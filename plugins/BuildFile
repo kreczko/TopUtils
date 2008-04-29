@@ -1,0 +1,13 @@
+<use name=TopAnalysis/TopUtils>
+<use name=Foundation/PluginManager>
+<use name=PhysicsTools/UtilAlgos>
+<use name=FWCore/ServiceRegistry>
+<use name=FWCore/MessageLogger>
+<use name=FWCore/ParameterSet>
+<use name=FWCore/Framework>
+<use name=FWCore/Utilities>
+<use name=root>
+
+<library file=*.cc name=TopAnalysisTopUtilsPlugins>
+  <flags EDM_PLUGIN=1>
+</library>
