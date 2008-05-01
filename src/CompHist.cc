@@ -86,6 +86,7 @@ CompHist::configBlockHist(ConfigFile& cfg)
     //-----------------------------------------------
     // histogram steering
     //-----------------------------------------------
+    readVector( cfg.read<std::string>( "errors" ), errors_);
     readVector( cfg.read<std::string>( "histScale" ), scale_ );
     readVector( cfg.read<std::string>( "histMinimum"), min_ );
     readVector( cfg.read<std::string>( "histMaximum"), max_ );
@@ -273,6 +274,63 @@ CompHist::histFilter(TString& cmp, CompHist::HistFilter option)
   return contained;
 }
 
+void
+CompHist::draw(TCanvas& canv, TLegend& leg, int& idx, int& ihx)
+{  
+  //-----------------------------------------------
+  // loop all samples via the list sampleList_, which 
+  // containas the histograms of each sample as 
+  // TObjects in TObjectArrays
+  //-----------------------------------------------
+  TH1F hfirst; //draw first histogram on top of others
+               //after all histograms have been drawn
+  std::vector<TObjArray>::const_iterator hist = sampleList_.begin();
+  for(int jdx=0; hist!=sampleList_.end(); ++hist, ++jdx){
+    TH1F& hcmp = *((TH1F*)(*hist)[idx]); //recieve histogram
+    setCanvLog( canv, ihx );
+    setCanvGrid( canv, ihx );
+    setHistStyles( hcmp, ihx, jdx );
+    // for the first histogram just draw
+    // for the following ones draw same
+    if(jdx==0){
+      hfirst = hcmp; // buffer first histogram to redraw it after all
+      if(errors_[jdx]) 
+	hcmp.Draw("e");
+      else 
+	hcmp.Draw(   );
+    }
+    else{
+      if(errors_[jdx]) 
+	hcmp.Draw("samee");
+      else 
+	hcmp.Draw("same" );
+    }
+    // add legend entry in appropriate format
+    switch( histStyle_[jdx]){
+    case HistStyle::Line:
+      leg.AddEntry( &hcmp, legend(jdx).c_str(), "L"  );
+      break;
+      
+    case HistStyle::Marker:
+      leg.AddEntry( &hcmp, legend(jdx).c_str(), "PL" );
+      break;
+      
+    case HistStyle::Filled:
+      leg.AddEntry( &hcmp, legend(jdx).c_str(), "FL" );
+      break;
+    }
+  }
+  if(errors_[0]){
+    hfirst.Draw("esame");
+  }
+  else{
+    hfirst.Draw( "same"); 
+  }
+  leg.Draw( "same" );
+  canv.RedrawAxis( );
+  canv.Update( );
+}
+
 void 
 CompHist::drawPs()
 {
@@ -315,49 +373,7 @@ CompHist::drawPs()
     //-----------------------------------------------   
     TLegend* leg = new TLegend(legXLeft_,legYLower_,legXRight_,legYUpper_);
     setLegendStyle( *leg );  
-
-    //-----------------------------------------------
-    // loop all samples via the list sampleList_, which 
-    // containas the histograms of each sample as 
-    // TObjects in TObjectArrays
-    //-----------------------------------------------
-    int  hstyle = 0;
-    TH1F hfirst; //draw first histogram on top of others
-                 //after all histograms have been drawn
-    std::vector<TObjArray>::const_iterator hist = sampleList_.begin();
-    for(int jdx=0; hist!=sampleList_.end(); ++hist, ++jdx){
-      TH1F& hcmp = *((TH1F*)(*hist)[idx]); //recieve histogram
-      setCanvLog( *canv, ihx );
-      setCanvGrid( *canv, ihx );
-      setHistStyles( hcmp, ihx, jdx );
-      if(jdx==0){
-	hstyle = histStyle_[jdx];
-	hfirst = hcmp;
-	//FIXME intorduce a proper flag to ask for errorbars in histograms	
-	if(histStyle_[jdx]==HistStyle::Marker){
-	  leg->AddEntry( &hcmp, legend(jdx).c_str(), "PL" );
-	  hcmp.Draw("e");
-	}
-	else{
-	  leg->AddEntry( &hcmp, legend(jdx).c_str(), "L"  );
-	  hcmp.Draw(   );
-	}
-	//FIXME intorduce a proper flag to ask for errorbars in histograms	
-      }
-      else{
-	leg->AddEntry( &hcmp, legend(jdx).c_str(), "FL" );
-	hcmp.Draw( "same" );
-      }
-    }
-    if(hstyle==HistStyle::Marker){
-      hfirst.Draw("esame");
-    }
-    else{
-      hfirst.Draw( "same"); 
-    }
-    leg->Draw( "same" );
-    canv->RedrawAxis( );
-    canv->Update( );
+    draw(*canv, *leg, idx, ihx);
     if(idx == (int)histList_.size()-1){
       psFile.Close();
     }
@@ -408,49 +424,7 @@ CompHist::drawEps()
     //-----------------------------------------------   
     TLegend* leg = new TLegend(legXLeft_,legYLower_,legXRight_,legYUpper_);
     setLegendStyle( *leg ); 
-
-    //-----------------------------------------------
-    // loop all samples via the list sampleList_, which 
-    // containas the histograms of each sample as 
-    // TObjects in TObjectArrays
-    //-----------------------------------------------
-    int  hstyle = 0;
-    TH1F hfirst;; //draw first histogram on top of others
-                  //after all histograms have been drawn
-    std::vector<TObjArray>::const_iterator hist = sampleList_.begin();
-    for(int jdx=0; hist!=sampleList_.end(); ++hist, ++jdx){
-      TH1F& hcmp = *((TH1F*)(*hist)[idx] ); //recieve histogram
-      setCanvLog( *canv, ihx );
-      setCanvGrid( *canv, ihx );
-      setHistStyles( hcmp, ihx, jdx );
-      if(jdx==0){
-	hstyle = histStyle_[jdx];
-	hfirst = hcmp;
-	//FIXME intorduce a proper flag to ask for errorbars in histograms	
-	if(histStyle_[jdx]==HistStyle::Marker){
-	  leg->AddEntry( &hcmp, legend(jdx).c_str(), "PL" );
-	  hcmp.Draw("e");
-	}
-	else{
-	  leg->AddEntry( &hcmp, legend(jdx).c_str(), "L"  );
-	  hcmp.Draw(   );
-	}
-	//FIXME intorduce a proper flag to ask for errorbars in histograms
-      }
-      else{
-	leg->AddEntry( &hcmp, legend(jdx).c_str(), "FL" );
-	hcmp.Draw( "same" );
-      }
-    }
-    if(hstyle==HistStyle::Marker){
-      hfirst.Draw("esame");
-    }
-    else{
-      hfirst.Draw( "same"); 
-    }
-    leg->Draw( "same" );
-    canv->RedrawAxis( );
-    canv->Update( );
+    draw(*canv, *leg, idx, ihx);
     psFile.Close();
     ++ihx; delete leg;
   }
@@ -467,6 +441,18 @@ CompHist::legend(int idx)
     return legendEntries_[idx];
   }
   return buffer;
+}
+
+double
+CompHist::findMaximum(int idx)
+{
+  double max=-1.;
+  for(std::vector<TObjArray>::const_iterator hist = sampleList_.begin(); 
+      hist!=sampleList_.end(); ++hist){
+    TH1F& hcmp = *((TH1F*)(*hist)[idx]); //recieve histogram
+    if( max<0 || hcmp.GetMaximum()>max ) max=hcmp.GetMaximum();
+  }
+  return max;
 }
 
 void 
@@ -627,7 +613,7 @@ CompHist::setHistMax(TH1F& hist, int idx)
     hist.SetMaximum(max_[idx]);
   }
   else{
-    hist.SetMaximum(1.5*hist.GetMaximum());
+    hist.SetMaximum(1.5*findMaximum(idx));
   }
 }
 
@@ -636,6 +622,9 @@ CompHist::setHistMin(TH1F& hist, int idx)
 {
   if( ((int)min_.size()>0) && (idx<(int)min_.size()) ){
     hist.SetMinimum(min_[idx]);
+  }
+  else{
+    hist.SetMinimum(0.);    
   }
 }
 

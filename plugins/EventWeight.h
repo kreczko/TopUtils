@@ -5,10 +5,12 @@
 #include <string>
 #include <iostream>
 
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/ParameterSet/interface/InputTag.h"
+#include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+
 
 class EventWeight : public edm::EDProducer {
 
@@ -21,7 +23,7 @@ class EventWeight : public edm::EDProducer {
 
  private:
   double gridEff_;
-  double evtWeight_;
+  edm::InputTag weight_;
 };
 
 #endif

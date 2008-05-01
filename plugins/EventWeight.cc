@@ -2,8 +2,8 @@
 #include "TopAnalysis/TopUtils/plugins/EventWeight.h"
 
 EventWeight::EventWeight(const edm::ParameterSet& cfg):
-  gridEff_  ( cfg.getParameter<double>("gridEff") ),
-  evtWeight_( cfg.getParameter<double>("evtWeight") )
+  gridEff_( cfg.getParameter<double>("gridEff") ),
+  weight_ ( cfg.getParameter<edm::InputTag>("weight") )
 {
   produces<double>();
 }
@@ -15,7 +15,7 @@ EventWeight::produce(edm::Event& evt, const edm::EventSetup& setup)
   // get event weight
   //---------------------------------------------
   edm::Handle<double> weight; 
-  evt.getByLabel("weight", weight);
+  evt.getByLabel(weight_, weight);
 
   std::auto_ptr<double> wgt(new double);
   if(gridEff_<=0.)

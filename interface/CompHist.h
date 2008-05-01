@@ -50,6 +50,7 @@ class CompHist{
   void loadHistograms();
   void drawPs();
   void drawEps();
+  void draw(TCanvas&, TLegend&, int&, int&);
   bool histFilter(TString&);
   bool histFilter(TString&, CompHist::HistFilter);
   void writeOutput(CompHist::RootOutput);
@@ -85,6 +86,7 @@ class CompHist{
   void setMarkerStyle(TH1F&, int);
   void setMarkerColor(TH1F&, int);
   void setMarkerSize(TH1F&, int);
+  double findMaximum(int);
 
  protected:
   //---------------------------------------------
@@ -114,6 +116,7 @@ class CompHist{
   std::vector<std::string> xAxes_, yAxes_;   // x/y axes labels
   std::vector<double> min_, max_;            // min/max of histogram (to be set by hand)
   std::vector<double> scale_;                // scale if wanted
+  std::vector<short int> errors_;            // show histogram with errors?
 
   // define legend design
   double legXLeft_,  legXRight_;             // legend boundaries (common to all histograms)
