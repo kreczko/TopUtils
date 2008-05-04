@@ -1,0 +1,11 @@
+module analyzeCSA07Weight = CSA07WeightAnalyzer{          
+#---------------------------------------------
+# file for histogram name management
+#---------------------------------------------
+  string hist = "analyzeCSA07Weight.hist"  
+}
+
+include "PhysicsTools/HepMCCandAlgos/data/genEventScale.cfi"
+include "PhysicsTools/HepMCCandAlgos/data/genEventProcID.cfi"
+
+sequence makeCSA07WeightAnalysis = {genEventProcID, genEventScale, weight, analyzeCSA07Weight}

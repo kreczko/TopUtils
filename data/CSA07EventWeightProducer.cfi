@@ -1,0 +1,13 @@
+module csa07Event = CSA07EventWeightProducer {
+  InputTag src = source
+
+#---------------------------------------------
+# verbosity level 
+#---------------------------------------------
+  untracked bool talkToMe = false
+
+#---------------------------------------------
+# overall luminosity normalization  (in pb-1) 
+#---------------------------------------------
+  double overallLumi = 1000.
+}
