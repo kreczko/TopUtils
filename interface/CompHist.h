@@ -50,7 +50,7 @@ class CompHist{
   void loadHistograms();
   void drawPs();
   void drawEps();
-  void draw(TCanvas&, TLegend&, int&, int&);
+  void draw(TCanvas&, TLegend&, int&);
   bool histFilter(TString&);
   bool histFilter(TString&, CompHist::HistFilter);
   void writeOutput(CompHist::RootOutput);

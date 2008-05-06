@@ -13,7 +13,7 @@ using namespace std;
 
 class TopInspectFit : public FitHist {
  public:
-  TopInspectFit():FitHist(true){};
+  TopInspectFit():FitHist(false){};
   ~TopInspectFit(){};
   virtual void readConfig( std::string );
 };

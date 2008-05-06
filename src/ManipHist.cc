@@ -27,7 +27,7 @@ ManipHist::configBlockDivide(ConfigFile& cfg)
     //-----------------------------------------------
     // histogram manipulations
     //-----------------------------------------------
-    histErrors_ = cfg.read<int>( "histErrors" );
+    errorType_ = cfg.read<int>( "errorType" );
   }
   catch(...){
     cerr << "ERROR during reading of config file"   << endl;
@@ -119,7 +119,7 @@ ManipHist::divideAndDrawPs()
     psFile.NewPage();
     TH1F& hsam = *((TH1F*)(sampleList_[0])[idx] ); //recieve sample
     TH1F& href = *((TH1F*)(sampleList_[1])[idx] ); //recieve reference
-    divideHistograms(hsam, href, histErrors_);
+    divideHistograms(hsam, href, errorType_);
     
     setCanvLog( *canv, idx );
     setCanvGrid( *canv, idx );
@@ -174,7 +174,7 @@ ManipHist::divideAndDrawEps()
     psFile.NewPage();
     TH1F& hsam = *((TH1F*)(sampleList_[0])[idx] ); //recieve sample
     TH1F& href = *((TH1F*)(sampleList_[1])[idx] ); //recieve reference
-    divideHistograms(hsam, href, histErrors_);
+    divideHistograms(hsam, href, errorType_);
     
     setCanvLog( *canv, idx );
     setCanvGrid( *canv, idx );
@@ -194,7 +194,7 @@ ManipHist::divideHistograms(TH1F& nom, TH1F& denom, int err)
 {
   //------------------------------------------------
   // divide histograms bin by bin & add appropriate 
-  // error according to specification in histErrors_
+  // error according to specification in errorType_
   //------------------------------------------------
   for(int idx=0; idx<denom.GetNbinsX(); ++idx){
     double dx=nom.GetBinError(idx+1), x=nom.GetBinContent(idx+1);

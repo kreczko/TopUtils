@@ -9,7 +9,9 @@
 #include <ios>
 
 class Cut {
+
  public:
+
   enum Type
     {
       Lower,
@@ -26,8 +28,8 @@ class Cut {
   bool is(int);
   bool is(bool);
   bool is(double);
-  void print(const unsigned int w1 = 10, const unsigned int w2 = 10, const unsigned int w3 = 10);
-  void print(std::ofstream&, const unsigned int w1 = 10, const unsigned int w2 = 10, const unsigned int w3 = 10);
+  void print(std::string, const unsigned int w1=10, const unsigned int w2=10, const unsigned int w3=10);
+  void print(std::ofstream&, std::string, const unsigned int w1=10, const unsigned int w2=10, const unsigned int w3=10);
   const char* name() const {return name_;}
   char* type() const {
     switch(type_){

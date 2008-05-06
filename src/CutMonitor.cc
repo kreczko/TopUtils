@@ -132,62 +132,59 @@ CutMonitor::select(const char* name, int idx, const double value)
 void
 CutMonitor::print()
 {
-  vector<Cut*> cs;
-  map<string,Cut*>::const_iterator cut=cuts_.begin();
-  for(; cut!=cuts_.end(); ++cut){
-    cs.push_back( cut->second );
-  }
-  sort( cs.begin(), cs.end(), CutComparator );
-
+  // determine maximal length of all cut names
   unsigned int w1max = 1;
-  for(vector<Cut*>::const_iterator c=cs.begin(); c!=cs.end(); ++c){
-    unsigned int w1 = strlen( (*c)->name() );
+  for(map<string,Cut*>::const_iterator cut=cuts_.begin(); 
+      cut!=cuts_.end(); ++cut){
+    unsigned int w1 = (cut->first).size();
     if(w1max < w1) w1max = w1;
   }
 
-  for(unsigned int i = 0; i < w1max + 33; ++i) cout << "=";
+  // print head line
+  for(unsigned int i=0; i<60; ++i) cout << "=";
   cout << "\n";
-  cout << setw( w1max + 13 ) << std::left  << setfill( ' ' ) << name_;
-  cout << setw( 21         ) << std::right << setfill( ' ' ) << "Number of events\n";
-  for(unsigned int i = 0; i < w1max + 33; ++i) cout << "-";
+  cout << setw( w1max+25 ) << std::left  << setfill( ' ' ) << name_;
+  cout << setw( 22       ) << std::right << setfill( ' ' ) << "Number of events\n";
+  for(unsigned int i=0; i<60; ++i) cout << "-";
   cout << "\n";
 
-  for(vector<Cut*>::const_iterator c=cs.begin(); c!=cs.end(); ++c){
-    (*c)->print( w1max, 10, 16 );
+  // print cut values
+  for(map<string,Cut*>::const_iterator cut=cuts_.begin(); 
+      cut!=cuts_.end(); ++cut){
+    (cut->second)->print( cut->first, w1max+3, 15, 15 );
   }
-
-  for(unsigned int i = 0; i < w1max + 33; ++i) cout << "=";
+  
+  // print bottom line 
+  for(unsigned int i=0; i<60; ++i) cout << "=";
   cout << "\n";
 }
 
 void
 CutMonitor::print(std::ofstream& file)
 {
-  vector<Cut*> cs;
-  map<string,Cut*>::const_iterator cut=cuts_.begin();
-  for(; cut!=cuts_.end(); ++cut){
-    cs.push_back( cut->second );
-  }
-  sort( cs.begin(), cs.end(), CutComparator );
-
+  // determine maximal length of all cut names
   unsigned int w1max = 1;
-  for(vector<Cut*>::const_iterator c=cs.begin(); c!=cs.end(); ++c){
-    unsigned int w1 = strlen( (*c)->name() );
+  for(map<string,Cut*>::const_iterator cut=cuts_.begin(); 
+      cut!=cuts_.end(); ++cut){
+    unsigned int w1 = (cut->first).size();
     if(w1max < w1) w1max = w1;
   }
 
-  for(unsigned int i = 0; i < w1max + 33; ++i) file << "=";
-  file << "\n";
-  file << setw( w1max + 13 ) << std::left  << setfill( ' ' ) << name_;
-  file << setw( 21         ) << std::right << setfill( ' ' ) << "Number of events\n";
-  for(unsigned int i = 0; i < w1max + 33; ++i) file << "-";
-  file << "\n";
+  // print head line
+  for(unsigned int i=0; i<60; ++i) cout << "=";
+  cout << "\n";
+  cout << setw( w1max+25 ) << std::left  << setfill( ' ' ) << name_;
+  cout << setw( 22       ) << std::right << setfill( ' ' ) << "Number of events\n";
+  for(unsigned int i=0; i<60; ++i) cout << "-";
+  cout << "\n";
 
-  vector<Cut*>::const_iterator c=cs.begin();
-  for(; c!=cs.end(); ++c){
-    (*c)->print( file, w1max, 10, 16 );
+  // print cut values
+  for(map<string,Cut*>::const_iterator cut=cuts_.begin(); 
+      cut!=cuts_.end(); ++cut){
+    (cut->second)->print( file, cut->first, w1max+3, 15, 15 );
   }
-
-  for(unsigned int i = 0; i < w1max + 33; ++i) file << "=";
-  file << "\n";
+  
+  // print bottom line 
+  for(unsigned int i=0; i<60; ++i) cout << "=";
+  cout << "\n";
 }

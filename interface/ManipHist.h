@@ -30,7 +30,7 @@ class ManipHist : public FitHist{
   //---------------------------------------------
 
   //define histogram manipulations
-  int histErrors_;                         // define histogram errors (uncorr/corr)
+  int errorType_;                          // define histogram errors (uncorr/corr)
   std::vector<double> weights_;            // define weights
 };
 

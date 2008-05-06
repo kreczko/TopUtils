@@ -86,7 +86,7 @@ CompHist::configBlockHist(ConfigFile& cfg)
     //-----------------------------------------------
     // histogram steering
     //-----------------------------------------------
-    readVector( cfg.read<std::string>( "errors" ), errors_);
+    readVector( cfg.read<std::string>( "histErrors" ), errors_);
     readVector( cfg.read<std::string>( "histScale" ), scale_ );
     readVector( cfg.read<std::string>( "histMinimum"), min_ );
     readVector( cfg.read<std::string>( "histMaximum"), max_ );
@@ -132,9 +132,17 @@ CompHist::readHistogramList()
     std::string buffer;
     histFile >> buffer;
     if( buffer.size()>0 ){
-      histList_.push_back( buffer );
+      TString cmp(buffer);
+      if( histFilter(cmp) )
+	histList_.push_back(buffer);
+      else{
+	if(verbose_){
+	  cout << " histogram is filtered out according"
+	       << " to settings in cfg file; filterOpt:  "
+	       << filterOpt_ << endl;
+	}
+      }
     }
-
     if( count>999 ){
       cerr << "ERROR caught in slope for histogram" << endl;
       cerr << "      names. Misspelled file name ?" << endl;
@@ -275,7 +283,7 @@ CompHist::histFilter(TString& cmp, CompHist::HistFilter option)
 }
 
 void
-CompHist::draw(TCanvas& canv, TLegend& leg, int& idx, int& ihx)
+CompHist::draw(TCanvas& canv, TLegend& leg, int& idx)
 {  
   //-----------------------------------------------
   // loop all samples via the list sampleList_, which 
@@ -287,9 +295,9 @@ CompHist::draw(TCanvas& canv, TLegend& leg, int& idx, int& ihx)
   std::vector<TObjArray>::const_iterator hist = sampleList_.begin();
   for(int jdx=0; hist!=sampleList_.end(); ++hist, ++jdx){
     TH1F& hcmp = *((TH1F*)(*hist)[idx]); //recieve histogram
-    setCanvLog( canv, ihx );
-    setCanvGrid( canv, ihx );
-    setHistStyles( hcmp, ihx, jdx );
+    setCanvLog( canv, idx );
+    setCanvGrid( canv, idx );
+    setHistStyles( hcmp, idx, jdx );
     // for the first histogram just draw
     // for the following ones draw same
     if(jdx==0){
@@ -356,28 +364,18 @@ CompHist::drawPs()
   // for each histogram & plot each sample in 
   // the same canvas
   //-----------------------------------------------
-  for(int idx=0, ihx=0; idx<(int)histList_.size(); ++idx){
-    // prepare compare string for filtering
-    TString cmp( histList_[idx] );
-    if( !histFilter(cmp) ){
-      if(verbose_){
-	cout << " event is filtered out according to"
-	     << " settings in cfg file; filterOpt:  "
-	     << filterOpt_ << endl;
-      }
-      continue;
-    }
+  for(int idx=0; idx<(int)histList_.size(); ++idx){
     psFile.NewPage();
     //-----------------------------------------------
     // on each page the legend needs to be redeclared
     //-----------------------------------------------   
     TLegend* leg = new TLegend(legXLeft_,legYLower_,legXRight_,legYUpper_);
     setLegendStyle( *leg );  
-    draw(*canv, *leg, idx, ihx);
+    draw(*canv, *leg, idx);
     if(idx == (int)histList_.size()-1){
       psFile.Close();
     }
-    ++ihx; delete leg;
+    delete leg;
   }
   canv->Close();
   delete canv;
@@ -398,17 +396,7 @@ CompHist::drawEps()
   // for each histogram & plot each sample in 
   // the same canvas
   //-----------------------------------------------  
-  for(int idx=0, ihx=0; idx<(int)histList_.size(); ++idx){
-    // prepare compare string for filtering
-    TString cmp( histList_[idx] );
-    if( !histFilter(cmp) ){
-      if(verbose_){
-	cout << " event is filterec out according to"
-	     << " settings in cfg file; filterOpt:  "
-	     << filterOpt_ << endl;
-      }
-      continue;
-    }
+  for(int idx=0; idx<(int)histList_.size(); ++idx){
     //-----------------------------------------------
     // open output files
     //-----------------------------------------------
@@ -424,9 +412,9 @@ CompHist::drawEps()
     //-----------------------------------------------   
     TLegend* leg = new TLegend(legXLeft_,legYLower_,legXRight_,legYUpper_);
     setLegendStyle( *leg ); 
-    draw(*canv, *leg, idx, ihx);
+    draw(*canv, *leg, idx);
     psFile.Close();
-    ++ihx; delete leg;
+    delete leg;
   }
   canv->Close();
   delete canv;

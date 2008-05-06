@@ -56,10 +56,10 @@ Cut::is(const int value)
 }
 
 void
-Cut::print(const unsigned int w1, const unsigned int w2, const unsigned int w3)
+Cut::print(std::string name, const unsigned int w1, const unsigned int w2, const unsigned int w3)
 {
   std::cout << ::std::setw( w1 ) << ::std::right << ::std::setfill( ' ' ) 
-	    << name_ 
+	    << name 
 	    << type()
 	    << ::std::setw( w2 ) << ::std::left  << ::std::setfill( '.' ) 
 	    << value_ 
@@ -70,10 +70,10 @@ Cut::print(const unsigned int w1, const unsigned int w2, const unsigned int w3)
 }
 
 void
-Cut::print(ofstream& file, const unsigned int w1, const unsigned int w2, const unsigned int w3)
+Cut::print(ofstream& file, std::string name, const unsigned int w1, const unsigned int w2, const unsigned int w3)
 {
   file << ::std::setw( w1 ) << ::std::right << ::std::setfill( ' ' ) 
-       << name_ 
+       << name 
        << type() 
        << ::std::setw( w2 ) << ::std::left  << ::std::setfill( '.' ) 
        << value_ 
