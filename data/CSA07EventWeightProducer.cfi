@@ -10,4 +10,9 @@ module csa07Event = CSA07EventWeightProducer {
 # overall luminosity normalization  (in pb-1) 
 #---------------------------------------------
   double overallLumi = 1000.
+
+#---------------------------------------------
+# cross section k factor for ttbar 
+#---------------------------------------------
+  double ttKfactor = 1.0
 }
