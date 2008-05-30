@@ -1,6 +1,6 @@
 #include "TopAnalysis/TopUtils/interface/FitHist.h"
+#include "TopAnalysis/TopUtils/interface/CompMethods.h"
 #include "TopAnalysis/TopUtils/interface/FitHist_fwd.h"
-#include "TopAnalysis/TopUtils/interface/FitMethods.h"
 #include "TopAnalysis/TopUtils/interface/RootPostScript.h"
 
 using namespace std;
@@ -24,12 +24,13 @@ FitHist::configBlockFit(ConfigFile& cfg)
     //-----------------------------------------------
     // histogram manipulations
     //-----------------------------------------------
-    readVector( cfg.read<std::string>( "targetLabel"), targetHistList_);
+    readVector( cfg.read<std::string>( "targetLabel" ), targetHistList_);
     fitFuncName_ = cfg.read<std::string>( "fitFunctionName" );
     fitFuncTitle_= cfg.read<std::string>( "fitFunctionTitle");
     fitFuncType_ = cfg.read<int>        ( "fitFunctionType" );
     fitFuncLowerBound_= cfg.read<double>( "fitLowerBound" );
     fitFuncUpperBound_= cfg.read<double>( "fitUpperBound" );
+    evalType_ = cfg.read<int>( "evalType" );
   }
   catch(...){
     cerr << "ERROR during reading of config file" << endl;
@@ -61,8 +62,8 @@ FitHist::isInFitTargetList(std::string& label)
   // check if given target prefix is suported
   //-----------------------------------------------
   TString target(label);
-  if( !(target.CompareTo(FitTarget::Cal) ||
-        target.CompareTo(FitTarget::Res) ||
+  if( !(target.CompareTo(FitTarget::Cal   ) ||
+        target.CompareTo(FitTarget::Res   ) ||
         target.CompareTo(FitTarget::Sigma ) ||
         target.CompareTo(FitTarget::Mean  ) )){
     cerr << "ERROR while filling target histogram" << endl;
@@ -70,29 +71,6 @@ FitHist::isInFitTargetList(std::string& label)
     return false;
   }
   return true;
-}
-
-int 
-FitHist::choiceOfParam(TString& target)
-{
-  //-----------------------------------------------
-  // determine if mean or sigma should be filled 
-  // into the target histogram, return -1 when 
-  // screwed up
-  //-----------------------------------------------
-  int paramChoice=-1;
-  if(!target.CompareTo(FitTarget::Cal) ||
-     !target.CompareTo(FitTarget::Mean  ) ){
-    paramChoice=1;
-  } else
-  if(!target.CompareTo(FitTarget::Res ) ||
-     !target.CompareTo(FitTarget::Sigma ) ){
-    paramChoice=2;
-  }
-  else{
-    cerr << "ERROR: this target is not known: " << target << endl;
-  }
-  return paramChoice;
 }
 
 TH1F& 
@@ -163,20 +141,100 @@ FitHist::findTargetHistogram(const TObjArray& hist, TString& zip, TString& name,
   return *(TH1F*)0;
 }
 
+double 
+FitHist::normalize(TString& buffer, double val)
+{ 
+  return ( (!buffer.CompareTo(FitTarget::Res ) && val>0.) ) ? 1./val : 1.; 
+}
+
+void 
+FitHist::fillTargetHistogramBin(TH1F& htarget, TH1F& hfit, int bin, TString& buffer, Quantile& func)
+{
+  if( !buffer.CompareTo(FitTarget::Cal) || !buffer.CompareTo(FitTarget::Mean ) ){
+    htarget.SetBinContent( bin, func.value( hfit ) ); htarget.SetBinError( bin, func.valueError( hfit ) );
+  }
+  if( !buffer.CompareTo(FitTarget::Res) || !buffer.CompareTo(FitTarget::Sigma) ){
+    double norm=normalize(buffer, func.value( hfit ));
+    htarget.SetBinContent( bin, norm*func.spread( hfit ) ); htarget.SetBinError  ( bin, norm*func.spreadError( hfit ) );
+  }
+}
+
+void 
+FitHist::fillTargetHistogramBin(TH1F& htarget, TH1F& hfit, int bin, TString& buffer, MaximalValue& func)
+{
+  if( !buffer.CompareTo(FitTarget::Cal) || !buffer.CompareTo(FitTarget::Mean ) ){
+    htarget.SetBinContent( bin, func.value( hfit ) ); htarget.SetBinError( bin, func.valueError( hfit ) );
+  }
+  if( !buffer.CompareTo(FitTarget::Res) || !buffer.CompareTo(FitTarget::Sigma) ){
+    double norm=normalize(buffer, func.value( hfit ));
+    htarget.SetBinContent( bin, norm*func.spread( hfit ) ); htarget.SetBinError  ( bin, norm*func.spreadError( hfit ) );
+  }
+}
+
+void 
+FitHist::fillTargetHistogramBin(TH1F& htarget, TH1F& hfit, int bin, TString& buffer, HistogramMean& func)
+{
+  if( !buffer.CompareTo(FitTarget::Cal) || !buffer.CompareTo(FitTarget::Mean ) ){
+    htarget.SetBinContent( bin, func.value( hfit ) ); htarget.SetBinError( bin, func.valueError( hfit ) );
+  }
+  if( !buffer.CompareTo(FitTarget::Res) || !buffer.CompareTo(FitTarget::Sigma) ){
+    double norm=normalize(buffer, func.value( hfit ));
+    htarget.SetBinContent( bin, norm*func.spread( hfit ) ); htarget.SetBinError  ( bin, norm*func.spreadError( hfit ) );
+  }
+}
+
+void 
+FitHist::fillTargetHistogramBin(TH1F& htarget, TH1F& hfit, int bin, TString& buffer, StabilizedGauss& func)
+{
+  if( !buffer.CompareTo(FitTarget::Cal) || !buffer.CompareTo(FitTarget::Mean ) ){
+    htarget.SetBinContent( bin, func.value( hfit ) ); htarget.SetBinError( bin, func.valueError( hfit ) );
+  }
+  if( !buffer.CompareTo(FitTarget::Res) || !buffer.CompareTo(FitTarget::Sigma) ){
+    double norm=normalize(buffer, func.value( hfit ));
+    htarget.SetBinContent( bin, norm*func.spread( hfit ) ); htarget.SetBinError  ( bin, norm*func.spreadError( hfit ) );
+  }
+}
+
 void 
 FitHist::fillTargetHistogramBin(TH1F& htarget, TH1F& hfit, int bin)
 {
+  if( !hfit.GetEntries()>0 ) return;
+
   //-----------------------------------------------
   // fill corresponding bin in target histogram
   //-----------------------------------------------
   TString buffer(htarget.GetName());
   buffer.Remove(0, buffer.First('/')+1);
   buffer.Remove(buffer.First('_')+1, buffer.Length());
-
-  int paramChoice=choiceOfParam(buffer); 
-  if(hfit.GetEntries()>0 && paramChoice>0){
-    htarget.SetBinContent( bin, hfit.GetFunction( fitFuncName_.c_str() )->GetParameter( paramChoice ) );
-    htarget.SetBinError  ( bin, hfit.GetFunction( fitFuncName_.c_str() )->GetParError ( paramChoice ) );
+  
+  switch(evalType_){
+  case kStabilizedGauss:
+    {
+      StabilizedGauss func(fitFuncName_.c_str());
+      fillTargetHistogramBin(htarget, hfit, bin, buffer, func);
+      break;
+    }
+  case kHistogramMean:
+    {
+      HistogramMean func;
+      fillTargetHistogramBin(htarget, hfit, bin, buffer, func);
+      break;
+    }
+  case kMaximalValue:
+    {
+      MaximalValue func(0.9, 0.05);
+      fillTargetHistogramBin(htarget, hfit, bin, buffer, func);
+      break;
+    }
+  case kQuantile:
+    {
+      Quantile func(0.5, 0.05);
+      fillTargetHistogramBin(htarget, hfit, bin, buffer, func);
+      break;
+    } 
+  default:
+    
+    break;
   }
 }
 
@@ -322,7 +380,7 @@ FitHist::fitAndDrawPs()
 	//hfit.Fit( "gaus" );
 
 	//do stable fit
-	StableFit func(fitFuncName_.c_str(), fitFuncType_, fitFuncLowerBound_, fitFuncUpperBound_);
+	StabilizedGauss func(fitFuncName_.c_str(), fitFuncType_, fitFuncLowerBound_, fitFuncUpperBound_);
 	func.fit(hfit);
 
 	hfit.Draw("esame");
@@ -415,7 +473,7 @@ FitHist::fitAndDrawEps()
 	//hfit.Fit( "gaus" );
 	
 	//do stable fit
-	StableFit func(fitFuncName_.c_str(), fitFuncType_, fitFuncLowerBound_, fitFuncUpperBound_);
+	StabilizedGauss func(fitFuncName_.c_str(), fitFuncType_, fitFuncLowerBound_, fitFuncUpperBound_);
 	func.fit(hfit);
 	
 	hfit.Draw("esame");

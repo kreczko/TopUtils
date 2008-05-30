@@ -33,11 +33,14 @@ void readVector(std::string s, std::vector<T>& vec)
 }
 
 class CompHist{
+
  public:
+
   enum RootOutput{ kFirstOnly, kLastOnly, kAll};
   enum HistFilter{ kBeginsWith, kEndsWith, kContains};
 
  public:
+
   CompHist():verbose_(false){};
   CompHist(bool verbose):verbose_(verbose){};
   //~CompHist(){ file_->Close(); };
@@ -50,13 +53,14 @@ class CompHist{
   void loadHistograms();
   void drawPs();
   void drawEps();
-  void draw(TCanvas&, TLegend&, int&);
-  bool histFilter(TString&);
-  bool histFilter(TString&, CompHist::HistFilter);
+  void draw(TCanvas&, TLegend&, int&, int&);
+  bool histFilter(TString&, std::vector<std::string>&);
+  bool histFilter(TString&, std::vector<std::string>&, CompHist::HistFilter);
   void writeOutput(CompHist::RootOutput);
   void writeOutput(){writeOutput(kAll);};
 
  protected:
+
   // io helpers
   void configBlockIO(ConfigFile&);
   void configBlockHist(ConfigFile&);
@@ -89,16 +93,18 @@ class CompHist{
   double findMaximum(int);
 
  protected:
+
   //---------------------------------------------
   // Interface
   //---------------------------------------------
 
   // define input/output
-  std::string filterOpt_;                    // filter option for comparison
+  std::string filterOpt_;                    // filter option for different filtering types
   std::string histFile_;                     // name of .hist file
   std::vector<std::string> dirNameList_;     // list of directory names in .root file(s)
   std::vector<std::string> fileNameList_;    // list of .root files
-  std::vector<std::string> histFilterList_;  // list of filter patterns for histograms
+  std::vector<std::string> plotFilterList_;  // list of filter patterns for histograms to be ploted
+  std::vector<std::string> histFilterList_;  // list of filter patterns for histograms to be loaded
   std::string output_;                       // potential root output
   std::string rootOutDir_;                   // root directory for potential root output
   std::string writeTo_, writeAs_;            // type (ps/eps) and directory of output

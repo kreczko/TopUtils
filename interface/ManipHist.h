@@ -4,7 +4,9 @@
 #include "TopAnalysis/TopUtils/interface/FitHist.h"
 
 class ManipHist : public FitHist{
+
  public:
+
   ManipHist(){};
   //~ManipHist(){ file_->Close(); };
   virtual ~ManipHist(){};
@@ -15,6 +17,7 @@ class ManipHist : public FitHist{
   void divideAndDrawEps();
   
  protected:
+
   //specific configurables
   void configBlockSum(ConfigFile&);
   void configBlockDivide(ConfigFile&);
@@ -25,6 +28,7 @@ class ManipHist : public FitHist{
   double ratioUncorrelatedError(double&, double&, double&, double&);
   
  protected:
+
   //---------------------------------------------
   // Interface
   //---------------------------------------------

@@ -15,8 +15,8 @@ class NameScheme {
   explicit NameScheme(const char*);
   explicit NameScheme(const char*, const char*);
   ~NameScheme();
-  
-  TString name(){TString namestr( name_ ); return namestr;};
+
+  TString name(){TString namestr( name_ ); return namestr;};  
   TString name(const int);
   TString name(const char*);
   TString name(const char*, const int);

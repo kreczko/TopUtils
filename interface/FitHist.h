@@ -2,10 +2,17 @@
 #define FitHist_h
 
 #include "TopAnalysis/TopUtils/interface/CompHist.h"
+#include "TopAnalysis/TopUtils/interface/CompMethods.h"
 
 
 class FitHist : public CompHist{
+
  public:
+
+  enum EvalType{kStabilizedGauss, kHistogramMean, kMaximalValue, kQuantile};
+
+ public:
+
   FitHist():CompHist(false){};
   FitHist(bool verbose):CompHist(verbose){};
   //~FitHist(){ file_->Close(); };
@@ -18,22 +25,28 @@ class FitHist : public CompHist{
   void writeFitOutput();
 
  protected:
+
   //io helpers
   void configBlockFit(ConfigFile&);
 
   //extra members
-  int choiceOfParam(TString&);
   bool checkTargetHistList();
   bool isInFitTargetList(std::string&);
   TH1F& findFitHistogram(const TObjArray&, TString&, TString&, int&); 
-  TH1F& findTargetHistogram(const TObjArray&, TString&, TString&, TString&); 
+  TH1F& findTargetHistogram(const TObjArray&, TString&, TString&, TString&);
+  double normalize(TString&, double); 
   void fillTargetHistogram(std::string&);
   void fillTargetHistogramBin(TH1F&, TH1F&, int);
+  void fillTargetHistogramBin(TH1F&, TH1F&, int, TString&, Quantile&);
+  void fillTargetHistogramBin(TH1F&, TH1F&, int, TString&, MaximalValue&);
+  void fillTargetHistogramBin(TH1F&, TH1F&, int, TString&, HistogramMean&);
+  void fillTargetHistogramBin(TH1F&, TH1F&, int, TString&, StabilizedGauss&);
   void setFitHistogramAxes(TH1F&, int);
   void addBinLabelToFitHist(const TObjArray&, int&, TString&, TString&);
   void addParLabelToFitHist(const TH1F&);
 
  protected:
+
   //---------------------------------------------
   // Interface
   //---------------------------------------------
@@ -46,7 +59,9 @@ class FitHist : public CompHist{
   std::vector<std::string> xAxesFit_;        // x axis title(s) of fit histograms 
   std::vector<std::string> yAxesFit_;        // y axis title(s) of fit histograms
 
-  //define fit procedure
+  //define fit/eval procedure
+
+  int evalType_;                             // evaluation type
   int fitFuncType_;                          // fit function type
   std::string fitFuncName_;                  // fit functino name
   std::string fitFuncTitle_;                 // fit function title (to be shown in legend)

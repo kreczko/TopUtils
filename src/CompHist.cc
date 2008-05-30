@@ -52,6 +52,7 @@ CompHist::configBlockIO(ConfigFile& cfg)
     readVector ( cfg.read<std::string>( "inputDirs" ), dirNameList_  );
     filterOpt_ = cfg.read<std::string>( "filterOption" );
     readVector ( cfg.read<std::string>( "histFilter" ), histFilterList_ );
+    readVector ( cfg.read<std::string>( "plotFilter" ), plotFilterList_ );
     writeTo_   = cfg.read<std::string>( "writePlotsTo" );
     writeAs_   = cfg.read<std::string>( "writePlotsAs" );
     rootOutDir_= cfg.read<std::string>( "outputDir" );
@@ -133,7 +134,7 @@ CompHist::readHistogramList()
     histFile >> buffer;
     if( buffer.size()>0 ){
       TString cmp(buffer);
-      if( histFilter(cmp) )
+      if( histFilter(cmp, histFilterList_) )
 	histList_.push_back(buffer);
       else{
 	if(verbose_){
@@ -179,8 +180,8 @@ CompHist::loadHistograms()
       if( !filterOpt_.compare("contains") )
 	cout << "WARNING: missing hist file in cfg file; will use list of histogram" << endl
 	     << "         names given in histFilter instead, requires filterOption " << endl
-	     << "         'optain'; will move filterOption to 'optain' to go on... " << endl;
-      filterOpt_="contain";
+	     << "         'optains'; will move filterOption to 'optain' to go on..." << endl;
+      filterOpt_="contains";
       histList_ =histFilterList_;
     }
   }
@@ -233,19 +234,19 @@ CompHist::loadHistograms()
 }
 
 bool
-CompHist::histFilter(TString& cmp)
+CompHist::histFilter(TString& cmp, std::vector<std::string>& ref)
 {
   bool contained=true;
   if(!filterOpt_.empty()){
     contained=false;
     if(!filterOpt_.compare("begins")){
-      contained = histFilter(cmp, kBeginsWith);
+      contained = histFilter(cmp, ref, kBeginsWith);
     }
     else if(!filterOpt_.compare("ends")){
-      contained = histFilter(cmp, kEndsWith);
+      contained = histFilter(cmp, ref, kEndsWith);
     }
     else if(!filterOpt_.compare("contains")){
-      contained = histFilter(cmp, kContains);
+      contained = histFilter(cmp, ref, kContains);
     }
     else{
       cerr << "ERROR during histogram filtering   " << endl;
@@ -257,14 +258,14 @@ CompHist::histFilter(TString& cmp)
 }
 
 bool 
-CompHist::histFilter(TString& cmp, CompHist::HistFilter option)
+CompHist::histFilter(TString& cmp, std::vector<std::string>& ref, CompHist::HistFilter option)
 {
   bool contained=true;
-  if(histFilterList_.size()>0){
+  if(ref.size()>0){
     contained=false;
-    for(unsigned int idx=0; idx<histFilterList_.size(); ++idx){
-      TString buffer(histFilterList_[idx]);
-      buffer+="_";
+    for(unsigned int idx=0; idx<ref.size(); ++idx){
+      TString buffer(ref[idx]);
+      if( !option==kContains ) buffer+="_";
       if( option==kBeginsWith && cmp.BeginsWith(buffer) ){ 
 	contained=true;
 	break;
@@ -283,7 +284,7 @@ CompHist::histFilter(TString& cmp, CompHist::HistFilter option)
 }
 
 void
-CompHist::draw(TCanvas& canv, TLegend& leg, int& idx)
+CompHist::draw(TCanvas& canv, TLegend& leg, int& idx, int& jdx)
 {  
   //-----------------------------------------------
   // loop all samples via the list sampleList_, which 
@@ -293,38 +294,38 @@ CompHist::draw(TCanvas& canv, TLegend& leg, int& idx)
   TH1F hfirst; //draw first histogram on top of others
                //after all histograms have been drawn
   std::vector<TObjArray>::const_iterator hist = sampleList_.begin();
-  for(int jdx=0; hist!=sampleList_.end(); ++hist, ++jdx){
+  for(int kdx=0; hist!=sampleList_.end(); ++hist, ++kdx){
     TH1F& hcmp = *((TH1F*)(*hist)[idx]); //recieve histogram
-    setCanvLog( canv, idx );
-    setCanvGrid( canv, idx );
-    setHistStyles( hcmp, idx, jdx );
+    setCanvLog( canv, jdx );
+    setCanvGrid( canv, jdx );
+    setHistStyles( hcmp, jdx, kdx );
     // for the first histogram just draw
     // for the following ones draw same
-    if(jdx==0){
+    if(kdx==0){
       hfirst = hcmp; // buffer first histogram to redraw it after all
-      if(errors_[jdx]) 
+      if(errors_[kdx]) 
 	hcmp.Draw("e");
       else 
 	hcmp.Draw(   );
     }
     else{
-      if(errors_[jdx]) 
+      if(errors_[kdx]) 
 	hcmp.Draw("samee");
       else 
 	hcmp.Draw("same" );
     }
     // add legend entry in appropriate format
-    switch( histStyle_[jdx]){
+    switch( histStyle_[kdx]){
     case HistStyle::Line:
-      leg.AddEntry( &hcmp, legend(jdx).c_str(), "L"  );
+      leg.AddEntry( &hcmp, legend(kdx).c_str(), "L"  );
       break;
       
     case HistStyle::Marker:
-      leg.AddEntry( &hcmp, legend(jdx).c_str(), "PL" );
+      leg.AddEntry( &hcmp, legend(kdx).c_str(), "PL" );
       break;
       
     case HistStyle::Filled:
-      leg.AddEntry( &hcmp, legend(jdx).c_str(), "FL" );
+      leg.AddEntry( &hcmp, legend(kdx).c_str(), "FL" );
       break;
     }
   }
@@ -364,18 +365,29 @@ CompHist::drawPs()
   // for each histogram & plot each sample in 
   // the same canvas
   //-----------------------------------------------
-  for(int idx=0; idx<(int)histList_.size(); ++idx){
+  for(int idx=0, jdx=0; idx<(int)histList_.size(); ++idx){
+    // prepare compare string for plot filtering
+    TString cmp( histList_[idx] );
+    if( !histFilter(cmp, plotFilterList_) ){
+      if(verbose_){
+	cout << " event is filtered out according to"
+	     << " settings in cfg file; filterOpt:  "
+	     << filterOpt_ 
+	     << " hist: " << cmp << endl;
+      }
+      continue;
+    }
     psFile.NewPage();
     //-----------------------------------------------
     // on each page the legend needs to be redeclared
     //-----------------------------------------------   
     TLegend* leg = new TLegend(legXLeft_,legYLower_,legXRight_,legYUpper_);
     setLegendStyle( *leg );  
-    draw(*canv, *leg, idx);
+    draw(*canv, *leg, idx, jdx);
     if(idx == (int)histList_.size()-1){
       psFile.Close();
     }
-    delete leg;
+    ++jdx; delete leg;
   }
   canv->Close();
   delete canv;
@@ -396,7 +408,7 @@ CompHist::drawEps()
   // for each histogram & plot each sample in 
   // the same canvas
   //-----------------------------------------------  
-  for(int idx=0; idx<(int)histList_.size(); ++idx){
+  for(int idx=0, jdx=0; idx<(int)histList_.size(); ++idx){
     //-----------------------------------------------
     // open output files
     //-----------------------------------------------
@@ -406,15 +418,27 @@ CompHist::drawEps()
     output += ".";
     output += writeAs_;
     TPostScript psFile( output, 113);
+
+    // prepare compare string for plot filtering
+    TString cmp( histList_[idx] );
+    if( !histFilter(cmp, plotFilterList_) ){
+      if(verbose_){
+	cout << " event is filtered out according to"
+	     << " settings in cfg file; filterOpt:  "
+	     << filterOpt_ 
+	     << " hist: " << cmp << endl;
+      }
+      continue;
+    }
     psFile.NewPage();
     //-----------------------------------------------
     // on each page the legend needs to be redeclared
     //-----------------------------------------------   
     TLegend* leg = new TLegend(legXLeft_,legYLower_,legXRight_,legYUpper_);
     setLegendStyle( *leg ); 
-    draw(*canv, *leg, idx);
+    draw(*canv, *leg, idx, jdx);
     psFile.Close();
-    delete leg;
+    ++jdx; delete leg;
   }
   canv->Close();
   delete canv;
