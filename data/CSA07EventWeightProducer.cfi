@@ -1,18 +1,6 @@
 module csa07Event = CSA07EventWeightProducer {
-  InputTag src = source
-
-#---------------------------------------------
-# verbosity level 
-#---------------------------------------------
-  untracked bool talkToMe = false
-
-#---------------------------------------------
-# overall luminosity normalization  (in pb-1) 
-#---------------------------------------------
-  double overallLumi = 1000.
-
-#---------------------------------------------
-# cross section k factor for ttbar 
-#---------------------------------------------
-  double ttKfactor = 1.0
+  InputTag src            = source
+  untracked bool talkToMe = false     # verbosity level 
+  double overallLumi      = 1000.     # overall luminosity normalization  (in pb-1) 
+  double ttKfactor        = 1.0       # cross section k factor for ttbar 
 }
