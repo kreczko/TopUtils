@@ -39,6 +39,7 @@ int main(int argc, char* argv[])
   }
 
   TopInspect plots;
+  //plots.setVerbose(true);
   try{
     plots.readConfig( argv[1] );
     plots.loadHistograms();

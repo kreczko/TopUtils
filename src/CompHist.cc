@@ -47,17 +47,17 @@ CompHist::configBlockIO(ConfigFile& cfg)
     //-----------------------------------------------
     // input/output files
     //-----------------------------------------------
-    histFile_  = cfg.read<std::string>( "histInput" );
-    readVector ( cfg.read<std::string>( "rootInput" ), fileNameList_ );
-    readVector ( cfg.read<std::string>( "inputDirs" ), dirNameList_  );
+    histFile_  = cfg.read<std::string>( "histInput"    );
+    readVector ( cfg.read<std::string>( "rootInput"    ), fileNameList_   );
+    readVector ( cfg.read<std::string>( "inputDirs"    ), dirNameList_    );
+    readVector ( cfg.read<std::string>( "histFilter"   ), histFilterList_ );
+    readVector ( cfg.read<std::string>( "plotFilter"   ), plotFilterList_ );
     filterOpt_ = cfg.read<std::string>( "filterOption" );
-    readVector ( cfg.read<std::string>( "histFilter" ), histFilterList_ );
-    readVector ( cfg.read<std::string>( "plotFilter" ), plotFilterList_ );
+    output_    = cfg.read<std::string>( "rootOutput"   );
+    rootOutDir_= cfg.read<std::string>( "outputDir"    );
+    readVector ( cfg.read<std::string>( "outputLabels" ), outputLabelList_);
     writeTo_   = cfg.read<std::string>( "writePlotsTo" );
     writeAs_   = cfg.read<std::string>( "writePlotsAs" );
-    rootOutDir_= cfg.read<std::string>( "outputDir" );
-    output_    = cfg.read<std::string>( "rootOutput" );
-    readVector ( cfg.read<std::string>( "outputLabels" ), outputLabelList_ );
   }
   catch(...){
     cerr << "ERROR during reading of config file" << endl;
@@ -79,32 +79,32 @@ CompHist::configBlockHist(ConfigFile& cfg)
     //-----------------------------------------------
     // canvas steering
     //-----------------------------------------------
-    readVector( cfg.read<std::string>( "xLog" ), logX_ );
-    readVector( cfg.read<std::string>( "yLog" ), logY_ );
+    readVector( cfg.read<std::string>( "xLog"  ), logX_ );
+    readVector( cfg.read<std::string>( "yLog"  ), logY_ );
     readVector( cfg.read<std::string>( "xGrid" ), gridX_);
     readVector( cfg.read<std::string>( "yGrid" ), gridY_);
 
     //-----------------------------------------------
     // histogram steering
     //-----------------------------------------------
-    readVector( cfg.read<std::string>( "histErrors" ), errors_);
-    readVector( cfg.read<std::string>( "histScale" ), scale_ );
-    readVector( cfg.read<std::string>( "histMinimum"), min_ );
-    readVector( cfg.read<std::string>( "histMaximum"), max_ );
-    readVector( cfg.read<std::string>( "histType" ), histStyle_ );
-    readVector( cfg.read<std::string>( "histStyle" ), commonStyle_ );
-    readVector( cfg.read<std::string>( "histColor" ), histColor_ );
-    readVector( cfg.read<std::string>( "lineWidth" ), commonWidth_ );
-    readVector( cfg.read<std::string>( "markerStyle" ), markerStyle_ );
-    readVector( cfg.read<std::string>( "markerSize" ), markerSize_ );
-    readLabels( cfg.read<std::string>( "xAxes" ), xAxes_ );
-    readLabels( cfg.read<std::string>( "yAxes" ), yAxes_ );
+    readVector( cfg.read<std::string>( "histScale"  ), scale_       );
+    readVector( cfg.read<std::string>( "histMinimum"), min_         );
+    readVector( cfg.read<std::string>( "histMaximum"), max_         );
+    readVector( cfg.read<std::string>( "histErrors" ), errors_      );
+    readVector( cfg.read<std::string>( "histType"   ), histStyle_   );
+    readVector( cfg.read<std::string>( "histStyle"  ), commonStyle_ );
+    readVector( cfg.read<std::string>( "histColor"  ), histColor_   );
+    readVector( cfg.read<std::string>( "lineWidth"  ), commonWidth_ );
+    readVector( cfg.read<std::string>( "markerStyle"), markerStyle_ );
+    readVector( cfg.read<std::string>( "markerSize" ), markerSize_  );
+    readLabels( cfg.read<std::string>( "xAxes"      ), xAxes_       );
+    readLabels( cfg.read<std::string>( "yAxes"      ), yAxes_       );
 
     //-----------------------------------------------
     // legend steering
     //-----------------------------------------------
-    readLabels( cfg.read<std::string>( "legEntries"), legendEntries_);
-    legXLeft_ = cfg.read<double>( "legXLeft" );
+    readLabels( cfg.read<std::string>( "legEntries" ),legendEntries_);
+    legXLeft_ = cfg.read<double>( "legXLeft"  );
     legXRight_= cfg.read<double>( "legXRight" );
     legYLower_= cfg.read<double>( "legYLower" );
     legYUpper_= cfg.read<double>( "legYUpper" );
@@ -303,13 +303,13 @@ CompHist::draw(TCanvas& canv, TLegend& leg, int& idx, int& jdx)
     // for the following ones draw same
     if(kdx==0){
       hfirst = hcmp; // buffer first histogram to redraw it after all
-      if(errors_[kdx]) 
+      if(!errors_.empty() && errors_[kdx]) 
 	hcmp.Draw("e");
       else 
 	hcmp.Draw(   );
     }
     else{
-      if(errors_[kdx]) 
+      if(!errors_.empty() && errors_[kdx]) 
 	hcmp.Draw("samee");
       else 
 	hcmp.Draw("same" );
@@ -329,7 +329,7 @@ CompHist::draw(TCanvas& canv, TLegend& leg, int& idx, int& jdx)
       break;
     }
   }
-  if(errors_[0]){
+  if(!errors_.empty() && errors_[0]){
     hfirst.Draw("esame");
   }
   else{
@@ -449,7 +449,8 @@ CompHist::legend(int idx)
 {
   char buffer[100];
   sprintf(buffer, "undefined sample %i", idx);
-  if( legendEntries_.size()>=sampleList_.size() ){
+
+  if( idx<=(int)legendEntries_.size() ){
     return legendEntries_[idx];
   }
   return buffer;
@@ -557,21 +558,33 @@ CompHist::setHistStyles( TH1F& hist, int idx, int jdx )
       histType=histStyle_[jdx];
     }
     else{
-      throw "Histogram Type cannot be specified ";
+      cerr << "ERROR histogram Type outof bound, value is: " << jdx << endl;
+      cerr << "      allowed range is: " << HistStyle::Line  << " - " << HistStyle::Filled << endl;
+      cerr << "      Please correct parameter \"histType\""  << endl;
+      cerr << "      in your cfg file" << endl;
+      cerr << "      [--called in setHistStyles--]" << endl;
+      throw "Histogram Type cannot be specified";
     }
+  }
+  else{
+    cerr << "ERROR histogram has no Type specified" << endl;
+    cerr << "      Please specify parameter \"histType\" "   << endl;
+    cerr << "      in your cfg file" << endl;
+    cerr << "      [--called in setHistStyles--]" << endl;
+    throw "Histogram has no Type";
   }
   
   //define histogram styles
-  setHistLabels( hist, idx );
-  setHistScale ( hist, idx );
-  setHistMax   ( hist, idx );
-  setHistMin   ( hist, idx );
+  setHistLabels   ( hist, idx );
+  setHistScale    ( hist, idx );
+  setHistMax      ( hist, idx );
+  setHistMin      ( hist, idx );
 
   switch( histType ){
   case HistStyle::Line: 
-    setLineWidth( hist, jdx );
-    setLineColor( hist, jdx );
-    setLineStyle( hist, jdx );
+    setLineWidth  ( hist, jdx );
+    setLineColor  ( hist, jdx );
+    setLineStyle  ( hist, jdx );
     break;
 
   case HistStyle::Marker:
@@ -583,10 +596,10 @@ CompHist::setHistStyles( TH1F& hist, int idx, int jdx )
     break;
 
   case HistStyle::Filled:
-    setLineWidth( hist, jdx );
-    setLineColor( hist, jdx );
-    setFillColor( hist, jdx );
-    setFillStyle( hist, jdx );    
+    setLineWidth  ( hist, jdx );
+    setLineColor  ( hist, jdx );
+    setFillColor  ( hist, jdx );
+    setFillStyle  ( hist, jdx );    
     break;
   }
 }
