@@ -291,18 +291,20 @@ CompHist::draw(TCanvas& canv, TLegend& leg, int& idx, int& jdx)
   // containas the histograms of each sample as 
   // TObjects in TObjectArrays
   //-----------------------------------------------
-  TH1F hfirst; //draw first histogram on top of others
-               //after all histograms have been drawn
+  TH1* hfirst = 0; //draw first histogram on top of others
+                   //after all histograms have been drawn
+  bool isTH2 = false;
   std::vector<TObjArray>::const_iterator hist = sampleList_.begin();
   for(int kdx=0; hist!=sampleList_.end(); ++hist, ++kdx){
-    TH1F& hcmp = *((TH1F*)(*hist)[idx]); //recieve histogram
+    TH1& hcmp = *((TH1*)(*hist)[idx]); //recieve histogram
+    isTH2 = hcmp.InheritsFrom("TH2");
     setCanvLog( canv, jdx );
     setCanvGrid( canv, jdx );
     setHistStyles( hcmp, jdx, kdx );
     // for the first histogram just draw
     // for the following ones draw same
     if(kdx==0){
-      hfirst = hcmp; // buffer first histogram to redraw it after all
+      hfirst = (TH1*)hcmp.Clone(); // buffer first histogram to redraw it after all
       if(!errors_.empty() && errors_[kdx]) 
 	hcmp.Draw("e");
       else 
@@ -314,6 +316,7 @@ CompHist::draw(TCanvas& canv, TLegend& leg, int& idx, int& jdx)
       else 
 	hcmp.Draw("same" );
     }
+    if(isTH2) break; // only first histogram and no legend in case of TH2
     // add legend entry in appropriate format
     switch( histStyle_[kdx]){
     case HistStyle::Line:
@@ -330,12 +333,12 @@ CompHist::draw(TCanvas& canv, TLegend& leg, int& idx, int& jdx)
     }
   }
   if(!errors_.empty() && errors_[0]){
-    hfirst.Draw("esame");
+    hfirst->Draw("esame");
   }
   else{
-    hfirst.Draw( "same"); 
+    hfirst->Draw( "same"); 
   }
-  leg.Draw( "same" );
+  if(!isTH2) leg.Draw( "same" );
   canv.RedrawAxis( );
   canv.Update( );
 }
@@ -462,7 +465,7 @@ CompHist::findMaximum(int idx)
   double max=-1.;
   for(std::vector<TObjArray>::const_iterator hist = sampleList_.begin(); 
       hist!=sampleList_.end(); ++hist){
-    TH1F& hcmp = *((TH1F*)(*hist)[idx]); //recieve histogram
+    TH1& hcmp = *((TH1*)(*hist)[idx]); //recieve histogram
     if( max<0 || hcmp.GetMaximum()>max ) max=hcmp.GetMaximum();
   }
   return max;
@@ -545,7 +548,7 @@ CompHist::setAxesStyle( TH1& hist, const char* titleX, const char* titleY )
 }
 
 void 
-CompHist::setHistStyles( TH1F& hist, int idx, int jdx )
+CompHist::setHistStyles( TH1& hist, int idx, int jdx )
 {
   //-----------------------------------------------
   // check hist style; throw exception if style 
@@ -585,6 +588,7 @@ CompHist::setHistStyles( TH1F& hist, int idx, int jdx )
     setLineWidth  ( hist, jdx );
     setLineColor  ( hist, jdx );
     setLineStyle  ( hist, jdx );
+    hist.SetOption("box");
     break;
 
   case HistStyle::Marker:
@@ -593,6 +597,7 @@ CompHist::setHistStyles( TH1F& hist, int idx, int jdx )
     setMarkerColor( hist, jdx );
     setMarkerStyle( hist, jdx ); 
     setMarkerSize ( hist, jdx );    
+    hist.SetOption("scat");
     break;
 
   case HistStyle::Filled:
@@ -600,12 +605,13 @@ CompHist::setHistStyles( TH1F& hist, int idx, int jdx )
     setLineColor  ( hist, jdx );
     setFillColor  ( hist, jdx );
     setFillStyle  ( hist, jdx );    
+    hist.SetOption("col");
     break;
   }
 }
 
 void 
-CompHist::setHistLabels(TH1F& hist, int idx)
+CompHist::setHistLabels(TH1& hist, int idx)
 {
   if( idx<((int)xAxes_.size()) && idx<((int)yAxes_.size()) ){
     setAxesStyle( hist, xAxes_[idx].c_str(), yAxes_[idx].c_str() );
@@ -618,13 +624,29 @@ CompHist::setHistLabels(TH1F& hist, int idx)
       setAxesStyle( hist, hist.GetXaxis()->GetTitle(), "events" );  
     }
     else{
-      setAxesStyle( hist, hist.GetTitle(), "events" );		  
+      if( hist.InheritsFrom("TH2") ) { 
+	// try to find labels for x and y axes
+	// using the histogram title
+	// and a substring as separator
+	TString h2Title = hist.GetTitle();
+	TString xySep = " vs. ";
+	if( h2Title.Contains(xySep) ) {
+	  TString xTitle = h2Title( 0, h2Title.Index(xySep) );
+	  int yTitleStart = h2Title.Index(xySep)+xySep.Length();
+	  TString yTitle = h2Title( yTitleStart,  h2Title.Length()-yTitleStart );
+	  setAxesStyle( hist, xTitle.Data(), yTitle.Data() );		  
+	}
+	else   
+	  setAxesStyle( hist, "x", "y" );		  
+      }
+      else
+	setAxesStyle( hist, hist.GetTitle(), "events" );		  
     }    	
   }
 }
 
 void 
-CompHist::setHistScale(TH1F& hist, int idx)
+CompHist::setHistScale(TH1& hist, int idx)
 {
   if( idx<((int)scale_.size()) ){
     if( scale_[idx]>0 ) hist.Scale(scale_[idx]/hist.Integral());
@@ -632,7 +654,7 @@ CompHist::setHistScale(TH1F& hist, int idx)
 }
 
 void 
-CompHist::setHistMax(TH1F& hist, int idx)
+CompHist::setHistMax(TH1& hist, int idx)
 {
   if( ((int)max_.size()>0) && (idx<(int)max_.size()) ){
     hist.SetMaximum(max_[idx]);
@@ -643,7 +665,7 @@ CompHist::setHistMax(TH1F& hist, int idx)
 }
 
 void 
-CompHist::setHistMin(TH1F& hist, int idx)
+CompHist::setHistMin(TH1& hist, int idx)
 {
   if( ((int)min_.size()>0) && (idx<(int)min_.size()) ){
     hist.SetMinimum(min_[idx]);
@@ -654,7 +676,7 @@ CompHist::setHistMin(TH1F& hist, int idx)
 }
 
 void 
-CompHist::setLineWidth(TH1F& hist, int jdx)
+CompHist::setLineWidth(TH1& hist, int jdx)
 {
   hist.SetLineWidth( 5 );
   if( jdx<((int)commonWidth_.size()) ){
@@ -663,7 +685,7 @@ CompHist::setLineWidth(TH1F& hist, int jdx)
 }
 
 void 
-CompHist::setLineStyle(TH1F& hist, int jdx)
+CompHist::setLineStyle(TH1& hist, int jdx)
 {
   hist.SetLineStyle( 1 );
   if( jdx<((int)commonStyle_.size()) ){
@@ -672,7 +694,7 @@ CompHist::setLineStyle(TH1F& hist, int jdx)
 }
 
 void 
-CompHist::setLineColor(TH1F& hist, int jdx)
+CompHist::setLineColor(TH1& hist, int jdx)
 {
   hist.SetLineColor( 1 );
   if( jdx<((int)histColor_.size()) ){
@@ -681,7 +703,7 @@ CompHist::setLineColor(TH1F& hist, int jdx)
 }
 
 void 
-CompHist::setFillStyle(TH1F& hist, int jdx)
+CompHist::setFillStyle(TH1& hist, int jdx)
 {
   hist.SetFillStyle( 3005 );
   if( jdx<((int)commonStyle_.size()) ){
@@ -690,7 +712,7 @@ CompHist::setFillStyle(TH1F& hist, int jdx)
 }
 
 void 
-CompHist::setFillColor(TH1F& hist, int jdx)
+CompHist::setFillColor(TH1& hist, int jdx)
 {
   hist.SetFillColor( 1 );
   if( jdx<((int)histColor_.size()) ){
@@ -699,7 +721,7 @@ CompHist::setFillColor(TH1F& hist, int jdx)
 }
 
 void 
-CompHist::setMarkerStyle(TH1F& hist, int jdx)
+CompHist::setMarkerStyle(TH1& hist, int jdx)
 {
   hist.SetMarkerStyle( 23 );
   if( jdx<((int)markerStyle_.size()) ){
@@ -708,7 +730,7 @@ CompHist::setMarkerStyle(TH1F& hist, int jdx)
 }
 
 void 
-CompHist::setMarkerColor(TH1F& hist, int jdx)
+CompHist::setMarkerColor(TH1& hist, int jdx)
 {
   hist.SetMarkerColor( 1 );
   if( jdx<((int)histColor_.size()) ){
@@ -717,7 +739,7 @@ CompHist::setMarkerColor(TH1F& hist, int jdx)
 }
 
 void 
-CompHist::setMarkerSize(TH1F& hist, int jdx)
+CompHist::setMarkerSize(TH1& hist, int jdx)
 {
   hist.SetMarkerSize( 2.3 );
   if( jdx<((int)markerSize_.size()) ){
@@ -761,21 +783,21 @@ CompHist::writeOutput(CompHist::RootOutput option)
       std::vector<TObjArray>::const_iterator hist = sampleList_.begin();
       for( ;hist!=sampleList_.end(); ++hist){
 	for(unsigned int idx=0; idx<histList_.size(); ++idx){  
-	  histFile << ((TH1F*)(*hist)[idx])->GetName() << "\n";
-	  ((TH1F*)(*hist)[idx])->Write();
+	  histFile << ((TH1*)(*hist)[idx])->GetName() << "\n";
+	  ((TH1*)(*hist)[idx])->Write();
 	}
       }
     }
     else{
       for(unsigned int idx=0; idx<histList_.size(); ++idx){ 
 	// write first/last histograms in the sample list only
-	histFile << (TH1F*)((sampleList_.back())[idx])->GetName() << "\n";
+	histFile << (TH1*)((sampleList_.back())[idx])->GetName() << "\n";
 	switch( option ){
 	case kFirstOnly:
-	  (TH1F*)((*sampleList_.begin())[idx])->Write();
+	  (TH1*)((*sampleList_.begin())[idx])->Write();
 	  break;
 	case kLastOnly:
-	  (TH1F*)((sampleList_.back())[idx])->Write();
+	  (TH1*)((sampleList_.back())[idx])->Write();
 	  break;
 	default:
 	  cerr << "WARNING:" 
