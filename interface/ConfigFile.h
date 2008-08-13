@@ -51,6 +51,20 @@
 
 using std::string;
 
+
+template <class T> 
+void readVector(std::string s, std::vector<T>& vec)
+{
+  std::stringstream stream( s );
+  T buffer;
+  while (!stream.eof()) {
+    stream >> buffer;
+    if(!stream.str().empty()){
+      vec.push_back( buffer );
+    }
+  }
+}
+
 class ConfigFile {
 // Data
 protected:
