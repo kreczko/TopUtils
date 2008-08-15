@@ -461,10 +461,10 @@ void CompHist::setCanvasStyle(TCanvas& canv) {
 }
 
 void CompHist::setCanvLog(TCanvas& canv, int idx) {
-	if (idx<((int)logX_.size()-1) && idx<((int)logY_.size()-1)) {
+	if (idx<(int)logX_.size() && idx<(int)logY_.size()) {
 		canv.SetLogx(logX_[idx]);
 		canv.SetLogy(logY_[idx]);
-	} else if (idx<((int)logY_.size()-1)) {
+	} else if (idx<(int)logY_.size()) {
 		canv.SetLogx( 0);
 		canv.SetLogy(logY_[idx]);
 	} else {
@@ -474,10 +474,10 @@ void CompHist::setCanvLog(TCanvas& canv, int idx) {
 }
 
 void CompHist::setCanvGrid(TCanvas& canv, int idx) {
-	if (idx<((int)gridX_.size()-1) && idx<((int)gridY_.size()-1)) {
+	if (idx<(int)gridX_.size() && idx<(int)gridY_.size()) {
 		canv.SetGridx(gridX_[idx]);
 		canv.SetGridy(gridY_[idx]);
-	} else if (idx<((int)gridY_.size()-1)) {
+	} else if (idx<(int)gridY_.size()) {
 		canv.SetGridx( 0);
 		canv.SetGridy(gridY_[idx]);
 	} else {
