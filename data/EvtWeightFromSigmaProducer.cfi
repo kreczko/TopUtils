@@ -1,0 +1,6 @@
+module wght = EvtWeightFromSigmaProducer{          
+    double crossSection =  49.9   #[pb]
+    int32  nEvents      =  1000
+    double targetLumi   =  1000.  #[pb^-1]    
+}
+
