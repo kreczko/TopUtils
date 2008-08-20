@@ -1,5 +1,5 @@
 #include "FWCore/Utilities/interface/EDMException.h"
-#include "TopAnalysis/TopUtils/interface/EvtWeightFromSigmaProducer.h"
+#include "TopAnalysis/TopUtils/plugins/EvtWeightFromSigmaProducer.h"
 
 EvtWeightFromSigmaProducer::EvtWeightFromSigmaProducer(const edm::ParameterSet& cfg):
   crossSection_( cfg.getParameter<double>("crossSection" ) ),
@@ -24,6 +24,3 @@ EvtWeightFromSigmaProducer::produce(edm::Event& evt, const edm::EventSetup& setu
       
   evt.put(eventWeight, "eventWeight");  
 }
-
-#include "FWCore/Framework/interface/MakerMacros.h"
-DEFINE_ANOTHER_FWK_MODULE( EvtWeightFromSigmaProducer );

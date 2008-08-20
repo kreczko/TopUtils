@@ -22,8 +22,8 @@ class EvtWeightFromSigmaProducer : public edm::EDProducer {
  private:
   double eventWeight_;
   double crossSection_;
-  double targetLumi_;  
   int nEvents_;
+  double targetLumi_;  
   double prodLumi;
 };
 
