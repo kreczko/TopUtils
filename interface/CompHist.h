@@ -16,10 +16,10 @@
 namespace HistStyle{
   static const int Line   = 0;
   static const int Marker = 1;
-  static const int Filled = 2; 
+  static const int Filled = 2;
 }
 
-// template <class T> 
+// template <class T>
 // void readVector(std::string s, std::vector<T>& vec)
 // {
 //   std::stringstream stream( s );
@@ -109,14 +109,15 @@ class CompHist{
   std::string rootOutDir_;                   // root directory for potential root output
   std::string writeTo_, writeAs_;            // type (ps/eps) and directory of output
   std::vector<std::string> outputLabelList_; // list of .root files
+  std::string outputFileName_;
 
   // define histogram design
   std::vector<short int> gridX_, gridY_;     // grid in x/y to be set?
-  std::vector<short int> logX_,  logY_;      // log  in x/y to be set? 
+  std::vector<short int> logX_,  logY_;      // log  in x/y to be set?
   std::vector<short int> histStyle_;         // line, marker, filled?
   std::vector<short int> histColor_;         // line/fill color?
   std::vector<short int> commonStyle_;       // fill or line style
-  std::vector<short int> commonWidth_;       // line width 
+  std::vector<short int> commonWidth_;       // line width
   std::vector<short int> markerStyle_;       // marker style
   std::vector<double> markerSize_;           // marker size
   std::vector<std::string> xAxes_, yAxes_;   // x/y axes labels

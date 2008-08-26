@@ -7,7 +7,7 @@ using namespace std;
 void CompHist::readLabels(std::string s, std::vector<std::string>& vec) {
 	//-----------------------------------------------
 	// fill vector of std::string's from a single
-	// std::string s; the process starts as soon as 
+	// std::string s; the process starts as soon as
 	// leading " are found and starts a new substr
 	// as soon as a "; is encountered
 	//-----------------------------------------------
@@ -35,7 +35,7 @@ void CompHist::readLabels(std::string s, std::vector<std::string>& vec) {
 void CompHist::configBlockIO(ConfigFile& cfg) {
 	//-----------------------------------------------
 	// read all configurables defined in CompHisto-
-	// grams from config file. Throw human readable 
+	// grams from config file. Throw human readable
 	// exception when misspellings occure
 	//-----------------------------------------------
 	try {
@@ -53,6 +53,7 @@ void CompHist::configBlockIO(ConfigFile& cfg) {
 		readVector ( cfg.read<std::string>( "outputLabels" ), outputLabelList_);
 		writeTo_ = cfg.read<std::string>( "writePlotsTo" );
 		writeAs_ = cfg.read<std::string>( "writePlotsAs" );
+		outputFileName_ = cfg.read<std::string>( "outputFileName" , "inspect");
 	}
 	catch(...) {
 		cerr << "ERROR during reading of config file" << endl;
@@ -65,7 +66,7 @@ void CompHist::configBlockIO(ConfigFile& cfg) {
 void CompHist::configBlockHist(ConfigFile& cfg) {
 	//-----------------------------------------------
 	// read all configurables defined in CompHisto-
-	// grams from config file. Throw human readable 
+	// grams from config file. Throw human readable
 	// exception when misspellings occure
 	//-----------------------------------------------
 	try {
@@ -113,9 +114,9 @@ void CompHist::configBlockHist(ConfigFile& cfg) {
 void CompHist::readHistogramList() {
 	//-----------------------------------------------
 	// fill the list histList_ with all requested
-	// histogram names; the names are recieved from 
-	// a .hist file; jump out if the reading takes 
-	// too long 
+	// histogram names; the names are recieved from
+	// a .hist file; jump out if the reading takes
+	// too long
 	//-----------------------------------------------
 	ifstream histFile(histFile_.c_str() );
 
@@ -148,11 +149,11 @@ void CompHist::readHistogramList() {
 void CompHist::loadHistograms() {
 	//-----------------------------------------------
 	// fill histograms listed in histList_ into a
-	// TObjectArray for each sample given in the 
-	// list fileNameList_ and its directories; Each 
-	// TObjectArray is then pushed into the vector 
-	// sampleList_ which keeps all TObjectArrays of 
-	// histograms for each sample 
+	// TObjectArray for each sample given in the
+	// list fileNameList_ and its directories; Each
+	// TObjectArray is then pushed into the vector
+	// sampleList_ which keeps all TObjectArrays of
+	// histograms for each sample
 	//-----------------------------------------------
 
 	//fill vector of root files
@@ -216,7 +217,7 @@ void CompHist::loadHistograms() {
 				if (verbose_) {
 					cout << "added to list as: " << dummy->GetName() << endl;
 				}
-			} // end of histogram name list 
+			} // end of histogram name list
 			sampleList_.push_back(hist);
 		} // end of root directory list
 	} // end of root file list
@@ -269,8 +270,8 @@ bool CompHist::histFilter(TString& cmp, std::vector<std::string>& ref,
 
 void CompHist::draw(TCanvas& canv, TLegend& leg, int& idx, int& jdx) {
 	//-----------------------------------------------
-	// loop all samples via the list sampleList_, which 
-	// containas the histograms of each sample as 
+	// loop all samples via the list sampleList_, which
+	// containas the histograms of each sample as
 	// TObjects in TObjectArrays
 	//-----------------------------------------------
 	TH1* hfirst = 0; //draw first histogram on top of others
@@ -338,15 +339,15 @@ void CompHist::drawPs() {
 	//-----------------------------------------------
 	TString output(writeTo_.c_str() );
 	output += "/";
-	output += "inspect";
+	output += outputFileName_;
 	output += ".";
 	output += writeAs_;
 	TPostScript psFile(output, 111); //112 for portrait
 
 	//-----------------------------------------------
 	// loop histograms via the list of histogram
-	// names stored in histList_, open a new page 
-	// for each histogram & plot each sample in 
+	// names stored in histList_, open a new page
+	// for each histogram & plot each sample in
 	// the same canvas
 	//-----------------------------------------------
 	for (int idx=0, jdx=0; idx<(int)histList_.size(); ++idx) {
@@ -363,7 +364,7 @@ void CompHist::drawPs() {
 		psFile.NewPage();
 		//-----------------------------------------------
 		// on each page the legend needs to be redeclared
-		//-----------------------------------------------   
+		//-----------------------------------------------
 		TLegend* leg = new TLegend(legXLeft_,legYLower_,legXRight_,legYUpper_);
 		setLegendStyle( *leg);
 		draw(*canv, *leg, idx, jdx);
@@ -386,10 +387,10 @@ void CompHist::drawEps() {
 
 	//-----------------------------------------------
 	// loop histograms via the list of histogram
-	// names stored in histList_, open a new page 
-	// for each histogram & plot each sample in 
+	// names stored in histList_, open a new page
+	// for each histogram & plot each sample in
 	// the same canvas
-	//-----------------------------------------------  
+	//-----------------------------------------------
 	for (int idx=0, jdx=0; idx<(int)histList_.size(); ++idx) {
 		//-----------------------------------------------
 		// open output files
@@ -414,7 +415,7 @@ void CompHist::drawEps() {
 		psFile.NewPage();
 		//-----------------------------------------------
 		// on each page the legend needs to be redeclared
-		//-----------------------------------------------   
+		//-----------------------------------------------
 		TLegend* leg = new TLegend(legXLeft_,legYLower_,legXRight_,legYUpper_);
 		setLegendStyle( *leg);
 		draw(*canv, *leg, idx, jdx);
@@ -510,8 +511,8 @@ void CompHist::setAxesStyle(TH1& hist, const char* titleX, const char* titleY) {
 
 void CompHist::setHistStyles(TH1& hist, int idx, int jdx) {
 	//-----------------------------------------------
-	// check hist style; throw exception if style 
-	// is not competible with specifications; set 
+	// check hist style; throw exception if style
+	// is not competible with specifications; set
 	// default line[0] if vector is too short
 	//-----------------------------------------------
 	int histType=0;
@@ -701,7 +702,7 @@ void CompHist::writeOutput(CompHist::RootOutput option) {
 			// create new directory if it does not yet exist
 			file.mkdir(rootOutDir_.c_str(), rootOutDir_.c_str() );
 		else
-			// clean-up directory if it was existing already 
+			// clean-up directory if it was existing already
 			(file.GetDirectory(rootOutDir_.c_str()))->Delete("*;*");
 		file.cd(rootOutDir_.c_str());
 
