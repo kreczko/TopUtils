@@ -6,7 +6,6 @@ class Config(ConfigWrapper):
     "constructor"
     def __init__(self, type):
         ConfigWrapper.__init__(self, 'TopAnalysis/TopUtils/python/QCDConfigTemplate.cfg')
-        print 'ich bin eine QCD config'
         #paths:
         self.path = {}
         self.ttbarMC_ = 'false'
@@ -26,8 +25,8 @@ class Config(ConfigWrapper):
 
         #standard path:
         self.path['standard'] = self.makePaths(p0a, p0, p1, p2, p3, p4)
-        self.path['top'] = self.makePaths(self.join(top, p0a), self.join(top, p0), self.join(top, p1), self.join(top, p2), self.join(top, p3), self.join(top, p4))
-        self.path['topbg'] = self.makePaths(self.join(topbg, p0a), self.join(topbg, p0), self.join(topbg, p1), self.join(topbg, p2), self.join(topbg, p3), self.join(topbg, p4))
+        self.path['top'] = self.makePaths(p0a, self.join(top, p0), self.join(top, p1), self.join(top, p2), self.join(top, p3), self.join(top, p4))
+        self.path['topbg'] = self.makePaths(p0a, self.join(topbg, p0), self.join(topbg, p1), self.join(topbg, p2), self.join(topbg, p3), self.join(topbg, p4))
         if not type in self.path.keys():
             for a in self.path['standard']:
                 self.addPath(a.__str__())

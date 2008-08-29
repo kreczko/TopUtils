@@ -12,15 +12,14 @@ class ConfigWrapper:
         self.source_ = ""
         #default values
         self.numberOfEvents_ = 10
-        self.outputRootfile = "test.root"
-        
+        self.outputRootfile = "test.root"        
         
     def source(self, source):
-        print source, "  ", input.source.keys()
         if source in input.source.keys():
             self.source_ = input.source[source]
         else:
-            print 'invalid source' 
+            print 'invalid source'
+            print 'accepted sources: ', input.source.keys()  
         
     def addPath(self, path):
         self.paths += "path p" + self.pathcounter_.__str__() + " = {" + path + "}\n"
@@ -34,7 +33,6 @@ class ConfigWrapper:
         self.numberOfEvents_ = numberOfEvents
         
     def replaceInFile(self, search, replace):
-        #print search, replace
         self.config = self.config.replace(search, replace)
         
     def readFromFile(self, filename):
