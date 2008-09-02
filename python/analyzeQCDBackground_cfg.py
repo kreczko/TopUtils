@@ -5,7 +5,7 @@ class Config(ConfigWrapper):
     allowedTypes = "top, topbg, qcd, wjets, zjets"
     "constructor"
     def __init__(self, type):
-        ConfigWrapper.__init__(self, 'TopAnalysis/TopUtils/python/QCDConfigTemplate.cfg')
+        ConfigWrapper.__init__(self, 'TopAnalysis/TopUtils/python/QCDConfigTemplate.cfg', type)
         #paths:
         self.path = {}
         self.ttbarMC_ = 'false'

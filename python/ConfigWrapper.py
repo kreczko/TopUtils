@@ -3,10 +3,10 @@ import datetime
 import SourceInput as input
 
 class ConfigWrapper:
-    def __init__(self, cfg):
+    def __init__(self, cfg, type):
         self.config = self.readFromFile(cfg)
         rrr = time.mktime(datetime.datetime.utcnow().timetuple()).__str__()
-        self.outputConfig = "tempconfig_" + rrr + ".cfg";
+        self.outputConfig = "tempconfig_" +type + "_" + rrr + ".cfg";
         self.pathcounter_ = 0;
         self.paths = "";
         self.source_ = ""

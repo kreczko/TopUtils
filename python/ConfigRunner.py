@@ -2,11 +2,14 @@ import os
 import sys
 import getopt
 import time
+import threading
 #set your config file here
 import analyzeQCDBackground_cfg as cms
 
 
 class CfgRunner:
+    standardOut = 'output.txt'
+    standardErr = 'outputErr.txt'
     def __init__(self):
         self._sleeptime = 10#time in seconds to wait between commands
 
@@ -23,6 +26,7 @@ class CfgRunner:
         self.outputfile = 'output.txt'
         self.outputerr = 'outputErr.txt'
         self.runs_ = ""
+        self.jobstarted = False
         
     def main(self):
     #possible arguments:
@@ -74,6 +78,7 @@ class CfgRunner:
             time.sleep(self._sleeptime)
             self.waitForFirst()
             os.remove(configfile)
+            self.jobstarted = True
         else:
             print 'configfile does not exist'
         
@@ -112,12 +117,16 @@ class CfgRunner:
 
             if (self.type_ in cms.Config.allowedTypes):                    
                 self.doJob(self.type_)
+                if self.jobstarted:
+                    print "job started"
+                    threading.Thread(target=self.waitingForEnd(self.type_))
             elif self.type_ == 'quit':
                 os._exit(0)
             else:
                 print "not allowed type used"
                 print "allowed types: ", cms.Config.allowedTypes
                 os._exit(0)
+        
                 
     def doJob(self, type):
         #create Config
@@ -126,10 +135,8 @@ class CfgRunner:
         output = self.filepath + self.fileprefix + type + "_" + time.strftime("%d%m%y", time.gmtime()) + self.filesuffix
         process.out(output)
         #setup outputfiles
-        if(self.outputfile == 'output.txt'):
-            self.outputfile = 'output_' + type + '.txt'
-        if(self.outputerr == 'outputErr.txt'):
-            self.outputerr = 'outputErr_' + type + '.txt'
+        self.outputfile = 'output_' + type + '.txt'
+        self.outputerr = 'outputErr_' + type + '.txt'
         self.executeCMSrun(process.returnTempCfg())
                 
     def createRuns(self, command):
@@ -148,6 +155,12 @@ class CfgRunner:
             allruns.append(a)
             
         return allruns
+    
+    def waitingForEnd(self, type):
+        while not 'Summary' in self.readFromFile(self.outputerr):
+            time.sleep(self._sleeptime)
+            print 'waiting for ', type, ' to end'
+        print type, ' ended'
 
 
 
