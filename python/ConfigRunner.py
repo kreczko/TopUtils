@@ -76,7 +76,7 @@ class CfgRunner:
             #os.system('eval `scramv1 runtime -sh`')# not working
             os.system('cmsRun ' + configfile + " >" + self.outputfile + " 2> " + self.outputerr + " < /dev/null&")
             time.sleep(self._sleeptime)
-            self.waitForFirst()
+            self.waitForFirst(self.type_)
             os.remove(configfile)
             self.jobstarted = True
         else:
@@ -88,13 +88,17 @@ class CfgRunner:
         print 'Inspect_top ' + configfile
         os.system('Inspect_top ' + configfile + ">& /dev/null&")
         
+    def TopInspectAll(self, type):
+        print "starting TopInspectAll for ", type
+        #do type specific TopInspect like 2D histos
+        
 
     ##################################################
     # wait for 1st event to be processed
     ##################################################        
-    def waitForFirst(self):
+    def waitForFirst(self, type):
         while (self.readFromFile(self.outputerr) == ""):
-            print "Waiting for the 1st event to be processed..."
+            print "Waiting for the 1st event of", type, "to be processed..."
             time.sleep(self._sleeptime)
         print "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"
         print self.readFromFile(self.outputerr)
@@ -119,7 +123,9 @@ class CfgRunner:
                 self.doJob(self.type_)
                 if self.jobstarted:
                     print "job started"
-                    threading.Thread(target=self.waitingForEnd(self.type_))
+                    thread = threading.Thread(target=self.waitingForEnd, args = (self.type_,))
+                    thread.start()
+                    self.jobstarted = False
             elif self.type_ == 'quit':
                 os._exit(0)
             else:
@@ -159,8 +165,9 @@ class CfgRunner:
     def waitingForEnd(self, type):
         while not 'Summary' in self.readFromFile(self.outputerr):
             time.sleep(self._sleeptime)
-            print 'waiting for ', type, ' to end'
-        print type, ' ended'
+            print 'waiting for', type, 'to end...'
+        print type, 'ended'
+        self.TopInspectAll(type)
 
 
 
