@@ -5,6 +5,7 @@ import time
 import threading
 #set your config file here
 import analyzeQCDBackground_cfg as cms
+from TopInspectRunner import TopRunner 
 
 
 class CfgRunner:
@@ -82,14 +83,10 @@ class CfgRunner:
         else:
             print 'configfile does not exist'
         
-    def TopInspect(self, configfile):
-        print 'Executing Inspect_top...'
-        print "##################################################"
-        print 'Inspect_top ' + configfile
-        os.system('Inspect_top ' + configfile + ">& /dev/null&")
         
     def TopInspectAll(self, type):
         print "starting TopInspectAll for ", type
+        
         #do type specific TopInspect like 2D histos
         
 
@@ -163,8 +160,17 @@ class CfgRunner:
         return allruns
     
     def waitingForEnd(self, type):
-        while not 'Summary' in self.readFromFile(self.outputerr):
-            time.sleep(self._sleeptime)
+        err = False
+        while not 'Summary' in self.readFromFile('outputErr_' + type + '.txt') and not err:
+            if (self.numberofevents_ == -1):
+                #every 30min
+                time.sleep(self._sleeptime*180)
+            else:
+            	#130s for each 1k events
+                time.sleep(self._sleeptime*1.3*self.numberofevents_/1000)
+            if "Root_Error" in self.readFromFile('outputErr_' + type + '.txt'):
+                print "an error occured in", type, 'sample'
+                err = True
             print 'waiting for', type, 'to end...'
         print type, 'ended'
         self.TopInspectAll(type)
