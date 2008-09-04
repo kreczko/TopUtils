@@ -1,32 +1,84 @@
+import time
+import datetime
+
 class InspectWrapper:
-    def __init__(self, cfg = "TopAnalysis/TopUtils/python/TopInspectTemplate.cfg"):
-         self.config = self.readFromFile(cfg)
-         self.outputConfig = ""
-         
-    def histInput(self, input):
-        #replace histInput
-        self.replace("histInput", input)
+    def __init__(self, cfg, type):
+        self.__config = self.__readFromFile(cfg)
+        rrr = time.mktime(datetime.datetime.utcnow().timetuple()).__str__()
+        self.__outputConfig = "tempconfig_" + type + "_" + rrr + ".cfg";
         
-    def rootInput(self, input):
-        #input is an array of files
-        self.replace(rootInput, input)
+        #list of options
+        self.__singleOptions = "histInput, filterOption, rootOutput, outputDir, writePlotsTo, writePlotsAs, legXLeft, legXRight, legYLower, legYUpper"
+        self.__options = {}
+        self.__options['histInput'] = ""
+        self.__options['rootInput'] = ""
+        self.__options['inputDirs'] = ""
+        self.__options['histFilter'] = ""
+        self.__options['plotFilter'] = ""
+        self.__options['filterOption'] = ""
+        self.__options['rootOutput'] = ""
+        self.__options['outputDir'] = ""
+        self.__options['outputLabels'] = ""
+        self.__options['writePlotsTo'] = "."
+        self.__options['writePlotsAs'] = "ps"
+        self.__options['xLog'] = ""
+        self.__options['yLog'] = ""
+        self.__options['xGrid'] = ""
+        self.__options['yGrid'] = ""
+        self.__options['histScale'] = ""
+        self.__options['histMinimum'] = ""
+        self.__options['histMaximum'] = ""
+        self.__options['histErrors'] = ""
+        self.__options['histType'] = ""
+        self.__options['histStyle'] = ""
+        self.__options['histColor'] = ""
+        self.__options['lineWidth'] = ""
+        self.__options['markerStyle'] = ""
+        self.__options['markerSize'] = ""
+        self.__options['xAxes'] = ""
+        self.__options['yAxes'] = ""
+        self.__options['legEntries'] = ""
+        self.__options['legXLeft'] = ""
+        self.__options['legXRight'] = ""
+        self.__options['legYLower'] = ""        
+        self.__options['legYUpper'] = ""
+        #inspectSum options
+        self.__sumOptions = 'histWeights'
+        self.__options['histWeights'] = ""
         
-    def replace(self, searchFor, replaceWith):
-        #it has to handle both arrays and singles
-        print "nothing"
+    def addOption(self, optionName, value):
+        if optionName in self.__options.keys():
+            if optionName in self.__singleOptions.split(","):                    
+                self.__options[optionName] = value
+            else:
+                self.__options[optionName] += value + '\n'
+        else:
+            print 'Inspect option not found'
         
-    def replaceInFile(self, search, replace):
-        print search, replace
-        self.config = self.config.replace(search, replace)
+    def returnTempCfg(self):
+        self.__replaceAll()
+        self.__writeToFile(self.__outputConfig, self.__config)
+        return self.__outputConfig
+    
+    def addHistDescription(self):
+        print 'todo'
+    def __replaceAll(self):
+        for a in self.__options.keys():
+            self.__replaceInFile('{$' + a.__str__() + '}', self.__options[a])
         
-    def readFromFile(self, filename):
+    def __replaceInFile(self, search, replace):
+       # print search, replace
+        self.__config = self.__config.replace(search, replace)
+        
+    def __readFromFile(self, filename):
         file = open(filename, 'r')
         str = file.read()
         file.close()
         return str
     
     #writes a string to a file (overwrites the file)
-    def writeToFile(self, filename, str):
+    def __writeToFile(self, filename, str):
         file = open(filename, 'w')
         file.write(str)
         file.close()
+        
