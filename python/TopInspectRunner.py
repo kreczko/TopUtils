@@ -2,7 +2,7 @@ import os
 import sys
 import getopt
 
-class TopRunner():
+class TopRunner:
     def __init__(self):
         self.config = ''
         
@@ -12,7 +12,7 @@ class TopRunner():
         print 'Inspect_top ' + configfile
         os.system('Inspect_top ' + configfile + ">& /dev/null&")
         
-    def __main__(self):
+    def main(self):
         print 'hallo'
         
 if __name__ == '__main__':
