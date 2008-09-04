@@ -18,7 +18,7 @@ class CfgRunner:
         #you can change it here
         #example: self.filepath = 'outputpath/rootfiles/'
         self.filepath = '' 
-        self.fileprefix = 'MatrixMethod_' #will be used as filnameprefix
+        self.fileprefix = 'test_MatrixMethod_' #will be used as filnameprefix
         self.filesuffix = '.root' #filetype
         
         self.type_ = ''     
@@ -47,7 +47,7 @@ class CfgRunner:
                 self.type_ = a
                 #self.doAll()
             elif o in ("-e", "--events"):
-                self.numberofevents_ = a
+                self.numberofevents_ = int(a)
             elif o in ("-f", "--out"):
                 if(not (a == '')):
                     self.outputfilename = a
@@ -94,6 +94,7 @@ class CfgRunner:
     # wait for 1st event to be processed
     ##################################################        
     def waitForFirst(self, type):
+        #TODO: abort on error
         while (self.readFromFile(self.outputerr) == ""):
             print "Waiting for the 1st event of", type, "to be processed..."
             time.sleep(self._sleeptime)
@@ -138,8 +139,8 @@ class CfgRunner:
         output = self.filepath + self.fileprefix + type + "_" + time.strftime("%d%m%y", time.gmtime()) + self.filesuffix
         process.out(output)
         #setup outputfiles
-        self.outputfile = 'output_' + type + '.txt'
-        self.outputerr = 'outputErr_' + type + '.txt'
+        self.outputfile = 'output_' + output.__str__().replace(self.filesuffix, '.txt')
+        self.outputerr = 'outputErr_' + output.__str__().replace(self.filesuffix, '.txt')
         self.executeCMSrun(process.returnTempCfg())
                 
     def createRuns(self, command):
@@ -161,14 +162,17 @@ class CfgRunner:
     
     def waitingForEnd(self, type):
         err = False
-        while not 'Summary' in self.readFromFile('outputErr_' + type + '.txt') and not err:
+        output = self.filepath + self.fileprefix + type + "_" + time.strftime("%d%m%y", time.gmtime()) + self.filesuffix
+        erO = 'outputErr_' + output.__str__().replace(self.filesuffix, '.txt')
+        while not 'Summary' in self.readFromFile(erO) and not err:
             if (self.numberofevents_ == -1):
                 #every 30min
                 time.sleep(self._sleeptime*180)
             else:
             	#130s for each 1k events
-                time.sleep(self._sleeptime*1.3*self.numberofevents_/1000)
-            if "Root_Error" in self.readFromFile('outputErr_' + type + '.txt'):
+                t = self._sleeptime*self.numberofevents_/100
+                time.sleep(t)
+            if "Root_Error" in self.readFromFile(erO):
                 print "an error occured in", type, 'sample'
                 err = True
             print 'waiting for', type, 'to end...'
