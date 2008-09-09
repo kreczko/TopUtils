@@ -54,14 +54,18 @@ class InspectWrapper:
                 self.__options[optionName] += value + '\n'
         else:
             print 'Inspect option not found'
+            
+    def replaceOption(self, optionName, value):
+        if optionName in self.__options.keys():
+            self.__options[optionName] = value
+        else:
+            print 'Inspect option not found'
         
     def returnTempCfg(self):
         self.__replaceAll()
         self.__writeToFile(self.__outputConfig, self.__config)
         return self.__outputConfig
     
-    def addHistDescription(self):
-        print 'todo'
     def __replaceAll(self):
         for a in self.__options.keys():
             self.__replaceInFile('{$' + a.__str__() + '}', self.__options[a])
