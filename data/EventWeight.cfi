@@ -2,9 +2,11 @@ module eventWeight = EventWeight{
 #---------------------------------------------
 # CSA and grid efficiency weights
 #---------------------------------------------
+  bool     useWght = true
   double   gridEff = 1.
   InputTag weight  = csa07Event:weight
 }
 
 include "TopAnalysis/TopUtils/data/CSA07EventWeightProducer.cfi"
 sequence makeWeights = {csa07Event, eventWeight}
+sequence makeDummyWeights= {eventWeight}
