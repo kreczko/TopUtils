@@ -1,5 +1,5 @@
-#ifndef EventWeightFromXSec_h
-#define EventWeightFromXSec_h
+#ifndef EventWeightPlain_h
+#define EventWeightPlain_h
 
 #include <memory>
 #include <string>
@@ -10,11 +10,11 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
-class EventWeightFromXSec : public edm::EDProducer {
+class EventWeightPlain : public edm::EDProducer {
 
  public:
-  explicit EventWeightFromXSec(const edm::ParameterSet&);
-  ~EventWeightFromXSec();
+  explicit EventWeightPlain(const edm::ParameterSet&);
+  ~EventWeightPlain();
   
  private:
   virtual void produce(edm::Event&, const edm::EventSetup&);

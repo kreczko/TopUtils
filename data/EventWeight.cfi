@@ -2,10 +2,8 @@
 include "TopAnalysis/TopUtils/data/CSA07EventWeightProducer.cfi"
 
 module eventWeight = EventWeight{          
-  bool     useWght = true
   double   gridEff = 1.
   InputTag weight  = csa07Event:weight
 }
 
-sequence makeWeights_plain = {eventWeight}
-sequence makeWeights       = {csa07Event, eventWeight}
+sequence makeWeights = {csa07Event, eventWeight}

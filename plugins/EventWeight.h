@@ -22,7 +22,6 @@ class EventWeight : public edm::EDProducer {
   virtual void produce(edm::Event&, const edm::EventSetup&);
 
  private:
-  bool useWght_;
   double gridEff_;
   edm::InputTag weight_;
 };

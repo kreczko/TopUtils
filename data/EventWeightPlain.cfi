@@ -1,4 +1,4 @@
-module eventWeight = EventWeightFromXSec{          
+module eventWeight = EventWeightPlain{          
   double eff   = 1  # [/]
   double xsec  = 1  # [pb]
   uint32 nevts = 1
@@ -6,4 +6,4 @@ module eventWeight = EventWeightFromXSec{
   double lumi  = 1  # [pb^{-1}]    
 }
 
-sequence makeWeights_plain = {eventWeight}
+sequence makeWeights = {eventWeight}

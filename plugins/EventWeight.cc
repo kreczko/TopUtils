@@ -2,7 +2,6 @@
 #include "TopAnalysis/TopUtils/plugins/EventWeight.h"
 
 EventWeight::EventWeight(const edm::ParameterSet& cfg):
-  useWght_( cfg.getParameter<bool>("useWght") ),
   gridEff_( cfg.getParameter<double>("gridEff") ),
   weight_ ( cfg.getParameter<edm::InputTag>("weight") )
 {
@@ -15,17 +14,14 @@ EventWeight::produce(edm::Event& evt, const edm::EventSetup& setup)
   //---------------------------------------------
   // get event weight
   //---------------------------------------------
-  double dummy=1.;
   edm::Handle<double> weight; 
-  if(useWght_){
-    evt.getByLabel(weight_, weight);
-    dummy=*weight;
-  }
+  evt.getByLabel(weight_, weight);
+  
   std::auto_ptr<double> wgt(new double);
   if(gridEff_<=0.)
     throw edm::Exception( edm::errors::Configuration,"Grid Efficiency is found to be <=0" );
   else{
-    *wgt=1./gridEff_*dummy;
+    *wgt=1./gridEff_*(*weight);
   }
   evt.put(wgt);
 }
