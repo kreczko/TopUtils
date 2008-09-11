@@ -1,5 +1,5 @@
-#ifndef EvtWeightFromSigmaProducer_h
-#define EvtWeightFromSigmaProducer_h
+#ifndef EventWeightFromXSec_h
+#define EventWeightFromXSec_h
 
 #include <memory>
 #include <string>
@@ -10,21 +10,22 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
-class EvtWeightFromSigmaProducer : public edm::EDProducer {
+class EventWeightFromXSec : public edm::EDProducer {
 
  public:
-  explicit EvtWeightFromSigmaProducer(const edm::ParameterSet&);
-  ~EvtWeightFromSigmaProducer();
+  explicit EventWeightFromXSec(const edm::ParameterSet&);
+  ~EventWeightFromXSec();
   
  private:
   virtual void produce(edm::Event&, const edm::EventSetup&);
 
  private:
-  double eventWeight_;
-  double crossSection_;
-  int nEvents_;
-  double targetLumi_;  
-  double prodLumi;
+  double eff_;  
+  double xsec_;
+  double lumi_;  
+  unsigned nevts_;
+
+  double wght_;
 };
 
 #endif
