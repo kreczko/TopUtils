@@ -1,39 +1,44 @@
 import os
 import sys
 import getopt
-import time
+from Timer import Timer
 import threading
 #set your config file here
 import analyzeQCDBackground_cfg as cms
-from TopInspectRunner import TopRunner 
 
-
+"executive script for a simple run"
 class CfgRunner:
-    standardOut = 'output.txt'
-    standardErr = 'outputErr.txt'
+    #TODO: dynamic inport of needed Confug
+    __standardOut = 'output.txt'
+    __standardErr = 'outputErr.txt'
+    #time in seconds to wait between commands
+    __sleeptime = 10
+    #for the -a option
+    __additionalParameters = ''
+    #executing path is in most cases the outputpath.
+    #you can change it here
+    #example: self.filepath = 'outputpath/rootfiles/'
+    __filepath = '' 
+    __fileprefix = 'test_MatrixMethod_new_things' #will be used as filnameprefix
+    __filesuffix = '.root' #filetype
+    #sampletype
+    __type = ''     
+    __numberofevents = 0
+    __outputfile = 'output.txt'
+    __outputerr = 'outputErr.txt'
+    __runs_ = ""
+    __jobstarted = False
+    __verbose = False
+    
     def __init__(self):
-        self._sleeptime = 10#time in seconds to wait between commands
-
-        #executing path is in most cases the outputpath.
-        #you can change it here
-        #example: self.filepath = 'outputpath/rootfiles/'
-        self.filepath = '' 
-        self.fileprefix = 'test_MatrixMethod_' #will be used as filnameprefix
-        self.filesuffix = '.root' #filetype
-        
-        self.type_ = ''     
-        self.numberofevents_ = 0
-        
-        self.outputfile = 'output.txt'
-        self.outputerr = 'outputErr.txt'
-        self.runs_ = ""
-        self.jobstarted = False
+        self.__cmsRunTimer = {}
+        self.__analysisTimer = {}
         
     def main(self):
     #possible arguments:
         # parse command line options
         try:
-            opts, args = getopt.getopt(sys.argv[1:], 'ht:e:f:', ['help', 'type=', 'events=', 'out=', 'err='])
+            opts, args = getopt.getopt(sys.argv[1:], 'ht:e:f:a:v', ['help', 'type=', 'events=', 'out=', 'err=', 'add='])
         except getopt.error, msg:
             print msg
             print "for help use --help"
@@ -44,87 +49,94 @@ class CfgRunner:
                 print __doc__
                 sys.exit(0)
             elif o in ("-t", "--type"):
-                self.type_ = a
+                self.__type = a
                 #self.doAll()
             elif o in ("-e", "--events"):
-                self.numberofevents_ = int(a)
+                self.__numberofevents = int(a)
             elif o in ("-f", "--out"):
                 if(not (a == '')):
-                    self.outputfilename = a
+                    self.__outputfilename = a
             elif o in ("--err"):
                 if(not a == ''):
-                    self.outputerr = a
-#            elif o in ("-c", "--cfg-file"):
-#                if(not (a == '')):
-#                    self.config = a
+                    self.__outputerr = a
+            elif o in ("--add", '-a'):
+                if(not a == ''):
+                    self.__additionalParameters = a
+            elif o in ('-v'):
+                self.__verbose = True
             else:
                 print 'Argument(s) not recognized. See --help for usage'
                 
-        if (not self.numberofevents_ == 0) and (not self.type_ == ''):
-            self.doAll()
+        if (not self.__numberofevents == 0) and (not self.__type == ''):
+            self.__doAll()
             
-    def executeCMSrun(self, configfile):
+    def __executeCMSrun(self, configfile):
         print 'Executing cmsRun...'
         print "##################################################"
         if os.path.exists(configfile):
             print 'cmsRun ' + configfile
-            if os.path.exists(self.outputfile):
-                os.remove(self.outputfile)
-            if os.path.exists(self.outputerr):
-                os.remove(self.outputerr)   
+            if os.path.exists(self.__outputfile):
+                os.remove(self.__outputfile)
+            if os.path.exists(self.__outputerr):
+                os.remove(self.__outputerr)   
             
             #setup runtime environment
             #os.system('eval `scramv1 runtime -sh`')# not working
-            os.system('cmsRun ' + configfile + " >" + self.outputfile + " 2> " + self.outputerr + " < /dev/null&")
-            time.sleep(self._sleeptime)
-            self.waitForFirst(self.type_)
+            os.system('cmsRun ' + configfile + " >" + self.__outputfile + " 2> " + self.__outputerr + " < /dev/null&")
+            Timer.sleep(self.__sleeptime)
+            self.__waitForFirst(self.__type)
             os.remove(configfile)
-            self.jobstarted = True
+            self.__jobstarted = True
         else:
             print 'configfile does not exist'
         
         
-    def TopInspectAll(self, type):
-        print "starting TopInspectAll for ", type
-        
-        #do type specific TopInspect like 2D histos
+    def __finishJob(self, type):
+        print "starting macros for ", type
         
 
     ##################################################
     # wait for 1st event to be processed
     ##################################################        
-    def waitForFirst(self, type):
+    def __waitForFirst(self, type):
         #TODO: abort on error
-        while (self.readFromFile(self.outputerr) == ""):
+        while (self.__readFromFile(self.__outputerr) == ""):
             print "Waiting for the 1st event of", type, "to be processed..."
-            time.sleep(self._sleeptime)
+            Timer.sleep(self.__sleeptime)
         print "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"
-        print self.readFromFile(self.outputerr)
+        print self.__readFromFile(self.__outputerr)
         print "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+        if not 'Begin processing the 1st record.' in self.__readFromFile(self.__outputerr):
+            print 'an error occured'
+            os.sys.exit(-1)
+        self.__cmsRunTimer[type].stop()
+        print 'Time to start cmsRun (s):', self.__cmsRunTimer[type].getMeasuredTime() 
+        self.__analysisTimer[type].start()
+        #start analysis timer
         
-    def readFromFile(self, filename):
+    def __readFromFile(self, filename):
         file = open(filename, 'r')
         str = file.read()
         file.close()
         return str
     
-    def doAll(self):
+    def __doAll(self):
         #check if only some samples are to be done
         #top  or     qcd;top
         #more than one kind of sample
-        self.runs_ = self.createRuns(self.type_)
+        self.__runs = self.__createRuns(self.__type)
         #check if source-type is defined
-        for i in self.runs_:
-            self.type_ = i
+        for i in self.__runs:
+            self.__type = i
 
-            if (self.type_ in cms.Config.allowedTypes):                    
-                self.doJob(self.type_)
-                if self.jobstarted:
+            if (self.__type in cms.Config.allowedTypes):              
+                self.__doJob(self.__type)
+                if self.__jobstarted:
                     print "job started"
-                    thread = threading.Thread(target=self.waitingForEnd, args = (self.type_,))
+                    thread = threading.Thread(target=self.__waitingForEnd, args = (self.__type,))
                     thread.start()
-                    self.jobstarted = False
-            elif self.type_ == 'quit':
+                    self.__jobstarted = False
+            elif self.__type == 'quit':
                 os._exit(0)
             else:
                 print "not allowed type used"
@@ -132,52 +144,59 @@ class CfgRunner:
                 os._exit(0)
         
                 
-    def doJob(self, type):
+    def __doJob(self, type):
         #create Config
-        process = cms.Config(type)
-        process.events(self.numberofevents_)
-        output = self.filepath + self.fileprefix + type + "_" + time.strftime("%d%m%y", time.gmtime()) + self.filesuffix
-        process.out(output)
+        process = cms.Config(type, self.__additionalParameters)
+        process.modifyOption('events', self.__numberofevents)
+        output = self.__filepath + self.__fileprefix + type + "_" + Timer.getDate() + self.__filesuffix
+        process.modifyOption('output',output)
         #setup outputfiles
-        self.outputfile = 'output_' + output.__str__().replace(self.filesuffix, '.txt')
-        self.outputerr = 'outputErr_' + output.__str__().replace(self.filesuffix, '.txt')
-        self.executeCMSrun(process.returnTempCfg())
+        self.__outputfile = 'output_' + output.__str__().replace(self.__filesuffix, '.txt')
+        self.__outputerr = 'outputErr_' + output.__str__().replace(self.__filesuffix, '.txt')
+        self.__cmsRunTimer[type] = Timer()
+        self.__analysisTimer[type] = Timer()
+        self.__cmsRunTimer[type].start()
+        self.__executeCMSrun(process.returnTempCfg())
                 
-    def createRuns(self, command):
+    def __createRuns(self, command):
         print 'Parsing command...'
-        sampletypes_ = []
+        sampletypes = []
         allruns = []
-        
+        #remove ' and " from command
+        #print command
         if ';' in command:
-            sampletypes_ = command.split(';')
+            sampletypes = command.split(';')
         #print  o.split(';')
         else:
-            sampletypes_ = [command]
+            sampletypes = [command]
     
         
-        for a in sampletypes_:
+        for a in sampletypes:
             allruns.append(a)
             
         return allruns
     
-    def waitingForEnd(self, type):
+    def __waitingForEnd(self, type):
         err = False
-        output = self.filepath + self.fileprefix + type + "_" + time.strftime("%d%m%y", time.gmtime()) + self.filesuffix
-        erO = 'outputErr_' + output.__str__().replace(self.filesuffix, '.txt')
-        while not 'Summary' in self.readFromFile(erO) and not err:
-            if (self.numberofevents_ == -1):
+        output = self.__filepath + self.__fileprefix + type + "_" + Timer.getDate() + self.__filesuffix
+        erO = 'outputErr_' + output.__str__().replace(self.__filesuffix, '.txt')
+        while not 'Summary' in self.__readFromFile(erO) and not err:
+            if (self.__numberofevents == -1):
                 #every 30min
-                time.sleep(self._sleeptime*180)
+                Timer.sleep(self.__sleeptime*180)
             else:
             	#130s for each 1k events
-                t = self._sleeptime*self.numberofevents_/100
-                time.sleep(t)
-            if "Root_Error" in self.readFromFile(erO):
+                t = self.__sleeptime*self.__numberofevents/100
+                Timer.sleep(t)
+            if "Root_Error" in self.__readFromFile(erO):
                 print "an error occured in", type, 'sample'
                 err = True
             print 'waiting for', type, 'to end...'
         print type, 'ended'
-        self.TopInspectAll(type)
+        self.__analysisTimer[type].stop()
+        print 'Time needed for analysis (s):', self.__analysisTimer[type].getMeasuredTime()
+        self.__finishJob(type)
+        
 
 
 

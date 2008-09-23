@@ -1,11 +1,9 @@
-import time
-import datetime
+from Timer import Timer
 
 class InspectWrapper:
     def __init__(self, cfg, type):
         self.__config = self.__readFromFile(cfg)
-        rrr = time.mktime(datetime.datetime.utcnow().timetuple()).__str__()
-        self.__outputConfig = "tempconfig_" + type + "_" + rrr + ".cfg";
+        self.__outputConfig = "tempconfig_" + type + "_" + Timer.getTime() + ".cfg";
         
         #list of options
         self.__singleOptions = "histInput, filterOption, rootOutput, outputDir, writePlotsTo, writePlotsAs, legXLeft, legXRight, legYLower, legYUpper"
@@ -46,7 +44,7 @@ class InspectWrapper:
         self.__sumOptions = 'histWeights'
         self.__options['histWeights'] = ""
         
-    def addOption(self, optionName, value):
+    def modifyOption(self, optionName, value):
         if optionName in self.__options.keys():
             if optionName in self.__singleOptions.split(","):                    
                 self.__options[optionName] = value

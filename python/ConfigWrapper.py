@@ -1,39 +1,42 @@
-import time
-import datetime
-import SourceInput as input
+from Timer import Timer
 
+"A Wrapper for a cfg to python transition"
 class ConfigWrapper:
-    def __init__(self, cfg, type):
-        self.config = self.readFromFile(cfg)
-        rrr = time.mktime(datetime.datetime.utcnow().timetuple()).__str__()
-        self.outputConfig = "tempconfig_" +type + "_" + rrr + ".cfg";
-        self.pathcounter_ = 0;
-        self.paths = "";
-        self.source_ = ""
-        #default values
-        self.numberOfEvents_ = 10
-        self.outputRootfile = "test.root"        
-        
-    def source(self, source):
-        if source in input.source.keys():
-            self.source_ = input.source[source]
-        else:
-            print 'invalid source'
-            print 'accepted sources: ', input.source.keys()  
-        
-    def addPath(self, path):
-        self.paths += "path p" + self.pathcounter_.__str__() + " = {" + path + "}\n"
-        self.pathcounter_ += 1
-        
+    __config = ''
+    __outputConfig = ''
+    __pathcounter = 0
+
     
-    def out(self, outputfile):
-        self.outputRootfile = outputfile
+    def __init__(self, cfg, type):
+        self.__config = self.readFromFile(cfg)
+        self.__outputConfig = "tempconfig_" +type + "_" + Timer.getTime() + ".cfg"  
         
-    def events(self, numberOfEvents):
-        self.numberOfEvents_ = numberOfEvents
+        #make protected
+        self._options = {}
+        self._options['source'] = ""
+        self._options['output'] = ""
+        self._options['events'] = ""
+        self._options['paths'] = ""
         
-    def replaceInFile(self, search, replace):
-        self.config = self.config.replace(search, replace)
+    def modifyOption(self, optionName, value):
+        if optionName in self._options.keys():
+            self._options[optionName] = value
+        else:
+            print 'Config option' , optionName, 'not found'    
+        
+#    def source(self, source):
+#        if source in input.source.keys():
+#            self.__source = input.source[source]
+#        else:
+#            print 'invalid source'
+#            print 'accepted sources: ', input.source.keys()  
+#        
+    def addPath(self, path):
+        self._options['paths'] += "path p" + self.__pathcounter.__str__() + " = {" + path + "}\n"
+        self.__pathcounter += 1
+        
+    def _replaceInFile(self, search, replace):
+        self.__config = self.__config.replace(search.__str__(), replace.__str__())
         
     def readFromFile(self, filename):
         file = open(filename, 'r')
@@ -47,14 +50,13 @@ class ConfigWrapper:
         file.write(str)
         file.close()
         
-    def replaceAll(self):
-        self.replaceInFile("{$source}", self.source_)
-        self.replaceInFile("{$out}", self.outputRootfile)
-        self.replaceInFile("{$events}", self.numberOfEvents_.__str__())
-        self.replaceInFile("{$paths}", self.paths)
+    #make protected
+    def _replaceAll(self):
+        for a in self._options.keys():
+            self._replaceInFile('{$' + a.__str__() + '}', self._options[a])
         
         
     def returnTempCfg(self):
-        self.replaceAll()
-        self.writeToFile(self.outputConfig, self.config)
-        return self.outputConfig
+        self._replaceAll()
+        self.writeToFile(self.__outputConfig, self.__config)
+        return self.__outputConfig
