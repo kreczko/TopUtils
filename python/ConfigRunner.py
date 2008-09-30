@@ -19,7 +19,7 @@ class CfgRunner:
     #you can change it here
     #example: self.filepath = 'outputpath/rootfiles/'
     __filepath = '' 
-    __fileprefix = 'test_MatrixMethod_new_things' #will be used as filnameprefix
+    __fileprefix = 'MatrixMethod_new_binning_' #will be used as filnameprefix
     __filesuffix = '.root' #filetype
     #sampletype
     __type = ''     
@@ -29,6 +29,7 @@ class CfgRunner:
     __runs_ = ""
     __jobstarted = False
     __verbose = False
+    __errorToken = ['RootError', 'Exception', 'Root_Error']
     
     def __init__(self):
         self.__cmsRunTimer = {}
@@ -36,21 +37,20 @@ class CfgRunner:
         
     def main(self):
     #possible arguments:
-        # parse command line options
+        # parse command line parameter
         try:
             opts, args = getopt.getopt(sys.argv[1:], 'ht:e:f:a:v', ['help', 'type=', 'events=', 'out=', 'err=', 'add='])
         except getopt.error, msg:
             print msg
             print "for help use --help"
             sys.exit(2)
-        # process options
+        # process parameter
         for o, a in opts:
             if o in ("-h", "--help"):
                 print __doc__
                 sys.exit(0)
             elif o in ("-t", "--type"):
                 self.__type = a
-                #self.doAll()
             elif o in ("-e", "--events"):
                 self.__numberofevents = int(a)
             elif o in ("-f", "--out"):
@@ -69,7 +69,8 @@ class CfgRunner:
                 
         if (not self.__numberofevents == 0) and (not self.__type == ''):
             self.__doAll()
-            
+    
+    "executes the CMSSW runable"        
     def __executeCMSrun(self, configfile):
         print 'Executing cmsRun...'
         print "##################################################"
@@ -81,23 +82,26 @@ class CfgRunner:
                 os.remove(self.__outputerr)   
             
             #setup runtime environment
-            #os.system('eval `scramv1 runtime -sh`')# not working
+            #os.system('eval `scramv1 runtime -sh`')# !!not working!!
+            # nohup
             os.system('cmsRun ' + configfile + " >" + self.__outputfile + " 2> " + self.__outputerr + " < /dev/null&")
             Timer.sleep(self.__sleeptime)
             self.__waitForFirst(self.__type)
             os.remove(configfile)
             self.__jobstarted = True
         else:
-            print 'configfile does not exist'
+            print 'requested configfile does not exist'
         
         
-    def __finishJob(self, type):
-        print "starting macros for ", type
+    "does some things on the end of a job"
+    def __endJob(self, type):
+        print "starting something for ", type
         
 
     ##################################################
     # wait for 1st event to be processed
-    ##################################################        
+    ##################################################
+    "waits for the first event to be processed"        
     def __waitForFirst(self, type):
         #TODO: abort on error
         while (self.__readFromFile(self.__outputerr) == ""):
@@ -153,8 +157,10 @@ class CfgRunner:
         #setup outputfiles
         self.__outputfile = 'output_' + output.__str__().replace(self.__filesuffix, '.txt')
         self.__outputerr = 'outputErr_' + output.__str__().replace(self.__filesuffix, '.txt')
+        #initilize timers
         self.__cmsRunTimer[type] = Timer()
         self.__analysisTimer[type] = Timer()
+        #start counting
         self.__cmsRunTimer[type].start()
         self.__executeCMSrun(process.returnTempCfg())
                 
@@ -166,7 +172,6 @@ class CfgRunner:
         #print command
         if ';' in command:
             sampletypes = command.split(';')
-        #print  o.split(';')
         else:
             sampletypes = [command]
     
@@ -195,7 +200,7 @@ class CfgRunner:
         print type, 'ended'
         self.__analysisTimer[type].stop()
         print 'Time needed for analysis (s):', self.__analysisTimer[type].getMeasuredTime()
-        self.__finishJob(type)
+        self.__endJob(type)
         
 
 

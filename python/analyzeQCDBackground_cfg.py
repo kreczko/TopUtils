@@ -3,8 +3,8 @@ import SourceInput as input
 
 "a config for qcd analysis"
 class Config(ConfigWrapper):
-    allowedTypes = "top, topbg, qcd, wjets, zjets, qcdmu"
-    allowedPathTypes = 'analysis, track, calo, jet, all'
+    allowedTypes = "top,topbg,qcd,wjets,zjets,qcdmu"
+    allowedPathTypes = 'analysis,track,calo,jet,all'
     __fileNameAddition = ''
 #    __ttbarMC = 'false'
     "constructor"
@@ -18,7 +18,7 @@ class Config(ConfigWrapper):
         self._options['ttbarMC'] = 'false'
 #        self.__ttbarMC = 'false'
         self.__path['basic'] = 'makeWeights & makeGenEvt'
-        self.__path['analysis'] = 'analyzeisolationMET'
+        self.__path['analysis'] = 'analyzeisolationMET, analyzeEventShapeMuon'
         self.__path['track'] = 'looseSelection,trackmbefore, trackIsoFilter, trackmafter'
         self.__path['calo'] = 'looseSelection,calombefore, caloIsoFilter, calomafter'
         self.__path['jet'] = 'looseSelection,jetIsombefore, jetIsoFilter, jetIsomafter'
@@ -32,13 +32,13 @@ class Config(ConfigWrapper):
         
         self.addPath(self.__path['basic'])
         for x in paths:
-            if x in self.allowedPathTypes:
+            print x
+            if x in self.allowedPathTypes.split(','):
                 #standard path:
                 self.__path['standard'] = self.__path[x]
                 self.__path['top'] = self.join(top, self.__path[x])
                 self.__path['topbg'] = self.join(topbg, self.__path[x])
-        if type in self.__path.keys():
-            self.addPath(self.__path[type])
+                self.addPath(self.__path[x])
         
         
         if type == 'top':

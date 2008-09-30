@@ -24,10 +24,14 @@ class Config(iw):
         self.modifyOption('inputDirs', 'qcd/trackmafter')
         self.modifyOption('inputDirs', 'top/trackmafter')
         self.modifyOption('inputDirs', 'mixed/trackmafter')
+        #hist manipulation
         for x in range(1,self.__noh + 1):
+            #histminimum
             self.modifyOption('histMinimum', '0.0')
+            #show errors or not
             self.modifyOption('histErrors', '1')
-            self.modifyOption('histType', '0.0')
+            
+            self.modifyOption('histType', '0')
             self.modifyOption('xAxes', 'MET[GeV]')
             if x == 1:
                 self.modifyOption('yAxes', 'efficiency')

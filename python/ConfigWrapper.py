@@ -18,6 +18,7 @@ class ConfigWrapper:
         self._options['events'] = ""
         self._options['paths'] = ""
         
+    "modifies an option of the config file"
     def modifyOption(self, optionName, value):
         if optionName in self._options.keys():
             self._options[optionName] = value
@@ -31,6 +32,7 @@ class ConfigWrapper:
 #            print 'invalid source'
 #            print 'accepted sources: ', input.source.keys()  
 #        
+    "adds a cmsRun path to the configfile"
     def addPath(self, path):
         self._options['paths'] += "path p" + self.__pathcounter.__str__() + " = {" + path + "}\n"
         self.__pathcounter += 1
@@ -38,13 +40,14 @@ class ConfigWrapper:
     def _replaceInFile(self, search, replace):
         self.__config = self.__config.replace(search.__str__(), replace.__str__())
         
+    "Reads a file"
     def readFromFile(self, filename):
         file = open(filename, 'r')
         str = file.read()
         file.close()
         return str
     
-    #writes a string to a file (overwrites the file)
+    "writes a string to a file (overwrites the file)"
     def writeToFile(self, filename, str):
         file = open(filename, 'w')
         file.write(str)
@@ -56,6 +59,7 @@ class ConfigWrapper:
             self._replaceInFile('{$' + a.__str__() + '}', self._options[a])
         
         
+    "returns the name of the temporary config file"
     def returnTempCfg(self):
         self._replaceAll()
         self.writeToFile(self.__outputConfig, self.__config)

@@ -1,5 +1,6 @@
 from Timer import Timer
 
+"interface between old config language and python"
 class InspectWrapper:
     def __init__(self, cfg, type):
         self.__config = self.__readFromFile(cfg)
@@ -44,21 +45,24 @@ class InspectWrapper:
         self.__sumOptions = 'histWeights'
         self.__options['histWeights'] = ""
         
+    "changes an option of the config. Options which are global will be replaced, other will be expanded"
     def modifyOption(self, optionName, value):
         if optionName in self.__options.keys():
-            if optionName in self.__singleOptions.split(","):                    
-                self.__options[optionName] = value
+            if optionName in self.__singleOptions.split(","):       
+                self.replaceOption(optionName, value)             
             else:
                 self.__options[optionName] += value + '\n'
         else:
             print 'Inspect option not found'
             
+    "Replaces an option in the config"
     def replaceOption(self, optionName, value):
         if optionName in self.__options.keys():
             self.__options[optionName] = value
         else:
             print 'Inspect option not found'
-        
+       
+    "returns the name of the temporary created config-file" 
     def returnTempCfg(self):
         self.__replaceAll()
         self.__writeToFile(self.__outputConfig, self.__config)
@@ -78,7 +82,7 @@ class InspectWrapper:
         file.close()
         return str
     
-    #writes a string to a file (overwrites the file)
+    "writes a string to a file (overwrites the file)"
     def __writeToFile(self, filename, str):
         file = open(filename, 'w')
         file.write(str)
