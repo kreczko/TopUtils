@@ -1,23 +1,18 @@
+<use name=TopAnalysis/TopUtils>
+<use name=root> 
+
 <environment>
- <use name=root> 
- <use name=TopAnalysis/TopUtils>
  <bin file="Inspect_top.cc"> </bin>
 </environment>
 
 <environment>
- <use name=root> 
- <use name=TopAnalysis/TopUtils>
  <bin file="InspectSum_top.cc"> </bin>
 </environment>
 
 <environment>
- <use name=root> 
- <use name=TopAnalysis/TopUtils>
  <bin file="InspectRatio_top.cc"> </bin>
 </environment>
 
 <environment>
- <use name=root> 
- <use name=TopAnalysis/TopUtils>
  <bin file="InspectFit_top.cc"> </bin>
 </environment>

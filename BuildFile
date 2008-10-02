@@ -1,8 +1,10 @@
 <use name=FWCore/MessageLogger>
+<use name=rootgraphics>
 <use name=root>
 
 <export>
    <lib name=TopAnalysisTopUtils>
    <use name=FWCore/MessageLogger>
+   <use name=rootgraphics>
    <use name=root>
 </export>
