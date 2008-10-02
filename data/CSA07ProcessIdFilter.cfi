@@ -1,5 +1,0 @@
-module csa07Processes = CSA07ProcessIdFilter {
-  vint32 csa07Ids    = { 22,23,24,25,26 }             # process ids according to TWiki:CSA07ProcessId
-  double overallLumi = 1000.                          # (must be the same as for csa07EventWeightProducer)
-  string csa07EventWeightProducerLabel = "csa07Event" # label of the csa07EventWeightProducer
-}

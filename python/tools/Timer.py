@@ -3,9 +3,9 @@ import datetime
 import os
 
 class Timer:
-    __name = 'nothing'
+    __name  = 'nothing'
     __start = 0.0
-    __stop = 0.0
+    __stop  = 0.0
     def __init__(self):
        self.__name = 'timer'
         
@@ -21,7 +21,7 @@ class Timer:
         
     def stop(self):
         t0 = os.times()
-        self.__stop = t0[3] + t0[4]
+        self.__stop  = t0[3] + t0[4]
         
     def getMeasuredTime(self):
         t = self.__stop - self.__start
@@ -31,17 +31,17 @@ class Timer:
         ft = ""
         if t >= 3600:
             h = (t - t%3600)/3600
-            t = t -h*3600
+            t =  t - h*3600
         if t >= 60:
             m = (t - t%60)/60
-            t = t-m*60
+            t =  t - m*60
             
         s = t
         if h > 0:
-            ft = h.__str__() + "h "
+            ft =      h.__str__() + "h "
         if m > 0:
             ft = ft + m.__str__() + "m "
-        ft =  ft + s.__str__() + "s"  
+        ft     = ft + s.__str__() + "s"  
         return ft
     
     def sleep(sleeptime):
@@ -49,5 +49,5 @@ class Timer:
     
     getDate = staticmethod(getDate)
     getTime = staticmethod(getTime)
-    sleep = staticmethod(sleep)
+    sleep   = staticmethod(sleep)
     

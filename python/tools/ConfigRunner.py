@@ -12,27 +12,27 @@ class CfgRunner:
     __standardOut = 'output.txt'
     __standardErr = 'outputErr.txt'
     #time in seconds to wait between commands
-    __sleeptime = 10
+    __sleeptime   = 10
     #for the -a option
     __additionalParameters = ''
     #executing path is in most cases the outputpath.
     #you can change it here
     #example: self.filepath = 'outputpath/rootfiles/'
-    __filepath = '' 
-    __fileprefix = 'MatrixMethod_new_binning_' #will be used as filnameprefix
-    __filesuffix = '.root' #filetype
+    __filepath    = '' 
+    __fileprefix  = 'MatrixMethod_new_binning_' #will be used as filnameprefix
+    __filesuffix  = '.root' #filetype
     #sampletype
-    __type = ''     
+    __type        = ''     
     __numberofevents = 0
-    __outputfile = 'output.txt'
-    __outputerr = 'outputErr.txt'
-    __runs_ = ""
-    __jobstarted = False
-    __verbose = False
-    __errorToken = ['RootError', 'Exception', 'Root_Error']
+    __outputfile  = 'output.txt'
+    __outputerr   = 'outputErr.txt'
+    __runs_       = ""
+    __jobstarted  = False
+    __verbose     = False
+    __errorToken  = ['RootError', 'Exception', 'Root_Error']
     
     def __init__(self):
-        self.__cmsRunTimer = {}
+        self.__cmsRunTimer   = {}
         self.__analysisTimer = {}
         
     def main(self):

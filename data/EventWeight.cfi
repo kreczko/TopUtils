@@ -1,9 +1,0 @@
-# add CSA07 and grid efficiency weights to the event
-include "TopAnalysis/TopUtils/data/CSA07EventWeightProducer.cfi"
-
-module eventWeight = EventWeight{          
-  double   gridEff = 1.
-  InputTag weight  = csa07Event:weight
-}
-
-sequence makeWeights = {csa07Event, eventWeight}

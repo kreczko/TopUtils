@@ -2,17 +2,17 @@
 <use name=root> 
 
 <environment>
- <bin file="Inspect_top.cc"> </bin>
+ <bin file="plot.cc"> </bin>
 </environment>
 
 <environment>
- <bin file="InspectSum_top.cc"> </bin>
+ <bin file="plot_sum.cc"> </bin>
 </environment>
 
 <environment>
- <bin file="InspectRatio_top.cc"> </bin>
+ <bin file="plot_fit.cc"> </bin>
 </environment>
 
 <environment>
- <bin file="InspectFit_top.cc"> </bin>
+ <bin file="plot_ratio.cc"> </bin>
 </environment>
