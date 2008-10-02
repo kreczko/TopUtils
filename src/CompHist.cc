@@ -5,110 +5,105 @@
 using namespace std;
 
 void CompHist::readLabels(std::string s, std::vector<std::string>& vec) {
-	//-----------------------------------------------
-	// fill vector of std::string's from a single
-	// std::string s; the process starts as soon as
-	// leading " are found and starts a new substr
-	// as soon as a "; is encountered
-	//-----------------------------------------------
-	std::stringstream stream(s);
-	std::string buffer, label;
-	while (!stream.eof()) {
-		stream >> buffer;
-		if (buffer.find("\"", 0)==0) {
-			//start new label if leading " are found
-			label=buffer;
-		} else {
-			//concatenate buffer to label else
-			label+=" ";
-			label+=buffer;
-		}
-
-		//push_back label if it starts with " and ends with ";
-		if (buffer.find("\"", buffer.size()-2)==buffer.size()-2 && buffer.find(
-				";", buffer.size()-2)==buffer.size()-1) {
-			vec.push_back(label.substr(1, label.size()-3) );
-		}
-	}
+  //-----------------------------------------------
+  // fill vector of std::string's from a single
+  // std::string s; the process starts as soon as
+  // leading " are found and starts a new substr
+  // as soon as a "; is encountered
+  //-----------------------------------------------
+  std::stringstream stream(s);
+  std::string buffer, label;
+  while (!stream.eof()) {
+    stream >> buffer;
+    if (buffer.find("\"", 0)==0) {
+      //start new label if leading " are found
+      label=buffer;
+    } else {
+      //concatenate buffer to label else
+      label+=" ";
+      label+=buffer;
+    }
+    
+    //push_back label if it starts with " and ends with ";
+    if (buffer.find("\"", buffer.size()-2)==buffer.size()-2 && buffer.find(
+									   ";", buffer.size()-2)==buffer.size()-1) {
+      vec.push_back(label.substr(1, label.size()-3) );
+    }
+  }
 }
 
 void CompHist::configBlockIO(ConfigFile& cfg) {
-	//-----------------------------------------------
-	// read all configurables defined in CompHisto-
-	// grams from config file. Throw human readable
-	// exception when misspellings occure
-	//-----------------------------------------------
-	try {
-		//-----------------------------------------------
-		// input/output files
-		//-----------------------------------------------
-		histFile_ = cfg.read<std::string>( "histInput" );
-		readVector ( cfg.read<std::string>( "rootInput" ), fileNameList_ );
-		readVector ( cfg.read<std::string>( "inputDirs" ), dirNameList_ );
-		readVector ( cfg.read<std::string>( "histFilter" ), histFilterList_ );
-		readVector ( cfg.read<std::string>( "plotFilter" ), plotFilterList_ );
-		filterOpt_ = cfg.read<std::string>( "filterOption" );
-		output_ = cfg.read<std::string>( "rootOutput" );
-		rootOutDir_= cfg.read<std::string>( "outputDir" );
-		readVector ( cfg.read<std::string>( "outputLabels" ), outputLabelList_);
-		writeTo_ = cfg.read<std::string>( "writePlotsTo" );
-		writeAs_ = cfg.read<std::string>( "writePlotsAs" );
-		outputFileName_ = cfg.read<std::string>( "outputFileName" , "inspect");
-	}
-	catch(...) {
-		cerr << "ERROR during reading of config file" << endl;
-		cerr << "      misspelled variables in cfg ?" << endl;
-		cerr << "      [--called in configBlockIO--]" << endl;
-		std::exit(1);
-	}
+  //-----------------------------------------------
+  // read all configurables defined in CompHisto-
+  // grams from config file. Throw human readable
+  // exception when misspellings occure
+  //-----------------------------------------------
+
+  //-----------------------------------------------
+  // input/output files
+  //-----------------------------------------------
+  histFile_  = cfg.read<std::string>( "histInput",    Config::kEmpty    );
+  readVector ( cfg.read<std::string>( "rootInput"  ), fileNameList_     );
+  readVector ( cfg.read<std::string>( "inputDirs"  ), dirNameList_      );
+  readVector ( cfg.read<std::string>( "histFilter" ), histFilterList_   );
+  readVector ( cfg.read<std::string>( "plotFilter" ), plotFilterList_   );
+  filterOpt_ = cfg.read<std::string>( "filterOption", Config::kEmpty    );
+  output_    = cfg.read<std::string>( "rootOutput",   Config::kEmpty    );
+  rootOutDir_= cfg.read<std::string>( "outputDir",    Config::kEmpty    );
+  readVector ( cfg.read<std::string>( "outputLabels" ), outputLabelList_);
+  writeTo_   = cfg.read<std::string>( "writePlotsTo", "." );
+  writeAs_   = cfg.read<std::string>( "writePlotsAs", "ps" );
+  outputFileName_ = cfg.read<std::string>( "outputFileName", "inspect"  );
+
+  if(histFile_.empty() && histFilterList_.empty() ){
+    cerr << "ERROR[Config/configBlockIO]              \n"
+	 << " * variable 'histInput'  is empty        \n"
+	 << " * variable 'histFilter' is empty        \n"
+	 << " * at least one variable needs to be set \n"
+	 << "sorry this will quit your program here...\n";
+    exit(1);
+  }
 }
 
 void CompHist::configBlockHist(ConfigFile& cfg) {
-	//-----------------------------------------------
-	// read all configurables defined in CompHisto-
-	// grams from config file. Throw human readable
-	// exception when misspellings occure
-	//-----------------------------------------------
-	try {
-		//-----------------------------------------------
-		// canvas steering
-		//-----------------------------------------------
-		readVector( cfg.read<std::string>( "xLog" ), logX_ );
-		readVector( cfg.read<std::string>( "yLog" ), logY_ );
-		readVector( cfg.read<std::string>( "xGrid" ), gridX_);
-		readVector( cfg.read<std::string>( "yGrid" ), gridY_);
+  //-----------------------------------------------
+  // read all configurables defined in CompHisto-
+  // grams from config file. Throw human readable
+  // exception when misspellings occure
+  //-----------------------------------------------
 
-		//-----------------------------------------------
-		// histogram steering
-		//-----------------------------------------------
-		readVector( cfg.read<std::string>( "histScale" ), scale_ );
-		readVector( cfg.read<std::string>( "histMinimum"), min_ );
-		readVector( cfg.read<std::string>( "histMaximum"), max_ );
-		readVector( cfg.read<std::string>( "histErrors" ), errors_ );
-		readVector( cfg.read<std::string>( "histType" ), histStyle_ );
-		readVector( cfg.read<std::string>( "histStyle" ), commonStyle_ );
-		readVector( cfg.read<std::string>( "histColor" ), histColor_ );
-		readVector( cfg.read<std::string>( "lineWidth" ), commonWidth_ );
-		readVector( cfg.read<std::string>( "markerStyle"), markerStyle_ );
-		readVector( cfg.read<std::string>( "markerSize" ), markerSize_ );
-		readLabels( cfg.read<std::string>( "xAxes" ), xAxes_ );
-		readLabels( cfg.read<std::string>( "yAxes" ), yAxes_ );
-
-		//-----------------------------------------------
-		// legend steering
-		//-----------------------------------------------
-		readLabels( cfg.read<std::string>( "legEntries" ),legendEntries_);
-		legXLeft_ = cfg.read<double>( "legXLeft" );
-		legXRight_= cfg.read<double>( "legXRight" );
-		legYLower_= cfg.read<double>( "legYLower" );
-		legYUpper_= cfg.read<double>( "legYUpper" );
-	}
-	catch(...) {
-		cerr << "ERROR during reading of config file" << endl;
-		cerr << "      misspelled variables in cfg ?" << endl;
-		cerr << "      [--called in configBlockHist--]" << endl;
-		std::exit(1);
-	}
+  //-----------------------------------------------
+  // canvas steering
+  //-----------------------------------------------
+  readVector( cfg.read<std::string>( "xLog" ), logX_ );
+  readVector( cfg.read<std::string>( "yLog" ), logY_ );
+  readVector( cfg.read<std::string>( "xGrid" ), gridX_);
+  readVector( cfg.read<std::string>( "yGrid" ), gridY_);
+  
+  //-----------------------------------------------
+  // histogram steering
+  //-----------------------------------------------
+  readVector( cfg.read<std::string>( "histScale" ), scale_ );
+  readVector( cfg.read<std::string>( "histMinimum"), min_ );
+  readVector( cfg.read<std::string>( "histMaximum"), max_ );
+  readVector( cfg.read<std::string>( "histErrors" ), errors_ );
+  readVector( cfg.read<std::string>( "histType" ), histStyle_ );
+  readVector( cfg.read<std::string>( "histStyle" ), commonStyle_ );
+  readVector( cfg.read<std::string>( "histColor" ), histColor_ );
+  readVector( cfg.read<std::string>( "lineWidth" ), commonWidth_ );
+  readVector( cfg.read<std::string>( "markerStyle"), markerStyle_ );
+  readVector( cfg.read<std::string>( "markerSize" ), markerSize_ );
+  readLabels( cfg.read<std::string>( "xAxes" ), xAxes_ );
+  readLabels( cfg.read<std::string>( "yAxes" ), yAxes_ );
+  
+  //-----------------------------------------------
+  // legend steering
+  //-----------------------------------------------
+  readLabels( cfg.read<std::string>( "legEntries" ),legendEntries_);
+  legXLeft_ = cfg.read<double>( "legXLeft",  0.25 );
+  legXRight_= cfg.read<double>( "legXRight", 0.95 );
+  legYLower_= cfg.read<double>( "legYLower", 0.70 );
+  legYUpper_= cfg.read<double>( "legYUpper", 0.95 );
 }
 
 void CompHist::readHistogramList() {

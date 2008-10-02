@@ -13,10 +13,16 @@
 #include "TopAnalysis/TopUtils/interface/RootHistograms.h"
 
 
-namespace HistStyle{
+namespace HistStyle
+{
   static const int Line   = 0;
   static const int Marker = 1;
   static const int Filled = 2;
+}
+
+namespace Config
+{
+  static const string kEmpty = "";
 }
 
 // template <class T>
