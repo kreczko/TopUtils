@@ -41,6 +41,7 @@ class InspectWrapper:
         self.__options['legXRight'] = ""
         self.__options['legYLower'] = ""        
         self.__options['legYUpper'] = ""
+        self.__options['outputFileName'] = ""
         #inspectSum options
         self.__sumOptions = 'histWeights'
         self.__options['histWeights'] = ""

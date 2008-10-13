@@ -12,27 +12,27 @@ class CfgRunner:
     __standardOut = 'output.txt'
     __standardErr = 'outputErr.txt'
     #time in seconds to wait between commands
-    __sleeptime   = 10
+    __sleeptime = 10
     #for the -a option
     __additionalParameters = ''
     #executing path is in most cases the outputpath.
     #you can change it here
     #example: self.filepath = 'outputpath/rootfiles/'
-    __filepath    = '' 
-    __fileprefix  = 'MatrixMethod_new_binning_' #will be used as filnameprefix
-    __filesuffix  = '.root' #filetype
+    __filepath = '' 
+    __fileprefix = 'MatrixMethod_' #will be used as filnameprefix
+    __filesuffix = '.root' #filetype
     #sampletype
-    __type        = ''     
+    __type = ''     
     __numberofevents = 0
-    __outputfile  = 'output.txt'
-    __outputerr   = 'outputErr.txt'
-    __runs_       = ""
-    __jobstarted  = False
-    __verbose     = False
-    __errorToken  = ['RootError', 'Exception', 'Root_Error']
+    __outputfile = 'output.txt'
+    __outputerr = 'outputErr.txt'
+    __runs_ = ""
+    __jobstarted = False
+    __verbose = False
+    __errorToken = ['RootError', 'Exception', 'Root_Error']
     
     def __init__(self):
-        self.__cmsRunTimer   = {}
+        self.__cmsRunTimer = {}
         self.__analysisTimer = {}
         
     def main(self):
@@ -84,6 +84,7 @@ class CfgRunner:
             #setup runtime environment
             #os.system('eval `scramv1 runtime -sh`')# !!not working!!
             # nohup
+#            eval('eval `scramv1 runtime -sh`')
             os.system('cmsRun ' + configfile + " >" + self.__outputfile + " 2> " + self.__outputerr + " < /dev/null&")
             Timer.sleep(self.__sleeptime)
             self.__waitForFirst(self.__type)
@@ -186,18 +187,21 @@ class CfgRunner:
         output = self.__filepath + self.__fileprefix + type + "_" + Timer.getDate() + self.__filesuffix
         erO = 'outputErr_' + output.__str__().replace(self.__filesuffix, '.txt')
         while not 'Summary' in self.__readFromFile(erO) and not err:
+            printEvery = self.__sleeptime
             if (self.__numberofevents == -1):
                 #every 30min
-                Timer.sleep(self.__sleeptime*180)
+                printEvery = self.__sleeptime*180
             else:
             	#130s for each 1k events
-                t = self.__sleeptime*self.__numberofevents/100
-                Timer.sleep(t)
+                t = self.__numberofevents/100 - self.__numberofevents%100
+                printEvery = self.__sleeptime*t
             if "Root_Error" in self.__readFromFile(erO):
                 print "an error occured in", type, 'sample'
                 err = True
-            print 'waiting for', type, 'to end...'
+            if((self.__analysisTimer[type].timePassed(os.times()) % printEvery) == 0):
+                print 'waiting for', type, 'to end...'
         print type, 'ended'
+        #TODO: printing long time, but timer stop should be independent
         self.__analysisTimer[type].stop()
         print 'Time needed for analysis (s):', self.__analysisTimer[type].getMeasuredTime()
         self.__endJob(type)

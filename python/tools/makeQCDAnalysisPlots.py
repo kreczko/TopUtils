@@ -7,14 +7,14 @@ class Config(iw):
 #    __iso2Dhist = "Isolation2D.hist"
     __qcdHist = "QCDMatrix.hist"
     __maccroHist = 'Macro.hist'
-    __cfgFile = 'TopAnalysis/TopUtils/test/TopInspectTemplate.cfg'
+    __cfgFile = '../test/TopInspectTemplate.cfg'
     __module = 'allmafter'
 #    __samples = ''
-    #number of hists
-    __noh = len(self.__readFromFile('Macro.hist').split('\n'))-1
     "constructor"
     def __init__(self, inspectType):
         iw.__init__(self, self.__cfgFile, inspectType)
+        #number of hists
+        self.__noh = len(self.__readFromFile('Macro.hist').split('\n'))-1
         #standard values
         #hist file
         self.modifyOption('histInput', 'Macro.hist')

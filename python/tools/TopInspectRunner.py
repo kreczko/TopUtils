@@ -15,7 +15,8 @@ class TopRunner:
         #os.system('Inspect_top ' + configfile + ">& /dev/null&")
         
     def main(self):
-        print 'hallo'
+       # print 'hallo'
+        self.__cfg.replaceOption('outputFileName', "test.ps")
         self.TopInspect(self.__cfg.returnTempCfg())
         
     def prepare(self):
