@@ -1,5 +1,5 @@
-source = {}
 
+source = {}
 source['ttbar'] = 'include "TopAnalysis/Configuration/test/csa07AllEventsSkim_Ttbar.cff"'
 source['wjets'] = 'include "TopAnalysis/Configuration/test/csa07AllEventsSkim_Wjets.cff"'
 source['zjets'] = 'include "TopAnalysis/Configuration/test/csa07AllEventsSkim_Zjets.cff"'

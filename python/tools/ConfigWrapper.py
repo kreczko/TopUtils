@@ -10,8 +10,6 @@ class ConfigWrapper:
     def __init__(self, cfg, type):
         self.__config = self.readFromFile(cfg)
         self.__outputConfig = "tempconfig_" +type + "_" + Timer.getTime() + ".cfg"  
-        
-        #make protected
         self._options = {}
         self._options['source'] = ""
         self._options['output'] = ""

@@ -7,18 +7,15 @@ class Config(ConfigWrapper):
     allowedPathTypes = 'analysis,track,calo,jet,all'
     __fileNameAddition = ''
     __lumi = 50 #pb^-1
-#    __ttbarMC = 'false'
     "constructor"
     def __init__(self, type, pathtypes):
         self.__fileNameAddition = pathtypes.replace(';', '_')
         ConfigWrapper.__init__(self, 'TopAnalysis/TopUtils/test/QCDConfigTemplate.cfg', type)
-        #paths:
         self.__path = {}
-        #self.__options = ConfigWrapper.__options
-        #self.__options['ttbarMC'] = ''
         self._options['ttbarMC'] = 'false'
         self._options['eventWeight'] = ''
-#        self.__ttbarMC = 'false'
+
+        #paths:
         self.__path['basic'] = 'makeWeights & makeGenEvt'
         self.__path['analysis'] = 'analyzeEventShapeMuon, analyzeisolationMET'
         self.__path['track'] = 'looseSelection,trackmbefore, trackIsoFilter, trackmafter'
@@ -34,7 +31,6 @@ class Config(ConfigWrapper):
         
         self.addPath(self.__path['basic'])
         for x in paths:
-            print x
             if x in self.allowedPathTypes.split(','):
                 #standard path:
                 self.__path['standard'] = self.__path[x]

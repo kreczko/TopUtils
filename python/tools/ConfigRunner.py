@@ -105,11 +105,16 @@ class CfgRunner:
     "waits for the first event to be processed"        
     def __waitForFirst(self, type):
         self.__cmsRunTimer[type].start()
-        #TODO: abort on error
+        Timer.sleep(self.__sleeptime)
+        loopnumber = 1.0;
         while (self.__readFromFile(self.__outputerr) == ""):
-            printEvery = self.__sleeptime
-            if((self.__cmsRunTimer[type].timePassed(os.times()) % printEvery) == 0):
-                print "Waiting for the 1st event of", type, "to be processed..."
+            printEvery = self.__sleeptime*1.3
+            passed = self.__cmsRunTimer[type].timePassed(os.times())
+            if(( passed % printEvery) == 0):
+                print passed/printEvery - loopnumber
+                if loopnumber == passed/printEvery:
+                    print "Waiting for the 1st event of", type, "to be processed..."
+            loopnumber += 1.0
         print "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"
         print self.__readFromFile(self.__outputerr)
         print "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
@@ -167,7 +172,7 @@ class CfgRunner:
         self.__executeCMSrun(process.returnTempCfg())
                 
     def __createRuns(self, command):
-        print 'Parsing command...'
+        #print 'Parsing command...'
         sampletypes = []
         allruns = []
         #remove ' and " from command
@@ -213,5 +218,4 @@ class CfgRunner:
 if __name__ == '__main__':
     runner = CfgRunner()
     runner.main()
-    
     
