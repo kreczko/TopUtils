@@ -111,7 +111,7 @@ class CfgRunner:
             printEvery = self.__sleeptime*1.3
             passed = self.__cmsRunTimer[type].timePassed(os.times())
             if(( passed % printEvery) == 0):
-                print passed/printEvery - loopnumber
+                #print passed/printEvery - loopnumber
                 if loopnumber == passed/printEvery:
                     print "Waiting for the 1st event of", type, "to be processed..."
             loopnumber += 1.0
@@ -198,7 +198,7 @@ class CfgRunner:
                 #every 30min
                 printEvery = self.__sleeptime*180
             else:
-            	#130s for each 1k events
+            	#every 130s for each 1k events
                 t = self.__numberofevents/100 - self.__numberofevents%100
                 printEvery = self.__sleeptime*t
             if "Root_Error" in self.__readFromFile(erO):
