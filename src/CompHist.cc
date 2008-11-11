@@ -278,7 +278,7 @@ void CompHist::draw(TCanvas& canv, TLegend& leg, int& idx, int& jdx) {
 		isTH2 = hcmp.InheritsFrom("TH2");
 		setCanvLog(canv, jdx);
 		setCanvGrid(canv, jdx);
-		setHistStyles(hcmp, jdx, kdx);
+		setHistStyles(hcmp, idx, jdx, kdx);
 		// for the first histogram just draw
 		// for the following ones draw same
 		if (kdx==0) {
@@ -437,9 +437,21 @@ double CompHist::findMaximum(int idx) {
 	for (std::vector<TObjArray>::const_iterator hist = sampleList_.begin(); hist
 			!=sampleList_.end(); ++hist) {
 		TH1& hcmp = *((TH1*)(*hist)[idx]); //recieve histogram
-		if ( max<0 || hcmp.GetMaximum()>max ) max=hcmp.GetMaximum();
+		if ( max<0 || (hcmp.GetMaximum()+hcmp.GetBinError(hcmp.GetMaximumBin())) > max ) 
+		  max = hcmp.GetMaximum() + hcmp.GetBinError(hcmp.GetMaximumBin());
 	}
 	return max;
+}
+
+double CompHist::findMinimum(int idx) {
+	double min=1.;
+	for (std::vector<TObjArray>::const_iterator hist = sampleList_.begin(); hist
+			!=sampleList_.end(); ++hist) {
+		TH1& hcmp = *((TH1*)(*hist)[idx]); //recieve histogram
+		if ( min>0 || (hcmp.GetMinimum()-hcmp.GetBinError(hcmp.GetMinimumBin())) < min ) 
+		  min = hcmp.GetMinimum() - hcmp.GetBinError(hcmp.GetMinimumBin());
+	}
+	return min;
 }
 
 void CompHist::setLegendStyle(TLegend& leg) {
@@ -504,19 +516,19 @@ void CompHist::setAxesStyle(TH1& hist, const char* titleX, const char* titleY) {
 	hist.GetYaxis()->SetLabelFont( 62);
 }
 
-void CompHist::setHistStyles(TH1& hist, int idx, int jdx) {
+void CompHist::setHistStyles(TH1& hist, int idx, int jdx, int kdx) {
 	//-----------------------------------------------
 	// check hist style; throw exception if style
 	// is not competible with specifications; set
 	// default line[0] if vector is too short
 	//-----------------------------------------------
 	int histType=0;
-	if (jdx<((int)histStyle_.size())) {
-		if (HistStyle::Line<=histStyle_[jdx] && histStyle_[jdx]
+	if (kdx<((int)histStyle_.size())) {
+		if (HistStyle::Line<=histStyle_[kdx] && histStyle_[kdx]
 				<=HistStyle::Filled) {
-			histType=histStyle_[jdx];
+			histType=histStyle_[kdx];
 		} else {
-			cerr << "ERROR histogram Type outof bound, value is: " << jdx
+			cerr << "ERROR histogram Type outof bound, value is: " << kdx
 					<< endl;
 			cerr << "      allowed range is: " << HistStyle::Line << " - "
 					<< HistStyle::Filled << endl;
@@ -534,33 +546,33 @@ void CompHist::setHistStyles(TH1& hist, int idx, int jdx) {
 	}
 
 	//define histogram styles
-	setHistLabels(hist, idx);
-	setHistScale(hist, idx);
-	setHistMax(hist, idx);
-	setHistMin(hist, idx);
+	setHistLabels(hist, jdx);
+	setHistScale(hist, jdx);
+	setHistMax(hist, idx, jdx);
+	setHistMin(hist, idx, jdx);
 
 	switch (histType) {
 	case HistStyle::Line:
-		setLineWidth(hist, jdx);
-		setLineColor(hist, jdx);
-		setLineStyle(hist, jdx);
+		setLineWidth(hist, kdx);
+		setLineColor(hist, kdx);
+		setLineStyle(hist, kdx);
 		hist.SetOption("box");
 		break;
 
 	case HistStyle::Marker:
-		setLineWidth(hist, jdx);
-		setLineColor(hist, jdx);
-		setMarkerColor(hist, jdx);
-		setMarkerStyle(hist, jdx);
-		setMarkerSize(hist, jdx);
+		setLineWidth(hist, kdx);
+		setLineColor(hist, kdx);
+		setMarkerColor(hist, kdx);
+		setMarkerStyle(hist, kdx);
+		setMarkerSize(hist, kdx);
 		hist.SetOption("scat");
 		break;
 
 	case HistStyle::Filled:
-		setLineWidth(hist, jdx);
-		setLineColor(hist, jdx);
-		setFillColor(hist, jdx);
-		setFillStyle(hist, jdx);
+		setLineWidth(hist, kdx);
+		setLineColor(hist, kdx);
+		setFillColor(hist, kdx);
+		setFillStyle(hist, kdx);
 		hist.SetOption("col");
 		break;
 	}
@@ -602,19 +614,20 @@ void CompHist::setHistScale(TH1& hist, int idx) {
 	}
 }
 
-void CompHist::setHistMax(TH1& hist, int idx) {
-	if ( ((int)max_.size()>0) && (idx<(int)max_.size())) {
-		hist.SetMaximum(max_[idx]);
+void CompHist::setHistMax(TH1& hist, int idx, int jdx) {
+	if ( ((int)max_.size()>0) && (jdx<(int)max_.size())) {
+		hist.SetMaximum(max_[jdx]);
 	} else {
 		hist.SetMaximum(1.5*findMaximum(idx));
 	}
 }
 
-void CompHist::setHistMin(TH1& hist, int idx) {
-	if ( ((int)min_.size()>0) && (idx<(int)min_.size())) {
-		hist.SetMinimum(min_[idx]);
+void CompHist::setHistMin(TH1& hist, int idx, int jdx) {
+	if ( ((int)min_.size()>0) && (jdx<(int)min_.size())) {
+		hist.SetMinimum(min_[jdx]);
 	} else {
-		hist.SetMinimum(0.);
+		if( findMinimum(idx)<0 ) hist.SetMinimum(1.5*findMinimum(idx));
+		  else hist.SetMinimum(0);
 	}
 }
 

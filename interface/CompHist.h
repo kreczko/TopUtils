@@ -83,11 +83,11 @@ class CompHist{
   void setCanvLog(TCanvas&, int);
   void setCanvGrid(TCanvas&, int);
   void setAxesStyle(TH1&, const char*, const char*);
-  void setHistStyles(TH1&, int, int);
+  void setHistStyles(TH1&, int, int, int);
   void setHistLabels(TH1&, int);
   void setHistScale(TH1&, int);
-  void setHistMax(TH1&, int);
-  void setHistMin(TH1&, int);
+  void setHistMax(TH1&, int, int);
+  void setHistMin(TH1&, int, int);
   void setLineWidth (TH1&, int);
   void setLineStyle(TH1&, int);
   void setLineColor(TH1&, int);
@@ -97,6 +97,7 @@ class CompHist{
   void setMarkerColor(TH1&, int);
   void setMarkerSize(TH1&, int);
   double findMaximum(int);
+  double findMinimum(int);
 
  protected:
 

@@ -123,7 +123,7 @@ ManipHist::divideAndDrawPs()
     
     setCanvLog( *canv, idx );
     setCanvGrid( *canv, idx );
-    setHistStyles( hsam, idx, 0 ); //there is only one sample
+    setHistStyles( hsam, idx, idx, 0 ); //there is only one sample
     
     hsam.Draw();
     canv->RedrawAxis( );
@@ -178,7 +178,7 @@ ManipHist::divideAndDrawEps()
     
     setCanvLog( *canv, idx );
     setCanvGrid( *canv, idx );
-    setHistStyles( hsam, idx, 0 ); //there is only one sample
+    setHistStyles( hsam, idx, idx, 0 ); //there is only one sample
     
     hsam.Draw();
     canv->RedrawAxis( );
