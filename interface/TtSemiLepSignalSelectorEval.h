@@ -5,7 +5,7 @@
 #include "PhysicsTools/MVATrainer/interface/MVATrainer.h"
 #include "TopAnalysis/TopUtils/interface/TtSemiLepSignalSelector.h"
 
-inline double evaluateTtSemiLepSignalSel(PhysicsTools::MVAComputerCache& mvaComputer,
+inline double evaluateTtSemiLepSignalSelector(PhysicsTools::MVAComputerCache& mvaComputer,
 		const TtSemiLepSignalSelector& sigsel, float weight = 1., const bool training = false, const bool isSignal =
 				false) {
 	std::vector<PhysicsTools::Variable::Value> values;

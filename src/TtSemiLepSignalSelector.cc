@@ -4,10 +4,10 @@
 TtSemiLepSignalSelector::TtSemiLepSignalSelector() {
 }
 
-TtSemiLepSignalSelector::TtSemiLepSignalSelector(edm::Handle<TopJetCollection> jets, pat::Particle *lepton, const pat::MET *met) {
+TtSemiLepSignalSelector::TtSemiLepSignalSelector(TopJetCollection jets, const pat::Muon *lepton, const pat::MET *met) {
 
-	if (jets->size() >= 4) {
-		TopJetCollection::const_iterator jet = jets->begin();
+	if (jets.size() >= 4) {
+		TopJetCollection::const_iterator jet = jets.begin();
 
 		double jet1Phi, jet2Phi, jet3Phi, jet4Phi;
 		double jet1Eta, jet2Eta, jet3Eta, jet4Eta;

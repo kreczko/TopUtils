@@ -3,7 +3,7 @@
 
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
-#include "DataFormats/PatCandidates/interface/Particle.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
 typedef std::vector<pat::Jet> TopJetCollection;
 
 class TtSemiLepSignalSelector {
@@ -11,41 +11,41 @@ class TtSemiLepSignalSelector {
 	// variables in semi leptonic ttbar decays
 public:
 	TtSemiLepSignalSelector();
-	TtSemiLepSignalSelector(edm::Handle<TopJetCollection>, pat::Particle*, const pat::MET*);
+	TtSemiLepSignalSelector(TopJetCollection, const pat::Muon*, const pat::MET*);
 	~TtSemiLepSignalSelector();
 
 	//deltaPhi(MET, jet4)
-	double dphiMETJet4() {
+	double dphiMETJet4() const {
 		return dphiMETJet4_;
 	}
 	//deltaPhi(MET, leading lepton)
-	double dphiMETLepton() {
+	double dphiMETLepton() const {
 		return dphiMETLepton_;
 	}
 	//MET * Et(jet1)
-	double METTimesLeadingJet() {
+	double METTimesLeadingJet() const {
 		return METTimesLeadingJet_;
 	}
 	//Et(jet3) + Et(jet4)
-	double sumEtJet3And4() {
+	double sumEtJet3And4() const {
 		return sumEtJet3And4_;
 	}
 	//summ Et(all jets) + pt(lepton)
-	double sumAllJetsEtAndLepton() {
+	double sumAllJetsEtAndLepton() const {
 		return sumAllJetsEtAndLepton_;
 	}
 
 	//|sumVec p(all jets, lepton)|
-	double vecSumAllJetsAndLepton() {
+	double vecSumAllJetsAndLepton() const {
 		return vecSumAllJetsAndLepton_;
 	}
 	//Et(jet1) + 2*pt(lepton)
-	double sumEtleadingJetAnd2TimesLeptonPt() {
+	double sumEtleadingJetAnd2TimesLeptonPt() const {
 		return sumEtleadingJetAnd2TimesLeptonPt_;
 	}
 
 	//deltaPhi(MET, jet2)
-	double dphiMETJet2() {
+	double dphiMETJet2() const {
 		return dphiMETJet2_;
 	}
 private:
