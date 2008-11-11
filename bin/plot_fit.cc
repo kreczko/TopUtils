@@ -54,15 +54,18 @@ int main(int argc, char* argv[])
     //depending on style draw ps/eps/jpg
     if( !strcmp(plots.writeAs().c_str(), "ps") ){
       plots.fitAndDrawPs();
+      plots.fillTargetHistograms();
+      plots.drawPs();
     } else if( !strcmp(plots.writeAs().c_str(), "eps") ){
       plots.fitAndDrawEps();
+      plots.fillTargetHistograms();
+      plots.drawEps();
     } else{
       cerr << "ERROR:"
 	   << " Unknown file format requested: "
 	   << plots.writeAs() << endl; 
       return -1;
     }
-    plots.fillTargetHistograms();
     plots.writeFitOutput();
   }
   catch(char* str){
