@@ -154,8 +154,9 @@ FitHist::fillTargetHistogramBin(TH1F& htarget, TH1F& hfit, int bin, TString& buf
     htarget.SetBinContent( bin, func.value( hfit ) ); htarget.SetBinError( bin, func.valueError( hfit ) );
   }
   if( !buffer.CompareTo(FitTarget::Res) || !buffer.CompareTo(FitTarget::Sigma) ){
-    double norm=normalize(buffer, func.value( hfit ));
-    htarget.SetBinContent( bin, norm*func.spread( hfit ) ); htarget.SetBinError  ( bin, norm*func.spreadError( hfit ) );
+//     double norm=normalize(buffer, func.value( hfit ));
+//     htarget.SetBinContent( bin, norm*func.spread( hfit ) ); htarget.SetBinError  ( bin, norm*func.spreadError( hfit ) );//to normalize does not make sense for relative difference
+    htarget.SetBinContent( bin, func.spread( hfit ) ); htarget.SetBinError  ( bin, func.spreadError( hfit ) );
   }
 }
 
@@ -166,8 +167,9 @@ FitHist::fillTargetHistogramBin(TH1F& htarget, TH1F& hfit, int bin, TString& buf
     htarget.SetBinContent( bin, func.value( hfit ) ); htarget.SetBinError( bin, func.valueError( hfit ) );
   }
   if( !buffer.CompareTo(FitTarget::Res) || !buffer.CompareTo(FitTarget::Sigma) ){
-    double norm=normalize(buffer, func.value( hfit ));
-    htarget.SetBinContent( bin, norm*func.spread( hfit ) ); htarget.SetBinError  ( bin, norm*func.spreadError( hfit ) );
+//     double norm=normalize(buffer, func.value( hfit ));
+//     htarget.SetBinContent( bin, norm*func.spread( hfit ) ); htarget.SetBinError  ( bin, norm*func.spreadError( hfit ) );//to normalize does not make sense for relative difference
+    htarget.SetBinContent( bin, func.spread( hfit ) ); htarget.SetBinError  ( bin, func.spreadError( hfit ) );
   }
 }
 
@@ -178,8 +180,9 @@ FitHist::fillTargetHistogramBin(TH1F& htarget, TH1F& hfit, int bin, TString& buf
     htarget.SetBinContent( bin, func.value( hfit ) ); htarget.SetBinError( bin, func.valueError( hfit ) );
   }
   if( !buffer.CompareTo(FitTarget::Res) || !buffer.CompareTo(FitTarget::Sigma) ){
-    double norm=normalize(buffer, func.value( hfit ));
-    htarget.SetBinContent( bin, norm*func.spread( hfit ) ); htarget.SetBinError  ( bin, norm*func.spreadError( hfit ) );
+//     double norm=normalize(buffer, func.value( hfit ));
+//     htarget.SetBinContent( bin, norm*func.spread( hfit ) ); htarget.SetBinError  ( bin, norm*func.spreadError( hfit ) );//to normalize does not make sense for relative difference
+    htarget.SetBinContent( bin, func.spread( hfit ) ); htarget.SetBinError  ( bin, func.spreadError( hfit ) );
   }
 }
 
@@ -190,8 +193,9 @@ FitHist::fillTargetHistogramBin(TH1F& htarget, TH1F& hfit, int bin, TString& buf
     htarget.SetBinContent( bin, func.value( hfit ) ); htarget.SetBinError( bin, func.valueError( hfit ) );
   }
   if( !buffer.CompareTo(FitTarget::Res) || !buffer.CompareTo(FitTarget::Sigma) ){
-    double norm=normalize(buffer, func.value( hfit ));
-    htarget.SetBinContent( bin, norm*func.spread( hfit ) ); htarget.SetBinError  ( bin, norm*func.spreadError( hfit ) );
+//     double norm=normalize(buffer, func.value( hfit ));
+//     htarget.SetBinContent( bin, norm*func.spread( hfit ) ); htarget.SetBinError  ( bin, norm*func.spreadError( hfit ) );//to normalize does not make sense for relative difference
+    htarget.SetBinContent( bin, func.spread( hfit ) ); htarget.SetBinError  ( bin, func.spreadError( hfit ) );
   }
 }
 
@@ -280,9 +284,16 @@ FitHist::addBinLabelToFitHist(const TObjArray& hist, int& bin, TString& name, TS
   char labelname[100];
   TString buffer(targetHistList_[0]); buffer+="_";
   TH1F&  target = findTargetHistogram(hist, zip, name, buffer);
+
+  TString refName( name );
+  refName.Remove(0, refName.First('_')+1); //chop of prefix
+  refName.Remove(refName.Last('_'), refName.Length()); //chop of postfix
+
   double lowerEdge = target.GetBinLowEdge(bin+1);
   double upperEdge = target.GetBinLowEdge(bin+1)+target.GetBinWidth(bin+1);
-  sprintf(labelname, "[%3.0f GeV; %3.0f GeV]", lowerEdge, upperEdge );//FIXME: this does not need to be GeV only
+  if( refName=="relPt")sprintf(labelname, "[%3.0f GeV; %3.0f GeV]", lowerEdge, upperEdge );
+  if( refName=="Phi")sprintf(labelname, "[%1.2f; %1.2f]", lowerEdge, upperEdge );
+  if( refName=="Eta")sprintf(labelname, "[%1.1f; %1.1f]", lowerEdge, upperEdge );
   text->AddText( labelname );
   text->Draw();
 }
@@ -291,7 +302,7 @@ void
 FitHist::addParLabelToFitHist(const TH1F& hist)
 {
   if( hist.GetFunction(fitFuncName_.c_str()) ){
-    TPaveText* pars  = new TPaveText(0.40, 0.55, 0.95, 0.70, "NDC");
+    TPaveText* pars  = new TPaveText(0.24, 0.55, 0.95, 0.70, "NDC");
     pars->SetBorderSize(   0 );
     pars->SetFillStyle( 4000 );
     pars->SetTextAlign(   12 );
@@ -301,7 +312,7 @@ FitHist::addParLabelToFitHist(const TH1F& hist)
    
     char parstring[100]; 
     if(fitFuncType_==0){
-      sprintf(parstring, "#mu=%3.2f ; #sigma=%3.2f",  
+      sprintf(parstring, "#mu=%2.5f;    #sigma=%2.5f",  
 	      hist.GetFunction(fitFuncName_.c_str())->GetParameter( 1 ), 
 	      hist.GetFunction(fitFuncName_.c_str())->GetParameter( 2 ) );
     }
@@ -333,7 +344,7 @@ FitHist::fitAndDrawPs()
     // open output file
     //-----------------------------------------------
     TString output( writeTo_.c_str() );
-    output += "/inspectFit_";
+    output += "/fitPlots_";
     if(outputLabelList_.size()>=sampleList_.size())
       output += outputLabelList_[idx];
     else
@@ -347,6 +358,7 @@ FitHist::fitAndDrawPs()
     // taining the prefix 'fit'
     //---------------------------------------------
     int label=0;
+    std::vector<TLegend*> mLegendVec;
     for(int jdx=0; jdx<(*hist).GetEntriesFast(); ++jdx){
       TH1F& hfit = *((TH1F*)(*hist)[jdx]); //recieve histogram
       // prepare compare string
@@ -395,19 +407,24 @@ FitHist::fitAndDrawPs()
 	// add legend to fitted histogram
 	//---------------------------------------------
 	TLegend* leg = new TLegend(0.25,0.70,0.95,0.87);
-	setLegendStyle( *leg );
-	leg->AddEntry( &hfit, legend(idx).c_str(), "PL" );
-	leg->AddEntry( hfit.GetFunction(fitFuncName_.c_str()), fitFuncTitle_.c_str(),  "L" );
-	leg->Draw( "same" );
+	mLegendVec.push_back(leg);
+	setLegendStyle( *(mLegendVec.back()) );
+	mLegendVec.back()->AddEntry( &hfit, legend(idx).c_str(), "PL" );
+	mLegendVec.back()->AddEntry( hfit.GetFunction(fitFuncName_.c_str()), fitFuncTitle_.c_str(),  "L" );
+	mLegendVec.back()->Draw( "same" );
 	canv->RedrawAxis( );
 	canv->Update( );
-	if(jdx<((*hist).GetEntriesFast()-1)) delete leg;
       }
     }
     psFile.Close();
+    for(int jdx=0; jdx<label; ++jdx){
+      delete mLegendVec[jdx];
+    }
+    mLegendVec.clear();
   }
   canv->Close();
   delete canv;
+  
 }
 
 void 
@@ -592,6 +609,7 @@ FitHist::writeFitOutput()
       for( ;hist!=sampleList_.end(); ++hist){
 	for(int idx=0; idx<(int)histList_.size(); ++idx){  
 	  TString cmp( ((TH1F*)(*hist)[idx])->GetName() );
+	  cmp.Remove(0, cmp.First('/')+1);
 	  if( cmp.BeginsWith( buffer ) ){ //found target hist
 	    histFile << ((TH1F*)(*hist)[idx])->GetName() << "\n";
 	    ((TH1F*)(*hist)[idx])->Write();
