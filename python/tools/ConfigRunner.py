@@ -7,6 +7,7 @@ import threading
 import analyzeQCDBackground_cfg as cms
 
 "executive script for a simple run, Version 1.0"
+"twiki: https://twiki.cern.ch/twiki/bin/view/CMS/ConfigRunner"
 class CfgRunner:
     #TODO: dynamic inport of needed Confug
     __standardOut = 'output.txt'
@@ -73,9 +74,8 @@ class CfgRunner:
     "executes the CMSSW runable"        
     def __executeCMSrun(self, configfile):
         print 'Executing cmsRun...'
-        print "##################################################"
         if os.path.exists(configfile):
-            print 'cmsRun ' + configfile
+            print '>> cmsRun ' + configfile
             if os.path.exists(self.__outputfile):
                 os.remove(self.__outputfile)
             if os.path.exists(self.__outputerr):
@@ -86,7 +86,8 @@ class CfgRunner:
             # nohup
 #            eval('eval `scramv1 runtime -sh`')
             os.system('cmsRun ' + configfile + " >" + self.__outputfile + " 2> " + self.__outputerr + " < /dev/null&")
-            Timer.sleep(self.__sleeptime)
+            self.__cmsRunTimer[self.__type].start()
+            print ''
             self.__waitForFirst(self.__type)
             os.remove(configfile)
             self.__jobstarted = True
@@ -104,17 +105,27 @@ class CfgRunner:
     ##################################################
     "waits for the first event to be processed"        
     def __waitForFirst(self, type):
-        self.__cmsRunTimer[type].start()
-        Timer.sleep(self.__sleeptime)
-        loopnumber = 1.0;
+        printEvery = self.__sleeptime*1.3
+        msg = "Waiting for the 1st event of '" + str(type) + "' to be processed..." 
+        #print 'waiting up to 10 times
+        printtimer = {}
+        for i in range(0,10):
+            printtimer[i] = threading.Timer(printEvery*i, self.__printMsg, [msg])
+            printtimer[i].start()
+        #waits until the files are created by cmsRun
+        while(not os.path.exists(self.__outputerr)):
+            Timer.sleep(1)
+            #if after 3 min no file is created, script aborts
+            if self.__cmsRunTimer[type].timePassed(os.times()) > 360:
+                print "cmsRun needs too long, aborting."
+                os.sys.exit(-1)
+            #waits until first event has been read
         while (self.__readFromFile(self.__outputerr) == ""):
-            printEvery = self.__sleeptime*1.3
-            passed = self.__cmsRunTimer[type].timePassed(os.times())
-            if(( passed % printEvery) == 0):
-                #print passed/printEvery - loopnumber
-                if loopnumber == passed/printEvery:
-                    print "Waiting for the 1st event of", type, "to be processed..."
-            loopnumber += 1.0
+            Timer.sleep(1)
+            
+        for i in printtimer:
+            printtimer[i].cancel()
+        print ''
         print "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"
         print self.__readFromFile(self.__outputerr)
         print "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
@@ -144,7 +155,7 @@ class CfgRunner:
             if (self.__type in cms.Config.allowedTypes):              
                 self.__doJob(self.__type)
                 if self.__jobstarted:
-                    print "job started"
+                    print ""
                     thread = threading.Thread(target=self.__waitingForEnd, args = (self.__type,))
                     thread.start()
                     self.__jobstarted = False
@@ -192,27 +203,39 @@ class CfgRunner:
         err = False
         output = self.__filepath + self.__fileprefix + type + "_" + Timer.getDate() + self.__filesuffix
         erO = 'outputErr_' + output.__str__().replace(self.__filesuffix, '.txt')
-        while not 'Summary' in self.__readFromFile(erO) and not err:
-            printEvery = self.__sleeptime
-            if (self.__numberofevents == -1):
-                #every 30min
-                printEvery = self.__sleeptime*180
-            else:
-            	#every 130s for each 1k events
-                t = self.__numberofevents/100 - self.__numberofevents%100
-                printEvery = self.__sleeptime*t
+        printEvery = self.__sleeptime
+        if (self.__numberofevents == -1):
+            #every 30min
+            printEvery = self.__sleeptime*180
+        else:
+            #every 100s for each 1k events
+            t = self.__numberofevents/100 - self.__numberofevents%100
+            printEvery = self.__sleeptime*t
+        
+        #print 'waiting up to 100 times
+        printtimer = {}
+        msg = "waiting for '" + str(type) + "' to end..."
+        for i in range(0,100):
+            printtimer[i] = threading.Timer(printEvery*i, self.__printMsg, [msg])
+            printtimer[i].start()
+                    
+        while not 'Summary' in self.__readFromFile(erO) and not err:            
             if "Root_Error" in self.__readFromFile(erO):
                 print "an error occured in", type, 'sample'
                 err = True
+            Timer.sleep(1)
             if((self.__analysisTimer[type].timePassed(os.times()) % printEvery) == 0):
                 print 'waiting for', type, 'to end...'
         print type, 'ended'
+        for i in printtimer:
+            printtimer[i].cancel()
         #TODO: printing long time, but timer stop should be independent
         self.__analysisTimer[type].stop()
         print 'Time needed for analysis (s):', self.__analysisTimer[type].getMeasuredTime()
         self.__endJob(type)
         
-
+    def __printMsg(self, msg):
+        print msg
 
 
 if __name__ == '__main__':

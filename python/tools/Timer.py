@@ -9,19 +9,21 @@ class Timer:
     def __init__(self):
        self.__name = 'timer'
         
+    "Return a formated date string"
     def getDate():
         return time.strftime("%d%m%y", time.gmtime())
     
+    "Return a formated date and time string" 
     def getTime():
         return time.mktime(datetime.datetime.utcnow().timetuple()).__str__()
     
     def start(self):
-        print 'start'
+        #print 'start'
         t0 = os.times()
         self.__start = t0[3] + t0[4]
         
     def stop(self):
-        print 'stop'
+        #print 'stop'
         t0 = os.times()
         self.__stop = t0[3] + t0[4]
         
@@ -40,10 +42,10 @@ class Timer:
             
         s = t
         if h > 0:
-            ft = h.__str__() + "h "
+            ft = round(h,0).__str__() + "h "
         if m > 0:
-            ft = ft + m.__str__() + "m "
-        ft =  ft + s.__str__() + "s"  
+            ft = ft + round(m, 0).__str__() + "m "
+        ft =  ft + round(s,2).__str__() + "s"  
         return ft
     
     def timePassed(self, osTime):

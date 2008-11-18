@@ -1,6 +1,7 @@
 from Timer import Timer
 
 "A Wrapper for a cfg to python transition"
+"twiki: https://twiki.cern.ch/twiki/bin/view/CMS/ConfigRunner#ConfigWrapper"
 class ConfigWrapper:
     __config = ''
     __outputConfig = ''
