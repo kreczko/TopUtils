@@ -1,6 +1,7 @@
 from Timer import Timer
 
 "A Wrapper for a cfg to python transition"
+"twiki: https://twiki.cern.ch/twiki/bin/view/CMS/ConfigRunner#ConfigWrapper"
 class ConfigWrapper:
     __config = ''
     __outputConfig = ''
@@ -10,8 +11,6 @@ class ConfigWrapper:
     def __init__(self, cfg, type):
         self.__config = self.readFromFile(cfg)
         self.__outputConfig = "tempconfig_" +type + "_" + Timer.getTime() + ".cfg"  
-        
-        #make protected
         self._options = {}
         self._options['source'] = ""
         self._options['output'] = ""
