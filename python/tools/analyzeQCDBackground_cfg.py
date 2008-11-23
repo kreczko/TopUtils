@@ -3,14 +3,14 @@ import SourceInput as input
 
 "a config for qcd analysis"
 class Config(ConfigWrapper):
-    allowedTypes = "top,topbg,qcd,wjets,zjets,qcdmu"
+    allowedTypes = "top, topbg, thad, qcd, wjets, zjets, qcdmu, topr"
     allowedPathTypes = 'analysis,track,calo,jet,all'
     __fileNameAddition = ''
     __lumi = 50 #pb^-1
     "constructor"
     def __init__(self, type, pathtypes):
         self.__fileNameAddition = pathtypes.replace(';', '_')
-        ConfigWrapper.__init__(self, 'TopAnalysis/TopUtils/test/QCDConfigTemplate.cfg', type)
+        ConfigWrapper.__init__(self, 'TopAnalysis/TopUtils/test/qcdConfigTemplate.cfg', type)
         self.__path = {}
         self._options['ttbarMC'] = 'false'
         self._options['eventWeight'] = ''
@@ -26,6 +26,8 @@ class Config(ConfigWrapper):
         #prefiltering on MC Truth (p2)
         top = "ttSemiLeptonicFilter"
         topbg = "!ttSemiLeptonicFilter"
+        thad = "ttFullyHadronicFilter"
+        topr = "!ttFullyHadronicFilter, !ttSemiLeptonicFilter";
 
         paths = pathtypes.split(';')
         
@@ -36,6 +38,8 @@ class Config(ConfigWrapper):
                 self.__path['standard'] = self.__path[x]
                 self.__path['top'] = self.join(top, self.__path[x])
                 self.__path['topbg'] = self.join(topbg, self.__path[x])
+                self.__path['thad'] = self.join(thad, self.__path[x])
+                self.__path['topr'] = self.join(topr, self.__path[x])
                 self.addPath(self.__path[x])
         
         
@@ -56,13 +60,14 @@ class Config(ConfigWrapper):
         
             
         self.modifyOption('eventWeight', eventWeight)
-        if 'top' in type:
+        if ('top' in type) or type == 'thad':
             type = 'ttbar'
         
         if type in input.source.keys():
             self.modifyOption('source', input.source[type])
         else:
             print 'Unknown type "', type, '" for source'
+            sys.exit(1)
     
     "joins two paths together"
     def join(self, e1, e2):

@@ -162,9 +162,9 @@ class CfgRunner:
             elif self.__type == 'quit':
                 os._exit(0)
             else:
-                print "not allowed type used"
+                print "Oh no! Not allowed type used!"
                 print "allowed types: ", cms.Config.allowedTypes
-                os._exit(0)
+                os._exit(1)
         
                 
     def __doJob(self, type):
@@ -215,6 +215,7 @@ class CfgRunner:
         #print 'waiting up to 100 times
         printtimer = {}
         msg = "waiting for '" + str(type) + "' to end..."
+        #TODO: add last line off the outputfileErr
         for i in range(0,100):
             printtimer[i] = threading.Timer(printEvery*i, self.__printMsg, [msg])
             printtimer[i].start()
