@@ -86,7 +86,7 @@ FitHist::findFitHistogram(const TObjArray& hist, TString& zip, TString& name, in
   refName+="_";
   refName+=bin;
   refName.Remove(0, refName.First('_')+1); //chop of prefix
-  
+
   //---------------------------------------------
   // loop array of histograms & search for ref
   //---------------------------------------------
@@ -96,7 +96,7 @@ FitHist::findFitHistogram(const TObjArray& hist, TString& zip, TString& name, in
     if( buffer.BeginsWith( zip ) ){
       TString cmpName( cmp.GetName() );        // chop off root directory and 
       cmpName.Remove(0, cmpName.First('/')+1); // file from histogram name  
-      if( cmpName.BeginsWith(FitTarget::Fit) && cmpName.Contains(refName) ){
+      if( cmpName.BeginsWith(FitTarget::Fit) && cmpName.EndsWith(refName) ){
 	return cmp;
       }
     }
@@ -285,15 +285,11 @@ FitHist::addBinLabelToFitHist(const TObjArray& hist, int& bin, TString& name, TS
   TString buffer(targetHistList_[0]); buffer+="_";
   TH1F&  target = findTargetHistogram(hist, zip, name, buffer);
 
-  TString refName( name );
-  refName.Remove(0, refName.First('_')+1); //chop of prefix
-  refName.Remove(refName.Last('_'), refName.Length()); //chop of postfix
-
   double lowerEdge = target.GetBinLowEdge(bin+1);
   double upperEdge = target.GetBinLowEdge(bin+1)+target.GetBinWidth(bin+1);
-  if( refName=="relPt")sprintf(labelname, "[%3.0f GeV; %3.0f GeV]", lowerEdge, upperEdge );
-  if( refName=="Phi")sprintf(labelname, "[%1.2f; %1.2f]", lowerEdge, upperEdge );
-  if( refName=="Eta")sprintf(labelname, "[%1.1f; %1.1f]", lowerEdge, upperEdge );
+  if( name.Contains("_relPt_"))sprintf(labelname, "[%3.0f GeV; %3.0f GeV]", lowerEdge, upperEdge );
+  if( name.Contains("_Phi_"))sprintf(labelname, "[%1.2f; %1.2f]", lowerEdge, upperEdge );
+  if( name.Contains("_Eta_"))sprintf(labelname, "[%1.1f; %1.1f]", lowerEdge, upperEdge );
   text->AddText( labelname );
   text->Draw();
 }
