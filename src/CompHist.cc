@@ -618,7 +618,8 @@ void CompHist::setHistMax(TH1& hist, int idx, int jdx) {
 	if ( ((int)max_.size()>0) && (jdx<(int)max_.size())) {
 		hist.SetMaximum(max_[jdx]);
 	} else {
-		hist.SetMaximum(1.5*findMaximum(idx));
+	        if( findMaximum(idx)>0 ) hist.SetMaximum(1.5*findMaximum(idx));
+		  else hist.SetMaximum(0);
 	}
 }
 
@@ -626,7 +627,7 @@ void CompHist::setHistMin(TH1& hist, int idx, int jdx) {
 	if ( ((int)min_.size()>0) && (jdx<(int)min_.size())) {
 		hist.SetMinimum(min_[jdx]);
 	} else {
-		if( findMinimum(idx)<0 ) hist.SetMinimum(1.5*findMinimum(idx));
+		if( findMinimum(idx)<0 ) hist.SetMinimum(1.1*findMinimum(idx));
 		  else hist.SetMinimum(0);
 	}
 }
