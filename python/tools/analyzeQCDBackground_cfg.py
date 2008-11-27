@@ -40,7 +40,13 @@ class Config(ConfigWrapper):
                 self.__path['topbg'] = self.join(topbg, self.__path[x])
                 self.__path['thad'] = self.join(thad, self.__path[x])
                 self.__path['topr'] = self.join(topr, self.__path[x])
-                self.addPath(self.__path[x])
+                if ('top' in type) or type == 'thad':
+                    self.addPath(self.__path[type])
+                else:
+                    self.addPath(self.__path['standard'])
+            else:
+                print 'Not allowed path'
+                sys.exit(2)
         
         
         if type == 'top':

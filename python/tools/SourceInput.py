@@ -1,10 +1,13 @@
-
 source = {}
 source['ttbar'] = 'include "TopAnalysis/Configuration/test/csa07AllEventsSkim_Ttbar.cff"'
 source['wjets'] = 'include "TopAnalysis/Configuration/test/csa07AllEventsSkim_Wjets.cff"'
 source['zjets'] = 'include "TopAnalysis/Configuration/test/csa07AllEventsSkim_Zjets.cff"'
 source['qcd'] = 'include "TopAnalysis/Configuration/test/csa07AllEventsSkim_QCD.cff"'
 source['qcdmu'] = 'include "TopAnalysis/Configuration/test/csa07AllEventsSkim_QCDMu.cff"'
+source['mvaCqcdmu'] = 'include "TopAnalysis/Configuration/test/mvaQCDMuComputingSample.cff"'
+source['mvaTqcdmu'] = 'include "TopAnalysis/Configuration/test/mvaQCDMuTrainingSample.cff"'
+source['mvaCttbar'] = 'include "TopAnalysis/Configuration/test/mvaTtbarComputingSample.cff"'
+source['mvaTttbar'] = 'include "TopAnalysis/Configuration/test/mvaTtbarTrainingSample.cff"'
 
 #source['ttbar'] = 'include "TopAnalysis/Configuration/test/csa07AllEventsSkim_ttbar.cff"'
 #source['wjets'] = 'include "TopAnalysis/Configuration/test/csa07AllEventsSkim_wjets.cff"'
