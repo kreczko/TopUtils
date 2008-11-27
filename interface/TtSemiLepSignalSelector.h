@@ -16,11 +16,11 @@ public:
 
 	//deltaPhi(MET, jet4)
 	double dphiMETJet4() const {
-		return dphiMETJet4_;
+		return fabs(dphiMETJet4_);
 	}
 	//deltaPhi(MET, leading lepton)
 	double dphiMETLepton() const {
-		return dphiMETLepton_;
+		return fabs(dphiMETLepton_);
 	}
 	//MET * Et(jet1)
 	double METTimesLeadingJet() const {
@@ -46,14 +46,22 @@ public:
 
 	//deltaPhi(MET, jet2)
 	double dphiMETJet2() const {
-		return dphiMETJet2_;
+		return fabs(dphiMETJet2_);
+	}
+
+	double MET() const {
+		return MET_;
+	}
+
+	double dphiMuJ1J2() const {
+		return fabs(dphiMuJ1J2_);
 	}
 private:
 	double dphiMETJet4_, dphiMETLepton_;
 	double METTimesLeadingJet_, sumEtJet3And4_;
 	double sumAllJetsEtAndLepton_, vecSumAllJetsAndLepton_;
 	double sumEtleadingJetAnd2TimesLeptonPt_;
-	double dphiMETJet2_;
+	double dphiMETJet2_, MET_, dphiMuJ1J2_;
 
 };
 

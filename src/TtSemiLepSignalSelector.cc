@@ -52,6 +52,8 @@ TtSemiLepSignalSelector::TtSemiLepSignalSelector(TopJetCollection jets, const pa
 		vecSumAllJetsAndLepton_ = vec.pt();
 		sumEtleadingJetAnd2TimesLeptonPt_ = jet1Et + 2 * lepton->et();
 		dphiMETJet2_= deltaPhi(jet2Phi, met->phi());
+		MET_ = met->et();
+		dphiMuJ1J2_ = deltaPhi(lepton->phi(), jet1Phi) + deltaPhi(lepton->phi(), jet2Phi);
 	}
 }
 

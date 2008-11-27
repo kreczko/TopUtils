@@ -24,6 +24,8 @@ inline double evaluateTtSemiLepSignalSelector(PhysicsTools::MVAComputerCache& mv
 	values.push_back(PhysicsTools::Variable::Value("sumEtleadingJetAnd2TimesLeptonPt",
 			sigsel.sumEtleadingJetAnd2TimesLeptonPt()));
 	values.push_back(PhysicsTools::Variable::Value("dphiMETJet2", sigsel.dphiMETJet2()));
+	values.push_back(PhysicsTools::Variable::Value("MET", sigsel.MET()));
+	values.push_back(PhysicsTools::Variable::Value("dphiMuJ1J2", sigsel.dphiMuJ1J2()));
 
 	return mvaComputer->eval(values);
 
