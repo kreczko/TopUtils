@@ -4,7 +4,7 @@ import SourceInput as input
 "a config for qcd analysis"
 class Config(ConfigWrapper):
     allowedTypes = "top, topbg, thad, qcd, wjets, zjets, qcdmu, topr"
-    allowedPathTypes = 'analysis,track,calo,jet,all'
+    allowedPathTypes = 'analysis,track,calo,jet,all,training,compute,save,filtertest'
     __fileNameAddition = ''
     __lumi = 50 #pb^-1
     "constructor"
@@ -14,14 +14,20 @@ class Config(ConfigWrapper):
         self.__path = {}
         self._options['ttbarMC'] = 'false'
         self._options['eventWeight'] = ''
+        self._options['looper'] = ''
+        self._options['mvamodule'] = ''
 
         #paths:
         self.__path['basic'] = 'makeWeights & makeGenEvt'
         self.__path['analysis'] = 'analyzeEventShapeMuon, analyzeisolationMET'
-        self.__path['track'] = 'looseSelection,trackmbefore, trackIsoFilter, trackmafter'
-        self.__path['calo'] = 'looseSelection,calombefore, caloIsoFilter, calomafter'
-        self.__path['jet'] = 'looseSelection,jetIsombefore, jetIsoFilter, jetIsomafter'
-        self.__path['all'] = 'looseSelection,allmbefore,allFilter,  allmafter'
+        self.__path['track'] = 'looseSelection,findTtSemiLepSignalSelectorMVA,trackmbefore, trackIsoFilter, trackmafter'
+        self.__path['calo'] = 'looseSelection,findTtSemiLepSignalSelectorMVA,calombefore, caloIsoFilter, calomafter'
+        self.__path['jet'] = 'looseSelection,findTtSemiLepSignalSelectorMVA,jetIsombefore, jetIsoFilter, jetIsomafter'
+        self.__path['all'] = 'looseSelection,findTtSemiLepSignalSelectorMVA,allmbefore,allFilter,  allmafter'
+        self.__path['training'] = 'looseSelection, makeMVATraining'
+        self.__path['compute'] = 'looseSelection, findTtSemiLepSignalSelectorMVA, analyzeDisc'
+        self.__path['filtertest'] = 'looseSelection, findTtSemiLepSignalSelectorMVA, mvaDiscFilter'
+        self.__path['save'] = self.__path['training']
 
         #prefiltering on MC Truth (p2)
         top = "ttSemiLeptonicFilter"
@@ -68,6 +74,50 @@ class Config(ConfigWrapper):
         self.modifyOption('eventWeight', eventWeight)
         if ('top' in type) or type == 'thad':
             type = 'ttbar'
+            
+        looper = ''
+        mvamodule = ''
+        if 'training' in pathtypes or 'save' in pathtypes:
+            mvamodule = 'include "TopAnalysis/TopFilter/data/TtSemiLepSignalSelectorMVATrainer_Muons.cff"'
+            type = 'mvaT' + type
+            looper += 'looper = TtSemiLepSignalSelectorMVATrainerLooper {' + '\n'
+            looper += 'VPSet trainers = {' + '\n'
+            looper += '{' + '\n'
+            looper += 'string calibrationRecord = "ttSemiLepSignalSelectorMVA"' + '\n'
+            if 'save' in pathtypes:
+                looper += ' untracked string trainDescription = "' + self.__savefile + '"' + '\n'
+                looper += 'untracked bool saveState = false' + '\n'
+            else:
+                looper += ' untracked string trainDescription = "' + self.__trainfile + '"' + '\n'
+                looper += 'untracked bool saveState = true' + '\n'
+            looper += 'untracked bool loadState = false' + '\n'
+            looper += 'untracked bool monitoring = true' + '\n'
+            looper += '}' + '\n'
+            looper += '}' + '\n'
+            looper += '}' + '\n'
+            self.modifyOption('looper', looper)
+            
+        else:
+            if type in ['ttbar', 'qcdmu']:
+                type = 'mvaC' + type
+            mvamodule = 'include "TopAnalysis/TopFilter/data/TtSemiLepSignalSelectorMVAComputer_Muons.cff"'
+            looper += '# define the event content' '\n'
+            looper += 'block myEventContent = {' '\n'
+            looper += 'untracked vstring outputCommands = {' + '\n'
+            looper += '"drop *"' + '\n'
+            looper += ',"keep double_*_DiscSel_*"' + '\n'
+            looper += '}' + '\n'
+            looper += '}' + '\n'
+            looper += '# the actual output module' + '\n'
+            looper += ' module out = PoolOutputModule {' + '\n'
+            looper += 'untracked string fileName = "Lkh_output"' + '\n'
+            looper += 'using myEventContent' + '\n'
+            looper += 'untracked bool verbose = false' + '\n'
+            looper += '}' + '\n'
+            looper += 'endpath outpath = { out }' + '\n'
+        
+        self.modifyOption('mvamodule', mvamodule)
+        self.modifyOption('looper', looper)
         
         if type in input.source.keys():
             self.modifyOption('source', input.source[type])

@@ -4,8 +4,8 @@ import getopt
 from Timer import Timer
 import threading
 #set your config file here
-#import analyzeQCDBackground_cfg as cms
-import mvaAnalysis_cfg as cms
+import analyzeQCDBackground_cfg as cms
+#import mvaAnalysis_cfg as cms
 
 "executive script for a simple run, Version 1.0"
 "twiki: https://twiki.cern.ch/twiki/bin/view/CMS/ConfigRunner"

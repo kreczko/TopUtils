@@ -1,10 +1,11 @@
 from ConfigWrapper import ConfigWrapper
 import SourceInput as input
+import sys
 
 "a config for mca analysis"
 class Config(ConfigWrapper):
     allowedTypes = "top, topbg, thad, qcd, wjets, zjets, qcdmu, topr"
-    allowedPathTypes = 'training,compute,save'
+    allowedPathTypes = 'training,compute,save,filtertest'
     __fileNameAddition = ''
     __lumi = 50 #pb^-1
     __savefile = 'TopAnalysis/TopFilter/data/TreeSaver.xml'
@@ -22,6 +23,7 @@ class Config(ConfigWrapper):
         self.__path['basic'] = 'makeWeights & makeGenEvt'
         self.__path['training'] = 'looseSelection, makeMVATraining'
         self.__path['compute'] = 'looseSelection, findTtSemiLepSignalSelectorMVA, analyzeDisc'
+        self.__path['filtertest'] = 'looseSelection, findTtSemiLepSignalSelectorMVA, mvaDiscFilter'
         self.__path['save'] = self.__path['training']
 
         #prefiltering on MC Truth (p2)
@@ -84,25 +86,24 @@ class Config(ConfigWrapper):
             looper += '}' + '\n'
             looper += '}' + '\n'
             looper += '}' + '\n'
-            self.modifyOption('looper', looper)
             
-        if 'compute' in pathtypes:
+        if 'compute' in pathtypes or 'filtertest' in pathtypes:
             type = 'mvaC' + type
             mvamodule = 'include "TopAnalysis/TopFilter/data/TtSemiLepSignalSelectorMVAComputer_Muons.cff"'
-            looper = '# define the event content' '\n'
-            looper = 'block myEventContent = {' '\n'
-            looper = 'untracked vstring outputCommands = {' + '\n'
-            looper = '"drop *"' + '\n'
-            looper = ',"keep double_*_DiscSel_*"' + '\n'
-            looper = '}' + '\n'
-            looper = '}' + '\n'
-            looper = '# the actual output module' + '\n'
-            looper = ' module out = PoolOutputModule {' + '\n'
-            looper = 'untracked string fileName = "Lkh_output"' + '\n'
-            looper = 'using myEventContent' + '\n'
-            looper = 'untracked bool verbose = false' + '\n'
-            looper = '}' + '\n'
-            looper = 'endpath outpath = { out }' + '\n'
+            looper += '# define the event content' '\n'
+            looper += 'block myEventContent = {' '\n'
+            looper += 'untracked vstring outputCommands = {' + '\n'
+            looper += '"drop *"' + '\n'
+            looper += ',"keep double_*_DiscSel_*"' + '\n'
+            looper += '}' + '\n'
+            looper += '}' + '\n'
+            looper += '# the actual output module' + '\n'
+            looper += ' module out = PoolOutputModule {' + '\n'
+            looper += 'untracked string fileName = "Lkh_output"' + '\n'
+            looper += 'using myEventContent' + '\n'
+            looper += 'untracked bool verbose = false' + '\n'
+            looper += '}' + '\n'
+            looper += 'endpath outpath = { out }' + '\n'
             
         if type in input.source.keys():
             self.modifyOption('source', input.source[type])
@@ -110,6 +111,7 @@ class Config(ConfigWrapper):
             print 'Unknown type "', type, '" for source'
             sys.exit(1)
         self.modifyOption('mvamodule', mvamodule)
+        self.modifyOption('looper', looper)
     
     "joins two paths together"
     def join(self, e1, e2):
