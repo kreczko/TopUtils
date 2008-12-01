@@ -1,4 +1,5 @@
 from Timer import Timer
+import sys
 
 "A Wrapper for a cfg to python transition"
 "twiki: https://twiki.cern.ch/twiki/bin/view/CMS/ConfigRunner#ConfigWrapper"
@@ -63,3 +64,8 @@ class ConfigWrapper:
         self._replaceAll()
         self.writeToFile(self.__outputConfig, self.__config)
         return self.__outputConfig
+    
+    def endJob(self, type):
+        print 'nothing defined for', type
+        
+    endJob = staticmethod(endJob)

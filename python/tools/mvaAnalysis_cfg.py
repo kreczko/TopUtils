@@ -1,29 +1,26 @@
 from ConfigWrapper import ConfigWrapper
 import SourceInput as input
+import sys
 
-"a config for qcd analysis"
+"a config for mca analysis"
 class Config(ConfigWrapper):
     allowedTypes = "top, topbg, thad, qcd, wjets, zjets, qcdmu, topr"
-    allowedPathTypes = 'analysis,track,calo,jet,all,training,compute,save,filtertest'
+    allowedPathTypes = 'training,compute,save,filtertest'
     __fileNameAddition = ''
     __lumi = 50 #pb^-1
+    __savefile = 'TopAnalysis/TopFilter/data/TreeSaver.xml'
+    __trainfile = 'TopAnalysis/TopFilter/data/TtSemiLepSignalSelectorMVATrainer_Muons.xml'
     "constructor"
     def __init__(self, type, pathtypes):
         self.__fileNameAddition = pathtypes.replace(';', '_')
-        ConfigWrapper.__init__(self, 'TopAnalysis/TopUtils/test/qcdConfigTemplate.cfg', type)
+        ConfigWrapper.__init__(self, 'TopAnalysis/TopUtils/test/mvaTemplate.cfg', type)
         self.__path = {}
-        self._options['ttbarMC'] = 'false'
         self._options['eventWeight'] = ''
         self._options['looper'] = ''
         self._options['mvamodule'] = ''
 
         #paths:
         self.__path['basic'] = 'makeWeights & makeGenEvt'
-        self.__path['analysis'] = 'analyzeEventShapeMuon, analyzeisolationMET'
-        self.__path['track'] = 'looseSelection,findTtSemiLepSignalSelectorMVA,trackmbefore, trackIsoFilter, trackmafter'
-        self.__path['calo'] = 'looseSelection,findTtSemiLepSignalSelectorMVA,calombefore, caloIsoFilter, calomafter'
-        self.__path['jet'] = 'looseSelection,findTtSemiLepSignalSelectorMVA,jetIsombefore, jetIsoFilter, jetIsomafter'
-        self.__path['all'] = 'looseSelection,findTtSemiLepSignalSelectorMVA,allmbefore,allFilter,  allmafter'
         self.__path['training'] = 'looseSelection, makeMVATraining'
         self.__path['compute'] = 'looseSelection, findTtSemiLepSignalSelectorMVA, analyzeDisc'
         self.__path['filtertest'] = 'looseSelection, findTtSemiLepSignalSelectorMVA, mvaDiscFilter'
@@ -51,24 +48,18 @@ class Config(ConfigWrapper):
                 else:
                     self.addPath(self.__path['standard'])
             else:
-                print 'Not allowed path'
+                print 'Wrong path!'
                 sys.exit(2)
-        
-        
-        if type == 'top':
-            self.modifyOption('ttbarMC', 'true')
-        else:
-            self.modifyOption('ttbarMC', 'false')
             
         if type == 'qcdmu':
             eventWeight = 'include "TopAnalysis/TopUtils/data/EventWeightPlain.cfi"\n'
             eventWeight += 'replace eventWeight.eff = 0.00028\n '
             eventWeight += 'replace eventWeight.xsec  = 819900000. \n' #pb-1
             eventWeight += 'replace eventWeight.nevts = 2037232 \n'  
-            eventWeight += 'replace eventWeight.lumi ='+ self.__lumi.__str__()
+            eventWeight += 'replace eventWeight.lumi =' + self.__lumi.__str__()
         else:
             eventWeight = 'include "TopAnalysis/TopUtils/data/EventWeight.cfi"\n'
-            eventWeight += 'replace csa07Event.overallLumi = '+ self.__lumi.__str__()
+            eventWeight += 'replace csa07Event.overallLumi = ' + self.__lumi.__str__()
         
             
         self.modifyOption('eventWeight', eventWeight)
@@ -95,11 +86,9 @@ class Config(ConfigWrapper):
             looper += '}' + '\n'
             looper += '}' + '\n'
             looper += '}' + '\n'
-            self.modifyOption('looper', looper)
             
-        else:
-            if type in ['ttbar', 'qcdmu']:
-                type = 'mvaC' + type
+        if 'compute' in pathtypes or 'filtertest' in pathtypes:
+            type = 'mvaC' + type
             mvamodule = 'include "TopAnalysis/TopFilter/data/TtSemiLepSignalSelectorMVAComputer_Muons.cff"'
             looper += '# define the event content' '\n'
             looper += 'block myEventContent = {' '\n'
@@ -115,15 +104,14 @@ class Config(ConfigWrapper):
             looper += 'untracked bool verbose = false' + '\n'
             looper += '}' + '\n'
             looper += 'endpath outpath = { out }' + '\n'
-        
-        self.modifyOption('mvamodule', mvamodule)
-        self.modifyOption('looper', looper)
-        
+            
         if type in input.source.keys():
             self.modifyOption('source', input.source[type])
         else:
             print 'Unknown type "', type, '" for source'
             sys.exit(1)
+        self.modifyOption('mvamodule', mvamodule)
+        self.modifyOption('looper', looper)
     
     "joins two paths together"
     def join(self, e1, e2):

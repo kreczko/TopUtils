@@ -5,6 +5,7 @@ from Timer import Timer
 import threading
 #set your config file here
 import analyzeQCDBackground_cfg as cms
+#import mvaAnalysis_cfg as cms
 
 "executive script for a simple run, Version 1.0"
 "twiki: https://twiki.cern.ch/twiki/bin/view/CMS/ConfigRunner"
@@ -89,7 +90,7 @@ class CfgRunner:
             self.__cmsRunTimer[self.__type].start()
             print ''
             self.__waitForFirst(self.__type)
-            os.remove(configfile)
+            #os.remove(configfile)
             self.__jobstarted = True
         else:
             print 'requested configfile does not exist'
@@ -162,9 +163,9 @@ class CfgRunner:
             elif self.__type == 'quit':
                 os._exit(0)
             else:
-                print "not allowed type used"
+                print "Oh no! Not allowed type used!"
                 print "allowed types: ", cms.Config.allowedTypes
-                os._exit(0)
+                os._exit(1)
         
                 
     def __doJob(self, type):
@@ -215,9 +216,11 @@ class CfgRunner:
         #print 'waiting up to 100 times
         printtimer = {}
         msg = "waiting for '" + str(type) + "' to end..."
-        for i in range(0,100):
-            printtimer[i] = threading.Timer(printEvery*i, self.__printMsg, [msg])
-            printtimer[i].start()
+        #TODO: add last line off the outputfileErr
+        if printEvery > 0:
+            for i in range(0,100):
+                printtimer[i] = threading.Timer(printEvery*i, self.__printMsg, [msg])
+                printtimer[i].start()
                     
         while not 'Summary' in self.__readFromFile(erO) and not err:            
             if "Root_Error" in self.__readFromFile(erO):
@@ -227,8 +230,9 @@ class CfgRunner:
             if((self.__analysisTimer[type].timePassed(os.times()) % printEvery) == 0):
                 print 'waiting for', type, 'to end...'
         print type, 'ended'
-        for i in printtimer:
-            printtimer[i].cancel()
+        if printEvery > 0:
+            for i in printtimer:
+                printtimer[i].cancel()
         #TODO: printing long time, but timer stop should be independent
         self.__analysisTimer[type].stop()
         print 'Time needed for analysis (s):', self.__analysisTimer[type].getMeasuredTime()
