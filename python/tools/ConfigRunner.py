@@ -86,7 +86,7 @@ class CfgRunner:
             #os.system('eval `scramv1 runtime -sh`')# !!not working!!
             # nohup
 #            eval('eval `scramv1 runtime -sh`')
-            os.system('cmsRun ' + configfile + " >" + self.__outputfile + " 2> " + self.__outputerr + " < /dev/null&")
+            os.system('cmsRun ' + configfile + " >" + self.__outputfile + " 2> " + self.__outputerr + " < /dev/null")
             self.__cmsRunTimer[self.__type].start()
             print ''
             self.__waitForFirst(self.__type)
