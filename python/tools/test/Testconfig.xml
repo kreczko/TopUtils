@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <HistPlotter>
-	<include file ='test/hist.xml' />
+	<include file='test/hist.xml' />
 	<include file='test/hist1.xml' />
-	<source>
+	<include file='defaultHist.xml' />
+	<sources>
+		<!-- gets input from 2 folders -->
 		<input name="SemiLepAnalysis">
 			<folder name='analysis'>
+			<!-- only histogram which have 'muon' in their name -->
 				<filter type='contains' value='muon' />
 			</folder>
 			<folder name='kinematic'>
-			<!-- multiple filters? -->
+				<!-- histograms containing 'pt' but also do not have electron in their name-->
 				<filter type='contains' value='pt' />
-				<filter type='exact' value='METdistribution' />
+				<filter type='!contains' value='electron' />
 			</folder>
 		</input>
 		<input name='kinematicPlots'>
@@ -19,26 +22,28 @@
 			</folder>
 		</input>
 	<!-- includes of the data -->
-		<file name='qcd' value='yxc.root' />
-		<file name='top' value='yasdwrewe.root' />
-	</source>
+		<file id='qcd' name='background.root' />
+		<file id='top' name='signal.root' />
+		<file id='kin' name='kinematic.root' />
+	</sources>
 	<!--
 		makes the canvas, mixes the histogramms defined in the histSetup
 		summaryFile = ps oder pdf
 	-->
 	<plots create='eps,pdf' makeSummaryFile='true' summaryFile="inspect.pdf">
-		<hist name='muonPt' defaults='HistSetupName'>
+		<hist name='muonPt' defaults='HistSetupName' input="SemiLepAnalysis">
 		<!-- name is also used for legend -->
 			<var name='qcd' from='file:qcd' markerStyle='22' color='23' />
 			<var name='signal' from='file:top' markerStyle='23' color='blue' />
 			<var name='combined' from='var:signal,var:qcd' compute='add'
 				markerStyle='24' />
-			<legend name="plotname" posx="20" posy="0" fonsize="12"/>
+			<legend name="plotname" posx="20" posy="0" fonsize="12" />
 		</hist>
 		<histlist name='electronKinematic' input='kinematicPlots'>
 			<var name='qcd' from='file:qcd' markerStyle='22' color='23' />
 			<var name='signal' from='file:top' markerStyle='23' color='blue' />
 		</histlist>
+		
 		<histlist name='AllHistos'>
 			<var name='qcd' from='file:qcd' markerStyle='22' color='23' />
 			<var name='signal' from='file:top' markerStyle='23' color='blue' />
