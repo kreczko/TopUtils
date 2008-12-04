@@ -3,9 +3,10 @@ import datetime
 import os
 
 class Timer:
-    __name = 'nothing'
+    __name  = 'nothing'
     __start = 0.0
-    __stop = 0.0
+    __stop  = 0.0
+    
     def __init__(self):
        self.__name = 'timer'
         
@@ -58,5 +59,5 @@ class Timer:
     
     getDate = staticmethod(getDate)
     getTime = staticmethod(getTime)
-    sleep = staticmethod(sleep)
+    sleep   = staticmethod(sleep)
     
