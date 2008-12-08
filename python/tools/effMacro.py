@@ -6,6 +6,7 @@ class Macro:
     after = 'mafter'
     debug = True
     cuts = [0.1, 0.2, 0.3]
+    latexfile = 'effMacro.tex'
     def __init__(self, outputfile, inputfiles, inputdirs):
         print 'starting macro'
         self.effsig = {}
@@ -86,10 +87,10 @@ class Macro:
                 unwbefore.Write()
                 self.output.Cd('/')
                 #caluclate MC Efficiency without binning
-                mceff = after.Integral()/before.Integral()
-                mcerr = sqrt((mceff*(1-mceff))/unwbefore.Integral())
+                mceff = after.Integral() / before.Integral()
+                mcerr = sqrt((mceff * (1 - mceff)) / unwbefore.Integral())
                 self.setEff(type, i, 0, mceff, mcerr)
-                print 'MC Eff for', i, ':[', mceff,',', mcerr, ']' 
+                print 'MC Eff for', i, ':[', mceff, ',', mcerr, ']' 
                 for effs in result[1]:
                     print 'Eff for', i, 'disc <', effs[0], ':[', effs[1], ',', effs[2], ']'
                     
@@ -125,8 +126,8 @@ class Macro:
             self.mixunwb.Write()
             self.output.Cd('/')
             for effs in result[1]:
-                print 'Eff for', dir, 'disc <', effs[0], ':', round(effs[1],3), '+-', round(effs[2],3)
-                self.setEff('mixed', dir, effs[0], round(effs[1],3), round(effs[2],3))                
+                print 'Eff for', dir, 'disc <', effs[0], ':', round(effs[1], 3), '+-', round(effs[2], 3)
+                self.setEff('mixed', dir, effs[0], round(effs[1], 3), round(effs[2], 3))                
                 
     def getEffHist(self, before, after, unweightedBefore):
         effplot = after.Clone("efficiency")
@@ -136,7 +137,7 @@ class Macro:
             err = sqrt((eff * (1 - eff)) / unweightedBefore.GetBinContent(i))
             if self.debug:
                 print 'before:', before.GetBinContent(i), 'after:', after.GetBinContent(i), 'unw.:', unweightedBefore.GetBinContent(i)
-                print round(eff,3), '+-', round(err,3)
+                print round(eff, 3), '+-', round(err, 3)
             effplot.SetBinError(i, err)
             effplot.SetMinimum(0)
         #cut based eff
@@ -148,7 +149,7 @@ class Macro:
             nunwb = unweightedBefore.Integral(1, bin)
             eff = na / nb
             err = sqrt((eff * (1 - eff)) / nunwb)
-            effs.append([x, round(eff,3), round(err,3)])
+            effs.append([x, round(eff, 3), round(err, 3)])
         
         return [effplot, effs]
         
@@ -172,7 +173,7 @@ class Macro:
         nbg = ((nloose * effsig) - ntight) / (effsig - effbg)
         nbga = nbg * effbg
         nsig = (ntight - (nloose * effbg)) / (effsig - effbg)
-        nsiga = nsig*effsig
+        nsiga = nsig * effsig
         return {'NQL':int(nbg), 'NQT':int(nbga), 'NSL':int(nsig), 'NST':int(nsiga)}
         
     def createFolders(self, parentfolder, folderlist):
@@ -190,9 +191,9 @@ class Macro:
     def setEff(self, type, input, cut, eff, err):
         #signal from monte carlo, bg from mixed sample control region
         if type == 'top':
-            self.effsig[input] = [round(eff,3),round(err,3)]
+            self.effsig[input] = [round(eff, 3), round(err, 3)]
         elif type == 'mixed':
-            self.effbg[input][cut] = [round(eff,3),round(err,3)]
+            self.effbg[input][cut] = [round(eff, 3), round(err, 3)]
     
     def setN(self, input, loose, tight):
         self.nloose[input] = int(loose)
@@ -207,7 +208,7 @@ class Macro:
             print 'for cut: disc <', x
             print 'isolation & $\epsilon_{sig}$ & $\epsilon_{qcd}$ & $N_L$ & $N_T$ \\\\'
             for i in self.inputdirs:
-                print i, '&', '[',self.effsig[i][0],round(self.effsig[i][1],3),'] &', '[',round(self.effbg[i][x][0],3),round(self.effbg[i][x][1],3),'] &', self.nloose[i], '&', self.ntight[i], '\\\\'
+                print i, '&', '[', self.effsig[i][0], round(self.effsig[i][1], 3), '] &', '[', round(self.effbg[i][x][0], 3), round(self.effbg[i][x][1], 3), '] &', self.nloose[i], '&', self.ntight[i], '\\\\'
             print ''
             print 'isolation & TrueTight(sig) & TrueTight(qcd) & TrueLoose(sig) & TrueLoose(qcd) \\\\'
             for i in self.inputdirs:
@@ -216,10 +217,15 @@ class Macro:
             print 'isolation & $N_T(sig)$ & $N_T(qcd)$ & Rel(sig)in \%  & Rel(qcd)in \%\\\\'
             for i in self.inputdirs:
                 matrix = self.matrixMethod(self.effbg[i][x][0], self.effsig[i][0], self.nloose[i], self.ntight[i])
-                relsig = (self.nTtruesig[i] - matrix['NST'])/self.nTtruesig[i]*100
-                relqcd = (self.nTtruebg[i] - matrix['NQT'])/self.nTtruebg[i]*100
-                print i, '&', int(matrix['NST']), '&', int(matrix['NQT']), '&',round(relsig,2) , '&', round(relqcd,2), '\\\\'
+                relsig = (self.nTtruesig[i] - matrix['NST']) / self.nTtruesig[i] * 100
+                relqcd = (self.nTtruebg[i] - matrix['NQT']) / self.nTtruebg[i] * 100
+                print i, '&', int(matrix['NST']), '&', int(matrix['NQT']), '&', round(relsig, 2) , '&', round(relqcd, 2), '\\\\'
             print ''
+            
+    def exportLatex(self):
+        print '################################################'
+        print '###         Exporting Latex and PDF          ###'
+        print '################################################'
         
 if __name__ == '__main__':
     gROOT.Reset()

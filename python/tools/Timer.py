@@ -27,6 +27,7 @@ class Timer:
         t0 = os.times()
         self.__stop = t0[3] + t0[4]
         
+    "returns a formated time string: h m s"
     def getMeasuredTime(self):
         t = self.__stop - self.__start
         h = 0

@@ -17,6 +17,7 @@ class ConfigWrapper:
         self._options['output'] = ""
         self._options['events'] = ""
         self._options['paths'] = ""
+        self._options['skipevents'] = 0
         
     "modifies an option of the config file"
     def modifyOption(self, optionName, value):
