@@ -1,22 +1,34 @@
-from Timer import Timer
+## system imports
+import os
 import sys
 
-"A Wrapper for a cfg to python transition"
-"twiki: https://twiki.cern.ch/twiki/bin/view/CMS/ConfigRunner#ConfigWrapper"
-##-----------------------------------------------------------------------------------
-class ConfigWrapper:
-    __config = ''
-    __outputConfig = ''
-    __pathcounter  = 1000 ## counts the number of paths to be changed/added in
-                          ## predefined config file; 1000 leaves room for user
-                          ## defined process paths in the predefined cfg file
+## timer
+from Timer import Timer
+
 
 ##-----------------------------------------------------------------------------------
-    "constructor; options are source, output, event, paths"
-    "these can be changed within a predefined config file"
+## wrapper class for a cfg to python transition
+## twiki: https://twiki.cern.ch/twiki/bin/view/CMS/ConfigRunner#ConfigWrapper
+class ConfigWrapper:
+    ##
+    ## configurables
+    ##
+    __config       = ''   ## input  config
+    __outputConfig = ''   ## output config
+    __pathcounter  = 1000 ## counts the number of paths to be changed/added in
+                          ## the predefined config file; 1000 leaves room for 
+                          ## user defined process paths in the predefined cfg
+                          ## file
+
+##-----------------------------------------------------------------------------------
+##  Constructor; options are source, output, event, paths
+##  these can be changed within a predefined config file
     def __init__(self, cfg, type):
+        ## read input config from source file 
         self.__config = self.readFromFile(cfg)
-        self.__outputConfig = "tmp_" +type + "_" + Timer.getTime() + "_cfg.py"  
+        ## create output config filename            
+        self.__outputConfig = "tmpConfig_" + type + "_cfg.py"
+        ## define options
         self._options = {}
         self._options['source'] = ""  ## change source
         self._options['output'] = ""  ## change output 
@@ -25,7 +37,7 @@ class ConfigWrapper:
         self._options['paths' ] = ""  ## add paths if specified
 
 ##-----------------------------------------------------------------------------------        
-    "modifies an option"
+##  * modifies an option
     def modifyOption(self, optionName, value):
         if optionName in self._options.keys():
             self._options[optionName] = value
@@ -33,7 +45,7 @@ class ConfigWrapper:
             print 'config option' , optionName, 'not found'    
 
 ##-----------------------------------------------------------------------------------        
-    "reads a file into a string"
+##  * reads a file into a string
     def readFromFile(self, filename):
         file = open(filename, 'r')
         str = file.read()
@@ -41,27 +53,26 @@ class ConfigWrapper:
         return str
 
 ##-----------------------------------------------------------------------------------            
-    "writes a string to a file (overwriting the existing files)"
+##  * writes a string to a file (overwriting existing files)
     def writeToFile(self, filename, str):
         file = open(filename, 'w')
         file.write(str)
         file.close()
 
 ##-----------------------------------------------------------------------------------
-    "adds a path to the cfg file; must be"
-    "given as: module1 * module2 + ...aso"
+##  * adds a path to the cfg file; must be given as: module1 * module2 + ...aso
     def addPath(self, path):
         self._options['paths'] += "process.p" + self.__pathcounter.__str__()
         self._options['paths'] += " = cms.Path(" + path + ")\n"
         self.__pathcounter += 1
 
 ##-----------------------------------------------------------------------------------
-    "replace 'search' by 'replace'"
+##  * replace 'search' by 'replace' in the input config file
     def _replaceInFile(self, search, replace):
         self.__config = self.__config.replace(search.__str__(), replace.__str__())
         
 ##-----------------------------------------------------------------------------------
-    "replace all entrties which were mapped to the option keys"
+##  * replace all entries which were mapped to the option keys in inpit config file
     def _replaceAll(self):
         self.__config += '\n'
         self.__config += '####################################################### \n'
@@ -94,17 +105,24 @@ class ConfigWrapper:
                 ## modify event numbers
                 self.__config += self._options[a]
                 self.__config += '\n'                    
-
                 
 ##-----------------------------------------------------------------------------------
-    "returns the name of the temporary config file"
-    def returnTempCfg(self):
+##  * returns the name of the temporary config file
+    def returnTempCfg(self, path='.'):
+        ## replace all specified parameters in
+        ## the input config
         self._replaceAll()
-        self.writeToFile(self.__outputConfig, self.__config)
-        return self.__outputConfig
+        ## create job directory if it doesn't
+        ## exist yet
+        if (not os.path.exists(path)):
+            os.system('mkdir ' + path)
+        ## define output path
+        outpath = path + '/' + self.__outputConfig
+        self.writeToFile(outpath, self.__config)
+        return outpath
 
 ##-----------------------------------------------------------------------------------    
     def endJob(self, type):
-        print 'nothing defined for', type
+        print 'nothing defined for: ', type
         
     endJob = staticmethod(endJob)

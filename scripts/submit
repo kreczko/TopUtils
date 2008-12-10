@@ -1,0 +1,333 @@
+#! /usr/bin/env python
+
+## system imports
+import re
+import os
+import sys
+import getopt
+
+## timer
+from TopAnalysis.TopUtils.tools.Timer import Timer
+
+##-----------------------------------------------------------------------------------
+## executive script for cmsRun, Version 1.1
+## twiki: https://twiki.cern.ch/twiki/bin/view/CMS/ConfigRunner
+class jobSplitter:
+   ##
+   ## configurables
+   ##
+
+   ## verbose mode
+   __verbose        = False
+   ## job command
+   __command        = ''
+   ## events token
+   __eventToken     = '-e'
+   ## skip evt token
+   __skipsToken     = '-s'
+   ## job name token
+   __outputToken    = '-o'
+   ## submit token
+   __submitToken    = '-j'
+   ## submit name
+   __submitName     = ''
+   ## number of jobs
+   __numberOfJobs   = 0
+
+   ##
+   ## internal variables
+   ##
+
+   ## name of the object 
+   __name   = 'none'
+   
+##-----------------------------------------------------------------------------------    
+##  Constructor
+   def __init__(self):
+      self.name = 'splitter'
+      
+##-----------------------------------------------------------------------------------        
+##  * start sequence
+   def beginJob(self):
+      print "**************************************************"
+      print "* starting JobSplitter...                        *"
+      print "*                                                *"
+      print "*                                                *"
+      print "*                                                *"    
+      print "*                                                *"
+      print "*                                      V00-00-00 *"
+      print "**************************************************"
+      
+##-----------------------------------------------------------------------------------        
+##  * end sequence
+##  * this may contain the execution of histPlotter or something similar                
+   def endJob(self):
+      print "**************************************************"
+      print "* leaving JobSplitter...                         *"
+      print "*                                                *"
+      print "*                                                *"
+      print "*                                                *"    
+      print "*                                                *"
+      print "*                                      Good Bye! *"
+      print "**************************************************"          
+
+##-----------------------------------------------------------------------------------
+##  * Parse command line options
+##  * Do basic check whether the options make sense or not
+##  * Depending on the options execute 'doAll' or 'doJob'
+   def main(self):       
+      try:
+         opts, args = getopt.getopt(sys.argv[1:],
+                                    'hvc:s:e:o:j:n:x:',
+                                    ['help','verbose','cmd=','skip=','evts=','out=','job=','njobs=','name=']
+                                    )
+      except getopt.error, msg:
+         print msg
+         print "for help use --help"
+         sys.exit(2)
+         
+      for o, a in opts:
+         ################################################
+         ## get help
+         ################################################
+         if o in ("-h", "--help"):
+            print "help"
+            print __doc__
+            sys.exit(0)
+         ################################################
+         ## run verbose mode
+         ################################################                         
+         elif o in ("-v", "--verbose"):
+            self.__verbose = True
+         ################################################
+         ## execution command
+         ################################################            
+         elif o in ("-c", "--cmd"):
+            if (not (a == '')):
+               self.__command = a
+         ################################################
+         ## token for maximal number of events to be
+         ## processed from 'cmd'
+         ################################################                                
+         elif o in ("-e", "--evts"):
+            if (not (a == '')):               
+               self.__eventToken = a
+         ################################################
+         ## token for skip events to be
+         ## processed from 'cmd'
+         ################################################                                
+         elif o in ("-s", "--skip"):
+            if (not (a == '')):               
+               self.__skipsToken = a               
+         ################################################
+         ## token for output name for 'cmd'
+         ################################################               
+         elif o in ("-o", "--out"):
+            if (not (a == '')):               
+               self.__outputToken = a
+         ################################################
+         ## token for job name for 'cmd'
+         ################################################               
+         elif o in ("-j", "--job"):
+            if (not (a == '')):               
+               self.__submitToken = a
+         ################################################
+         ## jon name
+         ################################################               
+         elif o in ("x", "--name"):
+            if (not (a == '')):               
+               self.__submitName = a               
+         ################################################
+         ## maximal number of jobs to split
+         ################################################               
+         elif o in ("-n", "--njobs"):
+            self.__numberOfJobs = int(a)                  
+         else:
+            self.__errorMsg()
+            print '* * argument(s) not recognized. See --help for usage'
+
+      ## perform basic checks later here   
+
+      ## do the job splitting
+      self.__split()
+
+##-----------------------------------------------------------------------------------
+##  * print head for simple error message            
+   def __errorMsg(self):
+      print "**************************************************"
+      print "* Error:"
+
+##-----------------------------------------------------------------------------------
+##  * take command token and value
+##  * replace object by value in token
+##  * return modified command      
+   def __toToken(self, command, token, value):
+      ## prepare regex   
+      object = r'\s+?('+token+')\s*?(\w+)\s*?'
+      ## compile regex's
+      flag = re.compile(object)
+
+      if (not flag.search(command)):
+         ## perform basic error treatment
+         self.__errorMsg()
+         msg = '* * toToken :: token not found in command line: ' + token
+         print msg
+         sys.exit(0)
+      else:
+         replacement = ' ' + token + ' ' + value.__str__()
+         command = flag.sub(replacement, command)         
+      return command
+   
+##-----------------------------------------------------------------------------------
+##  * get object from token
+   def __fromToken(self, token):
+      ## return value
+      value=''
+      ## prepare regex
+      object = r'\s+?('+token+')\s*?(\w+)\s*?'
+      ## compile regex's
+      flag = re.compile(object)
+
+      if (not flag.search(self.__command)):
+         ## perform basic error treatment
+         self.__errorMsg()
+         msg = '* * fromToken :: token not found in command line: ' + token
+         print msg
+         sys.exit(0)
+      else:
+         value = flag.search(self.__command).group(2)         
+         ## check sanity
+         if(re.match(r'\d+', value) and re.search(r'\D+', value)):
+            self.__errorMsg()
+            msg = '* * value extraced from token: ' + token
+            msg+= ' does not contain \n'
+            msg+= '*   only digits as expected: '
+            msg+= value
+            print msg
+            sys.exit(0)
+      return value
+
+##-----------------------------------------------------------------------------------
+##  * determine job length from maximal number of events and number of jobs
+##  * each job but the last will have the same length which will be
+##    int(maxEvents/nJobs)
+##  * the last job will hold the spill over   
+   def __jobLength(self):
+      maxEvents = int(self.__fromToken(self.__eventToken))
+      jobLength = (maxEvents - maxEvents%self.__numberOfJobs)/self.__numberOfJobs
+      if (maxEvents%self.__numberOfJobs > 0):
+         jobLength+= 1
+      return jobLength
+    
+##-----------------------------------------------------------------------------------
+##  * get number of events for job to start with
+##  * starts with event '0'
+##  * events are filled in equal buckets up to the last job which takes what is left
+##    over   
+   def __firstEvent(self, job):
+      maxEvents = int(self.__fromToken(self.__eventToken))
+      if (maxEvents%self.__numberOfJobs > 0):
+         firstEvent=job * (self.__jobLength()-1)
+      else:
+         firstEvent=job *  self.__jobLength()         
+      return firstEvent
+
+##-----------------------------------------------------------------------------------
+##  * get number of events for job to stop at
+##  * stops with event '__jobLength()-1' unless it is the last job which end with
+##    the maximal number of events   
+   def __lastEvent(self, job):
+      ## correct in case of the last job
+      lastEvent = int(self.__fromToken(self.__eventToken))
+      if (not (job == (self.__numberOfJobs-1))):
+         if (lastEvent%self.__numberOfJobs > 0):
+            lastEvent=(job+1) * (self.__jobLength()-1) - 1
+         else:
+            lastEvent=(job+1) *  self.__jobLength()    - 1
+      return lastEvent
+
+##-----------------------------------------------------------------------------------
+##  * replace job name/event number/events to skip in 'command' 
+##  * return final string
+   def __subjob(self, job):
+      subjob = self.__command
+      ## replace output name
+      newOutput = self.__fromToken(self.__outputToken)
+      newOutput+= '_' + job.__str__()
+      subjob    = self.__toToken(subjob, self.__outputToken, newOutput)
+      ## replace skip
+      newSkip   = self.__firstEvent(job).__str__()
+      subjob    = self.__toToken(subjob, self.__skipsToken, newSkip)
+      ## replace events
+      newEvnt   = self.__lastEvent(job).__str__()
+      subjob    = self.__toToken(subjob, self.__eventToken, newEvnt)
+      ## add jobname at the end of the command line
+      subjob+= ' ' + self.__submitToken + ' ' + self.__submitName
+      return subjob
+
+##-----------------------------------------------------------------------------------
+##  * split up jobs to be executed
+   def __split(self):
+      ## catch pathological cases
+      if (self.__numberOfJobs<=0):
+         self.__errorMsg()
+         print "* * numberOfJobs <=0; this should never happen!!!"
+         sys.exit(0)
+          
+      for job in range(self.__numberOfJobs):
+         msg = "...submitting job " + job.__str__() + ' to folder '
+         #msg+= submitName
+         msg+= " first event = " + self.__firstEvent(job).__str__()
+         msg+= " last event = " + self.__lastEvent(job).__str__()
+         print msg
+
+         print self.__subjob(job)
+         ## create job directory if it doesn't
+         ## exist yet
+         if (not os.path.exists(self.__submitName)):
+            os.system('mkdir ' + self.__submitName)
+         ## prepare submission script
+         submissionScript = self.__submitName
+         submissionScript+= '/'
+         submissionScript+= self.__submitName
+         submissionLog    = submissionScript
+         submissionScript+='_'+job.__str__()
+         submissionScript+='.sh'
+         file = open(submissionScript, 'w')
+         file.write('echo ...executing '+ self.__subjob(job) + '\n')
+         file.write(self.__subjob(job))
+         file.close()
+         ## do the job submission            
+         ## os.system('chmod a+x '+submissionScript)
+         ## uncomment the following line(s) to run in interactive mode
+         os.system('./'+submissionScript+'>>'+submissionLog+'.log')
+         ## uncomment the following line(s) to run in batch mode; qsub parameters are
+         ## explained above. For more details see:
+         ## http://naf.desy.de/general_naf_docu/working_with_the_local_batch_system/
+         farm = 'qsub'
+         farm+= ' -l h_vmem=1G'                ## increas memory to 1G
+         farm+= ' -cwd'                        ## execute job from current directory
+         farm+= ' -V'                          ## inherit the current shell environment to the job
+         farm+= ' -o'+submissionLog+'.farmout' ## farm output file
+         farm+= ' -e'+submissionLog+'.farmerr' ## farm error file
+         fram+= ' '
+         os.system(fram+'./'+submissionScript+'>>'+submissionLog)
+
+##-----------------------------------------------------------------------------------
+if __name__ == '__main__':
+    splitter = jobSplitter()
+    splitter.beginJob()
+    splitter.main()
+    splitter.endJob()
+
+# os.system(cd)
+## 1) change to data directory on worker node
+##    * qsub -V -cwd
+## 2) set cmsenv --> ask Benedikt Hegner with problem description / crab experts
+## 3) cut job in pieces (configurable)
+## 4) add untracked uint32 skipEvents = 0 thatfore
+#( 5) monitor jobs qsub -status )
+## 6  return job and add output:
+##     -- edm none
+##     -- histogram files hadd
+##     -- mva mit TreeSaver --> combine root trees

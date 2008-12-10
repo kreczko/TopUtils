@@ -6,7 +6,7 @@ import sys
 import getopt
 import threading
 
-## timer and threading
+## timer
 from TopAnalysis.TopUtils.tools.Timer import Timer
 
 ## configuration
@@ -26,9 +26,9 @@ class CfgRunner:
     ## error  logfile
     __outputErr       = ''
     ## file service output path
-    __fileServicePath = ''
+    __jobName         = '.'
     ## file service output name    
-    __fileServiceName = ''
+    __outputName      = ''
     ## cfg file for cmsRun
     __config          = ''
     ## physics process/sample
@@ -47,15 +47,15 @@ class CfgRunner:
     ##
     
     ## time in seconds to wait
-    __sleeptime   = 10
+    __sleeptime       = 10
     ## user defined parameters
-    __userParams  = ''
+    __userParams      = ''
     ## for interactive mode
-    __runs_ = ''
+    __runs_           = ''
     ## for cmsRun execution
-    __jobStarted = False
+    __jobStarted      = False
     ## error handling
-    __errorToken = ['RootError', 'Exception', 'Root_Error']
+    __errorToken      = ['RootError', 'Exception', 'Root_Error']
 
 ##-----------------------------------------------------------------------------------    
 ##  Constructor
@@ -95,8 +95,8 @@ class CfgRunner:
     def main(self):
         try:
             opts, args = getopt.getopt(sys.argv[1:],
-                                       'hvic:p:e:s:o:',
-                                       ['help','verbose','interactive','cfg=','proc=','evts=','skip=','out=','path=','user=']
+                                       'hvic:p:s:e:o:j:',
+                                       ['help','verbose','interactive','cfg=','proc=','skip=','evts=','out=','job=','user=']
                                        )
         except getopt.error, msg:
             print msg
@@ -104,58 +104,58 @@ class CfgRunner:
             sys.exit(2)
 
         for o, a in opts:
+            ################################################
+            ## get help
+            ################################################                
             if o in ("-h", "--help"):
-                ################################################
-                ## get help
-                ################################################                
                 print __doc__
                 sys.exit(0)
+            ################################################
+            ## run verbose mode
+            ################################################
             elif o in ("-v", "--verbose"):
-                ################################################
-                ## run verbose mode
-                ################################################
                 self.__verbose = True
+            ################################################                
+            ## run interactive batch mode
+            ################################################                
             elif o in ("-i", "--interactive"):
-                ################################################                
-                ## run interactive mode
-                ################################################                
                 self.__interactive = True                
+            ################################################                
+            ## cmssw cfg file
+            ################################################                
             elif o in ("-c", "--cfg"):
-                ################################################                
-                ## cmssw cfg file
-                ################################################                
                 self.__config = a
+            ################################################                
+            ## process of consideration
+            ################################################                
             elif o in ("-p", "--proc"):
-                ################################################                
-                ## process of consideration
-                ################################################                
                 self.__process = a
+            ################################################                
+            ## number of events to be processed
+            ################################################                                
             elif o in ("-e", "--evts"):
-                ################################################                
-                ## number of events to be processed
-                ################################################                
                 self.__numberOfEvents = int(a)
+            ################################################                
+            ## number of events to be skipped
+            ################################################                                
             elif o in ("-s", "--skip"):
-                ################################################                
-                ## number of events to be skipped
-                ################################################                
                 self.__numberOfSkips  = int(a)                
+            ################################################                
+            ## define output file with process suffix
+            ################################################
             elif o in ("-o", "--out"):
-                ################################################                
-                ## define output file with process suffix
-                ################################################
                 if (not (a == '')):
-                    self.__fileServiceName = a
-            elif o in ("--path"):
-                ################################################
-                ## define error file with sample suffix
-                ################################################                
+                    self.__outputName = a
+            ################################################
+            ## define error file with sample suffix
+            ################################################                
+            elif o in ("-j", "--job"):
                 if (not a == ''):
-                    self.__fileServicePath = a
+                    self.__jobName = a
+            ################################################                
+            ## add user defined parameters
+            ################################################
             elif o in ("-u", "--user"):
-                ################################################                
-                ## add user defined parameters
-                ################################################
                 if (not a == ''):
                     self.__userParams = a
             else:
@@ -184,8 +184,8 @@ class CfgRunner:
             print '* * config file doen\'t exist. Please check spelling'
             sys.exit(1)
 
-        ## check fileServiceName
-        if (self.__fileServiceName == ''):
+        ## check outputName
+        if (self.__outputName == ''):
             self.__errorMsg()
             print '* * no output name specified. Choose --out to specify'
             sys.exit(1)
@@ -195,7 +195,7 @@ class CfgRunner:
             self.__doAll()
         else:
             self.__doJob(self.__process)
-            self.__waitingForEnd(self.__process)
+            #self.__waitingForEnd(self.__process)
 
 ##-----------------------------------------------------------------------------------
 ##  * print head for simple error message            
@@ -296,6 +296,12 @@ class CfgRunner:
 ##  * modify std configurables            
 ##  * call executeCMSrun            
     def __doJob(self, proc):
+        ## create job directory if doesn't exist yet
+        ## and if __jobName != ''
+        if (not os.path.exists(self.__jobName)):
+            print 'create directory'
+            print self.__jobName
+            os.system('mkdir ' + self.__jobName)        
         ## create tmp config
         process = cms.ConfigWrapper(self.__config, proc)
         ## modify events
@@ -305,10 +311,9 @@ class CfgRunner:
         ## modify source
         process.modifyOption('source', input.source[self.__process])
         ## modify output
-        output = self.__fileServicePath
-        output+= self.__fileServiceName
-        output+= '_' + proc + "_"
-        output+= Timer.getDate()
+        output = self.__jobName+'/'
+        output+= self.__outputName
+        output+= '_' + proc
         output+= '.root'
         process.modifyOption('output',output)
         ## setup outputLogs
@@ -319,9 +324,9 @@ class CfgRunner:
         self.__analysisTimer[proc] = Timer()
 
         ## uncomment for testing
-        #print "produced file: " + process.returnTempCfg()
+        ## print "produced file: " + process.returnTempCfg(self.__jobName)
         ## start cmsRun
-        self.__executeCMSrun(process.returnTempCfg())
+        self.__executeCMSrun(process.returnTempCfg(self.__jobName))
 
 ##-----------------------------------------------------------------------------------
 ##  * create a vector from a list of objects in a string separated by an arbitary
