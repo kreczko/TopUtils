@@ -45,7 +45,9 @@ class CfgRunner:
     ##
     ## internal variables
     ##
-    
+
+    ## version
+    __version         = 'V00-00-01'
     ## time in seconds to wait
     __sleeptime       = 10
     ## user defined parameters
@@ -66,13 +68,15 @@ class CfgRunner:
 ##-----------------------------------------------------------------------------------        
 ##  * start sequence
     def beginJob(self):
+        versionLine = "*                                      "
+        versionLine+= self.__version + " *"        
         print "**************************************************"
         print "* starting ConfigRunner...                       *"
         print "*                                                *"
         print "*                                                *"
         print "*                                                *"    
         print "*                                                *"
-        print "*                                      V00-00-00 *"
+        print versionLine
         print "**************************************************"
         
 ##-----------------------------------------------------------------------------------        
@@ -108,7 +112,8 @@ class CfgRunner:
             ## get help
             ################################################                
             if o in ("-h", "--help"):
-                print __doc__
+                self.__helpMsg()
+                self.endJob()
                 sys.exit(0)
             ################################################
             ## run verbose mode
@@ -161,48 +166,38 @@ class CfgRunner:
             else:
                 self.__errorMsg()
                 print '* * argument(s) not recognized. See --help for usage'
-
-        ## check number of events
-        if (self.__numberOfEvents == 0):
-            self.__errorMsg()
-            print '* * no events to be processed. Choose --evts to specify'
-            sys.exit(1)
-
-        ## check physics process
-        if (self.__process == ''):
-            self.__errorMsg()
-            print '* * no physics process specified. Choose --proc to specify'
-            sys.exit(1)            
-
-        ## check configfile
-        if (self.__config == ''):
-            self.__errorMsg()
-            print '* * no config file specified. Choose --cfg to specify'
-            
-        if (not os.path.exists(self.__config)):
-            self.__errorMsg()
-            print '* * config file doen\'t exist. Please check spelling'
-            sys.exit(1)
-
-        ## check outputName
-        if (self.__outputName == ''):
-            self.__errorMsg()
-            print '* * no output name specified. Choose --out to specify'
-            sys.exit(1)
-            
-        ## run
+        ## perform basic checks of the input
+        self.__checkOptions()
+        ## run and perform basic monitoring
         if(self.__interactive):
             self.__doAll()
         else:
             self.__doJob(self.__process)
-            #self.__waitingForEnd(self.__process)
+            self.__waitingForEnd(self.__process)
 
 ##-----------------------------------------------------------------------------------
+##  * print help message for the use of the ConfigRunner
+    def __helpMsg(self):
+        print "\n"
+        print " Synopsis: ConfigRunner [Option]                                       "
+        print " Options : -h | --help         [ ]   print this message                "
+        print "           -v | --verbose      [ ]   run in verbose mode               "
+        print "           -i | --interactive  [ ]   run in interactive mode           "
+        print "           -c | --cfg  ...     [x]   specify config file               "
+        print "           -p | --proc ...     [x]   specify process                   "
+        print "           -s | --skip ...     [ ]   specify no of evts to be skipped  "
+        print "           -e | --evts ...     [x]   specify no of evts to be processed"        
+        print "           -o | --out  ...     [x]   specify name of output file       "
+        print "           -j | --job  ...     [ ]   specify job name                  "
+        print "           -u | --user ...     [ ]   specify user defined sequences  \n"
+        print " Options marked by [x] are mandatory and optional else"
+        print "\n"
+
+##-----------------------------------------------------------------------------------            
 ##  * print head for simple error message            
     def __errorMsg(self):
         print "**************************************************"
         print "* Error:"
-
 
 ##-----------------------------------------------------------------------------------
 ##  * print message on screen
@@ -210,6 +205,60 @@ class CfgRunner:
     def __printMsg(self, msg):
         print msg
 
+##-----------------------------------------------------------------------------------
+##  * basic check of input configuration
+    def __checkOptions(self):
+        ################################################
+        ## number of events specified?
+        ################################################        
+        if (self.__numberOfEvents == 0):
+            self.__errorMsg()
+            print '* * no events to be processed. Choose --evts to specify'
+            sys.exit(0)
+        ################################################
+        ## physics process specified?
+        ################################################            
+        if (self.__process == ''):
+            self.__errorMsg()
+            print '* * no physics process specified. Choose --proc to specify'
+            sys.exit(0)            
+        ################################################
+        ## configfile specified and existent?
+        ################################################            
+        if (self.__config == ''):
+            self.__errorMsg()
+            print '* * no config file specified. Choose --cfg to specify'
+        if (not os.path.exists(self.__config)):
+            self.__errorMsg()
+            print '* * config file doen\'t exist. Please check spelling'
+            sys.exit(0)
+        ################################################
+        ## name of output file specified?
+        ################################################            
+        if (self.__outputName == ''):
+            self.__errorMsg()
+            print '* * no output name specified. Choose --out to specify'
+            sys.exit(0)
+
+##-----------------------------------------------------------------------------------
+##  * perform basic job monitoring
+    def __monitorJob(self):
+        err=False
+        ################################################
+        ## check for configuration file errors
+        ################################################        
+        if '---- Configuration BEGIN' in self.__readFromFile(self.__outputErr):
+            self.__errorMsg()
+            print '* * Configuration error occured & job aborted; please check .err file'
+            err=True
+        ################################################            
+        ## check if run started properly
+        ################################################            
+        if not 'Root_Error' in self.__readFromFile(self.__outputErr):
+            print '* * RootError occured & job aborted; please check .err file'
+            err=True
+        return err
+    
 ##-----------------------------------------------------------------------------------
 ##  * read string from file (in read only)
 ##  * used in __waitForFirst                
@@ -226,7 +275,7 @@ class CfgRunner:
 ##  * start runtime estimate            
     def __waitForFirst(self, process):
         printEvery = self.__sleeptime*1.3
-        msg = "* * waiting for the 1st event of '" + str(process) + "' to be processed..." 
+        msg = "* * waiting for the 1st event for '" + str(process) + "' to be processed..." 
         printtimer = {}
         ## print msg up to 10 times
         for i in range(0,10):
@@ -239,27 +288,22 @@ class CfgRunner:
             if self.__cmsRunTimer[process].timePassed(os.times()) > 60:
                 print "* * waited more then 1min for job to begin"
                 print "* * aborting job..."
-                os.sys.exit(1)
+                os.sys.exit(0)
         ## waits until first event has been read
         while (self.__readFromFile(self.__outputErr) == ""):
             Timer.sleep(1)
-            
         ## clear printtimer
         for i in printtimer:
             printtimer[i].cancel()
-            
         ## make a first print out from logfile on screen
+        ## in verbose mode
         if (self.__verbose):
             print self.__readFromFile(self.__outputErr)
 
-        ## check for configuration file errors
-        if '---- Configuration BEGIN' in self.__readFromFile(self.__outputErr):
-            print '* * Configuration error; abort submission'
-            os.system.exit(1)
-        ## check if run started properly
-        if not 'Begin processing the 1st record.' in self.__readFromFile(self.__outputErr):
-            print '* * error occured; first event could not be processed in cmsRun job'
-            os.system.exit(1)
+        ## perform some basic job monitoring
+        if (self.__monitorJob()):
+            sys.exit(0)
+        ## stop runstart timer
         self.__cmsRunTimer[process].stop()
         ## print time to screen to get cmsRun starting
         print '* * time elapsed to start cmsRun:', self.__cmsRunTimer[process].getMeasuredTime() 
@@ -277,7 +321,6 @@ class CfgRunner:
                 os.remove(self.__outputLog)
             if os.path.exists(self.__outputErr):
                 os.remove(self.__outputErr)   
-            
             ## needs runtime environment to be set first
             if (self.__interactive):
                 os.system('cmsRun ' + configfile + " >" + self.__outputLog + " 2> " + self.__outputErr + " < /dev/null&")
@@ -299,8 +342,6 @@ class CfgRunner:
         ## create job directory if doesn't exist yet
         ## and if __jobName != ''
         if (not os.path.exists(self.__jobName)):
-            print 'create directory'
-            print self.__jobName
             os.system('mkdir ' + self.__jobName)        
         ## create tmp config
         process = cms.ConfigWrapper(self.__config, proc)
@@ -370,10 +411,8 @@ class CfgRunner:
         ## while the run did not yet reach the run summary
         ## and wihle there did not yet occure any error
         while not 'Summary' in self.__readFromFile(self.__outputErr) and not err:
-            ## spotted RootError
-            if "Root_Error" in self.__readFromFile(self.__outputErr):
-                print "* * RootError occured in ", process, ' process'
-                err = True
+            ## perform basic monitoring
+            err = self.__monitorJob()
             Timer.sleep(1)
             if((self.__analysisTimer[process].timePassed(os.times()) % printEvery) == 0):
                 print '* * waiting for ', process, ' to end...'

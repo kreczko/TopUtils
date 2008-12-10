@@ -38,8 +38,10 @@ class jobSplitter:
    ## internal variables
    ##
 
+   ## version
+   __version = 'V00-00-01'
    ## name of the object 
-   __name   = 'none'
+   __name    = 'none'
    
 ##-----------------------------------------------------------------------------------    
 ##  Constructor
@@ -49,13 +51,15 @@ class jobSplitter:
 ##-----------------------------------------------------------------------------------        
 ##  * start sequence
    def beginJob(self):
+      versionLine = "*                                      "
+      versionLine+= self.__version + " *"              
       print "**************************************************"
       print "* starting JobSplitter...                        *"
       print "*                                                *"
       print "*                                                *"
       print "*                                                *"    
       print "*                                                *"
-      print "*                                      V00-00-00 *"
+      print versionLine
       print "**************************************************"
       
 ##-----------------------------------------------------------------------------------        
@@ -262,7 +266,8 @@ class jobSplitter:
       newEvnt   = self.__lastEvent(job).__str__()
       subjob    = self.__toToken(subjob, self.__eventToken, newEvnt)
       ## add jobname at the end of the command line
-      subjob+= ' ' + self.__submitToken + ' ' + self.__submitName
+      newJob    = self.__submitName
+      subjob    = self.__toToken(subjob, self.__submitToken, newJob)      
       return subjob
 
 ##-----------------------------------------------------------------------------------
@@ -276,7 +281,7 @@ class jobSplitter:
           
       for job in range(self.__numberOfJobs):
          msg = "...submitting job " + job.__str__() + ' to folder '
-         #msg+= submitName
+         msg+= self.__submitName
          msg+= " first event = " + self.__firstEvent(job).__str__()
          msg+= " last event = " + self.__lastEvent(job).__str__()
          print msg
@@ -298,20 +303,20 @@ class jobSplitter:
          file.write(self.__subjob(job))
          file.close()
          ## do the job submission            
-         ## os.system('chmod a+x '+submissionScript)
-         ## uncomment the following line(s) to run in interactive mode
-         os.system('./'+submissionScript+'>>'+submissionLog+'.log')
+         os.system('chmod a+x '+submissionScript)
+         ## uncomment the following line(s) to run in interactive mode'
+         os.system('./'+submissionScript+'>>'+submissionLog+'.log'+ '< /dev/null&')
          ## uncomment the following line(s) to run in batch mode; qsub parameters are
          ## explained above. For more details see:
          ## http://naf.desy.de/general_naf_docu/working_with_the_local_batch_system/
-         farm = 'qsub'
-         farm+= ' -l h_vmem=1G'                ## increas memory to 1G
-         farm+= ' -cwd'                        ## execute job from current directory
-         farm+= ' -V'                          ## inherit the current shell environment to the job
-         farm+= ' -o'+submissionLog+'.farmout' ## farm output file
-         farm+= ' -e'+submissionLog+'.farmerr' ## farm error file
-         fram+= ' '
-         os.system(fram+'./'+submissionScript+'>>'+submissionLog)
+##         farm = 'qsub'
+##         farm+= ' -l h_vmem=1G'                ## increase memory to 1G
+##         farm+= ' -cwd'                        ## execute job from current directory
+##         farm+= ' -V'                          ## inherit the current shell environment to the job
+##         farm+= ' -o'+submissionLog+'.farmout' ## farm output file
+##         farm+= ' -e'+submissionLog+'.farmerr' ## farm error file
+##         farm+= ' '
+##         os.system(fram+'./'+submissionScript+'>>'+submissionLog)
 
 ##-----------------------------------------------------------------------------------
 if __name__ == '__main__':
