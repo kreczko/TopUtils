@@ -19,7 +19,7 @@ class Config(ConfigWrapper):
 
         #paths:
         self.__path['basic'] = 'makeWeights & makeGenEvt'
-        self.__path['analysis'] = 'looseSelection, analyzeEventShapeMuon, analyzeisolationMET, analyzeSelJets'
+        self.__path['analysis'] = 'looseSelection, analyzeisolationMET, analyzeSelJets'
         self.__path['track'] = 'looseSelection,trackmbefore, trackIsoFilter, trackmafter'
         self.__path['calo'] = 'looseSelection,calombefore, caloIsoFilter, calomafter'
         self.__path['jet'] = 'looseSelection,jetIsombefore, jetIsoFilter, jetIsomafter'

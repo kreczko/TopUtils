@@ -36,7 +36,7 @@ class Config(ConfigWrapper):
         self.__path['filtertest'] = 'looseSelection,analyzeMVA mvaDiscFilter, analyzeDiscFilter'
         self.__path['save'] = self.__path['training']
         ## Matrix Analysis:
-        self.__path['analysis'] = 'looseSelection, analyzeMVA, analyzeEventShapeMuon, analyzeisolationMET, analyzeSelJets'
+        self.__path['analysis'] = 'looseSelection, analyzeMVA, analyzeisolationMET, analyzeSelJets'
         self.__path['track'] = 'looseSelection,trackmbefore, trackIsoFilter, trackmafter'
         self.__path['calo'] = 'looseSelection,calombefore, caloIsoFilter, calomafter'
         self.__path['jet'] = 'looseSelection,jetIsombefore, jetIsoFilter, jetIsomafter'
@@ -51,7 +51,7 @@ class Config(ConfigWrapper):
         paths = pathtypes.split(';')
         
         self.addPath(self.__path['basic'])
-        if type != 'train' and type != 'save':
+        if (not 'training' in pathtypes) and (not 'save' in pathtypes):
             if ('top' in type) or type == 'thad':
                 self.addPath(self.join(self.__mcfilter[type], self.__path['compute']))
             else:
