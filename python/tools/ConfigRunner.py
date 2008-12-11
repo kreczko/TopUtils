@@ -21,7 +21,8 @@ class CfgRunner:
     #executing path is in most cases the outputpath.
     #you can change it here
     #example: self.filepath = 'outputpath/rootfiles/'
-    __filepath = 'cfgR/' 
+    #filepath isn't used for root output so far
+    __filepath = 'CRtmp/' 
     __fileprefix = 'MatrixMethod_' #will be used as filnameprefix
     __filesuffix = '.root' #filetype
     #sampletype
@@ -44,11 +45,13 @@ class CfgRunner:
     def __init__(self):
         self.__cmsRunTimer = {}
         self.__analysisTimer = {}
+        self.__paramoptions = []
 ##--------------------------------------------------------------------------------------------        
     def main(self):
     #possible arguments:
         # parse command line parameter
         try:
+            self.__paramoptions = sys.argv[1:]
             opts, args = getopt.getopt(sys.argv[1:], 'ht:e:s:f:c:a:v', ['help', 'type=', 'events=', 'out=', 'err=', 'add=', 'cfgt=', 'skip='])
         except getopt.error, msg:
             print msg
@@ -121,6 +124,8 @@ class CfgRunner:
         print "starting something for ", type
         subject = 'ConfigRunner Job successfully ended'
         msg = 'ConfigRunner just finished the sample "' + type + '"\n\n'
+        msg += 'Tool command used:\n'
+        msg += 'ConfigRunner' + self.__paramoptions.__str__()+'\n\n'
         msg += 'following parameters were used:\n'
         msg += '- number of events: ' + self.__numberofevents.__str__() + '\n'
         msg += '- events skipped: ' + self.__skipevents.__str__() + '\n'
@@ -168,7 +173,7 @@ class CfgRunner:
         print "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
         if not 'Begin processing the 1st record.' in self.__readFromFile(self.__outputerr):
             print 'an error occured'
-            self.sendErrorNotification('an error occured' + self.__readFromFile(self.__outputerr))
+            self.sendErrorNotification('an error occured\n\n' + self.__readFromFile(self.__outputerr))
             os.sys.exit(- 1)
         self.__cmsRunTimer[type].stop()
         print 'Time to start cmsRun (s):', self.__cmsRunTimer[type].getMeasuredTime() 
@@ -270,7 +275,7 @@ class CfgRunner:
                     
         while not 'Summary' in self.__readFromFile(erO) and not err:            
             if "Root_Error" in self.__readFromFile(erO):
-                msg = "an error occured in " + type + ' sample'
+                msg = "an error occured in " + type + ' sample\n\n'
                 print msg
                 msg += '\n Output file: \n\n' + self.__readFromFile(erO)
                 err = True
