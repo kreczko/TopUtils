@@ -330,7 +330,8 @@ class jobSplitter:
          ## do the job submission            
          os.system('chmod a+x '+submissionScript)
          ## uncomment the following line(s) to run in interactive mode'
-         os.system('./'+submissionScript+'>>'+submissionLog+'.log'+ '< /dev/null&')
+         os.system('./'+submissionScript+'>>'+submissionLog+'.log')
+         #os.system('./'+submissionScript+'>>'+submissionLog+'.log'+ '< /dev/null&')         
          ## uncomment the following line(s) to run in batch mode; qsub parameters are
          ## explained above. For more details see:
          ## http://naf.desy.de/general_naf_docu/working_with_the_local_batch_system/

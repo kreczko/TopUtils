@@ -264,7 +264,7 @@ class CfgRunner:
         ################################################            
         ## check if run started properly
         ################################################            
-        if not 'Root_Error' in self.__readFromFile(self.__outputErr):
+        if 'Root_Error' in self.__readFromFile(self.__outputErr):
             print '* * RootError occured & job aborted; please check .err file'
             err=True
         return err
