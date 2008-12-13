@@ -99,8 +99,8 @@ class CfgRunner:
     def main(self):
         try:
             opts, args = getopt.getopt(sys.argv[1:],
-                                       'hvic:p:s:e:o:j:',
-                                       ['help','verbose','interactive','cfg=','proc=','skip=','evts=','out=','job=','user=']
+                                       'hvic:p:s:e:o:d:',
+                                       ['help','verbose','interactive','cfg=','proc=','skip=','evts=','out=','dir=','user=']
                                        )
         except getopt.error, msg:
             print msg
@@ -154,7 +154,7 @@ class CfgRunner:
             ################################################
             ## define error file with sample suffix
             ################################################                
-            elif o in ("-j", "--job"):
+            elif o in ("-d", "--dir"):
                 if (not a == ''):
                     self.__jobName = a
             ################################################                
@@ -179,18 +179,28 @@ class CfgRunner:
 ##  * print help message for the use of the ConfigRunner
     def __helpMsg(self):
         print "\n"
-        print " Synopsis: ConfigRunner [Option]                                       "
-        print " Options : -h | --help         [ ]   print this message                "
-        print "           -v | --verbose      [ ]   run in verbose mode               "
-        print "           -i | --interactive  [ ]   run in interactive mode           "
-        print "           -c | --cfg  ...     [x]   specify config file               "
-        print "           -p | --proc ...     [x]   specify process                   "
-        print "           -s | --skip ...     [ ]   specify no of evts to be skipped  "
-        print "           -e | --evts ...     [x]   specify no of evts to be processed"        
-        print "           -o | --out  ...     [x]   specify name of output file       "
-        print "           -j | --job  ...     [ ]   specify job name                  "
-        print "           -u | --user ...     [ ]   specify user defined sequences  \n"
-        print " Options marked by [x] are mandatory and optional else"
+        print " Synopsis   : ConfigRunner [Option] --cfg '...' -p PROC -e EVTS -o OUTPUT \n"
+        print " Description: Script to allow replacement of cfg file parameters for cmsRun "
+        print "              via options; supported parameter replacements are:            "
+        print "              * number of events [-e],                                      "
+        print "              * number of skipped events [-s],                              "
+        print "              * name of output file [-o],                                   "
+        print "              * input source [-p]                                           "
+        print "              The input source is steered via vector define in:             "
+        print "              TopAnalysis/Configuration/python/processes.py                 "
+        print "              Also user defined replacements are supported.               \n"
+        print " Options : -h | --help         [ ]   print this message                     "
+        print "           -v | --verbose      [ ]   run in verbose mode                    "
+        print "           -i | --interactive  [ ]   run in interactive mode                "
+        print "           -c | --cfg  ...     [x]   specify config file                    "
+        print "           -p | --proc ...     [x]   specify physics process                "
+        print "           -s | --skip ...     [ ]   specify no of evts to be skipped       "
+        print "           -e | --evts ...     [x]   specify no of evts to be processed     "        
+        print "           -o | --out  ...     [x]   specify name of output file            "
+        print "           -d | --dir  ...     [ ]   specify job directory                  "
+        print "           -u | --user ...     [ ]   specify user defined sequences       \n"
+        print " [ ] optional                                                               "
+        print " [x] mandatory                                                              "                
         print "\n"
 
 ##-----------------------------------------------------------------------------------            
