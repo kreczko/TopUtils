@@ -28,7 +28,7 @@ class jobSplitter:
    ## job name token
    __outputToken    = '-o'
    ## submit token
-   __submitToken    = '-j'
+   __submitToken    = '-d'
    ## submit name
    __submitName     = ''
    ## number of jobs
@@ -83,7 +83,7 @@ class jobSplitter:
       try:
          opts, args = getopt.getopt(sys.argv[1:],
                                     'hvc:s:e:o:d:n:x:',
-                                    ['help','verbose','cmd=','skip=','evts=','out=','dir=','n=','name=']
+                                    ['help','verbose','cmd=','skip=','evts=','out=','dir=','njob=','name=']
                                     )
       except getopt.error, msg:
          print msg
@@ -132,19 +132,19 @@ class jobSplitter:
          ################################################
          ## token for job name for 'cmd'
          ################################################               
-         elif o in ("-j", "--job"):
+         elif o in ("-d", "--dir"):
             if (not (a == '')):               
                self.__submitToken = a
          ################################################
          ## jon name
          ################################################               
-         elif o in ("-n", "--name"):
+         elif o in ("-x", "--name"):
             if (not (a == '')):               
                self.__submitName = a               
          ################################################
          ## maximal number of jobs to split
          ################################################               
-         elif o in ("-n", "--n"):
+         elif o in ("-n", "--njob"):
             self.__numberOfJobs = int(a)                  
          else:
             self.__errorMsg()
@@ -157,29 +157,29 @@ class jobSplitter:
 
 ##-----------------------------------------------------------------------------------
 ##  * print help message for the use of the ConfigRunner
-    def __helpMsg(self):
-        print "\n"
-        print " Synopsis: submit [Option] -cmd '...' -n NEVTS --dir JOBNAME              \n"
-        print " Description: Script to submit jobs to the NAF farm system. Major is        "
-        print "              expected with cmsRun, but it can take any; the execution      "
-        print "              should be specified as a full command line including all its  "
-        print "              options in the --cmd option; submission expects tokens for -e,"
-        print "               -s, -o, -d to be present in the command line. Defaults are   "
-        print "              given but may be specified if different.                    \n"        
-        print " Options : -h | --help           [ ]   print this message                   "
-        print "           -v | --verbose        [ ]   run in verbose mode                  "
-        print "           -c | --cmd    ....    [x]   specify full command line            "
-        print "           -s | --skip   '-s'    [!]   specify token skip                   "
-        print "           -e | --evts   '-e'    [!]   specify token for the no of evts     "        
-        print "           -o | --out    '-o'    [!]   specify token for output file        "
-        print "           -d | --dir    '-d'    [!]   specify token for the job directory  "
-        print "           -n | --n      ....    [x]   nuber of jobs to be created          "
-        print "           -x | --name   ....    [x]   submission job directory           \n"        
-        print " [ ] optional                                                               "
-        print " [x] mandatory                                                              "
-        print " [!] need to be present in the full command line [--cmd '...']              "        
-        print "\n"
-
+   def __helpMsg(self):
+      print "\n"
+      print " Synopsis   : submit [Option] -cmd '...' -n NEVTS --dir JOBNAME           \n"
+      print " Description: Script to submit jobs to the NAF farm system. Major is        "
+      print "              expected with cmsRun, but it can take any; the execution      "
+      print "              should be specified as a full command line including all      "
+      print "              its options in the --cmd option; submission expects tokens    "
+      print "              for -e, -s, -o, -d to be present in the command line.         "
+      print "              Defaults are given but may be specified if different.       \n"        
+      print " Options    : -h | --help           [ ]   print this message                "
+      print "              -v | --verbose        [ ]   run in verbose mode               "
+      print "              -c | --cmd    ....    [x]   specify full command line         "
+      print "              -s | --skip   '-s'    [!]   specify token skip                "
+      print "              -e | --evts   '-e'    [!]   specify token for the no of evts  "        
+      print "              -o | --out    '-o'    [!]   specify token for output file     "
+      print "              -d | --dir    '-d'    [!]   specify token for the job dir     "
+      print "              -n | --njob   ....    [x]   nuber of jobs to be created       "
+      print "              -x | --name   ....    [x]   submission job directory        \n"        
+      print " [ ] optional                                                               "
+      print " [x] mandatory                                                              "
+      print " [!] need to be present in the full command line [--cmd '...']              "        
+      print "\n"
+         
 ##-----------------------------------------------------------------------------------
 ##  * print head for simple error message            
    def __errorMsg(self):
@@ -288,7 +288,7 @@ class jobSplitter:
       newSkip   = self.__firstEvent(job).__str__()
       subjob    = self.__toToken(subjob, self.__skipsToken, newSkip)
       ## replace events
-      newEvnt   = self.__lastEvent(job).__str__()-self.__firstEvent(job).__str__()
+      newEvnt   = self.__lastEvent(job)-self.__firstEvent(job)
       subjob    = self.__toToken(subjob, self.__eventToken, newEvnt)
       ## add jobname at the end of the command line
       newJob    = self.__submitName
@@ -327,23 +327,44 @@ class jobSplitter:
          file.write('echo ...executing '+ self.__subjob(job) + '\n')
          file.write(self.__subjob(job))
          file.close()
-         ## do the job submission            
          os.system('chmod a+x '+submissionScript)
+
+         ## do the job submission            
+         ##if self.__jobstarted:
+         ##   thread = threading.Thread(target=self.__waitingForEnd, args=(self.__type,))
+         ##   thread.start()
+         ##   self.__jobstarted = False
+            
+         ## --------------------------------------------------------------------------
          ## uncomment the following line(s) to run in interactive mode'
-         os.system('./'+submissionScript+'>>'+submissionLog+'.log')
-         #os.system('./'+submissionScript+'>>'+submissionLog+'.log'+ '< /dev/null&')         
+         ## os.system('./'+submissionScript+'>>'+submissionLog+'.log')                  ## interactive
+         ## os.system('./'+submissionScript+'>>'+submissionLog+'.log'+ '< /dev/null&')  ## in batch on work group server
+            
+         ## --------------------------------------------------------------------------
          ## uncomment the following line(s) to run in batch mode; qsub parameters are
          ## explained above. For more details see:
          ## http://naf.desy.de/general_naf_docu/working_with_the_local_batch_system/
-##         farm = 'qsub'
-##         farm+= ' -l h_vmem=1G'                ## increase memory to 1G
-##         farm+= ' -cwd'                        ## execute job from current directory
-##         farm+= ' -V'                          ## inherit the current shell environment to the job
-##         farm+= ' -o'+submissionLog+'.farmout' ## farm output file
-##         farm+= ' -e'+submissionLog+'.farmerr' ## farm error file
-##         farm+= ' '
-##         os.system(fram+'./'+submissionScript+'>>'+submissionLog)
-
+         farm = 'qsub'
+         farm+= ' -l h_vmem=1G'                 ## increase memory to 1G
+         farm+= ' -cwd'                         ## execute job from current directory
+         farm+= ' -V'                           ## inherit the current shell environment to the job
+         farm+= ' -o '+submissionLog+'.farmout' ## farm output file
+         farm+= ' -e '+submissionLog+'.farmerr' ## farm error file
+         farm+= ' '
+         #use with from python2.6.1 on
+         #subprocess.check_call(farm+'./'+submissionScript+'>>'+submissionLog+'.farmlog', shell=True)
+         os.system(farm+'./'+submissionScript+'>>'+submissionLog+'.farmlog')
+         #os.spawnl(farm+'./'+submissionScript+'>>'+submissionLog+'.farmlog')         
+         Timer.sleep(10)
+      ## give submission summary and some final words
+      print '\n'
+      os.system('qstat -u `whoami`')
+      print '-----------------------------------------------------------------------------'
+      print ' you check the status of your jobs with    : \'qstat -u user\' '
+      print ' you can combined histograms later von with: \'hadd output.root input_?.root'
+      print '-----------------------------------------------------------------------------'
+      print '\n'
+      
 ##-----------------------------------------------------------------------------------
 if __name__ == '__main__':
     splitter = jobSplitter()

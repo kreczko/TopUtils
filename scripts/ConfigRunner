@@ -182,23 +182,23 @@ class CfgRunner:
         print " Synopsis   : ConfigRunner [Option] --cfg '...' -p PROC -e EVTS -o OUTPUT \n"
         print " Description: Script to allow replacement of cfg file parameters for cmsRun "
         print "              via options; supported parameter replacements are:            "
-        print "              * number of events [-e],                                      "
+        print "              * number of events         [-e],                              "
         print "              * number of skipped events [-s],                              "
-        print "              * name of output file [-o],                                   "
-        print "              * input source [-p]                                           "
-        print "              The input source is steered via vector define in:             "
-        print "              TopAnalysis/Configuration/python/processes.py                 "
+        print "              * name of output file      [-o],                              "
+        print "              * input source             [-p].                              "
+        print "              The input source is steered via vector defines in the file:   "
+        print "              './TopAnalysis/Configuration/python/processes.py'             "
         print "              Also user defined replacements are supported.               \n"
-        print " Options : -h | --help         [ ]   print this message                     "
-        print "           -v | --verbose      [ ]   run in verbose mode                    "
-        print "           -i | --interactive  [ ]   run in interactive mode                "
-        print "           -c | --cfg  ...     [x]   specify config file                    "
-        print "           -p | --proc ...     [x]   specify physics process                "
-        print "           -s | --skip ...     [ ]   specify no of evts to be skipped       "
-        print "           -e | --evts ...     [x]   specify no of evts to be processed     "        
-        print "           -o | --out  ...     [x]   specify name of output file            "
-        print "           -d | --dir  ...     [ ]   specify job directory                  "
-        print "           -u | --user ...     [ ]   specify user defined sequences       \n"
+        print " Options    : -h | --help         [ ]   print this message                  "
+        print "              -v | --verbose      [ ]   run in verbose mode                 "
+        print "              -i | --interactive  [ ]   run in interactive mode             "
+        print "              -c | --cfg  ...     [x]   specify config file                 "
+        print "              -p | --proc ...     [x]   specify physics process             "
+        print "              -s | --skip ...     [ ]   specify no of evts to be skipped    "
+        print "              -e | --evts ...     [x]   specify no of evts to be processed  "        
+        print "              -o | --out  ...     [x]   specify name of output file         "
+        print "              -d | --dir  ...     [ ]   specify job directory               "
+        print "              -u | --user ...     [ ]   specify user defined sequences    \n"
         print " [ ] optional                                                               "
         print " [x] mandatory                                                              "                
         print "\n"
@@ -261,6 +261,13 @@ class CfgRunner:
             self.__errorMsg()
             print '* * Configuration error occured & job aborted; please check .err file'
             err=True
+        ################################################
+        ## check for I/O errors
+        ################################################        
+        if '---- FileOpenError BEGIN' in self.__readFromFile(self.__outputErr):
+            self.__errorMsg()
+            print '* * I/O error occured & job aborted; please check .err file'
+            err=True            
         ################################################            
         ## check if run started properly
         ################################################            
