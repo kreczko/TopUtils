@@ -8,7 +8,9 @@
 		<input name="SemiLepAnalysis">
 			<folder name='analysis'>
 			<!-- only histogram which have 'muon' in their name -->
-				<filter type='contains' value='muon' />
+				<filter type='exact' value='muon' />
+<!--				Will be replaced by 'exact' filters in the parser-->
+<!--				<filter type='histfile' value='Muon.hist' />-->
 			</folder>
 			<folder name='kinematic'>
 				<!-- histograms containing 'pt' but also do not have electron in their name-->
@@ -21,6 +23,9 @@
 				<filter type='contains' value='elec' />
 			</folder>
 		</input>
+		<input name='strangeInput'>
+			<folder name ='strange'/>
+		</input>
 	<!-- includes of the data -->
 		<file id='qcd' name='background.root' />
 		<file id='top' name='signal.root' />
@@ -30,14 +35,14 @@
 		makes the canvas, mixes the histogramms defined in the histSetup
 		summaryFile = ps oder pdf
 	-->
-	<plots create='eps,pdf' makeSummaryFile='true' summaryFile="inspect.pdf">
-		<hist name='muonPt' defaults='HistSetupName' input="SemiLepAnalysis">
+	<plots create='eps,pdf' makeSummaryFile='true' summaryFile='inspect.pdf'>
+		<hist name='muonPt' defaults='HistSetupName' input='SemiLepAnalysis'>
 		<!-- name is also used for legend -->
 			<var name='qcd' from='file:qcd' markerStyle='22' color='23' />
 			<var name='signal' from='file:top' markerStyle='23' color='blue' />
 			<var name='combined' from='var:signal,var:qcd' compute='add'
 				markerStyle='24' />
-			<legend name="plotname" posx="20" posy="0" fonsize="12" />
+			<legend name='plotname' posx='20' posy='0' fonsize='12' />
 		</hist>
 		<histlist name='electronKinematic' input='kinematicPlots'>
 			<var name='qcd' from='file:qcd' markerStyle='22' color='23' />

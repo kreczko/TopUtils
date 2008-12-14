@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<Hist name="default">
+<!--histogram min and max usually from the histvalues -->
+<!--	<max v='1' />-->
+<!--	<min v='0' />-->
+	<logX v='0' />
+	<logY v='0' />
+	<gridX v='0' />
+	<gridY v='0' />
+	<scale v='1.0' />
+	<showErros v='false' />
+	<titleX v= 'var' />
+	<titleY v='events' />
+</Hist>

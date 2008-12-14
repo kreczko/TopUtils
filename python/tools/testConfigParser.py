@@ -1,5 +1,5 @@
 import sys
-
+from xml.dom.minidom import Document
 import unittest
 from ConfigParser import ConfigParser, ConfigError
 
@@ -45,6 +45,47 @@ class testConfigParser(unittest.TestCase):
         includes = self.parser.readIncludes()
         self.assertTrue('test/hist.xml' in includes )
         self.assertEqual(len(includes), 3)
+        
+    def testGetInputFiles(self):
+        self.assertRaises(ConfigError, self.falseParser.getInputFiles)
+        inputfiles = self.parser.getInputFiles()
+        self.assertEqual(inputfiles['qcd'], 'background.root')
+        self.assertEqual(inputfiles['top'], 'signal.root')
+        self.assertEqual(inputfiles['kin'], 'kinematic.root')
+        
+    def testGetInputs(self):
+        inputs = self.parser.getInputs()
+        self.assertEqual(inputs['SemiLepAnalysis'].folderlist[0].name, 'analysis')
+        self.assertTrue(inputs['SemiLepAnalysis'].folderlist[0].hasFilters())
+        self.assertEqual(inputs['SemiLepAnalysis'].folderlist[0].filterlist[0].type, 'contains')
+        self.assertEqual(inputs['SemiLepAnalysis'].folderlist[0].filterlist[0].value, 'muon')
+        self.assertFalse(inputs['strangeInput'].folderlist[0].hasFilters())
+        
+    def testGetChildNodes(self):
+        #make a small XML document
+        tree_data = Document()
+        node = tree_data.createElement('li')
+        text = tree_data.createTextNode('Loaded Python Modules')
+        node.appendChild(text)
+        node1 = tree_data.createElement('ul')
+        node.appendChild(node1)
+        #put the document together
+        tree_data.appendChild(node)
+        #test if the right child is given
+        self.assertEqual(node1, self.parser.getChildNodes(node, 'ul')[0])
+    
+    def testGetPlots(self):
+        plots = self.parser.getPlots()
+        self.assertEqual(plots.fileOutputs, ['eps','pdf'])
+        self.assertTrue(plots.makeSummary)
+        self.assertEqual(plots.sumfile, 'inspect.pdf')
+        #self.assertEqual(plots.histlist)
+    
+    def testGetFilenameByID(self):
+        self.assertEqual(self.parser.getFilenameByID('qcd'), 'background.root')
+        
+        
+                
         
         
 """
