@@ -50,6 +50,8 @@ class CfgRunner:
     __version         = 'V00-00-01'
     ## time in seconds to wait
     __sleeptime       = 10
+    ## internal farm parameters
+    __farmParams      = ''
     ## user defined parameters
     __userParams      = ''
     ## for interactive mode
@@ -99,8 +101,8 @@ class CfgRunner:
     def main(self):
         try:
             opts, args = getopt.getopt(sys.argv[1:],
-                                       'hvic:p:s:e:o:d:',
-                                       ['help','verbose','interactive','cfg=','proc=','skip=','evts=','out=','dir=','user=']
+                                       'hvic:p:s:e:o:d:f:u:',
+                                       ['help','verbose','interactive','cfg=','proc=','skip=','evts=','out=','dir=','farm=','user=']
                                        )
         except getopt.error, msg:
             print msg
@@ -158,11 +160,17 @@ class CfgRunner:
                 if (not a == ''):
                     self.__jobName = a
             ################################################                
+            ## add farm parameters
+            ################################################
+            elif o in ("-f", "--farm"):
+                if (not a == ''):
+                    self.__farmParams = a
+            ################################################                
             ## add user defined parameters
             ################################################
             elif o in ("-u", "--user"):
                 if (not a == ''):
-                    self.__userParams = a
+                    self.__userParams = a                    
             else:
                 self.__errorMsg()
                 print '* * argument(s) not recognized. See --help for usage'
@@ -179,28 +187,29 @@ class CfgRunner:
 ##  * print help message for the use of the ConfigRunner
     def __helpMsg(self):
         print "\n"
-        print " Synopsis   : ConfigRunner [Option] --cfg '...' -p PROC -e EVTS -o OUTPUT \n"
-        print " Description: Script to allow replacement of cfg file parameters for cmsRun "
-        print "              via options; supported parameter replacements are:            "
-        print "              * number of events         [-e],                              "
-        print "              * number of skipped events [-s],                              "
-        print "              * name of output file      [-o],                              "
-        print "              * input source             [-p].                              "
-        print "              The input source is steered via vector defines in the file:   "
-        print "              './TopAnalysis/Configuration/python/processes.py'             "
-        print "              Also user defined replacements are supported.               \n"
+        print " Synopsis   : ConfigRunner [Option] --cfg '...' -p PROC -e EVTS -o OUTPUT  \n"
+        print " Description: Script to allow replacement of cfg file parameters for cmsRun  "
+        print "              via options; supported parameter replacements are:             "
+        print "              * number of events         [-e],                               "
+        print "              * number of skipped events [-s],                               "
+        print "              * name of output file      [-o],                               "
+        print "              * input source             [-p].                               "
+        print "              The input source is steered via vector defines in the file:    "
+        print "              './TopAnalysis/Configuration/python/processes.py'              "
+        print "              Also user defined replacements are supported.                \n"
         print " Options    : -h | --help         [ ]   print this message                  "
-        print "              -v | --verbose      [ ]   run in verbose mode                 "
-        print "              -i | --interactive  [ ]   run in interactive mode             "
-        print "              -c | --cfg  ...     [x]   specify config file                 "
-        print "              -p | --proc ...     [x]   specify physics process             "
-        print "              -s | --skip ...     [ ]   specify no of evts to be skipped    "
-        print "              -e | --evts ...     [x]   specify no of evts to be processed  "        
-        print "              -o | --out  ...     [x]   specify name of output file         "
-        print "              -d | --dir  ...     [ ]   specify job directory               "
-        print "              -u | --user ...     [ ]   specify user defined sequences    \n"
-        print " [ ] optional                                                               "
-        print " [x] mandatory                                                              "                
+        print "              -v | --verbose      [ ]   run in verbose mode                  "
+        print "              -i | --interactive  [ ]   run in interactive mode              "
+        print "              -c | --cfg  ...     [x]   specify config file                  "
+        print "              -p | --proc ...     [x]   specify physics process              "
+        print "              -s | --skip ...     [ ]   specify no of evts to be skipped     "
+        print "              -e | --evts ...     [x]   specify no of evts to be processed   "        
+        print "              -o | --out  ...     [x]   specify name of output file          "
+        print "              -d | --dir  ...     [ ]   specify job directory                "
+        print "              -f | --farm ...     [ ]   specify name of cfg\'s for farm use\n"
+        print "              -u | --user ...     [ ]   specify user defined sequences     \n"        
+        print " [ ] optional                                                                "
+        print " [x] mandatory                                                               "                
         print "\n"
 
 ##-----------------------------------------------------------------------------------            
@@ -360,8 +369,13 @@ class CfgRunner:
         ## and if __jobName != ''
         if (not os.path.exists(self.__jobName)):
             os.system('mkdir ' + self.__jobName)        
-        ## create tmp config
-        process = cms.ConfigWrapper(self.__config, proc)
+        ## create tmp config; choose a standard name
+        ## if __farmParams was not specified via -f 
+        tmp = "tmp_" + self.__jobName
+        if (not self.__farmParams==''):
+            tmp = self.__farmParams
+        tmp+= "_cfg.py"
+        process = cms.ConfigWrapper(self.__config, tmp, proc)
         ## modify events
         process.modifyOption('events', self.__numberOfEvents)
         ## modify skips

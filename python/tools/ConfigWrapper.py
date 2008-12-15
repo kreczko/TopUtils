@@ -23,11 +23,11 @@ class ConfigWrapper:
 ##-----------------------------------------------------------------------------------
 ##  Constructor; options are source, output, event, paths
 ##  these can be changed within a predefined config file
-    def __init__(self, cfg, type):
+    def __init__(self, cfg, output, type):
         ## read input config from source file 
         self.__config = self.readFromFile(cfg)
         ## create output config filename            
-        self.__outputConfig = "tmpConfig_" + type + "_cfg.py"
+        self.__outputConfig = output
         ## define options
         self._options = {}
         self._options['source'] = ""  ## change source

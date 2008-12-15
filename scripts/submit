@@ -29,6 +29,8 @@ class jobSplitter:
    __outputToken    = '-o'
    ## submit token
    __submitToken    = '-d'
+   ## farm token
+   __farmToken      = '-f'   
    ## submit name
    __submitName     = ''
    ## number of jobs
@@ -82,8 +84,8 @@ class jobSplitter:
    def main(self):       
       try:
          opts, args = getopt.getopt(sys.argv[1:],
-                                    'hvc:s:e:o:d:n:x:',
-                                    ['help','verbose','cmd=','skip=','evts=','out=','dir=','njob=','name=']
+                                    'hvc:s:e:o:d:f:n:x:',
+                                    ['help','verbose','cmd=','skip=','evts=','out=','dir=','farm=','njob=','name=']
                                     )
       except getopt.error, msg:
          print msg
@@ -136,6 +138,12 @@ class jobSplitter:
             if (not (a == '')):               
                self.__submitToken = a
          ################################################
+         ## token for farm internal communication
+         ################################################               
+         elif o in ("-f", "--farm"):
+            if (not (a == '')):               
+               self.__farmToken = a               
+         ################################################
          ## jon name
          ################################################               
          elif o in ("-x", "--name"):
@@ -173,6 +181,7 @@ class jobSplitter:
       print "              -e | --evts   '-e'    [!]   specify token for the no of evts  "        
       print "              -o | --out    '-o'    [!]   specify token for output file     "
       print "              -d | --dir    '-d'    [!]   specify token for the job dir     "
+      print "              -f | --farm   '-f'    [ ]   specify token for farm internals  "      
       print "              -n | --njob   ....    [x]   nuber of jobs to be created       "
       print "              -x | --name   ....    [x]   submission job directory        \n"        
       print " [ ] optional                                                               "
@@ -290,9 +299,12 @@ class jobSplitter:
       ## replace events
       newEvnt   = self.__lastEvent(job)-self.__firstEvent(job)
       subjob    = self.__toToken(subjob, self.__eventToken, newEvnt)
-      ## add jobname at the end of the command line
+      ## replace jobname
       newJob    = self.__submitName
-      subjob    = self.__toToken(subjob, self.__submitToken, newJob)      
+      subjob    = self.__toToken(subjob, self.__submitToken, newJob)
+      ## add name of cfg for farmjob at the end of the command line
+      newCfg    = ' ' + self.__farmToken + ' ' + newOutput
+      subjob   += newCfg
       return subjob
 
 ##-----------------------------------------------------------------------------------
@@ -318,7 +330,7 @@ class jobSplitter:
             os.system('mkdir ' + self.__submitName)
          ## prepare submission script
          submissionScript = self.__submitName
-         submissionScript+= '/'
+         submissionScript+= '/job_'
          submissionScript+= self.__submitName
          submissionLog    = submissionScript
          submissionScript+='_'+job.__str__()
@@ -355,12 +367,12 @@ class jobSplitter:
          #subprocess.check_call(farm+'./'+submissionScript+'>>'+submissionLog+'.farmlog', shell=True)
          os.system(farm+'./'+submissionScript+'>>'+submissionLog+'.farmlog')
          #os.spawnl(farm+'./'+submissionScript+'>>'+submissionLog+'.farmlog')         
-         Timer.sleep(10)
+         Timer.sleep(1)
       ## give submission summary and some final words
       print '\n'
       os.system('qstat -u `whoami`')
       print '-----------------------------------------------------------------------------'
-      print ' you check the status of your jobs with    : \'qstat -u user\' '
+      print ' you can check the status of your jobs with    : \'qstat -u user\' '
       print ' you can combined histograms later von with: \'hadd output.root input_?.root'
       print '-----------------------------------------------------------------------------'
       print '\n'
