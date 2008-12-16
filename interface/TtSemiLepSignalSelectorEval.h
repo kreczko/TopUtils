@@ -26,6 +26,11 @@ inline double evaluateTtSemiLepSignalSelector(PhysicsTools::MVAComputerCache& mv
 	values.push_back(PhysicsTools::Variable::Value("dphiMETJet2", sigsel.dphiMETJet2()));
 	values.push_back(PhysicsTools::Variable::Value("MET", sigsel.MET()));
 	values.push_back(PhysicsTools::Variable::Value("dphiMuJ1J2", sigsel.dphiMuJ1J2()));
+	values.push_back(PhysicsTools::Variable::Value("leptonPt", sigsel.leptonPt()));
+	values.push_back(PhysicsTools::Variable::Value("aplanarity", sigsel.aplanarity()));
+	values.push_back(PhysicsTools::Variable::Value("sphericity", sigsel.sphericity()));
+	values.push_back(PhysicsTools::Variable::Value("circularity", sigsel.circularity()));
+	values.push_back(PhysicsTools::Variable::Value("isotropy", sigsel.isotropy()));
 
 	return mvaComputer->eval(values);
 

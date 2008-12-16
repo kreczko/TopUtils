@@ -56,12 +56,34 @@ public:
 	double dphiMuJ1J2() const {
 		return fabs(dphiMuJ1J2_);
 	}
+
+	double leptonPt() const {
+		return leptonPt_;
+	}
+
+	double aplanarity() const {
+		return aplanarity_;
+	}
+
+	double sphericity() const{
+		return sphericity_;
+	}
+
+	double circularity() const {
+		return circularity_;
+	}
+
+	double isotropy() const{
+		return isotropy_;
+	}
 private:
 	double dphiMETJet4_, dphiMETLepton_;
 	double METTimesLeadingJet_, sumEtJet3And4_;
 	double sumAllJetsEtAndLepton_, vecSumAllJetsAndLepton_;
 	double sumEtleadingJetAnd2TimesLeptonPt_;
 	double dphiMETJet2_, MET_, dphiMuJ1J2_;
+	double leptonPt_;
+	double aplanarity_, sphericity_, circularity_, isotropy_;
 
 };
 
