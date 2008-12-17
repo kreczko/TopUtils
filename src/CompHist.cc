@@ -579,32 +579,44 @@ void CompHist::setHistStyles(TH1& hist, int idx, int jdx, int kdx) {
 }
 
 void CompHist::setHistLabels(TH1& hist, int idx) {
-	if (idx<((int)xAxes_.size()) && idx<((int)yAxes_.size())) {
-		setAxesStyle(hist, xAxes_[idx].c_str(), yAxes_[idx].c_str() );
-	} else if (idx<((int)xAxes_.size())) {
-		setAxesStyle(hist, xAxes_[idx].c_str(), "events");
-	} else {
-		if (strcmp(hist.GetTitle(), "") == 0) {
-			setAxesStyle(hist, hist.GetXaxis()->GetTitle(), "events");
-		} else {
-			if (hist.InheritsFrom("TH2") ) {
-				// try to find labels for x and y axes
-				// using the histogram title
-				// and a substring as separator
-				TString h2Title = hist.GetTitle();
-				TString xySep = " vs. ";
-				if (h2Title.Contains(xySep) ) {
-					TString xTitle = h2Title( 0, h2Title.Index(xySep) );
-					int yTitleStart = h2Title.Index(xySep)+xySep.Length();
-					TString yTitle = h2Title(yTitleStart, h2Title.Length()
-							-yTitleStart);
-					setAxesStyle(hist, xTitle.Data(), yTitle.Data() );
-				} else
-					setAxesStyle(hist, "x", "y");
-			} else
-				setAxesStyle(hist, hist.GetTitle(), "events");
-		}
-	}
+  // default values
+  TString xTitle = hist.GetTitle();
+  TString yTitle = "events";
+  // special case: TH2
+  if( hist.InheritsFrom("TH2") ) {
+    // try to find labels for x- and y-axes
+    // using the histogram title and a substring as separator
+    TString h2Title = hist.GetTitle();
+    TString xySep = " vs. ";
+    if( h2Title.Contains(xySep) ) {
+      xTitle = h2Title( 0, h2Title.Index(xySep) );
+      int yTitleStart = h2Title.Index(xySep)+xySep.Length();
+      yTitle = h2Title( yTitleStart, h2Title.Length()-yTitleStart );
+    }
+    else {
+      xTitle = "x";
+      yTitle = "y";
+    }
+  }
+  // normal: not TH2
+  else {
+    // first: x-axis...
+    // try to get label from config file
+    if( idx < ((int) xAxes_.size()) )
+      xTitle = xAxes_[idx];
+    // try to get label from histo axis
+    else if( strcmp(hist.GetXaxis()->GetTitle(), "") != 0 )
+      xTitle = hist.GetXaxis()->GetTitle();
+    // second: y-axis...
+    // try to get label from config file
+    if( idx < ((int) yAxes_.size()) )
+      yTitle = yAxes_[idx];
+    // try to get label from histo axis
+    else if( strcmp(hist.GetYaxis()->GetTitle(), "") != 0 )
+      yTitle = hist.GetYaxis()->GetTitle();
+  }
+  // set labels
+  setAxesStyle( hist, xTitle.Data(), yTitle.Data() );
 }
 
 void CompHist::setHistScale(TH1& hist, int idx) {
