@@ -1,12 +1,13 @@
-from ROOT import gROOT, TCanvas, TH1F, TFile
+from ROOT import gROOT, TCanvas, TH1F, TFile, TF1
 from math import sqrt
+import os
 
 class Macro:
     before = 'mbefore'
     after = 'mafter'
     debug = True
-    cuts = [0.1, 0.2, 0.3]
-    latexfile = 'effMacro.tex'
+    cuts = [0.1, 0.2, 0.3, 0.9]
+    latexfile = 'Macro.tex'
     def __init__(self, outputfile, inputfiles, inputdirs):
         print 'starting macro'
         self.effsig = {}
@@ -48,7 +49,7 @@ class Macro:
             
     def calcEff(self, type):
         print 'calculating efficiency for', type
-        if type in ['qcd', 'top'] and type in self.inputfiles.keys():
+        if type in ['qcd', 'top', 'wjets'] and type in self.inputfiles.keys():
             #just to be sure:
             self.output.Cd('/')
             self.createFolders(type, self.inputdirs)
@@ -99,21 +100,48 @@ class Macro:
     def doEffMixed(self):
         for dir in self.inputdirs:
             #get first file
-            file = self.inputfiles[self.inputfiles.keys()[0]]
+            #file = self.inputfiles[self.inputfiles.keys()[0]]
+            i = 0
+            for x in self.inputfiles.keys():
+                
+                file = self.inputfiles[x]
+                if (i==0):
+                    self.mixa = file.Get(dir + self.after + '/' + self.hists['weighted']).Clone('nVSdiscTight')
+                    self.mixunwa = file.Get(dir + self.after + '/' + self.hists['simple']).Clone('nVSdiscTightSimple')
+                    self.mixb = file.Get(dir + self.before + '/' + self.hists['weighted']).Clone('nVSdiscLoose')
+                    self.mixunwb = file.Get(dir + self.before + '/' + self.hists['simple']).Clone('nVSdiscLooseSimple')
+                    if self.mixa == None or self.mixb == None or self.mixunwb == None or self.mixunwa == None:
+                        print 'hist not found', dir, self.after, '/', self.hists['weighted']
+                else:
+                    self.mixa.Add(file.Get(dir + self.after + '/' + self.hists['weighted']))
+                    self.mixunwa.Add(file.Get(dir + self.after + '/' + self.hists['simple']))
+                    self.mixb.Add(file.Get(dir + self.before + '/' + self.hists['weighted']))
+                    self.mixunwb.Add(file.Get(dir + self.before + '/' + self.hists['simple']))
+                i += 1
+                    
+                    
+                    
+            #file = self.inputfiles['qcd']
             #global var needed, because the scope ends in 2nd for loop
-            self.mixa = file.Get(dir + self.after + '/' + self.hists['weighted']).Clone('nVSdiscTight')
-            self.mixunwa = file.Get(dir + self.after + '/' + self.hists['simple']).Clone('nVSdiscTightSimple')
-            self.mixb = file.Get(dir + self.before + '/' + self.hists['weighted']).Clone('nVSdiscLoose')
-            self.mixunwb = file.Get(dir + self.before + '/' + self.hists['simple']).Clone('nVSdiscLooseSimple')
-            if self.mixa == None or self.mixb == None or self.mixunwb == None or self.mixunwa == None:
-                print 'hist not found', dir, self.after, '/', self.hists['weighted']
+#            self.mixa = file.Get(dir + self.after + '/' + self.hists['weighted']).Clone('nVSdiscTight')
+#            self.mixunwa = file.Get(dir + self.after + '/' + self.hists['simple']).Clone('nVSdiscTightSimple')
+#            self.mixb = file.Get(dir + self.before + '/' + self.hists['weighted']).Clone('nVSdiscLoose')
+#            self.mixunwb = file.Get(dir + self.before + '/' + self.hists['simple']).Clone('nVSdiscLooseSimple')
+#            if self.mixa == None or self.mixb == None or self.mixunwb == None or self.mixunwa == None:
+#                print 'hist not found', dir, self.after, '/', self.hists['weighted']
             #sum over all files except the first one
-            for x in range(1, len(self.inputfiles.keys())):
-                file = self.inputfiles[self.inputfiles.keys()[x]]
-                self.mixa.Add(file.Get(dir + self.after + '/' + self.hists['weighted']))
-                self.mixunwa.Add(file.Get(dir + self.after + '/' + self.hists['simple']))
-                self.mixb.Add(file.Get(dir + self.before + '/' + self.hists['weighted']))
-                self.mixunwb.Add(file.Get(dir + self.before + '/' + self.hists['simple']))
+#            for x in range(1, len(self.inputfiles.keys())):
+#                file = self.inputfiles[self.inputfiles.keys()[x]]
+#                self.mixa.Add(file.Get(dir + self.after + '/' + self.hists['weighted']))
+#                self.mixunwa.Add(file.Get(dir + self.after + '/' + self.hists['simple']))
+#                self.mixb.Add(file.Get(dir + self.before + '/' + self.hists['weighted']))
+#                self.mixunwb.Add(file.Get(dir + self.before + '/' + self.hists['simple']))
+#            file = self.inputfiles['top']
+#            self.mixa.Add(file.Get(dir + self.after + '/' + self.hists['weighted']))
+#            self.mixunwa.Add(file.Get(dir + self.after + '/' + self.hists['simple']))
+#            self.mixb.Add(file.Get(dir + self.before + '/' + self.hists['weighted']))
+#            self.mixunwb.Add(file.Get(dir + self.before + '/' + self.hists['simple']))
+           
             
             self.setN(dir, self.mixb.Integral(), self.mixa.Integral())
             self.output.cd('mixed' + '/' + dir)
@@ -126,8 +154,8 @@ class Macro:
             self.mixunwb.Write()
             self.output.Cd('/')
             for effs in result[1]:
-                print 'Eff for', dir, 'disc <', effs[0], ':', round(effs[1], 3), '+-', round(effs[2], 3)
-                self.setEff('mixed', dir, effs[0], round(effs[1], 3), round(effs[2], 3))                
+                print 'Eff for %s disc < %1.2f : %1.3f +- %1.3f' %(dir, effs[0], effs[1], effs[2])
+                self.setEff('mixed', dir, effs[0], effs[1], effs[2])                
                 
     def getEffHist(self, before, after, unweightedBefore):
         effplot = after.Clone("efficiency")
@@ -136,8 +164,8 @@ class Macro:
             eff = effplot.GetBinContent(i)
             err = sqrt((eff * (1 - eff)) / unweightedBefore.GetBinContent(i))
             if self.debug:
-                print 'before:', before.GetBinContent(i), 'after:', after.GetBinContent(i), 'unw.:', unweightedBefore.GetBinContent(i)
-                print round(eff, 3), '+-', round(err, 3)
+                print 'before: %d after: %d undw.: %d' %(before.GetBinContent(i), after.GetBinContent(i), unweightedBefore.GetBinContent(i))
+                print '%1.3f +- 1.3f' %(eff, err)
             effplot.SetBinError(i, err)
             effplot.SetMinimum(0)
         #cut based eff
@@ -149,7 +177,7 @@ class Macro:
             nunwb = unweightedBefore.Integral(1, bin)
             eff = na / nb
             err = sqrt((eff * (1 - eff)) / nunwb)
-            effs.append([x, round(eff, 3), round(err, 3)])
+            effs.append([x, eff, err])
         
         return [effplot, effs]
         
@@ -169,13 +197,53 @@ class Macro:
         for i in self.inputdirs:
             print i
         
-    def matrixMethod(self, effbg, effsig, nloose, ntight):
-        nbg = ((nloose * effsig) - ntight) / (effsig - effbg)
-        nbga = nbg * effbg
-        nsig = (ntight - (nloose * effbg)) / (effsig - effbg)
+    def matrixMethod(self, effqcd, effsig, Nloose, Ntight):
+        nbg = ((Nloose * effsig) - Ntight) / (effsig - effqcd)
+        nbga = nbg * effqcd
+        nsig = (Ntight - (Nloose * effqcd)) / (effsig - effqcd)
         nsiga = nsig * effsig
         return {'NQL':int(nbg), 'NQT':int(nbga), 'NSL':int(nsig), 'NST':int(nsiga)}
         
+    def matrixMethod2(self, effqcd, effqcderr, effsig, effsigerr, Nloose, Ntight):
+        nbg = ((Nloose * effsig) - Ntight) / (effsig - effqcd)
+        nbga = nbg * effqcd
+        nsig = (Ntight - (Nloose * effqcd)) / (effsig - effqcd)
+        nsiga = nsig * effsig
+        #error on N_s tight
+        errNST = self.errorNSTight(effqcd, effqcderr, effsig, effsigerr, Nloose, Ntight)
+        errQCDT = self.errorNQCDTight(effqcd, effqcderr, effsig, effsigerr, Nloose, Ntight)
+        return {'NQL':int(nbg), 'NQT':int(nbga), 'NSL':int(nsig), 'NST':int(nsiga), 'NSTerr':errNST, 'NQTerr':errQCDT}
+    
+    def errorNSTight(self, effqcd, effqcderr, effsig, effsigerr, Nloose, Ntight):
+        ########### dNsTight_deffsig
+        tmp1 = effqcd * (effqcd * Nloose - Ntight)
+        tmp2 = (effsig-effqcd) *  (effsig-effqcd)
+        d1 = tmp1/tmp2
+        ########### dNsLoose_deffqcd
+        tmp1 = effsig * (Ntight - effsig * Nloose)
+        d2 = tmp1/tmp2
+        ############ dNsTight_dNtight
+        d3 = (effsig*effqcd)/(effsig-effqcd)
+        ############ dNsTight_dNloose
+        d4 = -effsig*effqcd/(effsig-effqcd)
+        err = sqrt(d1*d1*effsigerr*effsigerr  + d2*d2*effqcderr*effqcderr + d3*d3*(Nloose - Ntight) + d4*d4*Ntight)
+        return err
+    
+    def errorNQCDTight(self, effqcd, effqcderr, effsig, effsigerr, Nloose, Ntight):
+        ##########dNqcdTight_deffsig
+        tmp1 = effqcd * (Ntight - effqcd * Nloose)
+        tmp2 = (effsig - effqcd) * (effsig - effqcd)
+        d1 = tmp1/tmp2
+        ####################dNqcdTight_deffqcd
+        tmp1 = effsig * (effsig * Nloose - Ntight)
+        d2 = tmp1/tmp2
+        ######################dNqcdTight_dNloose
+        d3 = effsig*effqcd/(effsig-effqcd)
+        ###################dNqcdTight_dNtight
+        d4 = -effqcd/(effsig-effqcd)
+        err = sqrt(d1*d1*effsigerr*effsigerr + d2*d2*effqcderr*effqcderr + d3*d3*Ntight + d4*d4*(Nloose-Ntight))
+        return err
+    
     def createFolders(self, parentfolder, folderlist):
         for i in folderlist:
                 self.output.GetDirectory(parentfolder).mkdir(i)
@@ -191,9 +259,9 @@ class Macro:
     def setEff(self, type, input, cut, eff, err):
         #signal from monte carlo, bg from mixed sample control region
         if type == 'top':
-            self.effsig[input] = [round(eff, 3), round(err, 3)]
+            self.effsig[input] = [eff,err]
         elif type == 'mixed':
-            self.effbg[input][cut] = [round(eff, 3), round(err, 3)]
+            self.effbg[input][cut] = [eff,err]
     
     def setN(self, input, loose, tight):
         self.nloose[input] = int(loose)
@@ -205,39 +273,218 @@ class Macro:
         print '###       Efficiency Summary:        ###'
         print '########################################'
         for x in self.cuts:
-            print 'for cut: disc <', x
-            print 'isolation & $\epsilon_{sig}$ & $\epsilon_{qcd}$ & $N_L$ & $N_T$ \\\\'
+            print 'for cut: disc < %1.3f' %x
+            print 'isolation | eff{sig} | eff{qcd} | N(L) | N(T)'
             for i in self.inputdirs:
-                print i, '&', '[', self.effsig[i][0], round(self.effsig[i][1], 3), '] &', '[', round(self.effbg[i][x][0], 3), round(self.effbg[i][x][1], 3), '] &', self.nloose[i], '&', self.ntight[i], '\\\\'
+                print '%s | %1.3f +- %1.3f | %1.3f +- %1.3f | %d | %d' %(i, self.effsig[i][0], self.effsig[i][1], self.effbg[i][x][0], self.effbg[i][x][1], self.nloose[i], self.ntight[i])
+                #print i, '&', '[', self.effsig[i][0], round(self.effsig[i][1], 3), '] &', '[', round(self.effbg[i][x][0], 3), round(self.effbg[i][x][1], 3), '] &', self.nloose[i], '&', self.ntight[i], '\\\\'
             print ''
-            print 'isolation & TrueTight(sig) & TrueTight(qcd) & TrueLoose(sig) & TrueLoose(qcd) \\\\'
+            print 'isolation | TrueTight(sig) | TrueTight(qcd) | TrueLoose(sig) | TrueLoose(qcd)'
             for i in self.inputdirs:
-                print i, '&', int(self.nTtruesig[i]), '&', int(self.nTtruebg[i]), '&', int(self.nLtruesig[i]), '&', int(self.nLtruebg[i]), '\\\\'
+                print '%s | %9d | %9d | %9d | %9d' % (i, self.nTtruesig[i],self.nTtruebg[i], self.nLtruesig[i], self.nLtruebg[i])
+                #print i, '&', int(self.nTtruesig[i]), '&', int(self.nTtruebg[i]), '&', int(self.nLtruesig[i]), '&', int(self.nLtruebg[i]), '\\\\'
             print ''
             print 'isolation & $N_T(sig)$ & $N_T(qcd)$ & Rel(sig)in \%  & Rel(qcd)in \%\\\\'
             for i in self.inputdirs:
                 matrix = self.matrixMethod(self.effbg[i][x][0], self.effsig[i][0], self.nloose[i], self.ntight[i])
                 relsig = (self.nTtruesig[i] - matrix['NST']) / self.nTtruesig[i] * 100
                 relqcd = (self.nTtruebg[i] - matrix['NQT']) / self.nTtruebg[i] * 100
-                print i, '&', int(matrix['NST']), '&', int(matrix['NQT']), '&', round(relsig, 2) , '&', round(relqcd, 2), '\\\\'
+                print '%s | %d | %d | %3.2f | %3.2f' %(i,int(matrix['NST']),int(matrix['NQT']),relsig, relqcd)
+                #print i, '&', int(matrix['NST']), '&', int(matrix['NQT']), '&', round(relsig, 2) , '&', round(relqcd, 2), '\\\\'
             print ''
             
     def exportLatex(self):
         print '################################################'
         print '###         Exporting Latex and PDF          ###'
         print '################################################'
+        content ='\\documentclass[a4paper,12pt]{report}\n'
+        content += '\\usepackage[ngerman, english]{babel}\n'
+        content += '\\begin{document}\n'
+        col = ' & '
+        #now fill the tables
+        for x in self.cuts:
+            content += '\\section{efficiencies for control region: discriminator $<$ %1.3f}\n' %x
+            content += '\\begin{table}[h] \n'
+            content += '\\centering \n'
+            content += '\\begin{tabular}{c|c|c|c|c} \n'
+            content += 'isolation & $\epsilon_{sig}$ & $\epsilon_{qcd}$ & $N_L$ & $N_T$ \\\\ \n'
+            for i in self.inputdirs:
+                content += ' %s & %1.3f $\pm$ %1.3f] & [%1.3f, %1.3f] & %d & %d  \\\\ \n' %(i, self.effsig[i][0], self.effsig[i][1], self.effbg[i][x][0], self.effbg[i][x][1], self.nloose[i], self.ntight[i])
+               # print i, '&', '[', self.effsig[i][0], round(self.effsig[i][1], 3), '] &', '[', round(self.effbg[i][x][0], 3), round(self.effbg[i][x][1], 3), '] &', self.nloose[i], '&', self.ntight[i], '\\\\'
+            print ''
+            content += '\\end{tabular} \n'
+            content += '\\end{table} \n'
+            content += '\n\n'
+            content += '\\begin{table}[h] \n'
+            content += '\\centering \n'
+            content += '\\begin{tabular}{c|c|c|c|c} \n'
+            content += 'isolation & TrueTight(sig) & TrueTight(qcd) & TrueLoose(sig) & TrueLoose(qcd) \\\\  \n'
+            #print 'isolation & TrueTight(sig) & TrueTight(qcd) & TrueLoose(sig) & TrueLoose(qcd) \\\\  \n'
+            for i in self.inputdirs:
+                content += '%s & %d & %d & %d & %d \\\\ \n' %(i,int(self.nTtruesig[i]), int(self.nTtruebg[i]), int(self.nLtruesig[i]),  int(self.nLtruebg[i]))
+                #print i, '&', int(self.nTtruesig[i]), '&', int(self.nTtruebg[i]), '&', int(self.nLtruesig[i]), '&', int(self.nLtruebg[i]), '\\\\'
+
+            content += '\\end{tabular} \n'
+            content += '\\end{table} \n'
+            content += '\n\n'
+            content += '\\begin{table}[h] \n'
+            content += '\\centering \n'
+            content += '\\begin{tabular}{c|c|c|c|c} \n'
+            content += 'isolation & $N_T(sig)$ & $N_T(qcd)$ & Rel(sig)in \%  & Rel(qcd)in \%\\\\ \n'
+            #print 'isolation & $N_T(sig)$ & $N_T(qcd)$ & Rel(sig)in \%  & Rel(qcd)in \%\\\\ \n'
+            for i in self.inputdirs:
+                matrix = self.matrixMethod(self.effbg[i][x][0], self.effsig[i][0], self.nloose[i], self.ntight[i])
+                relsig = (self.nTtruesig[i] - matrix['NST']) / self.nTtruesig[i] * 100
+                relqcd = (self.nTtruebg[i] - matrix['NQT']) / self.nTtruebg[i] * 100
+                content += '%s & %d & %d & %3.2f & %3.2f \\\\ \n' %(i,int(matrix['NST']),int(matrix['NQT']),relsig, relqcd)
+                #print i, '&', int(matrix['NST']), '&', int(matrix['NQT']), '&', round(relsig, 2) , '&', round(relqcd, 2), '\\\\'
+            content += '\\end{tabular} \n'
+            content += '\\end{table} \n'
+            content += '\clearpage'
+        content += '\n \\end{document} \n'
+        file = open(self.latexfile, 'w')
+        file.write(content)
+        file.close()
+        os.system('pdflatex ' + self.latexfile)
         
+    def applyToOthers(self, inputfiles, dir):
+        qcdfile = TFile(inputfiles['qcd'])
+        topfile = TFile(inputfiles['top'])
+        qcdhist = 0;
+        tophist = 0;
+        #get all histograms: qcdafter, top after, mixed after/before
+        self.mixa = qcdfile.Get(dir + self.after + '/' + self.hists['weighted']).Clone('nMixedVSdiscTight')
+        self.mixb = qcdfile.Get(dir + self.before + '/' + self.hists['weighted']).Clone('nMixedVSdiscLoose')
+        
+        self.qcdhisttight = qcdfile.Get(dir + self.after + '/' + self.hists['weighted']).Clone('nVSdiscQCDTight')
+        self.qcdhistloose = qcdfile.Get(dir + self.before + '/' + self.hists['weighted']).Clone('nVSdiscQCDLoose')
+        
+        self.tophisttight = topfile.Get(dir + self.after + '/' + self.hists['weighted']).Clone('nVSdiscSignalTight')
+        self.tophistloose = topfile.Get(dir + self.before + '/' + self.hists['weighted']).Clone('nVSdiscSignalLoose')
+        
+        self.mixa.Add(self.tophisttight)
+        self.mixb.Add(self.tophistloose)
+        
+        if self.mixa == None or self.mixb == None or self.tophistloose == None or self.tophisttight == None:
+            print 'hist not found', dir, self.after, '/', self.hists['weighted']
+        self.output.Cd('/')
+        self.output.mkdir('test')
+        self.output.cd('test')
+        
+        estimatedtop = self.tophisttight.Clone('estimatedNStight')
+        estimatedqcd = self.qcdhisttight.Clone('estimatedNQCDtight')
+        y = [self.effbg[dir][0.1][0], self.effbg[dir][0.2][0]]
+        x = [0.05, 0.1]
+        
+        ret = self.gerade(y, x, 0)
+        #effqcd = ret[0]
+        # a*x + b
+        formula = '%f*x + %f' %(ret[1], ret[2])
+        fitgraph = TF1('qcdEffFit', formula, 0,1)
+        tmphist = self.tophisttight.Clone('MCTopeff')
+        tmphist.Divide(self.tophistloose)
+        
+        tmphist2 = self.qcdhisttight.Clone('MCQCDeff')
+        tmphist2.Divide(self.qcdhistloose)
+        #test = TF1('fitfunc', 'exp(x)', 0, 1)
+        #test = TF1("f1","expo",0,1)
+        
+        #tmphist2.Fit('f1','R')
+        #tmphist2.Fit('exp(x)', '', '', 0, 1)
+        #getFitFunction, lookup naming in CVS
+        #print test.GetParameters()
+        bin1 = self.mixa.GetBinContent(1)
+        bin2 = self.mixa.GetBinContent(2)
+       # self.qcdhisttight
+        qbin1 = self.qcdhisttight.GetBinContent(1)
+        qbin2 = self.qcdhisttight.GetBinContent(2)
+        f1 = bin1/qbin1
+        f2 = bin2/qbin2
+        fa = (f1+f2)/2
+        #self.qcdhisttight
+        
+        bin1 = self.mixb.GetBinContent(1)
+        bin2 = self.mixb.GetBinContent(2)
+       # self.qcdhistloose
+        qbin1 = self.qcdhistloose.GetBinContent(1)
+        qbin2 = self.qcdhistloose.GetBinContent(2)
+        f1 = bin1/qbin1
+        f2 = bin2/qbin2
+        fb = (f1+f2)/2
+        
+        
+        tmphist3 = self.qcdhisttight.Clone('QCDeff')
+        tmphist3.Divide(self.qcdhistloose)
+        
+        
+        for i in range(1,self.mixa.GetNbinsX()+1):
+            Nloose = self.mixb.GetBinContent(i)
+            Ntight = self.mixa.GetBinContent(i)
+            realns = self.tophisttight.GetBinContent(i)
+           # print dir, self.effbg.keys()
+            
+            #estimatedtop.SetBinContent(i, mat['NST'])
+            #dNWttLoose_deffqcd
+            #tmp1 = after - self.effsig[dir][0] * before;
+            #tmp2 = (self.effsig[dir][0]-self.effbg[dir][0.1][0]) *  (self.effsig[dir][0]-self.effbg[dir][0.1][0])
+            #tmp3 = tmp1/tmp2
+            
+            effqcd = self.effbg[dir][0.1][0]
+            #ret = self.gerade(y, x, estimatedtop.GetBinCenter(i))
+            #effqcd = ret[0]
+            #fitFunc.GetYValue(estimatedtop.GetBinCenter(i))
+            #effqcd = (self.qcdhisttight.GetBinContent(i)*fa)/(self.qcdhistloose.GetBinContent(i)*fb)
+            #effqcd = self.effbg[dir][0.1][0]
+            effqcd2 = tmphist2.GetBinContent(i)
+            effsig = tmphist.GetBinContent(i)
+            effsigerr = self.effsig[dir][1]
+            effqcderr = self.effbg[dir][0.1][1]
+            
+            mat = self.matrixMethod2(effqcd,effqcderr, effsig,effsigerr, Nloose, Ntight)
+            print 'real top:%d , estimated: %d +- %d' %(realns, mat['NST'], mat['NSTerr'])
+            print 'comp effQ: %1.4f, real: %1.4f' %(effqcd,effqcd2)
+            estimatedtop.SetBinContent(i, mat['NST'])
+            estimatedtop.SetBinError(i, mat['NSTerr'])
+            estimatedqcd.SetBinContent(i, mat['NQT'])
+            estimatedqcd.SetBinError(i, mat['NQTerr'])
+            #print mat['NSTerr']
+        fitgraph.Write()    
+        tmphist2.Write()
+        estimatedtop.Write()
+        self.tophisttight.Write()
+        self.qcdhisttight.Write()
+        self.mixa.Write()
+        tmphist3.Write()
+        estimatedqcd.Write()
+        tmphist.Write()
+        #test.Write()
+        
+    def gerade(self, y, x, wert):
+        a = (y[0]-y[1])/(x[0]-x[1])
+        b = y[1] - a*x[1]
+        return [a*wert+b, a, b]
+        
+        #do matrix method for each bin, for each cut
+        
+        
+        
+
 if __name__ == '__main__':
     gROOT.Reset()
     inputfiles = {}
-    inputfiles['qcd'] = "MatrixMethod_qcdmu_041208.root"
-    inputfiles['top'] = "MatrixMethod_top_031208.root"
+    inputfiles['qcd'] = "MatrixMethod_qcdmu_111208.root"
+    inputfiles['top'] = "MatrixMethod_top_111208.root"
     inputdirs = ["all", "jetIso", "calo", "track"]
+    inputs = {}
+    inputs['qcd'] = 'MatrixMethod_qcdmu_111208.root'
+    inputs['top'] = "MatrixMethod_top_111208.root"
     mac = Macro('tst.root', inputfiles, inputdirs)
     mac.debug = False
     mac.calcEff('qcd')
     mac.calcEff('top')
     mac.calcEff('mixed')
     mac.makeAditionalPlots()
-    mac.printEffSummary()
+    #mac.printEffSummary()
+    mac.exportLatex()
+    mac.applyToOthers(inputs, "all")
         
