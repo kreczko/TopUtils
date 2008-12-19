@@ -180,6 +180,13 @@ class Macro:
             effs.append([x, eff, err])
         
         return [effplot, effs]
+    
+    def makeSignalToBKG(self, signal, background):
+        sb = signal.Clone('SiignalOverAll')
+        all = signal.Clone('all')
+        all.Add(background)
+        sb.Divide(all)
+        return sb
         
     def makeAditionalPlots(self):
         #summary plots:

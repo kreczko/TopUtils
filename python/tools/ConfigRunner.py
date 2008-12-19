@@ -121,11 +121,15 @@ class CfgRunner:
 ##--------------------------------------------------------------        
     "does some things on the end of a job"
     def __endJob(self, type):
-        print "starting something for ", type
+        print '#########################################################################'
+        print "###  Sending Email notification for '" + str(type)
+        print '#########################################################################' 
         subject = 'ConfigRunner Job successfully ended'
         msg = 'ConfigRunner just finished the sample "' + type + '"\n\n'
         msg += 'Tool command used:\n'
         msg += 'ConfigRunner' + self.__paramoptions.__str__()+'\n\n'
+        msg += 'In path:\n'
+        msg += os.getcwd().__str__()+'\n\n'
         msg += 'following parameters were used:\n'
         msg += '- number of events: ' + self.__numberofevents.__str__() + '\n'
         msg += '- events skipped: ' + self.__skipevents.__str__() + '\n'

@@ -1,5 +1,6 @@
 from ConfigWrapper import ConfigWrapper
 import SourceInput as input
+import sys
 
 "a config for qcd analysis"
 class Config(ConfigWrapper):

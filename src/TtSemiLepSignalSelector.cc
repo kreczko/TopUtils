@@ -78,6 +78,7 @@ TtSemiLepSignalSelector::TtSemiLepSignalSelector(TopJetCollection jets, const pa
 		sphericity_ = eventshape.sphericity(p);
 		circularity_ = eventshape.circularity(p);
 		isotropy_ = eventshape.isotropy(p);
+		sumAllJetsEt_ = jet1Et + jet2Et + jet3Et + jet4Et;
 	}
 }
 

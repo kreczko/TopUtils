@@ -12,7 +12,7 @@ class Config(ConfigWrapper):
     __savefile = 'TopAnalysis/TopFilter/data/TreeSaver.xml'
     __trainfile = 'TopAnalysis/TopFilter/data/TtSemiLepSignalSelectorMVATrainer_Muons.xml'
     #__mvaFile = 'TopAnalysis/TopFilter/data/TtSemiLepSignalSelector_Muons.mva'
-    __mvaFile = 'testmva/out.mva'
+    __mvaFile = 'mvatraining/current.mva'
     #number of train events. This number will be used for mvasaving and -training
     # and will be skipped for computing
     __noTe = 30000

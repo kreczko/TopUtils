@@ -31,6 +31,8 @@ inline double evaluateTtSemiLepSignalSelector(PhysicsTools::MVAComputerCache& mv
 	values.push_back(PhysicsTools::Variable::Value("sphericity", sigsel.sphericity()));
 	values.push_back(PhysicsTools::Variable::Value("circularity", sigsel.circularity()));
 	values.push_back(PhysicsTools::Variable::Value("isotropy", sigsel.isotropy()));
+	values.push_back(PhysicsTools::Variable::Value("sumAllJetsEt", sigsel.sumAllJetsEt()));
+
 
 	return mvaComputer->eval(values);
 
