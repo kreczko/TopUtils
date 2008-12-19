@@ -15,7 +15,7 @@ class Config(ConfigWrapper):
     __mvaFile = 'mvatraining/current.mva'
     #number of train events. This number will be used for mvasaving and -training
     # and will be skipped for computing
-    __noTe = 30000
+    #__noTe = 30000
     "constructor"
     def __init__(self, type, pathtypes):
         self.__fileNameAddition = pathtypes.replace(';', '_')

@@ -35,9 +35,9 @@ public:
 		return sumAllJetsEtAndLepton_;
 	}
 
-	double sumAllJetsEt() const {
-			return sumAllJetsEt_;
-		}
+//	double sumAllJetsEt() const {
+//			return sumAllJetsEt_;
+//		}
 
 	//|sumVec p(all jets, lepton)|
 	double vecSumAllJetsAndLepton() const {
@@ -86,7 +86,7 @@ private:
 	double sumAllJetsEtAndLepton_, vecSumAllJetsAndLepton_;
 	double sumEtleadingJetAnd2TimesLeptonPt_;
 	double dphiMETJet2_, MET_, dphiMuJ1J2_;
-	double leptonPt_, sumAllJetsEt_;
+	double leptonPt_;//, sumAllJetsEt_;
 	double aplanarity_, sphericity_, circularity_, isotropy_;
 
 };
