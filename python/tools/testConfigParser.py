@@ -10,56 +10,65 @@ from ConfigParser import ConfigParser, ConfigError
 """
 class testConfigParser(unittest.TestCase):   
     
-    #called after constructor, sets the variables
+    """
+    called after constructor, sets the variables
+    """
     def setUp(self):
+        #an how-it-should-be config
         self.testxml = 'test/Testconfig.xml'
+        #a false config 
         self.falsexml = 'test/FalseConfig.xml'
         self.parser = ConfigParser(self.testxml)
         self.falseParser = ConfigParser(self.falsexml)
         
-    #test method
+    """
+    check if the constructor works properly
+    """
     def testInit(self):
         #check if the ConfigParser constructor throws an IOException 
         #if the file doesn't exist
         self.assertRaises(IOError, ConfigParser, 'nothere')
 
-        
+    """
+    tests ConfigParser.getRoot()
+    """    
     def testGetRoot(self):
+        #the root tag of the document should be HistPlotter
         self.assertEqual(self.parser.getRoot().localName, 'HistPlotter')
         
     def testGetNodeList(self):
         node = self.parser.getNodeList('include')
-        self.assertEqual(node.length, 3)
+        self.assertEqual(node.length, 1)
         self.assertEqual(node[0].attributes.length, 1)
-        self.assertEqual(node[1].attributes.length, 1)
         self.assertEqual(node[0].attributes.item(0).name, 'file')
-        self.assertEqual(node[0].attributes.item(0).value, 'test/hist.xml')
+        self.assertEqual(node[0].attributes.item(0).value, 'test/HistConfig.xml')
         
     def testGetAttributeValue(self):
         nodes = self.parser.getNodeList('include')
         self.assertRaises(ConfigError,self.parser.getAttributeValue, nodes[0], 'color')
-        self.assertEqual(self.parser.getAttributeValue(nodes[0], 'file'), 'test/hist.xml')
+        self.assertEqual(self.parser.getAttributeValue(nodes[0], 'file'), 'test/HistConfig.xml')
         
     def testReadIncludes(self):
         self.assertRaises(ConfigError, self.falseParser.readIncludes)
         includes = self.parser.readIncludes()
-        self.assertTrue('test/hist.xml' in includes )
-        self.assertEqual(len(includes), 3)
+        self.assertTrue('test/HistConfig.xml' in includes )
+        self.assertEqual(len(includes), 1)
         
     def testGetInputFiles(self):
         self.assertRaises(ConfigError, self.falseParser.getInputFiles)
         inputfiles = self.parser.getInputFiles()
-        self.assertEqual(inputfiles['qcd'], 'background.root')
-        self.assertEqual(inputfiles['top'], 'signal.root')
-        self.assertEqual(inputfiles['kin'], 'kinematic.root')
+        self.assertEqual(inputfiles['qcd'], 'test/background.root')
+        self.assertEqual(inputfiles['top'], 'test/signal.root')
+        self.assertEqual(inputfiles['kin'], 'test/analyzeMuon.root')
         
     def testGetInputs(self):
         inputs = self.parser.getInputs()
-        self.assertEqual(inputs['SemiLepAnalysis'].folderlist[0].name, 'analysis')
+        self.assertEqual(inputs['SemiLepAnalysis'].folderlist[0].name, 'trackmafter')
         self.assertTrue(inputs['SemiLepAnalysis'].folderlist[0].hasFilters())
-        self.assertEqual(inputs['SemiLepAnalysis'].folderlist[0].filterlist[0].type, 'contains')
-        self.assertEqual(inputs['SemiLepAnalysis'].folderlist[0].filterlist[0].value, 'muon')
-        self.assertFalse(inputs['strangeInput'].folderlist[0].hasFilters())
+        self.assertEqual(inputs['SemiLepAnalysis'].folderlist[0].filterlist[0].type, 'exact')
+        self.assertEqual(inputs['SemiLepAnalysis'].folderlist[0].filterlist[0].value, 'mbg_nVSdisc')
+        self.assertFalse(inputs['SelectedMuons'].folderlist[0].hasFilters())
+        #self.assertFalse(inputs['strangeInput'].folderlist[0].hasFilters())
         
     def testGetChildNodes(self):
         #make a small XML document
@@ -79,10 +88,11 @@ class testConfigParser(unittest.TestCase):
         self.assertEqual(plots.fileOutputs, ['eps','pdf'])
         self.assertTrue(plots.makeSummary)
         self.assertEqual(plots.sumfile, 'inspect.pdf')
+        self.assertEqual(plots.histlist[0].opt['name'], 'NeventsVSmvadisc')
         #self.assertEqual(plots.histlist)
     
     def testGetFilenameByID(self):
-        self.assertEqual(self.parser.getFilenameByID('qcd'), 'background.root')
+        self.assertEqual(self.parser.getFilenameByID('qcd'), 'test/background.root')
         
         
                 

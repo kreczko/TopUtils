@@ -1,25 +1,47 @@
 import xml.dom.minidom as parser
-import os
+import os, sys
 
+"""
+The ConfigParser reads a XML-configuration file and makes the content easy to access by a script
+@author: lkreczko
+@contact: lkreczko@mail.desy.de
+@version: 0.3
+"""
 class ConfigParser:
-    def __init__(self, file):
-        self.__file = 'TopAnalysis/TopUtils/test/DummyConfig.xml'
-        self.__rootname = 'HistPlotter'
+    """
+    Constructor for ConfigParser
+    @param file: the configuration file 
+    @param rootname: the name of the XML-Tree-Root (defines the config type) 
+    @requires: file has to exist
+    @raise IOError: if the configuration file does not exist 
+    """
+    def __init__(self, file, rootname= 'HistPlotter'):
+        self.__rootname =  rootname
         self.__includeFiles = []#list of setups ['name'] = filepath
         self.__histDefinitions = []
         if os.path.exists(file):
             self.__file = file
         else:
             raise IOError, 'configuration file does not exist'
-            
+    """
+    @return: minidom representation of the XML-configfile
+    """        
     def getDocument(self):
         return parser.parse(self.__file)
     
-        
+    """
+    @param nodename: the name of the nodes
+    @return: a list of nodes with name = nodename 
+    """
     def getNodeList(self, nodename):
         return self.getDocument().getElementsByTagName(nodename)
         #return self.getNodeList(self.getDocument(), nodename)
     
+    """
+    @param parentnode: minidom node
+    @param name: name of the childNodes
+    @return: a list of childNodes of parentNode with the name = name   
+    """
     def getChildNodes(parentnode, name):
         ret = []
         for i in parentnode.childNodes:
@@ -27,17 +49,57 @@ class ConfigParser:
                 ret.append(i)
         return ret
     getChildNodes = staticmethod(getChildNodes)  
-      
+    
+    def getAllChildNodes(parentnode):
+        ret = []
+        for i in parentnode.childNodes:
+            if i and i.localName:
+                ret.append(i)
+        return ret
+    getAllChildNodes = staticmethod(getAllChildNodes)
+    
+    def getNodeByAttribute(nodelist, attName, attValue):
+        node = None
+        for i in nodelist:
+            if ConfigParser.hasAttribute(i, attName):
+               if ConfigParser.getAttributeValue(i, attName) == attValue:
+                   node = i
+        return node
+    getNodeByAttribute = staticmethod(getNodeByAttribute)
+    
+    def hasAttribute(node, attr):
+        ret = False
+        for i in range(node.attributes.length):
+            name = node.attributes.item(i).name
+            if name ==attr:
+                ret = True
+        return ret
+    
+    hasAttribute = staticmethod(hasAttribute)
+    
+    """
+    @return: rootnode of the XML-tree
+    @requires: rootnod-name == self.__rootname
+    """  
     def getRoot(self):
         root = self.getDocument().documentElement
-        if root.localName != 'HistPlotter':
-            raise ConfigError, 'not a HistPlotter configuration file'
+        if root.localName != self.__rootname:
+            msg = 'not a "' + self.__rootname + '" configuration file'
+            raise ConfigError, msg
         return root
 
+    """
+    Reads the include files section of the config.
+    @requires: each include is unique
+    @todo: only valid XML-Files should be included
+    @return: a list of files to include
+    """
     def readIncludes(self):
         includes = self.getNodeList('include')
         for i in includes:
             file = self.getAttributeValue(i, 'file')
+            if not os.path.exists(file):
+                raise ConfigError, 'include file does not exist'
             #file = self.getAttributeValue(i, 'value')
             if not file in self.__includeFiles:
                 self.__includeFiles.append(file)
@@ -45,21 +107,27 @@ class ConfigParser:
                 raise ConfigError, 'multiple includes with same name ' + name.__str__()
         return self.__includeFiles
         
+    """
+    @param node: minidom node referenz
+    @param name: name of the attribute
+    @raise ConfigError: if the attribute with name = 'name' does not exist
+    @return: value of the attribute named 'name' of the given node
+    """
     def getAttributeValue(node, name):
-        value = ''
+        value = None
         for i in range(node.attributes.length):
             if name == node.attributes.item(i).name:
                 value = node.attributes.item(i).value
-        if value == '':
+        if value == None:
             raise ConfigError, 'node has no attribute named ' + name.__str__()
         return value
-    
+    #make the function statuc
     getAttributeValue = staticmethod(getAttributeValue)
     
-    def readHistSetups(setups):
-        histlist = []
-        return ''
-    
+    """
+    Reads the <sources><file... section of the config
+    @return: a dictionary in form of dic[fileID] = filename
+    """
     def getInputFiles(self):
         ret = {}
         sources = self.getNodeList('sources')
@@ -76,9 +144,21 @@ class ConfigParser:
             ret[key] = value
         return ret
     
+    """
+    @param id: the id of the file specified in the config
+    @return: the filename associated to the id
+    @raise InputKexError: if the ID hasn't been specified yet
+    """
     def getFilenameByID(self, id):
         return self.getInputFiles()[id]
     
+    """
+    Reads the <sources><input... section of the config
+    @requires: exact one occurance of <sources>
+    @raise ConfigError: if the requirement is not fullfilled
+    @return: an instance of the Input class
+    @see: Input.getFromNode(node)
+    """
     def getInputs(self):
         ret = {}
         sources = self.getNodeList('sources')
@@ -90,6 +170,15 @@ class ConfigParser:
         for i in inputs:
             ret[self.getAttributeValue(i, 'name')] = Input.getFromNode(i)
         return ret
+    
+    """
+    reads the <plots> section of the config
+    @requires: exact one occurance of <plots>
+    @raise ConfigError: if the requirement is not fullfilled
+    @return: an instance of the Plots class
+    @see: Plots.__init__(histlist, create, makeSum, sumfile)
+    @todo: finish this
+    """
     def getPlots(self):
         plots = self.getNodeList('plots')
         if len(plots) >1 or not plots:
@@ -97,14 +186,33 @@ class ConfigParser:
         create = ConfigParser.getAttributeValue(plots[0], 'create')
         makeSum = ConfigParser.getAttributeValue(plots[0], 'makeSummaryFile')
         sumfile = ConfigParser.getAttributeValue(plots[0], 'summaryFile')
+        #read first the single histograms
+        single = self.getChildNodes(plots[0], 'hist')
+        singleList = []
+        for h in single:
+            #print ConfigParser.getAttributeValue(h, 'name')
+            singleList.append(Histogramm.readHistSetupFromNode(h))
         #plots can contain either single histograms or hist lists
-        return Plots(None, create, makeSum, sumfile)
+        multilist = []
+        #join the two lists
+        joinlist = singleList#+multilist
+        return Plots(joinlist, create, makeSum, sumfile)
     
 
+"""
+A simple Exception implementations for customized errors 
+"""
 class ConfigError(Exception):
+    """
+    constructor
+    @param value: an error value
+    """
     def __init__(self, value):
         self.value = value
         
+    """
+    @return: a string representation of the exception
+    """
     def __str__(self):
         return repr(self.value)
 
@@ -114,6 +222,14 @@ container for all Plots
 class Plots:
     #define the output as ROOT can write it
     output = ['eps','ps','pdf','jpg','png','gif']
+    """
+    constructor
+    @param histlist: the list of Histogram instances
+    @param create: what kind of file should the histograms be printed
+    @param makeSummary: should a summary file (a file with all histograms) be made?
+    @param sumfile: the filename of the summary file
+    @requires: create-values in the allowed list    
+    """
     def __init__(self,histlist, create = 'eps,png', makeSummary = 'false', sumfile ='inspect.ps'):
         self.fileOutputs = []
         for i in create.split(','):
@@ -131,19 +247,36 @@ class Plots:
             self.sumfile = sumfile + '.ps'
         self.histlist = histlist
     
+    """
+    Creates a Plots instance from a minidom node
+    @param node:the <plots> node
+    @requires: the node to be the <plots> node 
+    """
     def getFromNode(node):
-        print 'f'
+        if not node.localName == 'plots':
+            raise ConfigError, 'the given node is not <plots>'
+    #make the function static
     getFromNode = staticmethod(getFromNode)
             
-        
+
+"""
+The class Histogram provides access and checking of the histogram properties
+"""        
 class Histogramm:
-    def __init__(self, varlist, name):
-        self.logX = 0
-        self.logY = 0
-        if name != '':
-            self.name = name
-        else:
-            raise ConfigError, 'no histogram name defined'
+    defaultXML = 'test/DefaultHistConfig.xml'
+    
+    def __init__(self, varlist, optionlist):
+        #read defaults
+        defaultlist = self.readDefaults()
+        self.opt = defaultlist
+        #replaces defaults by config values, if they had been defined
+        for i in optionlist.keys():
+            if i in defaultlist.keys():
+                self.opt[i] = optionlist[i]
+            else:
+                msg = 'option "' + i + '" was not defined for Histogram'
+                raise ConfigError, msg
+            
         if varlist:   
             self.varlist = varlist
         else:
@@ -158,12 +291,42 @@ class Histogramm:
         if not os.path.exists(file):
             raise IOError, 'histogram configuration file not found'
         return ''
+    
     def readHistSetupFromNode(node):
-        return ''
+        name = ConfigParser.getAttributeValue(node, 'name')
+        varlist = []
+        optlist = {'name':name}
+        #empty var:
+        varlist.append(Variable())
+        return Histogramm(varlist, optlist)
+    
+    """
+    @return: a dictionary of options + default values
+    """
+    def readDefaults(self):
+        defaults = {}
+        cfg = ConfigParser(self.defaultXML, 'HistSetup')
+        root =ConfigParser.getNodeByAttribute(ConfigParser.getChildNodes(cfg.getRoot(), 'hist'), 'name', 'DEFAULT')
+        if not root:
+            raise ConfigError, 'no hist default found'
+        #for all attributes
+        for i in range(root.attributes.length):
+            defaults[root.attributes.item(i).name] = root.attributes.item(i).value
+        options = ConfigParser.getAllChildNodes(root)
+        #for all options
+        for i in options:
+            defaults[i.localName] = ConfigParser.getAttributeValue(i, 'v')
+        #for all children attributes named 'v'
+        return defaults
+        #in the defaults file all attributes are defined
     
     def isValid(self):
         #define needed values
-        return False
+        valid = False
+        return valid
+    
+    def exists(self, file):
+        return False;
     
     readHistSetupFromFile = staticmethod(readHistSetupFromFile)
     readHistSetupFromNode = staticmethod(readHistSetupFromNode)
@@ -178,7 +341,7 @@ class Variable:
         #how the variable is produces
         self.operation = 'none'
         self.color = 'black'
-        print 'Im a var!'
+        #print 'Im a var!'
         
         
     def getColorCode(self):
@@ -191,6 +354,7 @@ class Variable:
 Just a simple container
 """
 class Filter:
+    #the allowed types of a filter
     types = ['contains', '!contains', 'exact', 'beginsWith']
     
     def __init__(self, type, value):
