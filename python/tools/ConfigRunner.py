@@ -23,7 +23,7 @@ class CfgRunner:
     #example: self.filepath = 'outputpath/rootfiles/'
     #filepath isn't used for root output so far
     __filepath = 'CRtmp/' 
-    __fileprefix = 'MatrixMethod_' #will be used as filnameprefix
+    __fileprefix = 'MM_' #will be used as filnameprefix
     __filesuffix = '.root' #filetype
     #sampletype
     __type = ''     
@@ -36,7 +36,7 @@ class CfgRunner:
     __jobstarted = False
     #not used at the moment
     __verbose = False
-    __errorToken = ['RootError', 'Exception', 'Root_Error']
+    __errorToken = ['RootError', 'Exception', 'Root_Error', 'CMSException']
     __cfg = 'matrix'
     __skipevents = 0
     #email address used for notification
