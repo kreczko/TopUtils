@@ -1,42 +1,42 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <HistPlotter>
-	<include file='test/hist.xml' />
-	<include file='test/hist1.xml' />
-	<include file='defaultHist.xml' />
+	<include file='test/HistConfig.xml' />
+<!--	Not needed, since default file is defined in code-->
+<!--	<include file='defaultHist.xml' />-->
 	<sources>
 		<!-- gets input from 2 folders -->
 		<input name="SemiLepAnalysis">
-			<folder name='analysis'>
-			<!-- only histogram which have 'muon' in their name -->
-				<filter type='exact' value='muon' />
+			<folder name='trackmafter'>
+			<!-- only histogram which name is 'mbg_nVSdisc' -->
+				<filter type='exact' value='mbg_nVSdisc' />
 <!--				Will be replaced by 'exact' filters in the parser-->
 <!--				<filter type='histfile' value='Muon.hist' />-->
 			</folder>
-			<folder name='kinematic'>
+		</input>
+		<input name='allMuonPt'>
+			<folder name='analyzeAllMuon'>
 				<!-- histograms containing 'pt' but also do not have electron in their name-->
+				<!-- no case sensitivity -->
 				<filter type='contains' value='pt' />
-				<filter type='!contains' value='electron' />
+				<!--  without resolution plot -->
+				<filter type='!contains' value='res' />
 			</folder>
 		</input>
-		<input name='kinematicPlots'>
-			<folder name='kinematic'>
-				<filter type='contains' value='elec' />
-			</folder>
+		<input name='SelectedMuons'>
+			<folder name='analyzeSelMuon' />
 		</input>
-		<input name='strangeInput'>
-			<folder name ='strange'/>
-		</input>
+
 	<!-- includes of the data -->
-		<file id='qcd' name='background.root' />
-		<file id='top' name='signal.root' />
-		<file id='kin' name='kinematic.root' />
+		<file id='qcd' name='test/background.root' />
+		<file id='top' name='test/signal.root' />
+		<file id='kin' name='test/analyzeMuon.root' />
 	</sources>
 	<!--
 		makes the canvas, mixes the histogramms defined in the histSetup
 		summaryFile = ps oder pdf
 	-->
 	<plots create='eps,pdf' makeSummaryFile='true' summaryFile='inspect.pdf'>
-		<hist name='muonPt' defaults='HistSetupName' input='SemiLepAnalysis'>
+		<hist name='NeventsVSmvadisc' defaults='HistSetupName' input='SemiLepAnalysis'>
 		<!-- name is also used for legend -->
 			<var name='qcd' from='file:qcd' markerStyle='22' color='23' />
 			<var name='signal' from='file:top' markerStyle='23' color='blue' />

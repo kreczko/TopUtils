@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<Hist name="effplot">
-	<max v="1" />
-	<min v="0" />
-	<logX v='0' />
-</Hist>
+<HistSetup>
+	<hist name="effplot">
+		<max v="1" />
+		<min v="0" />
+	</hist>
+
+	<hist name="eventplot">
+		<logY v='0' />
+	</hist>
+</HistSetup>

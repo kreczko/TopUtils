@@ -1,14 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<Hist name="default">
-<!--histogram min and max usually from the histvalues -->
-<!--	<max v='1' />-->
-<!--	<min v='0' />-->
-	<logX v='0' />
-	<logY v='0' />
-	<gridX v='0' />
-	<gridY v='0' />
-	<scale v='1.0' />
-	<showErros v='false' />
-	<titleX v= 'var' />
-	<titleY v='events' />
-</Hist>
+<HistSetup>
+	<hist name="DEFAULT">
+		<!--histogram min and max usually from the histvalues -->
+		<max v='' />
+		<min v='' />
+		<logX v='0' />
+		<logY v='0' />
+		<gridX v='0' />
+		<gridY v='0' />
+		<scale v='1.0' />
+		<showErros v='false' />
+		<!--
+			hist titles come from histograms. Only if they are empty the config
+		-->
+		<!--
+			values are used. You can also set overwriteTitles to true in order to
+			overwrite the titles even if
+		-->
+		<!--	they're not empty-->
+		<titleX v='var' />
+		<titleY v='events' />
+		<overwriteTitles v='false' />
+	</hist>
+</HistSetup>
