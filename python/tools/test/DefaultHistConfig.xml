@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <HistSetup>
 	<hist name="DEFAULT">
+	<!-- ConfigParser.Histogram input -->
+		<input v='' />
+		<setup v='' />
+		<!-- root histogramm input -->
 		<!--histogram min and max usually from the histvalues -->
 		<max v='' />
 		<min v='' />

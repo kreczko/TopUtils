@@ -89,12 +89,22 @@ class testConfigParser(unittest.TestCase):
         self.assertTrue(plots.makeSummary)
         self.assertEqual(plots.sumfile, 'inspect.pdf')
         self.assertEqual(plots.histlist[0].opt['name'], 'NeventsVSmvadisc')
+        self.assertEqual(plots.histlist[0].opt['logX'], '0')
+        self.assertEqual(plots.histlist[0].varlist[0].opt['name'], 'qcd')
+        #test HistSetup
+        self.assertEqual(plots.histlist[0].opt['max'], '1')
         #self.assertEqual(plots.histlist)
     
     def testGetFilenameByID(self):
         self.assertEqual(self.parser.getFilenameByID('qcd'), 'test/background.root')
         
-        
+    def testFileContainsHist(self):
+        #folder
+        self.assertTrue(self.parser.fileContainsObject(self.parser.getFilenameByID('qcd'), 'trackmafter'))
+        #histogram
+        self.assertTrue(self.parser.fileContainsObject(self.parser.getFilenameByID('qcd'), 'trackmafter/mbg_nVSdisc'))
+        #does not contain:        
+        self.assertFalse(self.parser.fileContainsObject(self.parser.getFilenameByID('qcd'), 'nothing'))
                 
         
         

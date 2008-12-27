@@ -1,5 +1,8 @@
 import xml.dom.minidom as parser
 import os, sys
+from ROOT import TFile
+from sets import Set
+
 
 """
 The ConfigParser reads a XML-configuration file and makes the content easy to access by a script
@@ -19,10 +22,17 @@ class ConfigParser:
         self.__rootname =  rootname
         self.__includeFiles = []#list of setups ['name'] = filepath
         self.__histDefinitions = []
-        if os.path.exists(file):
+        if ConfigParser.fileExists(file, 'config'):
             self.__file = file
-        else:
-            raise IOError, 'configuration file does not exist'
+        
+    def fileExists(file, type):
+        ret = os.path.exists(file)
+        if(not ret):
+            msg = type + ' file "' + file +' " does not exist'
+            raise IOError, msg
+        return ret
+    fileExists = staticmethod(fileExists)
+    
     """
     @return: minidom representation of the XML-configfile
     """        
@@ -50,6 +60,11 @@ class ConfigParser:
         return ret
     getChildNodes = staticmethod(getChildNodes)  
     
+    """
+    A wrapper for the minidom childNodes function.
+    The empty childNodes are sorted out by this method
+    @return: all not empty childNodes
+    """
     def getAllChildNodes(parentnode):
         ret = []
         for i in parentnode.childNodes:
@@ -98,8 +113,9 @@ class ConfigParser:
         includes = self.getNodeList('include')
         for i in includes:
             file = self.getAttributeValue(i, 'file')
-            if not os.path.exists(file):
-                raise ConfigError, 'include file does not exist'
+            ConfigParser.fileExists(file, 'include')
+#            if not os.path.exists(file):
+#                raise ConfigError, 'include file does not exist'
             #file = self.getAttributeValue(i, 'value')
             if not file in self.__includeFiles:
                 self.__includeFiles.append(file)
@@ -126,6 +142,7 @@ class ConfigParser:
     
     """
     Reads the <sources><file... section of the config
+    @requires: all specified files have to exist
     @return: a dictionary in form of dic[fileID] = filename
     """
     def getInputFiles(self):
@@ -141,7 +158,9 @@ class ConfigParser:
         for i in files:
             key = self.getAttributeValue(i, 'id')
             value = self.getAttributeValue(i, 'name')
-            ret[key] = value
+            #the file has to exist
+            if ConfigParser.fileExists(value, 'root'):
+                ret[key] = value
         return ret
     
     """
@@ -152,6 +171,15 @@ class ConfigParser:
     def getFilenameByID(self, id):
         return self.getInputFiles()[id]
     
+    def fileContainsObject(file, objectname):
+        ret = False
+        ConfigParser.fileExists(file, 'root')
+        f = TFile(file)
+        k = f.Get(objectname)
+        if k:
+            ret = True            
+        return ret
+    fileContainsObject = staticmethod(fileContainsObject)
     """
     Reads the <sources><input... section of the config
     @requires: exact one occurance of <sources>
@@ -180,23 +208,11 @@ class ConfigParser:
     @todo: finish this
     """
     def getPlots(self):
+        inputfiles = self.getInputFiles()
+        inputs = self.getInputs()
+        includes = self.readIncludes()
         plots = self.getNodeList('plots')
-        if len(plots) >1 or not plots:
-            raise ConfigError, 'not exact one <plots> inside config file'
-        create = ConfigParser.getAttributeValue(plots[0], 'create')
-        makeSum = ConfigParser.getAttributeValue(plots[0], 'makeSummaryFile')
-        sumfile = ConfigParser.getAttributeValue(plots[0], 'summaryFile')
-        #read first the single histograms
-        single = self.getChildNodes(plots[0], 'hist')
-        singleList = []
-        for h in single:
-            #print ConfigParser.getAttributeValue(h, 'name')
-            singleList.append(Histogramm.readHistSetupFromNode(h))
-        #plots can contain either single histograms or hist lists
-        multilist = []
-        #join the two lists
-        joinlist = singleList#+multilist
-        return Plots(joinlist, create, makeSum, sumfile)
+        return Plots.getFromNode(plots,includes, inputs, inputfiles)
     
 
 """
@@ -215,6 +231,10 @@ class ConfigError(Exception):
     """
     def __str__(self):
         return repr(self.value)
+
+###########################################################################################
+######## Config Helpers  #####################################################################
+##########################################################################################
 
 """
 container for all Plots
@@ -252,11 +272,48 @@ class Plots:
     @param node:the <plots> node
     @requires: the node to be the <plots> node 
     """
-    def getFromNode(node):
-        if not node.localName == 'plots':
-            raise ConfigError, 'the given node is not <plots>'
+    def getFromNode(plots, includes, inputs, inputfiles):
+        if len(plots) >1 or not plots:
+            raise ConfigError, 'not exact one <plots> inside config file'
+        create = ConfigParser.getAttributeValue(plots[0], 'create')
+        makeSum = ConfigParser.getAttributeValue(plots[0], 'makeSummaryFile')
+        sumfile = ConfigParser.getAttributeValue(plots[0], 'summaryFile')
+        #read histsetups
+        histsetups = {}
+        histsetuplist = []
+        for i in includes:
+            setup = Histogramm.readHistSetupFromFile(i)
+            histsetuplist.append(setup)
+        if len(histsetuplist) > 0:
+            histsetups = histsetuplist[0]
+            for i in range(2,len(histsetuplist)):
+                for k in histsetups.keys():
+                    if i.has_key(k): 
+                        print 'Warning: multible definitions of  histsetup "', k,'"'
+                    else:
+                         histsetups[k] = i[k]
+
+        #read first the single histograms
+        single = ConfigParser.getChildNodes(plots[0], 'hist')
+        singleList =[]
+        for h in single:
+            hist = Histogramm.readHistSetupFromNode(h)
+            #check if Variables have valid input, input exists and setup is existing
+            if not hist.opt['setup'] == '':
+                if hist.opt['setup'] in histsetups.keys():
+                    hist.applySetup(histsetups[hist.opt['setup']].configOptions)
+                else:
+                    print 'Warning: HistSetup ', hist.opt['setup'], 'is not defined'
+            singleList.append(hist)
+        #plots can contain either single histograms or hist lists
+        multilist = []
+        #join the two lists        
+        singleList.extend(multilist)
+        joinlist = singleList
+        return Plots(joinlist, create, makeSum, sumfile)        
     #make the function static
     getFromNode = staticmethod(getFromNode)
+    
             
 
 """
@@ -269,6 +326,7 @@ class Histogramm:
         #read defaults
         defaultlist = self.readDefaults()
         self.opt = defaultlist
+        self.configOptions = optionlist
         #replaces defaults by config values, if they had been defined
         for i in optionlist.keys():
             if i in defaultlist.keys():
@@ -280,24 +338,70 @@ class Histogramm:
         if varlist:   
             self.varlist = varlist
         else:
-            raise ConfigError, 'no variable defined for histogram' + self.name
+            raise ConfigError, 'no variable defined for histogram ' + self.opt['name']
         
+#        if not self.isValid():
+#            msg = 'HistConfig of "'  + self.opt['name'] + '" is not valid'
+#            raise ConfigError, msg
         
+    def __cmp__(self, other):
+        return cmp(self.name, other.name)
+        
+#    def setOptions(self, options):
+#        for i in optionlist.keys():
+#            if i in defaultlist.keys():
+#                self.opt[i] = optionlist[i]
+#            else:
+#                msg = 'option "' + i + '" was not defined for Histogram'
+#                raise ConfigError, msg
+            
+    def applySetup(self, options):
+        print options
+        for i in options.keys():
+            if i in self.opt.keys():
+                if not i in self.configOptions.keys():
+                    self.opt[i] = options[i]
+            else:
+                msg = 'option "' + i + '" was not defined for Histogram'
+                raise ConfigError, msg
+                
     """
     Reads all histogram definitions from a file and returns a dictionary with histograms
     dic['histname'] = Histogram
     """
     def readHistSetupFromFile(file):
-        if not os.path.exists(file):
-            raise IOError, 'histogram configuration file not found'
-        return ''
+        varlist = [Variable({})]
+        setups = {}
+        cfg = ConfigParser(file, 'HistSetup')
+        hists = ConfigParser.getChildNodes(cfg.getRoot(), 'hist')
+        if not hists:
+            print 'Warning: empty setup file'
+        for i in hists:
+            hist = Histogramm.readHistSetupFromNode(i, True)
+            setups[hist.opt['name']] = hist
+        return setups
     
-    def readHistSetupFromNode(node):
-        name = ConfigParser.getAttributeValue(node, 'name')
+    def readHistSetupFromNode(node, setup =False):
         varlist = []
-        optlist = {'name':name}
-        #empty var:
-        varlist.append(Variable())
+        if setup:
+            varlist.append(Variable({}))
+        optlist = {}
+        #go through all attributes
+        for i in range(node.attributes.length):
+            name = node.attributes.item(i).name
+            value = node.attributes.item(i).value
+            optlist[name] = value
+#        optlist = {'name':name}
+        #go through all children nodes
+        for i in ConfigParser.getAllChildNodes(node):
+            #don't do complex input like var and legend
+            if not i.localName in ['var','legend']:
+                optlist[i.localName] = ConfigParser.getAttributeValue(i, 'v')
+                
+        for x in ConfigParser.getChildNodes(node, 'var'):
+            var = Variable.getFromNode(x)
+            if var:
+                varlist.append(var)
         return Histogramm(varlist, optlist)
     
     """
@@ -322,25 +426,59 @@ class Histogramm:
     
     def isValid(self):
         #define needed values
-        valid = False
+        valid = self.checkInput()
         return valid
     
-    def exists(self, file):
-        return False;
+    def checkInput(self):
+        return False
     
     readHistSetupFromFile = staticmethod(readHistSetupFromFile)
     readHistSetupFromNode = staticmethod(readHistSetupFromNode)
         
 class Variable:
+    defaultXML = 'test/DefaultVarConfig.xml'
+    #use maybe RGB?
     colors ={'black' : 1,
              'red' : 2}
-    operations = ['add', 'divide', 'substract']
-    def __init__(self):
-        #histogran
-        self.hist = None
-        #how the variable is produces
-        self.operation = 'none'
-        self.color = 'black'
+    operations = ['add', 'divide', 'substract', 'none']
+    histTypes = {'line':0}
+    """
+    Contructor
+    missing fillstyles
+    @param histType: the type of the histogram style: marker, line or otherwise
+    @param style: the style of the type: line-style, marker-style etc.
+    @param color: the color of the input
+    @param operation: defines the construction of the variables  
+    """
+    def __init__(self, optionlist):
+         #read defaults
+        defaultlist = self.readDefaults()
+        self.opt = defaultlist
+        #replaces defaults by config values, if they had been defined
+        for i in optionlist.keys():
+            if i in defaultlist.keys():
+                self.opt[i] = optionlist[i]
+            else:
+                msg = 'option "' + i + '" was not defined for Variable'
+                raise ConfigError, msg
+#        if color:
+#            self.color = color
+#        else:
+#            self.color = 'black'
+#        if operation in self.operations:
+#            self.operation = operation
+#        else:
+#            msg = 'unknown operation "' + operation + '"'
+#            raise ConfigError, msg
+#        if style:
+#            self.style = style
+#        else: 
+#            self.style = '0'
+#        if type:
+#            self.histType = histType
+#        else:
+#            self.histType = 'line'
+        
         #print 'Im a var!'
         
         
@@ -349,6 +487,32 @@ class Variable:
         if self.color in self.colors.keys():
             code = self.colors[self.color]
         return code
+    
+    def getFromNode(node):
+        optlist = {}
+        for i in range(node.attributes.length):
+            name = node.attributes.item(i).name
+            value = node.attributes.item(i).value
+            optlist[name] = value
+        return Variable(optlist)
+    getFromNode = staticmethod(getFromNode)
+    
+    def readDefaults(self):
+        defaults = {}
+        cfg = ConfigParser(self.defaultXML, 'VarSetup')
+        root =ConfigParser.getNodeByAttribute(ConfigParser.getChildNodes(cfg.getRoot(), 'var'), 'name', 'DEFAULT')
+        if not root:
+            raise ConfigError, 'no var default found'
+        #for all attributes
+        for i in range(root.attributes.length):
+            defaults[root.attributes.item(i).name] = root.attributes.item(i).value
+        options = ConfigParser.getAllChildNodes(root)
+        #for all options
+        for i in options:
+            defaults[i.localName] = ConfigParser.getAttributeValue(i, 'v')
+        #for all children attributes named 'v'
+        return defaults
+        #in the defaults file all attributes are defined
     
 """
 Just a simple container

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<VarSetup>
+	<var name='DEFAULT'>
+		<type v='line' />
+		<style v='1' />
+		<color v='black' />
+		<source v ='' />
+		<operation v= 'none' />
+	</var>
+</VarSetup>

@@ -36,22 +36,23 @@
 		summaryFile = ps oder pdf
 	-->
 	<plots create='eps,pdf' makeSummaryFile='true' summaryFile='inspect.pdf'>
-		<hist name='NeventsVSmvadisc' defaults='HistSetupName' input='SemiLepAnalysis'>
+		<hist name='NeventsVSmvadisc' setup='effplot' input='SemiLepAnalysis'>
 		<!-- name is also used for legend -->
-			<var name='qcd' from='file:qcd' markerStyle='22' color='23' />
-			<var name='signal' from='file:top' markerStyle='23' color='blue' />
-			<var name='combined' from='var:signal,var:qcd' compute='add'
-				markerStyle='24' />
+			<var name='qcd' source='file:qcd'  type='line' style='22' color='23' />
+			<var name='signal' source='file:top'  type='marker' style='23' color='blue' />
+			<var name='combined' source='var:signal,var:qcd' operation='add'
+				style='24' />
 			<legend name='plotname' posx='20' posy='0' fonsize='12' />
 		</hist>
+		
 		<histlist name='electronKinematic' input='kinematicPlots'>
-			<var name='qcd' from='file:qcd' markerStyle='22' color='23' />
-			<var name='signal' from='file:top' markerStyle='23' color='blue' />
+			<var name='qcd' source='file:qcd'  type='line' style='22' color='23' />
+			<var name='signal' source='file:top'  type='marker' style='23' color='blue' />
 		</histlist>
 		
 		<histlist name='AllHistos'>
-			<var name='qcd' from='file:qcd' markerStyle='22' color='23' />
-			<var name='signal' from='file:top' markerStyle='23' color='blue' />
+			<var name='qcd' source='file:qcd' type='marker' style='22' color='23' />
+			<var name='signal' source='file:top'   type='marker'  style='23' color='blue' />
 		</histlist>
 	</plots>
 </HistPlotter>
