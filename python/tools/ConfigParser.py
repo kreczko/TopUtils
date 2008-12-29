@@ -298,6 +298,7 @@ class Plots:
         singleList =[]
         for h in single:
             hist = Histogramm.readHistSetupFromNode(h)
+            hist.validateAndReplaceInput(inputs[hist.opt['input']], inputfiles)
             #check if Variables have valid input, input exists and setup is existing
             if not hist.opt['setup'] == '':
                 if hist.opt['setup'] in histsetups.keys():
@@ -333,30 +334,16 @@ class Histogramm:
                 self.opt[i] = optionlist[i]
             else:
                 msg = 'option "' + i + '" was not defined for Histogram'
-                raise ConfigError, msg
-            
+                raise ConfigError, msg        
         if varlist:   
             self.varlist = varlist
         else:
             raise ConfigError, 'no variable defined for histogram ' + self.opt['name']
         
-#        if not self.isValid():
-#            msg = 'HistConfig of "'  + self.opt['name'] + '" is not valid'
-#            raise ConfigError, msg
-        
     def __cmp__(self, other):
         return cmp(self.name, other.name)
-        
-#    def setOptions(self, options):
-#        for i in optionlist.keys():
-#            if i in defaultlist.keys():
-#                self.opt[i] = optionlist[i]
-#            else:
-#                msg = 'option "' + i + '" was not defined for Histogram'
-#                raise ConfigError, msg
             
     def applySetup(self, options):
-        print options
         for i in options.keys():
             if i in self.opt.keys():
                 if not i in self.configOptions.keys():
@@ -404,6 +391,46 @@ class Histogramm:
                 varlist.append(var)
         return Histogramm(varlist, optlist)
     
+#    def setInput(self, input):
+#        if self.validateInput(input):
+#            self.input = input
+            
+    def validateAndReplaceInput(self, input, files):
+        ret = False
+        #get var input and combine it with inputfolders and filters
+        for i in self.varlist:
+            source = i.opt['source']
+            if Variable.ksourceFile in source:
+                source = source.split(Variable.typeDelimiter)
+                #exact 1 source, 1 folder, 1 histogram of type exact!
+                err = not len(source) == 2
+                err = err and not len(input.folderlist) == 1
+                err = err and not len(input.folderlist[0].filterlist) == 1
+                err = err and not input.folderlist[0].filterlist[0].value == 'exact'
+                if err :
+                    raise ConfigError, 'multiple sources'
+                file =  files[source[1]]
+                folder = input.folderlist[0].name
+                h =  input.folderlist[0].filterlist[0].value
+                hist = folder + '/' + h
+                if ConfigParser.fileContainsObject(file, hist):
+                    i.rootsource = file
+                    i.hist = hist
+                else:
+                    raise ConfigError, 'specified source does not exist'
+            elif Variable.ksourceVar in source:
+                print source
+            else:
+                raise ConfigError, 'illegal Variable input'
+        return ret
+    
+    def getVarByName(self, name):
+        ret = None
+        for i in self.varlist:
+            if i.opt['name'] == name:
+                ret = i
+        return ret
+       
     """
     @return: a dictionary of options + default values
     """
@@ -424,19 +451,15 @@ class Histogramm:
         return defaults
         #in the defaults file all attributes are defined
     
-    def isValid(self):
-        #define needed values
-        valid = self.checkInput()
-        return valid
-    
-    def checkInput(self):
-        return False
-    
     readHistSetupFromFile = staticmethod(readHistSetupFromFile)
     readHistSetupFromNode = staticmethod(readHistSetupFromNode)
         
 class Variable:
     defaultXML = 'test/DefaultVarConfig.xml'
+    ksourceFile = 'file'
+    ksourceVar = 'var'
+    typeDelimiter = ':'
+    entryDelimiter = ','
     #use maybe RGB?
     colors ={'black' : 1,
              'red' : 2}
@@ -451,6 +474,10 @@ class Variable:
     @param operation: defines the construction of the variables  
     """
     def __init__(self, optionlist):
+        #after combining input folders, filters and root files
+        #might contain multiple histograms, if the variable is computed out of others
+        self.rootsource = ''
+        self.hist = ''
          #read defaults
         defaultlist = self.readDefaults()
         self.opt = defaultlist

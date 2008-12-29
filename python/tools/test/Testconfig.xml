@@ -4,7 +4,7 @@
 <!--	Not needed, since default file is defined in code-->
 <!--	<include file='defaultHist.xml' />-->
 	<sources>
-		<!-- gets input from 2 folders -->
+		<!-- gets input from 1 histogram -->
 		<input name="SemiLepAnalysis">
 			<folder name='trackmafter'>
 			<!-- only histogram which name is 'mbg_nVSdisc' -->

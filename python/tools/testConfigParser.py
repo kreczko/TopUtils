@@ -93,6 +93,8 @@ class testConfigParser(unittest.TestCase):
         self.assertEqual(plots.histlist[0].varlist[0].opt['name'], 'qcd')
         #test HistSetup
         self.assertEqual(plots.histlist[0].opt['max'], '1')
+        self.assertEqual(plots.histlist[0].getVarByName('qcd').rootsource, 'test/background.root')
+        self.assertEqual(plots.histlist[0].getVarByName('qcd').hist, 'trackmafter/mbg_nVSdisc')
         #self.assertEqual(plots.histlist)
     
     def testGetFilenameByID(self):
