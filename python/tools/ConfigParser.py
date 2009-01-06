@@ -75,6 +75,13 @@ class ConfigParser:
         return ret
     getAllChildNodes = staticmethod(getAllChildNodes)
     
+    """
+    Searches for a minidom-node with a certain attribute name and value
+    @param nodelist: the list of nodes to search in
+    @param attName: attribute name
+    @param attValue: attribute value
+    @return: first node with specified attribute name and value  
+    """
     def getNodeByAttribute(nodelist, attName, attValue):
         node = None
         for i in nodelist:
@@ -84,6 +91,11 @@ class ConfigParser:
         return node
     getNodeByAttribute = staticmethod(getNodeByAttribute)
     
+    """
+    @param node: the minidom-node
+    @param attr: attribute name  
+    @return: if the node has an attribute with the specified name
+    """
     def hasAttribute(node, attr):
         ret = False
         for i in range(node.attributes.length):
@@ -144,6 +156,7 @@ class ConfigParser:
     
     """
     Reads the <sources><file... section of the config
+    @requires: at least one file has to be defined
     @requires: all specified files have to exist
     @return: a dictionary in form of dic[fileID] = filename
     """
@@ -173,6 +186,12 @@ class ConfigParser:
     def getFilenameByID(self, id):
         return self.getInputFiles()[id]
     
+    """
+    Checks if a given root file contains an key/object
+    @param file: filename
+    @param objectname: objectname
+    @return: if files contains object 
+    """
     def fileContainsObject(file, objectname):
         ret = False
         ConfigParser.fileExists(file, 'root')
@@ -182,6 +201,7 @@ class ConfigParser:
             ret = True            
         return ret
     fileContainsObject = staticmethod(fileContainsObject)
+    
     """
     Reads the <sources><input... section of the config
     @requires: exact one occurance of <sources>
@@ -281,31 +301,19 @@ class Plots:
         makeSum = ConfigParser.getAttributeValue(plots[0], 'makeSummaryFile')
         sumfile = ConfigParser.getAttributeValue(plots[0], 'summaryFile')
         #read histsetups
-        histsetups = {}
-        histsetuplist = []
-        for i in includes:
-            setup = Histogramm.readHistSetupFromFile(i)
-            histsetuplist.append(setup)
-        if len(histsetuplist) > 0:
-            histsetups = histsetuplist[0]
-            for i in range(2,len(histsetuplist)):
-                for k in histsetups.keys():
-                    if i.has_key(k): 
-                        print 'Warning: multible definitions of  histsetup "', k,'"'
-                    else:
-                         histsetups[k] = i[k]
+        histsetups = Histogram.readHistSetups(includes)
 
         #read first the single histograms
         single = ConfigParser.getChildNodes(plots[0], 'hist')
         singleList =[]
         for h in single:
-            hist = Histogramm.readHist(h, histsetups, inputs, inputfiles)
+            hist = Histogram.readHist(h, histsetups, inputs, inputfiles)
             singleList.append(hist)
         #plots can contain either single histograms or hist lists
         multilist = []
         multi =  ConfigParser.getChildNodes(plots[0], 'histlist')
         for h in multi:
-            list = Histogramm.readHistList(h,  inputs, inputfiles)
+            list = Histogram.readHistList(h,  inputs, inputfiles)
             multilist.extend(list)
         #join the two lists        
         singleList.extend(multilist)
@@ -319,9 +327,16 @@ class Plots:
 """
 The class Histogram provides access and checking of the histogram properties
 """        
-class Histogramm:
+class Histogram:
     defaultXML = 'test/DefaultHistConfig.xml'
     
+    """
+    constructor for Histogram
+    @param varlist: a list of variables
+    @param optionlist: a list of histogram options
+    @requires: varlist not empty
+    @requires: all options in optionlist are defined in the defaults
+    """
     def __init__(self, varlist, optionlist):
         #read defaults
         defaultlist = self.readDefaults()
@@ -338,10 +353,18 @@ class Histogramm:
             self.varlist = varlist
         else:
             raise ConfigError, 'no variable defined for histogram ' + self.opt['name']
-        
+    
+    """
+    Compare function. Compares two instances of Histogram by their names
+    """    
     def __cmp__(self, other):
         return cmp(self.name, other.name)
             
+    """
+    Writes the options from a Histogram template if it wasn't overwritten in the configfile
+    @param options: optionlist from histogram template
+    @requires: all options are defined in the default hist
+    """
     def applySetup(self, options):
         for i in options.keys():
             if i in self.opt.keys():
@@ -354,8 +377,10 @@ class Histogramm:
     """
     Reads all histogram definitions from a file and returns a dictionary with histograms
     dic['histname'] = Histogram
+    @param file: filename to get the histsetup from
     """
     def readHistSetupFromFile(file):
+        #use empty variable to use the same constructor
         varlist = [Variable({})]
         setups = {}
         cfg = ConfigParser(file, 'HistSetup')
@@ -363,11 +388,39 @@ class Histogramm:
         if not hists:
             print 'Warning: empty setup file'
         for i in hists:
-            hist = Histogramm.readHistSetupFromNode(i, True)
+            hist = Histogram.readHistFromNode(i, True)
             setups[hist.opt['name']] = hist
         return setups
     
-    def readHistSetupFromNode(node, setup =False):
+    """
+    Reads the input of the setup files (include-section)
+    @param setupfiles: all hist setup files
+    @return: a dictionary with named setups, setup[name] = Histogram
+    """
+    def readHistSetups(setupfiles):
+        histsetups = {}
+        histsetuplist = []
+        for i in setupfiles:
+            setup = Histogram.readHistSetupFromFile(i)
+            histsetuplist.append(setup)
+        if len(histsetuplist) > 0:
+            histsetups = histsetuplist[0]
+            for i in range(2,len(histsetuplist)):
+                for k in histsetups.keys():
+                    if i.has_key(k): 
+                        print 'Warning: multible definitions of  histsetup "', k,'"'
+                    else:
+                         histsetups[k] = i[k]
+        return histsetups
+    readHistSetups = staticmethod(readHistSetups)
+    
+    """
+    Reads histogram information from a XML minidom node
+    @param node: XML node
+    @param setup: if the given node is a hist setup/template
+    @return: a Histogram instance
+    """
+    def readHistFromNode(node, setup =False):
         varlist = []
         if setup:
             varlist.append(Variable({}))
@@ -388,25 +441,32 @@ class Histogramm:
             var = Variable.getFromNode(x)
             if var:
                 varlist.append(var)
-        return Histogramm(varlist, optlist)
+        return Histogram(varlist, optlist)
     
+    """
+    Reads a list of histograms from a given node
+    @param node: the XML minidom node
+    @param input: input folders and filters
+    @param files: input root files
+    @return: a list of Histogram instances
+    """
     def readHistList(node, input, files):
         ret = []
-        basicHist = Histogramm.readHistSetupFromNode(node)
+        basicHist = Histogram.readHistFromNode(node)
         #translate multible input for validateAndReplaceInput       
         if basicHist.opt['input'] == '':
             #create simple input
             folder = Folder('*', [])
             inp = Input([folder])
-            ret = Histogramm.validateAndReplaceInputs(basicHist, inp, files)
+            ret = Histogram.validateAndReplaceInputs(basicHist, inp, files)
         else:
             inp = input[basicHist.opt['input']]
-            ret = Histogramm.validateAndReplaceInputs(basicHist, inp, files)
+            ret = Histogram.validateAndReplaceInputs(basicHist, inp, files)
         return ret
     readHistList = staticmethod(readHistList)
     
     def readHist(node, setup, input, files):
-        hist = Histogramm.readHistSetupFromNode(node)
+        hist = Histogram.readHistFromNode(node)
         hist.validateAndReplaceInput(input[hist.opt['input']], files)
         #check if Variables have valid input, input exists and setup is existing
         if not hist.opt['setup'] == '':
@@ -446,7 +506,7 @@ class Histogramm:
             if i.name == '*' and not i.filterlist:
                 #file of first variable
                 f = Variable.getSourceFile(hist.varlist[0])
-                hists = Histogramm.getHistsFromFile(files[f])
+                hists = Histogram.getHistsFromFile(files[f])
                 tmp = copy.copy(hist)
                 for x in hists:                    
                     spl = x.split('/')
@@ -490,6 +550,11 @@ class Histogramm:
                 raise ConfigError, 'illegal Variable input'
         return ret
     
+    """
+    Gets the variable with a given name
+    @param name: name of the variable
+    @return: variable which matches requirement 
+    """
     def getVarByName(self, name):
         ret = None
         for i in self.varlist:
@@ -498,6 +563,9 @@ class Histogramm:
         return ret
        
     """
+    Reads the defaults of the Histogram options.
+    Every option which hasn't been defined inside the DEFAULT histogram is invalid
+    @requires: the existance of the default hist file
     @return: a dictionary of options + default values
     """
     def readDefaults(self):
@@ -518,15 +586,19 @@ class Histogramm:
         #in the defaults file all attributes are defined
     
     readHistSetupFromFile = staticmethod(readHistSetupFromFile)
-    readHistSetupFromNode = staticmethod(readHistSetupFromNode)
-        
+    readHistFromNode = staticmethod(readHistFromNode)
+
+"""
+A class for checking and access to the histogramm input
+"""        
 class Variable:
+    #the default variable where all possible options with their defaults are defined
     defaultXML = 'test/DefaultVarConfig.xml'
     ksourceFile = 'file'
     ksourceVar = 'var'
     typeDelimiter = ':'
     entryDelimiter = ','
-    #use maybe RGB?
+    #use maybe RGB? like #FF0000 for red, or (255, 0, 0) for red
     colors ={'black' : 1,
              'red' : 2}
     operations = ['add', 'divide', 'substract', 'none']
@@ -554,25 +626,7 @@ class Variable:
             else:
                 msg = 'option "' + i + '" was not defined for Variable'
                 raise ConfigError, msg
-#        if color:
-#            self.color = color
-#        else:
-#            self.color = 'black'
-#        if operation in self.operations:
-#            self.operation = operation
-#        else:
-#            msg = 'unknown operation "' + operation + '"'
-#            raise ConfigError, msg
-#        if style:
-#            self.style = style
-#        else: 
-#            self.style = '0'
-#        if type:
-#            self.histType = histType
-#        else:
-#            self.histType = 'line'
-        
-        #print 'Im a var!'
+
     def getSourceFile(var):
         ret = None
         source = var.opt['source']
@@ -598,6 +652,12 @@ class Variable:
         return Variable(optlist)
     getFromNode = staticmethod(getFromNode)
     
+    """
+    Reads the defaults of the Variable options.
+    Every option which hasn't been defined inside the DEFAULT variable is invalid
+    @requires: the existance of the default variable file
+    @return: a dictionary of options + default values
+    """
     def readDefaults(self):
         defaults = {}
         cfg = ConfigParser(self.defaultXML, 'VarSetup')
@@ -620,10 +680,16 @@ Just a simple container
 """
 class Filter:
     #the allowed types of a filter
-    types = ['contains', '!contains', 'exact', 'beginsWith']
+    types = ['contains', 'exact', 'beginsWith', 'endsWith']
     
     def __init__(self, type, value):
-        if not type in self.types:
+        #inversion of types
+        self.nTypes= []
+        for i in self.types:
+            tmp = '!' + i
+            self.nTypes.append(tmp)
+            
+        if not type in self.types and not type in self.nTypes:
             raise ConfigError, 'unknown filter type'
         else:
             self.type = type
@@ -635,8 +701,6 @@ class Filter:
             raise ConfigError, 'invalid filter node'
         #self.getAttributeValue(y, 'type'), self.getAttributeValue(y, 'value'))
         type = ConfigParser.getAttributeValue(node, 'type')
-        if not type in Filter.types:
-            raise ConfigError, 'invalid filter type'
         value = ConfigParser.getAttributeValue(node, 'value')
         if value == '':
             raise ConfigError, 'invalid filter value'
