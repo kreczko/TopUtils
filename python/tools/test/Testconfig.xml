@@ -20,10 +20,16 @@
 				<filter type='contains' value='pt' />
 				<!--  without resolution plot -->
 				<filter type='!contains' value='res' />
-			</folder>
+			</folder>			
 		</input>
 		<input name='SelectedMuons'>
 			<folder name='analyzeSelMuon' />
+<!--			to use filters for all folders, use *-->
+<!--			<folder name='*' >-->
+<!--			<filter type='contains' value='pt' />-->
+				  without resolution plot 
+<!--				<filter type='!contains' value='res' />-->
+<!--			</folder>-->
 		</input>
 
 	<!-- includes of the data -->
@@ -45,10 +51,10 @@
 			<legend name='plotname' posx='20' posy='0' fonsize='12' />
 		</hist>
 		
-		<histlist name='electronKinematic' input='kinematicPlots'>
-			<var name='qcd' source='file:qcd'  type='line' style='22' color='23' />
-			<var name='signal' source='file:top'  type='marker' style='23' color='blue' />
-		</histlist>
+<!--		<histlist name='electronKinematic' input='kinematicPlots'>-->
+<!--			<var name='qcd' source='file:qcd'  type='line' style='22' color='23' />-->
+<!--			<var name='signal' source='file:top'  type='marker' style='23' color='blue' />-->
+<!--		</histlist>-->
 		
 		<histlist name='AllHistos'>
 			<var name='qcd' source='file:qcd' type='marker' style='22' color='23' />

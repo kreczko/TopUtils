@@ -2,6 +2,8 @@ import xml.dom.minidom as parser
 import os, sys
 from ROOT import TFile
 from sets import Set
+import copy
+
 
 
 """
@@ -297,17 +299,14 @@ class Plots:
         single = ConfigParser.getChildNodes(plots[0], 'hist')
         singleList =[]
         for h in single:
-            hist = Histogramm.readHistSetupFromNode(h)
-            hist.validateAndReplaceInput(inputs[hist.opt['input']], inputfiles)
-            #check if Variables have valid input, input exists and setup is existing
-            if not hist.opt['setup'] == '':
-                if hist.opt['setup'] in histsetups.keys():
-                    hist.applySetup(histsetups[hist.opt['setup']].configOptions)
-                else:
-                    print 'Warning: HistSetup ', hist.opt['setup'], 'is not defined'
+            hist = Histogramm.readHist(h, histsetups, inputs, inputfiles)
             singleList.append(hist)
         #plots can contain either single histograms or hist lists
         multilist = []
+        multi =  ConfigParser.getChildNodes(plots[0], 'histlist')
+        for h in multi:
+            list = Histogramm.readHistList(h,  inputs, inputfiles)
+            multilist.extend(list)
         #join the two lists        
         singleList.extend(multilist)
         joinlist = singleList
@@ -391,10 +390,77 @@ class Histogramm:
                 varlist.append(var)
         return Histogramm(varlist, optlist)
     
+    def readHistList(node, input, files):
+        ret = []
+        basicHist = Histogramm.readHistSetupFromNode(node)
+        #translate multible input for validateAndReplaceInput       
+        if basicHist.opt['input'] == '':
+            #create simple input
+            folder = Folder('*', [])
+            inp = Input([folder])
+            ret = Histogramm.validateAndReplaceInputs(basicHist, inp, files)
+        else:
+            inp = input[basicHist.opt['input']]
+            ret = Histogramm.validateAndReplaceInputs(basicHist, inp, files)
+        return ret
+    readHistList = staticmethod(readHistList)
+    
+    def readHist(node, setup, input, files):
+        hist = Histogramm.readHistSetupFromNode(node)
+        hist.validateAndReplaceInput(input[hist.opt['input']], files)
+        #check if Variables have valid input, input exists and setup is existing
+        if not hist.opt['setup'] == '':
+            if hist.opt['setup'] in setup.keys():
+                hist.applySetup(setup[hist.opt['setup']].configOptions)
+            else:
+                print 'Warning: HistSetup ', hist.opt['setup'], 'is not defined'    
+        return hist
+    readHist = staticmethod(readHist)
+    
 #    def setInput(self, input):
 #        if self.validateInput(input):
 #            self.input = input
-            
+    def getHistsFromFile(file):
+        ret = []
+        if os.path.exists(file):
+            f = TFile(file)
+            #faster with alias
+            fget = f.Get
+            dirlist = f.GetListOfKeys()
+            for i in dirlist:
+                dir = i.ReadObj()
+                histlist = dir.GetListOfKeys()
+                for x in histlist:
+                    hist = x.ReadObj()
+                    path = dir.GetName() + '/' + hist.GetName()
+                    ret.append(path)
+        else:
+            msg = 'root file "' +file +' "not found'
+            raise ConfigError, msg
+        return ret     
+    getHistsFromFile = staticmethod(getHistsFromFile)
+    
+    def validateAndReplaceInputs(hist, input, files):
+        ret = []
+        for i in input.folderlist:
+            if i.name == '*' and not i.filterlist:
+                #file of first variable
+                f = Variable.getSourceFile(hist.varlist[0])
+                hists = Histogramm.getHistsFromFile(files[f])
+                tmp = copy.copy(hist)
+                for x in hists:                    
+                    spl = x.split('/')
+                    dir = spl[0]
+                    hist = spl[1]
+                    filter = Filter('exact', hist)
+                    folder = Folder(dir, [filter])
+                    inp = Input([folder])
+                    tmp.validateAndReplaceInput(inp, files)
+                    ret.append( copy.copy(tmp))             
+        #break down input to single hist
+        #hist.validateAndReplaceInput(input, files)
+        return ret
+    
     def validateAndReplaceInput(self, input, files):
         ret = False
         #get var input and combine it with inputfolders and filters
@@ -507,6 +573,14 @@ class Variable:
 #            self.histType = 'line'
         
         #print 'Im a var!'
+    def getSourceFile(var):
+        ret = None
+        source = var.opt['source']
+        if Variable.ksourceFile in source:
+            source = source.split(Variable.typeDelimiter)
+            ret = source[1]
+        return ret
+    getSourceFile = staticmethod(getSourceFile)
         
         
     def getColorCode(self):
