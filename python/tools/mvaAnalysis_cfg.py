@@ -36,7 +36,7 @@ class Config(ConfigWrapper):
         self.__path['filtertest'] = 'looseSelection,analyzeMVA mvaDiscFilter, analyzeDiscFilter'
         self.__path['save'] = self.__path['training']
         ## Matrix Analysis:
-        self.__path['analysis'] = 'looseSelection, analyzeMVA, analyzeisolationMET, analyzeSelJets'
+        self.__path['analysis'] = 'looseSelection, analyzeMVA, analyzeisolationMET, analyzeSelJets, analyzeSelMuons'
         self.__path['track'] = 'looseSelection,trackmbefore, trackIsoFilter, trackmafter'
         self.__path['calo'] = 'looseSelection,calombefore, caloIsoFilter, calomafter'
         self.__path['jet'] = 'looseSelection,jetIsombefore, jetIsoFilter, jetIsomafter'
