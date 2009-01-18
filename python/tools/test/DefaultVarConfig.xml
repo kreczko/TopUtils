@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<VarSetup>
+	<var name='DEFAULT'>
+		<type v='line' />
+		<style v='1' />
+		<size v='2' />
+		<color v='1' />
+		<source v ='' />
+		<operation v= 'none' />
+		<norm v='' />
+		<draw v='1' /> 
+	</var>
+</VarSetup>

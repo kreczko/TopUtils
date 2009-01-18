@@ -9,7 +9,9 @@ class MatrixMethod:
         #error on N_s tight
         errNST = MatrixMethod.errorNSTight(effqcd, effqcderr, effsig, effsigerr, Nloose, Ntight)
         errQCDT = MatrixMethod.errorNQCDTight(effqcd, effqcderr, effsig, effsigerr, Nloose, Ntight)
-        return {'NQL':int(nbg), 'NQT':int(nbga), 'NSL':int(nsig), 'NST':int(nsiga), 'NSTerr':errNST, 'NQTerr':errQCDT}
+        errNS = MatrixMethod.errorNS(effqcd, effqcderr, effsig, effsigerr, Nloose, Ntight)
+        errNQ = MatrixMethod.errorNQ(effqcd, effqcderr, effsig, effsigerr, Nloose, Ntight)
+        return {'NQ':int(nbg), 'NQT':int(nbga), 'NS':int(nsig), 'NST':int(nsiga), 'NSTerr':errNST, 'NQTerr':errQCDT, 'NSerr':errNS, 'NQerr':errNQ}
     getNumbers = staticmethod(getNumbers)
     
     def errorNSTight(effqcd, effqcderr, effsig, effsigerr, Nloose, Ntight):

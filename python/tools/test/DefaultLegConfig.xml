@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<LegSetup>
+	<leg name='DEFAULT'>
+	<posX v ='70' />
+	<posY v ='95' />
+<!--	<size v= '0.5' />-->
+	<fonsize v ='12' /> 
+	<sizeX v='20' />
+	<sizeY v='20'/>
+	</leg>
+</LegSetup>

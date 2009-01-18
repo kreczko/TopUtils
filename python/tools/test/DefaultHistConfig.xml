@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<HistSetup>
+	<hist name="DEFAULT">
+	<!-- ConfigParser.Histogram input, do not change these lines -->
+		<input v='' />
+		<setup v='' />
+		<!-- root histogramm input, custom section -->
+		<!--histogram min and max usually from the histvalues -->
+		<max v='' />
+		<min v='' />
+		<logX v='0' />
+		<logY v='0' />
+		<gridX v='0' />
+		<gridY v='0' />
+		<scale v='1.0' />
+		<showErros v='false' />
+		<rotate v='False' />
+		<savefolder v = '' />
+		<!--
+			hist titles come from histograms. Only if they are empty the config
+		-->
+		<!-- 
+			values are used. You can also set overwriteTitles to true in order to
+			overwrite the titles even if
+		-->
+		<!--	they're not empty-->
+		<titleX v='var' />
+		<titleY v='events' />
+		<overwriteTitles v='false' />
+	</hist>
+</HistSetup>
