@@ -3,6 +3,7 @@
 	<var name='DEFAULT'>
 		<type v='line' />
 		<style v='1' />
+		<size v='2' />
 		<color v='black' />
 		<source v ='' />
 		<operation v= 'none' />

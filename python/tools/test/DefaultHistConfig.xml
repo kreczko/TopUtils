@@ -14,6 +14,7 @@
 		<gridY v='0' />
 		<scale v='1.0' />
 		<showErros v='false' />
+		<rotate v='False' />
 		<!--
 			hist titles come from histograms. Only if they are empty the config
 		-->

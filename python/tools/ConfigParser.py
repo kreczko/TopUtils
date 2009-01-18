@@ -329,6 +329,7 @@ The class Histogram provides access and checking of the histogram properties
 """        
 class Histogram:
     defaultXML = 'test/DefaultHistConfig.xml'
+    inputswitch = 'i:'
     
     """
     constructor for Histogram
@@ -434,7 +435,7 @@ class Histogram:
         #go through all children nodes
         for i in ConfigParser.getAllChildNodes(node):
             #don't do complex input like var and legend
-            if not i.localName in ['var','legend']:
+            if not i.localName in ['var','legend']:                
                 optlist[i.localName] = ConfigParser.getAttributeValue(i, 'v')
                 
         for x in ConfigParser.getChildNodes(node, 'var'):
@@ -467,7 +468,12 @@ class Histogram:
     
     def readHist(node, setup, input, files):
         hist = Histogram.readHistFromNode(node)
-        hist.validateAndReplaceInput(input[hist.opt['input']], files)
+        put = hist.opt['input']
+        if Histogram.inputswitch in put:
+            put = put.replace(Histogram.inputswitch, '')
+            hist.validateAndReplaceInput(input[put], files)
+        else:
+            hist.validateAndReplaceInput(put, files, True)
         #check if Variables have valid input, input exists and setup is existing
         if not hist.opt['setup'] == '':
             if hist.opt['setup'] in setup.keys():
@@ -521,9 +527,9 @@ class Histogram:
         #hist.validateAndReplaceInput(input, files)
         return ret
     
-    def validateAndReplaceInput(self, input, files):
+    def validateAndReplaceInput(self, input, files, text=False):
         ret = False
-        #get var input and combine it with inputfolders and filters
+            #get var input and combine it with inputfolders and filters
         for i in self.varlist:
             source = i.opt['source']
             if Variable.ksourceFile in source:
@@ -535,10 +541,14 @@ class Histogram:
                 err = err and not input.folderlist[0].filterlist[0].value == 'exact'
                 if err :
                     raise ConfigError, 'multiple sources'
-                file =  files[source[1]]
-                folder = input.folderlist[0].name
-                h =  input.folderlist[0].filterlist[0].value
-                hist = folder + '/' + h
+                file = files[source[1]]
+                hist = ''
+                if text:
+                    hist = input
+                else: 
+                    folder = input.folderlist[0].name
+                    h = input.folderlist[0].filterlist[0].value
+                    hist = folder + '/' + h
                 if ConfigParser.fileContainsObject(file, hist):
                     i.rootsource = file
                     i.hist = hist
