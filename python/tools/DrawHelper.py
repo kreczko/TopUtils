@@ -1,6 +1,7 @@
 from ROOT import TLegend, TBox
 import PadService as ps
 import os
+from math import log
 
 class Helper:
     allowedFormats = ['eps', 'ps', 'pdf', 'png', 'jpg']
@@ -75,23 +76,24 @@ class Helper:
         return pad
     setPadLayout = staticmethod(setPadLayout)
         
-    def saveHistsInOne(histlist, filename, folder, legend = None,log = ['0','0'], err = False, printAs = ['eps', 'png']):
+    def saveHistsInOne(histlist, filename, folder, legend = None,logH = ['0','0'], err = False, printAs = ['eps', 'png']):
         folder =  folder.rstrip('/')
         if not os.path.exists(folder):
             os.mkdir(folder)
         pads = ps.PadService('test', 'testing', 1)
         pad = pads.Next()
         pad = Helper.setPadLayout(pad)
-        if log[0] == 1:
-            pad.SetLogx()
-        if log[1] == 1:
-            pad.SetLogy()
+        if logH[0] == '1':
+            pad.SetLogx(1)
+        if logH[1] == '1':
+            pad.SetLogy(1)
         min = Helper.getMin(histlist)
         max = Helper.getMax(histlist)
         x = 0
         for hist in histlist:
-            hist.SetMaximum(max)
-            hist.SetMinimum(min)
+            if not logH[1] == '1':
+                hist.SetMaximum(max)
+                hist.SetMinimum(min)
             if legend:
                 legend.AddEntry(hist, hist.GetName())
             if x == 0:

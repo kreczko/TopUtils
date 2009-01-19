@@ -481,7 +481,7 @@ class Histogram:
             put = put.replace(Histogram.inputswitch, '')
             hist.validateAndReplaceInput(input[put], files)
         else:
-            hist.validateAndReplaceInput(put, files, True)
+            hist.validateAndReplaceInput(put, files, True, input)
         #check if Variables have valid input, input exists and setup is existing
         if not hist.opt['setup'] == '':
             if hist.opt['setup'] in setup.keys():
@@ -564,12 +564,12 @@ class Histogram:
         #hist.validateAndReplaceInput(input, files)
         return ret
     
-    def validateAndReplaceInput(self, input, files, text=False):
+    def validateAndReplaceInput(self, input, files, text=False, wholeinput = {}):
         ret = False
             #get var input and combine it with inputfolders and filters
         for i in self.varlist:
             source = i.opt['source']
-            if Variable.ksourceFile in source:
+            if Variable.ksourceFile in source and not Variable.ksourceInput in source:
                 source = source.split(Variable.typeDelimiter)
                 #exact 1 source, 1 folder, 1 histogram of type exact!
                 err = not len(source) == 2
@@ -592,14 +592,37 @@ class Histogram:
                 else:
                     msg = 'specified source does not exist %s::%s' %(file, hist)
                     raise ConfigError, msg
-            elif Variable.ksourceVar in source:
+            elif Variable.ksourceVar in source and not Variable.ksourceInput in source:
                 for iv in source.split(Variable.entryDelimiter):
                     xv = iv.split(Variable.typeDelimiter)[1]
                     vxx =  self.getVarByName(xv)
                     i.rootsource += vxx.rootsource + Variable.entryDelimiter
                     i.hist = vxx.hist
                 i.rootsource =  i.rootsource.rstrip(Variable.entryDelimiter)
-                
+            elif Variable.ksourceInput in source:
+                sources = source.split(Variable.entryDelimiter)
+                source = sources[0].split(Variable.typeDelimiter)
+                sinput =sources[1].split(Variable.typeDelimiter)
+                #exact 1 source, 1 folder, 1 histogram of type exact!
+                err = not len(source) == 2
+                err = err and not len(input.folderlist) == 1
+                err = err and input.folderlist[0].hasFilters
+                if err :
+                    raise ConfigError, 'invalid var source'
+                file = files[source[1]]
+                hist = ''
+                if text:
+                    hist = input
+                    folder = wholeinput[sinput[1]].folderlist[0].name
+                    hist = folder + '/' + hist
+                    print hist
+                    
+                if ConfigParser.fileContainsObject(file, hist):
+                    i.rootsource = file
+                    i.hist = hist
+                else:
+                    msg = 'specified source does not exist %s::%s' %(file, hist)
+                    raise ConfigError, msg    
             else:
                 raise ConfigError, 'illegal Variable input'
         return ret
@@ -650,6 +673,7 @@ class Variable:
     defaultXML = 'test/DefaultVarConfig.xml'
     ksourceFile = 'file'
     ksourceVar = 'var'
+    ksourceInput = 'input'
     typeDelimiter = ':'
     entryDelimiter = ','
     #use maybe RGB? like #FF0000 for red, or (255, 0, 0) for red

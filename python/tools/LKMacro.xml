@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<!-- rule declaration possible -->
+<!-- http://www.devmag.net/xml/xml_schema_elemente_attribute.htm -->
+<!-- final steering file -->
+<HistPlotter>
+	<include file='test/HistConfig.xml' />
+<!--	Not needed, since default file is defined in code-->
+<!--	<include file='defaultHist.xml' />-->
+	<sources>
+		<!-- gets input from 1 histogram -->
+		<input name="SemiLepAnalysis">
+			<folder name='trackmbefore'>
+			<!-- only histogram which name is 'mbg_nVSdisc' -->
+<!--				<filter type='exact' value='mbg_nVSdisc' />-->
+<!--				Will be replaced by 'exact' filters in the parser-->
+<!--				<filter type='histfile' value='Muon.hist' />-->
+			</folder>
+		</input>
+
+	<!-- includes of the data -->
+		<file id='qcd' name='{$QCD}' />
+		<file id='top' name='{$TOP}' />
+		<file id='wjets' name='{$WJETS}' />
+	</sources>
+	<!--
+		makes the canvas, mixes the histogramms defined in the histSetup
+		summaryFile = ps oder pdf
+	-->
+	<plots create='eps,pdf' makeSummaryFile='true' summaryFile='inspect.pdf'>
+		<hist name='norm_MET' input='analyzeisolationMET/var_norm_MET'>
+		<!-- name is also used for legend -->
+			<var name='qcd' source='file:qcd'  type='line' style='1' color='2'  />
+			<var name='top' source='file:top'  type='line' style='1' color='4' draw = '0'  />
+			<var name='wjets' source='file:wjets'  type='line' style='1' color='8' draw = '0'  />
+			<var name='signal' source='var:top,var:wjets' operation='add' type='filled' 
+				style='3005'  color='6' norm='Integral' />
+			<titleX v='missing E_{T} [GeV]' />
+			<titleY v='AU' />
+			<savefolder v='analysis' />
+			<legend name='plotname'  fonsize='12' />
+		</hist>
+	</plots>
+</HistPlotter>
