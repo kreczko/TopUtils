@@ -78,8 +78,11 @@ class Helper:
         
     def saveHistsInOne(histlist, filename, folder, legend = None,logH = ['0','0'], err = False, printAs = ['eps', 'png']):
         folder =  folder.rstrip('/')
-        if not os.path.exists(folder):
-            os.mkdir(folder)
+        f=''
+        for i in folder.split('/'):
+            f = f + i +  '/'
+            if not os.path.exists(f):
+                os.mkdir(f)
         pads = ps.PadService('test', 'testing', 1)
         pad = pads.Next()
         pad = Helper.setPadLayout(pad)
@@ -185,7 +188,11 @@ class Helper:
                 if mn < min:
                     min = mn
             x+= 1
-        return min*yScale
+        if min > 0:
+            min = min - min*(yScale-1)
+        else:
+            min = min*yScale
+        return min
     getMin = staticmethod(getMin)
     
         

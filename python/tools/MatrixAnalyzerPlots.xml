@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+	<!-- Works with LKThesis.xml -->
+<HistSetup>
+	<hist name='testingOverallIsolation' input='mbg_nVSdisc'>
+		<var name='qcdLoose' source='file:qcd,input:before' type='line'
+			style='1' color='2' norm='Integral' />
+		<var name='qcdTight' source='file:qcd,input:after' type='line'
+			style='1' color='4' norm='Integral' />
+		<titleX v='MVA disc.' />
+		<titleY v='AU' />
+		<savefolder v='analysis' />
+		<legend name='plotname' fonsize='12' />
+	</hist>	
+</HistSetup>

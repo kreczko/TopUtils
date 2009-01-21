@@ -1,189 +1,56 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<!-- rule declaration possible -->
-<!-- http://www.devmag.net/xml/xml_schema_elemente_attribute.htm -->
-<!-- final steering file -->
+	<!-- rule declaration possible -->
+	<!-- http://www.devmag.net/xml/xml_schema_elemente_attribute.htm -->
+	<!-- final steering file -->
 <HistPlotter>
-	<include file='test/HistConfig.xml' />
-<!--	Not needed, since default file is defined in code-->
-<!--	<include file='defaultHist.xml' />-->
+	<include file='MuonAnalyzerPlots.xml' />
+	<include file='IsolationAnalyzerPlots.xml' />
+	<include file='JetAnalyzerPlots.xml' />
+	<include file='MatrixAnalyzerPlots.xml' />
 	<sources>
 		<!-- gets input from 1 histogram -->
 		<input name="before">
-			<folder name='trackmbefore'>
-			<!-- only histogram which name is 'mbg_nVSdisc' -->
-<!--				<filter type='exact' value='mbg_nVSdisc' />-->
-<!--				Will be replaced by 'exact' filters in the parser-->
-<!--				<filter type='histfile' value='Muon.hist' />-->
+			<folder name='allmbefore'>
 			</folder>
 		</input>
 		<input name="after">
-			<folder name='trackmafter'>
-			<!-- only histogram which name is 'mbg_nVSdisc' -->
-<!--				<filter type='exact' value='mbg_nVSdisc' />-->
-<!--				Will be replaced by 'exact' filters in the parser-->
-<!--				<filter type='histfile' value='Muon.hist' />-->
+			<folder name='allmafter'>
 			</folder>
 		</input>
 
-	<!-- includes of the data -->
+		<!-- includes of the data -->
 		<file id='qcd' name='{$QCD}' />
 		<file id='top' name='{$TOP}' />
 		<file id='wjets' name='{$WJETS}' />
 	</sources>
 	<!--
-		makes the canvas, mixes the histogramms defined in the histSetup
-		summaryFile = ps oder pdf
+		makes the canvas, mixes the histogramms defined in the histSetup summaryFile
+		= ps oder pdf
 	-->
 	<plots create='eps,pdf' makeSummaryFile='true' summaryFile='inspect.pdf'>
-		<hist name='testingTrackIsolation' input='mbg_nVSdisc'>
-		<!-- name is also used for legend -->
-			<var name='qcdLoose' source='file:qcd,input:before'  type='line' style='1' color='2'  norm='Integral' />
-			<var name='qcdTight' source='file:qcd,input:after'  type='line' style='1' color='4'  norm='Integral' />
-<!--			<var name='wjets' source='file:wjets'  type='line' style='1' color='8' draw = '0'  />-->
-<!--			<var name='signal' source='var:top,var:wjets' operation='add' type='filled' -->
-<!--				style='3005'  color='6' norm='Integral' />-->
-			<titleX v='missing E_{T} [GeV]' />
-<!--			<titleY v='AU' />-->
-			<savefolder v='analysis' />
-			<legend name='plotname'  fonsize='12' />
-		</hist>
-		
-		<hist name='norm_MET' input='analyzeisolationMET/var_norm_MET'>
-		<!-- name is also used for legend -->
-			<var name='qcd' source='file:qcd'  type='line' style='1' color='2'  />
-			<var name='top' source='file:top'  type='line' style='1' color='4' draw = '0'  />
-			<var name='wjets' source='file:wjets'  type='line' style='1' color='8' draw = '0'  />
-			<var name='signal' source='var:top,var:wjets' operation='add' type='filled' 
-				style='3005'  color='6' norm='Integral' />
-			<titleX v='missing E_{T} [GeV]' />
-			<titleY v='AU' />
-			<savefolder v='analysis' />
-			<legend name='plotname'  fonsize='12' />
-		</hist>
-		<hist name='muon_pt' input='analyzeSelMuons/kin_pt'>
-		<!-- name is also used for legend -->
-			<var name='qcd' source='file:qcd'  type='line' style='1' color='2' norm='Integral' />
-			<var name='top' source='file:top'  type='line' style='1' color='4'  norm='Integral'/>
-			<var name='wjets' source='file:wjets'  type='line' style='1' color='8'  norm='Integral'/>
-<!--			<var name='signal' source='var:top,var:wjets' operation='add' type='filled'
--->
-<!--				style='3005'  color='6' norm='Integral' />-->
-			<titleX v='muon p_{T} [GeV]' />
-			<titleY v='AU' />
-			<savefolder v='analysis' />
-			<legend name='plotname' fonsize='12' />
-		</hist>
-		<hist name='muon_PtTracksVSdR' input='analyzeSelMuons/iso_dRTrkPt'>
-		<!-- name is also used for legend -->
-			<var name='qcd' source='file:qcd'  type='line' style='1' color='2' />
-			<var name='top' source='file:top'  type='line' style='1' color='4'  />
-			<var name='wjets' source='file:wjets'  type='line' style='1' color='8'  />
-			<titleX v='\Delta R(muon, track)' />
-			<titleY v='p_{T} of tracks' />
-			<savefolder v='analysis' />
-			<legend posX='20' name='plotname' fonsize='12' />
-		</hist>
-		<hist name='muon_NTracksVSdR' input='analyzeSelMuons/iso_dRTrkN'>
-		<!-- name is also used for legend -->
-			<var name='qcd' source='file:qcd'  type='line' style='1' color='2' />
-			<var name='top' source='file:top'  type='line' style='1' color='4'  />
-			<var name='wjets' source='file:wjets'  type='line' style='1' color='8'  />
-			<titleX v='\Delta R(muon, track)' />
-			<titleY v='# of tracks' />
-			<savefolder v='analysis' />
-			<legend posX='20' name='plotname' fonsize='12' />
-		</hist>
-		<hist name='muon_isoJet20' input='analyzeSelMuons/iso_isoJet20'>
-		<!-- name is also used for legend -->
-			<var name='qcd' source='file:qcd'  type='line' style='1' color='2' />
-			<var name='top' source='file:top'  type='line' style='1' color='4'  />
-			<var name='wjets' source='file:wjets'  type='line' style='1' color='8'  />
-			<titleX v='min. \Delta R(muon, jets(E_{T} > 20 GeV) )' />
-			<titleY v='AU' />
-			<logY v='1' />
-			<savefolder v='analysis' />
-			<legend name='plotname' fonsize='12' />
-		</hist>
-		<hist name='var_norm_dPhiMuJ12' input='analyzeisolationMET/var_norm_DeltaPhiMuonJet12'>
-			<var name='qcd' source='file:qcd'  type='line' style='1' color='2' />
-			<var name='top' source='file:top'  type='line' style='1' color='4'  />
-			<var name='wjets' source='file:wjets'  type='line' style='1' color='8'  />
-			<titleX v='\Delta\phi(\mu, jet 1) + \Delta\phi(\mu, jet 2)' />
-			<titleY v='AU' />
-<!--			<logY v='1' />-->
-			<savefolder v='analysis' />
-			<legend name='plotname' fonsize='12'  posX='40'/>
-		</hist>
-		<hist name='MVAdisc' input='analyzeisolationMET/var_MVAdisc'>
-			<var name='qcd' source='file:qcd'  type='line' style='1' color='2'  draw='0'/>
-			<var name='top' source='file:top'  type='line' style='1' color='4'  />
-			<var name='wjets' source='file:wjets'  type='line' style='1' color='8'  />
-			<titleX v='MVA disc.' />
-			<titleY v='AU' />
-<!--			<logY v='1' />-->
-			<savefolder v='analysis' />
-			<legend name='plotname' fonsize='12'  posX='40'/>
-		</hist>
-		<hist name='muon_eta' input='analyzeSelMuons/kin_eta'>
-		<!-- name is also used for legend -->
-			<var name='qcd' source='file:qcd'  type='line' style='1' color='2' norm='Integral' />
-			<var name='top' source='file:top'  type='line' style='1' color='4'  norm='Integral'/>
-			<var name='wjets' source='file:wjets'  type='line' style='1' color='8'  norm='Integral'/>
-<!--			<var name='signal' source='var:top,var:wjets' operation='add' type='filled'
--->
-<!--				style='3005'  color='6' norm='Integral' />-->
-			<titleX v='muon \eta' />
-			<titleY v='AU' />
-			<savefolder v='analysis' />
-			<legend name='plotname'  fonsize='12' />
-		</hist>
-		<hist name='jet1_et' input='analyzeSelJets/kin_e_0'>
-		<!-- name is also used for legend -->
-			<var name='qcd' source='file:qcd'  type='line' style='1' color='2' norm='Integral' />
-			<var name='top' source='file:top'  type='line' style='1' color='4'  norm='Integral'/>
-			<var name='wjets' source='file:wjets'  type='line' style='1' color='8'  norm='Integral'/>
-<!--			<var name='signal' source='var:top,var:wjets' operation='add' type='filled' -->
-<!--				style='3005'  color='6' norm='Integral' />-->
-			<titleX v='jet 1 E_{T} [GeV]' />
-			<titleY v='AU' />
-			<savefolder v='analysis' />
-			<legend name='plotname'  fonsize='12' />
-		</hist>
-		<hist name='jet2_et' input='analyzeSelJets/kin_e_1'>
-		<!-- name is also used for legend -->
-			<var name='qcd' source='file:qcd'  type='line' style='1' color='2' norm='Integral' />
-			<var name='top' source='file:top'  type='line' style='1' color='4'  norm='Integral'/>
-			<var name='wjets' source='file:wjets'  type='line' style='1' color='8'  norm='Integral'/>
-<!--			<var name='signal' source='var:top,var:wjets' operation='add' type='filled' -->
-<!--				style='3005'  color='6' norm='Integral' />-->
-			<titleX v='jet 2 E_{T} [GeV]' />
-			<titleY v='AU' />
-			<savefolder v='analysis' />
-			<legend name='plotname'  fonsize='12' />
-		</hist>
-		<hist name='jet3_et' input='analyzeSelJets/kin_e_2'>
-		<!-- name is also used for legend -->
-			<var name='qcd' source='file:qcd'  type='line' style='1' color='2' norm='Integral' />
-			<var name='top' source='file:top'  type='line' style='1' color='4'  norm='Integral'/>
-			<var name='wjets' source='file:wjets'  type='line' style='1' color='8'  norm='Integral'/>
-<!--			<var name='signal' source='var:top,var:wjets' operation='add' type='filled' -->
-<!--				style='3005'  color='6' norm='Integral' />-->
-			<titleX v='jet 3 E_{T} [GeV]' />
-			<titleY v='AU' />
-			<savefolder v='analysis' />
-			<legend name='plotname'  fonsize='12' />
-		</hist>
-		<hist name='jet4_et' input='analyzeSelJets/kin_e_3'>
-		<!-- name is also used for legend -->
-			<var name='qcd' source='file:qcd'  type='line' style='1' color='2' norm='Integral' />
-			<var name='top' source='file:top'  type='line' style='1' color='4'  norm='Integral'/>
-			<var name='wjets' source='file:wjets'  type='line' style='1' color='8'  norm='Integral'/>
-<!--			<var name='signal' source='var:top,var:wjets' operation='add' type='filled' -->
-<!--				style='3005'  color='6' norm='Integral' />-->
-			<titleX v='jet 4 E_{T} [GeV]' />
-			<titleY v='AU' />
-			<savefolder v='analysis' />
-			<legend name='plotname'  fonsize='12' />
-		</hist>
+		<!-- IsolationAnalyzer Plots -->
+		<hist setup='MVAdisc_signal' />
+		<hist setup='MVAdisc_qcd' />
+		<hist setup="norm_MET" />
+		<hist setup='var_norm_dPhiMuJ12'  />
+		<hist setup='norm_MVAdisc' />
+
+		<!-- MuonAnalyzer Plots -->
+		<hist setup='muon_pt' />
+		<hist setup='muon_calIso' />
+		<hist setup='muon_PtTracksVSdR' />
+		<hist setup='muon_NTracksVSdR' />
+		<hist setup='muon_isoJet20' />
+		<hist setup='var_norm_dPhiMuJ12' />
+		<hist setup='muon_eta' />
+
+		<!-- JetAnalyzer plots -->
+		<hist setup='jet1_et' />
+		<hist setup='jet2_et' />
+		<hist setup='jet3_et' />
+		<hist setup='jet4_et' />
+		<hist setup='muon_isoJet20' />
+		<hist setup='var_norm_dPhiMuJ12' />
+		<hist setup='muon_eta' />
 	</plots>
 </HistPlotter>

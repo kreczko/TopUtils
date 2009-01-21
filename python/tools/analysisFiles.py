@@ -1,11 +1,17 @@
 #only for personal use
+folder =  '/playground/rootfiles/FINAL/'
 
+def setFolder(dict):
+    for i in dict.keys():
+        dict[i] = folder + dict[i]
+        
 qcdVfilesJ = {'20': 'MM_qcdmu_valid_final_20j20m.root',
 '25':'MM_qcdmu_valid_final_25j20m.root',
 #MM_qcdmu_valid_final_30.30.60.75j30m.root
 '30':'MM_qcdmu_valid_final_30j20m.root',
 '35':'MM_qcdmu_valid_final_35j20m.root',
 '40':'MM_qcdmu_valid_final_40j20m.root'}
+
 
 qcdVfilesM = {'20': 'MM_qcdmu_valid_final_20j20m.root',
 '22.5':'MM_qcdmu_valid_final_20j22.5m.root',
@@ -77,3 +83,17 @@ wjetsCfilesM = {'20': 'MM_wjets_calib_final_20j20m.root',
 '25':'MM_wjets_calib_final_20j25m.root',
 '27.5':'MM_wjets_calib_final_20j27.5m.root',
 '30':'MM_wjets_calib_final_20j30m.root'}
+
+setFolder(qcdVfilesJ)
+setFolder(topVfilesJ)
+setFolder(wjetsVfilesJ)
+setFolder(qcdVfilesM)
+setFolder(topVfilesM)
+setFolder(wjetsVfilesM)
+
+setFolder(qcdCfilesM)
+setFolder(topCfilesM)
+setFolder(wjetsCfilesM)
+setFolder(qcdCfilesJ)
+setFolder(topCfilesJ)
+setFolder(wjetsCfilesJ)

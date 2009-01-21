@@ -83,30 +83,22 @@ class Macro:
         for i in xrange(1,count):
             L[i] = L[i-1] + inc
         return L
-
-    
-
             
-    def calcEff(self, type):
+    def calcEff(self, type, inputfiles, dir='all', outdir=''):
         if self.debug:
             print 'calculating efficiency for', type
-        if type in ['qcd', 'top', 'wjets'] and type in self.inputfiles.keys():
+        if type in ['qcd', 'top', 'wjets', 'mixed'] and (type in inputfiles.keys() or type == 'mixed'):
             #just to be sure:
             self.output.Cd('/')
-            self.createFolders(type, self.inputdirs)
+            self.createFolders(type, [outdir])
+            self.createFolders(type + '/' + outdir, [dir])
             #write old histogramms
-            self.doEff(type)            
-            
-        elif type == 'mixed' and len(self.inputfiles.keys()) > 0:
-            self.output.Cd('/')
-            self.createFolders(type, self.inputdirs)
-            #for i in self.inputdirs: 
-                #self.output.cd(type + '/' + i)
-            self.doEffMixed()
-                #eff.Write()
-                #self.output.Cd('/')
+            if not type=='mixed':
+                self.doEff(type, inputfiles[type], dir, outdir)
+            else:            
+                self.doEffMixed(['qcd', 'top', 'wjets', 'mixed'], dir, outdir)
         else:
-            print 'Error'
+            print 'Error occured in calcEff()'
             
     def createFolders(self, parentfolder, folderlist):
         for i in folderlist:
@@ -117,12 +109,12 @@ class Macro:
         self.mixb = None
         i = 0
         for x in inputfiles.itervalues():
-            file = x
+            file = TFile(x)
             if (i == 0):
-                self.mixa = file.Get(dir + self.after + '/' + self.hists['weighted']).Clone('nVSdiscTight')
-                self.mixunwa = file.Get(dir + self.after + '/' + self.hists['simple']).Clone('nVSdiscTightSimple')
-                self.mixb = file.Get(dir + self.before + '/' + self.hists['weighted']).Clone('nVSdiscLoose')
-                self.mixunwb = file.Get(dir + self.before + '/' + self.hists['simple']).Clone('nVSdiscLooseSimple')
+                self.mixa = copy.deepcopy(file.Get(dir + self.after + '/' + self.hists['weighted']).Clone('nVSdiscTight'))
+                self.mixunwa = copy.deepcopy(file.Get(dir + self.after + '/' + self.hists['simple']).Clone('nVSdiscTightSimple'))
+                self.mixb = copy.deepcopy(file.Get(dir + self.before + '/' + self.hists['weighted']).Clone('nVSdiscLoose'))
+                self.mixunwb = copy.deepcopy(file.Get(dir + self.before + '/' + self.hists['simple']).Clone('nVSdiscLooseSimple'))
                 if self.mixa == None or self.mixb == None or self.mixunwb == None or self.mixunwa == None:
                     print 'hist not found', dir, self.after, '/', self.hists['weighted']
             else:
@@ -134,30 +126,27 @@ class Macro:
         if self.debug:
             print 'summed in', dir, 'over', i, 'hists'
             
-    def doEffMixed(self):   
-        for dir in self.inputdirs:
-            self.makeMixed(self.inputfiles, dir)
-            self.setN(dir, self.mixb.Integral(), self.mixa.Integral())
-            self.output.cd('mixed' + '/' + dir)
-            result = self.getEffHist(self.mixb, self.mixa, self.mixunwb)
-            eff = result[0]
-            eff = Helper.setHistLabels(eff, 'mva disc.', 'effieciency in %')
-            self.mixa = Helper.setHistLabels(self.mixa, 'mva disc.', 'events')
-            self.mixunwa = Helper.setHistLabels(self.mixunwa, 'mva disc.', 'unweigthed events')
-            self.mixb = Helper.setHistLabels(self.mixb, 'mva disc.', 'events')
-            self.mixunwb = Helper.setHistLabels(self.mixunwb, 'mva disc.', 'unweigthed events')
-            eff = Helper.setMarker(eff, 4, 3, 1)
-            #Helper.saveHist(eff, 'eff', 'testing/' + dir)
-            eff.Write()            
-            self.mixa.Write()
-            self.mixunwa.Write()
-            self.mixb.Write()
-            self.mixunwb.Write()
-            self.output.Cd('/')
-            for effs in result[1]:
-                if self.debug:
-                    print 'Eff for %s disc < %1.2f : %1.3f +- %1.3f' % (dir, effs[0], effs[1], effs[2])
-                self.setEff('mixed', dir, round(effs[0], 2), effs[1], effs[2])     
+    def doEffMixed(self, types, dir, outdir):   
+        self.output.cd('mixed' + '/' + outdir + '/' +  dir)
+        result = self.getEffHist(self.mixb, self.mixa, self.mixunwb)
+        eff = result[0]
+        eff = Helper.setHistLabels(eff, 'mva disc.', 'effieciency in %')
+        self.mixa = Helper.setHistLabels(self.mixa, 'mva disc.', 'events')
+        self.mixunwa = Helper.setHistLabels(self.mixunwa, 'mva disc.', 'unweigthed events')
+        self.mixb = Helper.setHistLabels(self.mixb, 'mva disc.', 'events')
+        self.mixunwb = Helper.setHistLabels(self.mixunwb, 'mva disc.', 'unweigthed events')
+        eff = Helper.setMarker(eff, 4, 3, 1)
+        #Helper.saveHist(eff, 'eff', 'testing/' + dir)
+        eff.Write()            
+        self.mixa.Write()
+        self.mixunwa.Write()
+        self.mixb.Write()
+        self.mixunwb.Write()
+        self.output.Cd('/')
+        for effs in result[1]:
+            if self.debug:
+                print 'Eff for %s disc < %1.2f : %1.3f +- %1.3f' % (dir, effs[0], effs[1], effs[2])
+            self.setEff('mixed', dir, round(effs[0], 2), effs[1], effs[2])     
                 
     def setN(self, input, loose, tight):
         self.nloose[input] = int(loose)
@@ -217,53 +206,52 @@ class Macro:
         
         return [effplot, effs]
     
-    def doEff(self, type):
-        file = self.inputfiles[type]
+    def doEff(self, type, file, dir, outdir=''):
+        file = TFile(file)
         fGet = file.Get
-        for i in self.inputdirs:
-            after = fGet(i + self.after + '/' + self.hists['weighted']).Clone('nVSdiscTight')
-            unwafter = fGet(i + self.after + '/' + self.hists['simple']).Clone('nVSdiscTightSimple')
-            before = fGet(i + self.before + '/' + self.hists['weighted']).Clone('nVSdiscLoose')
-            unwbefore = fGet(i + self.before + '/' + self.hists['simple']).Clone('nVSdiscLooseSimple')
-            if after == None or before == None or unwbefore == None:
-                print 'Histogram not found'
-            else:
-                self.setMCTruth(type, i, before, after)
-                self.output.cd(type + '/' + i)
-                result = self.getEffHist(before, after, unwbefore)
-                #caluclate MC Efficiency without binning
-                mceff = after.Integral() / before.Integral()
-                mcerr = self.getStatError(mceff,  unwbefore.Integral())#sqrt((mceff * (1 - mceff)) / unwbefore.Integral())
+#        for i in self.inputdirs:
+        after = fGet(dir + self.after + '/' + self.hists['weighted']).Clone('nVSdiscTight')
+        unwafter = fGet(dir + self.after + '/' + self.hists['simple']).Clone('nVSdiscTightSimple')
+        before = fGet(dir + self.before + '/' + self.hists['weighted']).Clone('nVSdiscLoose')
+        unwbefore = fGet(dir + self.before + '/' + self.hists['simple']).Clone('nVSdiscLooseSimple')
+        if after == None or before == None or unwbefore == None:
+            print 'Histogram not found'
+        else:
+            self.setMCTruth(type, dir, before, after)
+            self.output.cd(type + '/' + outdir + '/' +  dir)
+            result = self.getEffHist(before, after, unwbefore)
+            #caluclate MC Efficiency without binning
+            mceff = after.Integral() / before.Integral()
+            mcerr = self.getStatError(mceff,  unwbefore.Integral())#sqrt((mceff * (1 - mceff)) / unwbefore.Integral())
                 
 #                print 'MC Eff for', i, ':[', mceff, ',', mcerr, ']' 
-                self.setEff(type, i, -1, mceff, mcerr)
+            self.setEff(type, dir, -1, mceff, mcerr)
 #                for effs in result[1]:          
 #                    print 'Eff for %s disc < %1.2f : %1.3f +- %1.3f' % (i, effs[0], effs[1], effs[2])
 #                    self.setEff(type, i,  effs[0], effs[1], effs[2])
-                leg = Helper.makePlainLegend( 25 , 95, 70, 25)
-                title1 = 'overall eff. %1.4f \pm %1.4f' % (mceff, mcerr)   
-                leg.SetHeader( title1)
-                leg = Helper.setLegendStyle(leg)
-                eff = result[0]
-                eff.SetTitle(title1)
+            leg = Helper.makePlainLegend( 25 , 95, 70, 25)
+            title1 = 'overall eff. %1.4f \pm %1.4f' % (mceff, mcerr)   
+            leg.SetHeader( title1)
+            leg = Helper.setLegendStyle(leg)
+            eff = result[0]
+            eff.SetTitle(title1)
 #                eff = Helper.setHistLabels(eff, 'mva disc.', 'efficiency in %')
 #                savefolder = self.plotsavefolder + '/' + i
 #                Helper.saveHist(eff, 'eff_MC_'+ type, savefolder, leg)
-                eff.Write()
+            eff.Write()
 #                leg.Write()
-                after.Write()
-                unwafter.Write()
-                before.Write()
-                unwbefore.Write()
-                self.output.Cd('/')        
+            after.Write()
+            unwafter.Write()
+            before.Write()
+            unwbefore.Write()
+            self.output.Cd('/')        
                     
-                    
-    def applyToOthers(self, inputfiles, dir):
+    def applyToOthers(self, inputfiles, dir, outdir=''):
         files = {}
         tf = TFile
         for i in inputfiles.keys():
             files[i] =  tf(inputfiles[i])
-        self.makeMixed(files, dir)
+        self.makeMixed(inputfiles, dir)
         qcdfile = files['qcd']
         topfile = files['top']
         wjetfile = files['wjets']
@@ -298,25 +286,72 @@ class Macro:
         effsig = sigalla/sigallb
         effsigerr = self.getStatError(effsig, unw.Integral())
         reweights = {'qcd':1, 'top':1, 'wjets':1}
-        qu = self.makeQualityHist(loose, tight,effsig, effsigerr, dir, reweights)
+        
         self.output.cd('applied')
-        self.output.GetDirectory('applied').mkdir(dir)
-        self.output.cd('applied/' + dir)
-        for i in qu:
-            i.Write()
+        completedir = 'applied/'
+        if outdir:
+            self.output.GetDirectory('applied').mkdir(outdir)
+            self.output.GetDirectory('applied').GetDirectory(outdir).mkdir(dir)
+            self.output.GetDirectory('applied').GetDirectory(outdir).GetDirectory(dir).mkdir('sig')
+            self.output.GetDirectory('applied').GetDirectory(outdir).GetDirectory(dir).mkdir('bkg')
+            completedir+= outdir + '/' + dir
+            self.output.cd(completedir)
+        else:
+            self.output.GetDirectory('applied').mkdir(dir)
+            self.output.GetDirectory('applied').GetDirectory(dir).mkdir('sig')
+            self.output.GetDirectory('applied').GetDirectory(dir).mkdir('bkg')
+            completedir+= dir 
+            self.output.cd('applied/' + dir)
+        qu = self.makeQualityHist(loose, tight,effsig, effsigerr, dir, reweights, completedir)
+        # 0,                     1            2          3            4         5
+        #[qualityBL, qualityBT,qualitySL, qualityST, effB, effQB]
+        self.output.cd(completedir + '/bkg')
+        qu[0].Write()
+        qu[1].Write()
+        qu[4].Write()
+        qu[5].Write()
+        self.output.Cd('/')
+        self.output.cd(completedir + '/sig')
+        qu[2].Write()
+        qu[3].Write()
+#        for i in qu:
+#            i.Write()
         
         self.output.Cd('/')
         
-    def makeQualityHist(self, loose, tight, effsig, effsigerr, dir, scale = {'qcd':1, 'top':1, 'wjets':1}): 
+    def makeQualityHist(self, loose, tight, effsig, effsigerr, dir, scale = {'qcd':1, 'top':1, 'wjets':1}, basedir=''): 
         keys = self.effbg[dir].keys()
         keys.sort()
+#        f = ''
+#        for i in basedir.split('/'):
+#            f = f + i +  '/'
+#            if not gROOT.GetDirectory(i):
+#                gROOT.mkdir(i)
+#                gROOT.cd(i)
+#        gROOT.cd(f)
+#        if basedir:
+##            gROOT.mkdir(basedir)
+##            gROOT.cd(basedir)
+#            gROOT.mkdir('sig')
+#            gROOT.mkdir('bkg')
+##            gROOT.cd(basedir+ '/bkg')
+#        else:
+        gROOT.mkdir('sig')
+        gROOT.mkdir('bkg')
+        gROOT.cd('bkg')
         
-        qualityBL = TH1F('quality_loose_BG', 'quality_loose_BG', int(len(keys)), 0., eval(keys[len(keys)-1]))
-        qualityBT = TH1F('quality_tight_BG', 'quality_tight_BG', int(len(keys)), 0., eval(keys[len(keys)-1]))
-        qualitySL = TH1F('quality_loose_SIG', 'quality_loose_SIG', int(len(keys)), 0., eval(keys[len(keys)-1]))
-        qualityST = TH1F('quality_tight_SIG', 'quality_tight_SIG', int(len(keys)), 0., eval(keys[len(keys)-1]))
+        
+        qualityBL = TH1F('quality_loose', 'quality_loose_BG', int(len(keys)), 0., eval(keys[len(keys)-1]))
+        qualityBT = TH1F('quality_tight', 'quality_tight_BG', int(len(keys)), 0., eval(keys[len(keys)-1]))
         effB = TH1F('effvsDiscCut_BG', 'effvsDiscCut_BG', int(len(keys)), 0., eval(keys[len(keys)-1]))
         effQB = TH1F('quality_eff_BG', 'quality_eff_BG', int(len(keys)), 0., eval(keys[len(keys)-1]))
+#        if basedir:
+#            gROOT.cd(basedir+ '/bkg')
+#        else:
+        gROOT.cd('bkg')
+        qualitySL = TH1F('quality_loose', 'quality_loose_SIG', int(len(keys)), 0., eval(keys[len(keys)-1]))
+        qualityST = TH1F('quality_tight', 'quality_tight_SIG', int(len(keys)), 0., eval(keys[len(keys)-1]))
+        
 #        effS = TH1F('effvsDiscCut_SIG', 'effvsDiscCut_SIG', int(len(keys)), 0., eval(keys[len(keys)-1]))
         
         #caching of PyROOT methods (faster)
@@ -425,16 +460,33 @@ class Macro:
                 print 'est: ', res['NQT'], 'pm',res['NQTerr'], 'real: ', self.qcdhisttight.GetBinContent(x)
                 
     def getStatError(self ,eff, unweighted):
-        err = sqrt((eff * (1 - eff)) / unweighted)
+        if unweighted > 0:
+            err = sqrt((eff * (1 - eff)) / unweighted)
+        else:
+            err = 0
         return err
     
-    def makeAllPlots(self):
+    
+    def saveReferencePlots(self, outputdir, files):
+        save = '/playground/ThesisPlots/reference/%s/' % outputdir 
         f = open('LKThesis.xml')
         cfg = f.read()
         f.close()
-        cfg = cfg.replace('{$QCD}', '/playground/rootfiles/FINAL/MM_qcdmu_calib_final_20j20m.root')
-        cfg = cfg.replace('{$TOP}', '/playground/rootfiles/FINAL/MM_top_calib_final_20j20m.root')
-        cfg = cfg.replace('{$WJETS}', '/playground/rootfiles/FINAL/MM_wjets_calib_final_20j20m.root')
+        cfg = cfg.replace('{$QCD}', files['qcd'])
+        cfg = cfg.replace('{$TOP}',  files['top'])
+        cfg = cfg.replace('{$WJETS}',  files['wjets'])
+        self.savePlotsFromCfg(cfg, save)
+        
+    def saveMacroPlots(self, outputdir, file):
+        save = '/playground/ThesisPlots/macro/%s/' % outputdir 
+        f = open('LKMacro.xml')
+        cfg = f.read()
+        f.close()
+        cfg = cfg.replace('{$macro}', file)
+        self.savePlotsFromCfg(cfg, save)
+        
+        
+    def savePlotsFromCfg(self,cfg, savedir):
         f = open('tmp.xml', 'w')
         f.write(cfg)
         f.close()
@@ -470,12 +522,56 @@ class Macro:
                     list.append(copy.deepcopy(h.Clone()))
                 # Helper.saveHist(h, "quality_loose_qcd", 'testing/plots/else')
             log = [hist.opt['logX'], hist.opt['logY']]
-            Helper.saveHistsInOne(list,hist.opt['name'], 'testing/plots/else/' + hist.opt['savefolder'], leg, log)        
+            Helper.saveHistsInOne(list,hist.opt['name'], savedir + hist.opt['savefolder'], leg, log)        
         os.remove('tmp.xml')
         
-    def makeCutDependencyPlots(self, varcut):
-        print 'Oo'
-                
+    def makeCutDependencyPlots(self, inputdirs, varcut):
+        keys = qcdCfilesJ.keys()
+        keys.sort()
+        for i in keys:
+            filesC = {'qcd' : qcdCfilesJ[i], 'top' : topCfilesJ[i], 'wjets' : wjetsCfilesJ[i]}
+            filesV = {'qcd' : qcdVfilesJ[i], 'top' : topVfilesJ[i], 'wjets' : wjetsVfilesJ[i]}
+        
+            outputdir = 'jetcut_%s' % i
+            for dir in inputdirs:
+                self.makeMixed(filesC, dir)
+                self.setN(dir, self.mixb.Integral(), self.mixa.Integral())
+                for type in ['qcd', 'top', 'wjets', 'mixed']:
+                    self.calcEff(type, filesC, dir, outputdir)
+                self.applyToOthers(filesV, dir, outputdir)
+        
+        keys = qcdCfilesM.keys()
+        keys.sort()
+        for i in keys:
+#            files = {'qcd' : qcdCfilesM[i], 'top' : topCfilesM[i], 'wjets' : wjetsCfilesM[i]}
+            filesC = {'qcd' : qcdCfilesM[i], 'top' : topCfilesM[i], 'wjets' : wjetsCfilesM[i]}
+            filesV = {'qcd' : qcdVfilesM[i], 'top' : topVfilesM[i], 'wjets' : wjetsVfilesM[i]}
+            outputdir = 'muoncut_%s' % i
+            for dir in inputdirs:
+                self.makeMixed(filesC, dir)
+                self.setN(dir, self.mixb.Integral(), self.mixa.Integral())
+                for type in ['qcd', 'top', 'wjets', 'mixed']:
+                    self.calcEff(type, filesC, dir, outputdir)
+                self.applyToOthers(filesV, dir, outputdir)
+        
+        
+    def saveAllPlots(self):
+        keys = qcdCfilesJ.keys()
+        keys.sort()
+        for i in keys:
+            files = {'qcd' : qcdCfilesJ[i], 'top' : topCfilesJ[i], 'wjets' : wjetsCfilesJ[i]}
+            outputdir = 'jetcut_%s' % i
+            self.saveReferencePlots(outputdir, files)
+        
+        keys = qcdCfilesM.keys()
+        keys.sort()
+        for i in keys:
+            files = {'qcd' : qcdCfilesM[i], 'top' : topCfilesM[i], 'wjets' : wjetsCfilesM[i]}
+            outputdir = 'muoncut_%s' % i
+            self.saveReferencePlots(outputdir, files)
+        
+        self.saveMacroPlots("", self.output.GetName())
+
 if __name__ == '__main__':
     gROOT.Reset()
     #for white background
@@ -483,21 +579,23 @@ if __name__ == '__main__':
     gROOT.SetBatch(True)
     inputfiles = {}
     folder = '/playground/rootfiles/FINAL/'
-    inputfiles['qcd'] = folder + "MM_qcdmu_calib_final_40j20m.root"
-    inputfiles['top'] = folder + "MM_top_calib_final_40j20m.root"
-    inputfiles['wjets'] =folder + "MM_wjets_calib_final_40j20m.root"
+    inputfiles['qcd'] = folder + "MM_qcdmu_calib_final_20j20m.root"
+    inputfiles['top'] = folder + "MM_top_calib_final_20j20m.root"
+    inputfiles['wjets'] =folder + "MM_wjets_calib_final_20j20m.root"
     inputdirs = ["all", "jetIso", "calo", "track"]
     inputs = {}
-    inputs['qcd'] = folder + 'MM_qcdmu_valid_final_40j20m.root'
-    inputs['top'] =folder +  "MM_top_valid_final_40j20m.root"
-    inputs['wjets'] = folder + "MM_wjets_valid_final_40j20m.root"
-    mac = Macro('complete_hists_MM.root', inputfiles, inputdirs)
-    mac.debug = True
-    mac.calcEff('qcd')
-    mac.calcEff('top')
-    mac.calcEff('wjets')
-    mac.calcEff('mixed')
-    #mac.applyToOthers(inputs, "track")
-    for i in inputdirs:
-        mac.applyToOthers(inputs, i)
-    mac.makeAllPlots()
+    inputs['qcd'] = folder + 'MM_qcdmu_valid_final_20j20m.root'
+    inputs['top'] =folder +  "MM_top_valid_final_20j20m.root"
+    inputs['wjets'] = folder + "MM_wjets_valid_final_20j20m.root"
+    mac = Macro(folder + 'complete_hists_MM.root', inputfiles, inputdirs)
+    mac.debug = False
+#    mac.calcEff('qcd')
+#    mac.calcEff('top')
+#    mac.calcEff('wjets')
+#    mac.calcEff('mixed')
+   # mac.applyToOthers(inputs, "track")
+    mac.makeCutDependencyPlots(inputdirs, 0.3)
+#    for i in inputdirs:
+#        mac.applyToOthers(inputs, i)
+    mac.output.Close()
+    mac.saveAllPlots()

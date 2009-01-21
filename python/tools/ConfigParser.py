@@ -6,22 +6,24 @@ import copy
 
 
 
-"""
-The ConfigParser reads a XML-configuration file and makes the content easy to access by a script
-@author: lkreczko
-@contact: lkreczko@mail.desy.de
-@version: 0.3
-"""
+
 class ConfigParser:
     """
-    Constructor for ConfigParser
-    @param file: the configuration file 
-    @param rootname: the name of the XML-Tree-Root (defines the config type) 
-    @requires: file has to exist
-    @raise IOError: if the configuration file does not exist 
+    The ConfigParser reads a XML-configuration file and makes the content easy to access by a script
+    @author: lkreczko
+    @contact: lkreczko@mail.desy.de
+    @version: 0.3
     """
-    def __init__(self, file, rootname= 'HistPlotter'):
-        self.__rootname =  rootname
+  
+    def __init__(self, file, rootname='HistPlotter'):
+        """
+            Constructor for ConfigParser
+            @param file: the configuration file 
+            @param rootname: the name of the XML-Tree-Root (defines the config type) 
+            @requires: file has to exist
+            @raise IOError: if the configuration file does not exist 
+        """
+        self.__rootname = rootname
         self.__includeFiles = []#list of setups ['name'] = filepath
         self.__histDefinitions = []
         if ConfigParser.fileExists(file, 'config'):
@@ -30,7 +32,7 @@ class ConfigParser:
     def fileExists(file, type):
         ret = os.path.exists(file)
         if(not ret):
-            msg = type + ' file "' + file +' " does not exist'
+            msg = type + ' file "' + file + ' " does not exist'
             raise IOError, msg
         return ret
     fileExists = staticmethod(fileExists)
@@ -100,7 +102,7 @@ class ConfigParser:
         ret = False
         for i in range(node.attributes.length):
             name = node.attributes.item(i).name
-            if name ==attr:
+            if name == attr:
                 ret = True
         return ret
     
@@ -164,7 +166,7 @@ class ConfigParser:
         ret = {}
         sources = self.getNodeList('sources')
         #exact one sources per config
-        if len(sources) >1 or not sources:
+        if len(sources) > 1 or not sources:
             raise ConfigError, 'not exact one <sources> inside config file'
         files = self.getChildNodes(sources[0], 'file')
         #files = self.getNodeList('file')
@@ -213,10 +215,10 @@ class ConfigParser:
         ret = {}
         sources = self.getNodeList('sources')
         #exact one sources per config
-        if len(sources) >1 or not sources:
+        if len(sources) > 1 or not sources:
             raise ConfigError, 'not exact one <sources> inside config file'
         #parent node of inputs has to be sources
-        inputs = self.getChildNodes(sources[0],'input')
+        inputs = self.getChildNodes(sources[0], 'input')
         for i in inputs:
             ret[self.getAttributeValue(i, 'name')] = Input.getFromNode(i)
         return ret
@@ -234,7 +236,7 @@ class ConfigParser:
         inputs = self.getInputs()
         includes = self.readIncludes()
         plots = self.getNodeList('plots')
-        return Plots.getFromNode(plots,includes, inputs, inputfiles)
+        return Plots.getFromNode(plots, includes, inputs, inputfiles)
     
 
 """
@@ -263,7 +265,7 @@ container for all Plots
 """
 class Plots:
     #define the output as ROOT can write it
-    output = ['eps','ps','pdf','jpg','png','gif']
+    output = ['eps', 'ps', 'pdf', 'jpg', 'png', 'gif']
     """
     constructor
     @param histlist: the list of Histogram instances
@@ -272,7 +274,7 @@ class Plots:
     @param sumfile: the filename of the summary file
     @requires: create-values in the allowed list    
     """
-    def __init__(self,histlist, create = 'eps,png', makeSummary = 'false', sumfile ='inspect.ps'):
+    def __init__(self, histlist, create='eps,png', makeSummary='false', sumfile='inspect.ps'):
         self.fileOutputs = []
         for i in create.split(','):
             if i in self.output:
@@ -295,7 +297,7 @@ class Plots:
     @requires: the node to be the <plots> node 
     """
     def getFromNode(plots, includes, inputs, inputfiles):
-        if len(plots) >1 or not plots:
+        if len(plots) > 1 or not plots:
             raise ConfigError, 'not exact one <plots> inside config file'
         create = ConfigParser.getAttributeValue(plots[0], 'create')
         makeSum = ConfigParser.getAttributeValue(plots[0], 'makeSummaryFile')
@@ -305,15 +307,15 @@ class Plots:
 
         #read first the single histograms
         single = ConfigParser.getChildNodes(plots[0], 'hist')
-        singleList =[]
+        singleList = []
         for h in single:
             hist = Histogram.readHist(h, histsetups, inputs, inputfiles)
             singleList.append(hist)
         #plots can contain either single histograms or hist lists
         multilist = []
-        multi =  ConfigParser.getChildNodes(plots[0], 'histlist')
+        multi = ConfigParser.getChildNodes(plots[0], 'histlist')
         for h in multi:
-            list = Histogram.readHistList(h,  inputs, inputfiles)
+            list = Histogram.readHistList(h, inputs, inputfiles)
             multilist.extend(list)
         #join the two lists        
         singleList.extend(multilist)
@@ -344,6 +346,7 @@ class Histogram:
         self.opt = defaultlist
         self.configOptions = optionlist
         self.legend = legend
+        self.varlist = []
         #replaces defaults by config values, if they had been defined
         for i in optionlist.keys():
             if i in defaultlist.keys():
@@ -353,8 +356,8 @@ class Histogram:
                 raise ConfigError, msg        
         if varlist:   
             self.varlist = varlist
-        else:
-            raise ConfigError, 'no variable defined for histogram ' + self.opt['name']
+#        else:
+#            raise ConfigError, 'no variable defined for histogram ' + self.opt['name']
     
     """
     Compare function. Compares two instances of Histogram by their names
@@ -367,7 +370,12 @@ class Histogram:
     @param options: optionlist from histogram template
     @requires: all options are defined in the default hist
     """
-    def applySetup(self, options):
+    def applySetup(self, setup):
+        options = setup.configOptions
+        if not self.varlist and setup.varlist:
+            self.varlist = setup.varlist
+        if not self.legend and setup.legend:
+            self.legend = setup.legend
         for i in options.keys():
             if i in self.opt.keys():
                 if not i in self.configOptions.keys():
@@ -407,12 +415,24 @@ class Histogram:
             histsetuplist.append(setup)
         if len(histsetuplist) > 0:
             histsetups = histsetuplist[0]
-            for i in range(2,len(histsetuplist)):
-                for k in histsetups.keys():
-                    if i.has_key(k): 
-                        print 'Warning: multible definitions of  histsetup "', k,'"'
+            for x in range(1, len(histsetuplist)):
+                i = histsetuplist[x]
+                for k in i.keys():
+                    if histsetups.has_key(k):
+                        print 'Warning: multible definitions of  histsetup "', k, '"'
                     else:
-                         histsetups[k] = i[k]
+                        histsetups[k] = i[k]
+
+                
+#            print histsetups
+#            for i in range(1,len(histsetuplist)):
+#                for k in histsetups.keys():
+#                    histsetups[k] = i[k]
+#                for k in histsetups.keys():
+#                    if i.has_key(k): 
+#                        print 'Warning: multible definitions of  histsetup "', k,'"'
+#                    else:
+#                         histsetups[k] = i[k]
         return histsetups
     readHistSetups = staticmethod(readHistSetups)
     
@@ -422,9 +442,9 @@ class Histogram:
     @param setup: if the given node is a hist setup/template
     @return: a Histogram instance
     """
-    def readHistFromNode(node, setup =False):
+    def readHistFromNode(node, setup=False):
         varlist = []
-        if setup:
+        if setup and not ConfigParser.getChildNodes(node, 'var'):
             varlist.append(Variable({}))
         optlist = {}
         #go through all attributes
@@ -436,7 +456,7 @@ class Histogram:
         #go through all children nodes
         for i in ConfigParser.getAllChildNodes(node):
             #don't do complex input like var and legend
-            if not i.localName in ['var','legend']:                
+            if not i.localName in ['var', 'legend']:                
                 optlist[i.localName] = ConfigParser.getAttributeValue(i, 'v')
                 
         for x in ConfigParser.getChildNodes(node, 'var'):
@@ -476,18 +496,25 @@ class Histogram:
     
     def readHist(node, setup, input, files):
         hist = Histogram.readHistFromNode(node)
+        if not hist.opt['setup'] == '':
+            if hist.opt['setup'] in setup.keys():
+                hist.applySetup(setup[hist.opt['setup']])
+            else:
+                print 'Warning: HistSetup ', hist.opt['setup'], 'is not defined'  
         put = hist.opt['input']
+#        print hist.varlist
+#        print put
         if Histogram.inputswitch in put:
             put = put.replace(Histogram.inputswitch, '')
             hist.validateAndReplaceInput(input[put], files)
         else:
             hist.validateAndReplaceInput(put, files, True, input)
         #check if Variables have valid input, input exists and setup is existing
-        if not hist.opt['setup'] == '':
-            if hist.opt['setup'] in setup.keys():
-                hist.applySetup(setup[hist.opt['setup']].configOptions)
-            else:
-                print 'Warning: HistSetup ', hist.opt['setup'], 'is not defined'    
+#        if not hist.opt['setup'] == '':
+#            if hist.opt['setup'] in setup.keys():
+#                hist.applySetup(setup[hist.opt['setup']])
+#            else:
+#                print 'Warning: HistSetup ', hist.opt['setup'], 'is not defined'    
         return hist
     readHist = staticmethod(readHist)
     
@@ -509,7 +536,7 @@ class Histogram:
                     path = dir.GetName() + '/' + hist.GetName()
                     ret.append(path)
         else:
-            msg = 'root file "' +file +' "not found'
+            msg = 'root file "' + file + ' "not found'
             raise ConfigError, msg
         return ret     
     getHistsFromFile = staticmethod(getHistsFromFile)
@@ -526,7 +553,7 @@ class Histogram:
                 path = dir.GetName() + '/' + hist.GetName()
                 ret.append(path)
         else:
-            msg = 'root file "' +file +' "not found'
+            msg = 'root file "' + file + ' "not found'
             raise ConfigError, msg
         return ret     
     getHistsFromFileDir = staticmethod(getHistsFromFileDir)
@@ -553,18 +580,18 @@ class Histogram:
                 spl = x.split('/')
                 dir = spl[0]
                 hist = spl[1]
-                tmp.opt['name'] =histlistname + '_' + hist 
+                tmp.opt['name'] = histlistname + '_' + hist 
                 tmp.opt['savefolder'] = dir
                 filter = Filter('exact', hist)
                 folder = Folder(dir, [filter])
                 inp = Input([folder])
                 tmp.validateAndReplaceInput(inp, files)
-                ret.append( copy.deepcopy(tmp))
+                ret.append(copy.deepcopy(tmp))
         #break down input to single hist
         #hist.validateAndReplaceInput(input, files)
         return ret
     
-    def validateAndReplaceInput(self, input, files, text=False, wholeinput = {}):
+    def validateAndReplaceInput(self, input, files, text=False, wholeinput={}):
         ret = False
             #get var input and combine it with inputfolders and filters
         for i in self.varlist:
@@ -590,19 +617,19 @@ class Histogram:
                     i.rootsource = file
                     i.hist = hist
                 else:
-                    msg = 'specified source does not exist %s::%s' %(file, hist)
+                    msg = 'specified source does not exist %s::%s' % (file, hist)
                     raise ConfigError, msg
             elif Variable.ksourceVar in source and not Variable.ksourceInput in source:
                 for iv in source.split(Variable.entryDelimiter):
                     xv = iv.split(Variable.typeDelimiter)[1]
-                    vxx =  self.getVarByName(xv)
+                    vxx = self.getVarByName(xv)
                     i.rootsource += vxx.rootsource + Variable.entryDelimiter
                     i.hist = vxx.hist
-                i.rootsource =  i.rootsource.rstrip(Variable.entryDelimiter)
+                i.rootsource = i.rootsource.rstrip(Variable.entryDelimiter)
             elif Variable.ksourceInput in source:
                 sources = source.split(Variable.entryDelimiter)
                 source = sources[0].split(Variable.typeDelimiter)
-                sinput =sources[1].split(Variable.typeDelimiter)
+                sinput = sources[1].split(Variable.typeDelimiter)
                 #exact 1 source, 1 folder, 1 histogram of type exact!
                 err = not len(source) == 2
                 err = err and not len(input.folderlist) == 1
@@ -615,13 +642,12 @@ class Histogram:
                     hist = input
                     folder = wholeinput[sinput[1]].folderlist[0].name
                     hist = folder + '/' + hist
-                    print hist
                     
                 if ConfigParser.fileContainsObject(file, hist):
                     i.rootsource = file
                     i.hist = hist
                 else:
-                    msg = 'specified source does not exist %s::%s' %(file, hist)
+                    msg = 'specified source does not exist %s::%s' % (file, hist)
                     raise ConfigError, msg    
             else:
                 raise ConfigError, 'illegal Variable input'
@@ -648,7 +674,7 @@ class Histogram:
     def readDefaults(self):
         defaults = {}
         cfg = ConfigParser(self.defaultXML, 'HistSetup')
-        root =ConfigParser.getNodeByAttribute(ConfigParser.getChildNodes(cfg.getRoot(), 'hist'), 'name', 'DEFAULT')
+        root = ConfigParser.getNodeByAttribute(ConfigParser.getChildNodes(cfg.getRoot(), 'hist'), 'name', 'DEFAULT')
         if not root:
             raise ConfigError, 'no hist default found'
         #for all attributes
@@ -677,7 +703,7 @@ class Variable:
     typeDelimiter = ':'
     entryDelimiter = ','
     #use maybe RGB? like #FF0000 for red, or (255, 0, 0) for red
-    colors ={'black' : 1,
+    colors = {'black' : 1,
              'red' : 2}
     operations = ['add', 'divide', 'substract', 'none']
     histTypes = {'line':0}
@@ -739,7 +765,7 @@ class Variable:
     def readDefaults(self):
         defaults = {}
         cfg = ConfigParser(self.defaultXML, 'VarSetup')
-        root =ConfigParser.getNodeByAttribute(ConfigParser.getChildNodes(cfg.getRoot(), 'var'), 'name', 'DEFAULT')
+        root = ConfigParser.getNodeByAttribute(ConfigParser.getChildNodes(cfg.getRoot(), 'var'), 'name', 'DEFAULT')
         if not root:
             raise ConfigError, 'no var default found'
         #for all attributes
@@ -762,7 +788,7 @@ class Filter:
     
     def __init__(self, type, value):
         #inversion of types
-        self.nTypes= []
+        self.nTypes = []
         for i in self.types:
             tmp = '!' + i
             self.nTypes.append(tmp)
@@ -821,9 +847,9 @@ class Folder:
         if filters:
             for y in filters:
                 filt.append(Filter.getFromNode(y))
-            folder = Folder(ConfigParser.getAttributeValue(node, 'name'),filt)
+            folder = Folder(ConfigParser.getAttributeValue(node, 'name'), filt)
         else:
-            folder = Folder(ConfigParser.getAttributeValue(node, 'name'),None) 
+            folder = Folder(ConfigParser.getAttributeValue(node, 'name'), None) 
         return folder
     getFromNode = staticmethod(getFromNode)
     
@@ -848,7 +874,7 @@ class Legend:
     def readDefaults(self):
         defaults = {}
         cfg = ConfigParser(self.defaultXML, 'LegSetup')
-        root =ConfigParser.getNodeByAttribute(ConfigParser.getChildNodes(cfg.getRoot(), 'leg'), 'name', 'DEFAULT')
+        root = ConfigParser.getNodeByAttribute(ConfigParser.getChildNodes(cfg.getRoot(), 'leg'), 'name', 'DEFAULT')
         if not root:
             raise ConfigError, 'no legend default found'
         #for all attributes
