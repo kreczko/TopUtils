@@ -1,43 +1,128 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<!-- rule declaration possible -->
-<!-- http://www.devmag.net/xml/xml_schema_elemente_attribute.htm -->
-<!-- final steering file -->
+	<!-- rule declaration possible -->
+	<!-- http://www.devmag.net/xml/xml_schema_elemente_attribute.htm -->
+	<!-- final steering file -->
 <HistPlotter>
-	<include file='test/HistConfig.xml' />
-<!--	Not needed, since default file is defined in code-->
-<!--	<include file='defaultHist.xml' />-->
 	<sources>
 		<!-- gets input from 1 histogram -->
-		<input name="SemiLepAnalysis">
-			<folder name='trackmbefore'>
-			<!-- only histogram which name is 'mbg_nVSdisc' -->
-<!--				<filter type='exact' value='mbg_nVSdisc' />-->
-<!--				Will be replaced by 'exact' filters in the parser-->
-<!--				<filter type='histfile' value='Muon.hist' />-->
-			</folder>
+		<input name='qcdAll'>
+			<folder name="qcd/jetcut_20/all" />
+		</input>
+		<input name='topAll'>
+			<folder name="top/jetcut_20/all" />
+		</input>
+		<input name='wjetsAll'>
+			<folder name="wjets/jetcut_20/all" />
+		</input>
+		<input name='mixedAll'>
+			<folder name="mixed/jetcut_20/all" />
+		</input>
+		
+		<input name='appQCD'>
+			<folder name="applied/jetcut_20/all/bkg" />
+		</input>
+		<input name='appSIG'>
+			<folder name="applied/jetcut_20/all/sig" />
+		</input>
+		<input name='appQCD25'>
+			<folder name="applied/jetcut_25/all/bkg" />
+		</input>
+		<input name='appSIG25'>
+			<folder name="applied/jetcut_25/all/sig" />
+		</input>
+		<input name='appQCD30'>
+			<folder name="applied/jetcut_30/all/bkg" />
+		</input>
+		<input name='appSIG30'>
+			<folder name="applied/jetcut_30/all/sig" />
+		</input>
+		<input name='appQCD35'>
+			<folder name="applied/jetcut_35/all/bkg" />
+		</input>
+		<input name='appSIG35'>
+			<folder name="applied/jetcut_35/all/sig" />
+		</input>
+		<input name='appQCD40'>
+			<folder name="applied/jetcut_40/all/bkg" />
+		</input>
+		<input name='appSIG40'>
+			<folder name="applied/jetcut_40/all/sig" />
 		</input>
 
-	<!-- includes of the data -->
-		<file id='qcd' name='{$QCD}' />
-		<file id='top' name='{$TOP}' />
-		<file id='wjets' name='{$WJETS}' />
+		<!-- includes of the data -->
+		<file id="macro" name="{$macro}" />
 	</sources>
 	<!--
-		makes the canvas, mixes the histogramms defined in the histSetup
-		summaryFile = ps oder pdf
+		makes the canvas, mixes the histogramms defined in the histSetup summaryFile
+		= ps oder pdf
 	-->
 	<plots create='eps,pdf' makeSummaryFile='true' summaryFile='inspect.pdf'>
-		<hist name='norm_MET' input='analyzeisolationMET/var_norm_MET'>
+	<!-- Macro plots -->
+	<hist name='quality_QCDLoose' input='quality_loose' >
+		<var name='qcd' source='file:macro, input:appQCD' type='line' color='2' />
+		<titleX v='mva disc. cut' />
+		<titleY v='N_{est}/N_{true}' />
+		<legend name='plotname' fonsize='12'   posX='50'/>
+	</hist>
+	<hist name='quality_SIGLoose' input='quality_loose' >
+		<var name='signal' source='file:macro, input:appSIG' type='line' color='4' />
+		<titleX v='mva disc. cut' />
+		<titleY v='N_{est}/N_{true}' />
+		<legend name='plotname' fonsize='12'  />
+	</hist>
+	<hist name='quality_QCDTight' input='quality_tight' >
+		<var name='qcd' source='file:macro, input:appQCD' type='line' color='2' />
+		<titleX v='mva disc. cut' />
+		<titleY v='N_{est}/N_{true}' />
+		<legend name='plotname' fonsize='12'  posX='50' />
+	</hist>
+	<hist name='quality_SIGTight' input='quality_tight' >
 		<!-- name is also used for legend -->
-			<var name='qcd' source='file:qcd'  type='line' style='1' color='2'  />
-			<var name='top' source='file:top'  type='line' style='1' color='4' draw = '0'  />
-			<var name='wjets' source='file:wjets'  type='line' style='1' color='8' draw = '0'  />
-			<var name='signal' source='var:top,var:wjets' operation='add' type='filled' 
-				style='3005'  color='6' norm='Integral' />
-			<titleX v='missing E_{T} [GeV]' />
-			<titleY v='AU' />
-			<savefolder v='analysis' />
-			<legend name='plotname'  fonsize='12' />
-		</hist>
+		<var name='signal' source='file:macro, input:appSIG' type='line' color='4' />
+		<titleX v='mva disc. cut' />
+		<titleY v='N_{est}/N_{true}' />
+		<legend name='plotname' fonsize='12'  />
+	</hist>
+	<hist name='masterPlotAll' input='efficiency' >
+		<var name='qcd' source='file:macro, input:qcdAll' type='line' color='2' />
+		<var name='top' source='file:macro, input:topAll' type='line' color='4' />
+		<var name='wjets' source='file:macro, input:wjetsAll' type='line' color='8' />
+<!--		<var name='signal' source='var:top,var:wjets' type='line' color='4' operation='add'/> -->
+		<var name='mixed' source='file:macro, input:mixedAll' type='line' color='3' />
+		<titleX v='mva disc.' />
+		<titleY v='iso. efficiency' />
+		<legend name='plotname' fonsize='12' posY="60"/>
+	</hist>
+	<hist name='eff_MC_qcd' input='efficiency' >
+		<var name='qcd' source='file:macro, input:qcdAll' type='line' color='2' />
+		<titleX v='mva disc. cut' />
+		<titleY v='iso. efficiency' />
+		<legend name='plotname' fonsize='12' posX='50' />
+	</hist>
+	<hist name='eff_qcd' input='effvsDiscCut_BG' >
+		<var name='qcd' source='file:macro, input:appQCD' type='line' color='2' />
+		<titleX v='mva disc. cut' />
+		<titleY v='iso. efficiency' />
+		<legend name='plotname' fonsize='12'  posX='50' />
+	</hist>
+	<hist name='quality_cuts' input='applied/Jcuts/quality_cut_0.15' >
+		<var name='qcd loose' source='file:macro' type='line' color='2' />
+		<titleX v='jet cut' />
+		<titleY v='N_{est}/N_{true}' />
+		<max v='1.003' />
+		<min v='0.997' />
+		<legend name='plotname' fonsize='12'  posX='50' />
+	</hist>
+	<!-- Cut plots -->
+	<hist name='quality_QCDLoose_cuts' input='quality_loose' >
+		<var name='jetCut 20' source='file:macro, input:appQCD' type='line' color='2' />
+		<var name='jetCut 25' source='file:macro, input:appQCD25' type='line' color='4' />
+		<var name='jetCut 30' source='file:macro, input:appQCD30' type='line' color='6' />
+		<var name='jetCut 35' source='file:macro, input:appQCD35' type='line' color='8' />
+		<var name='jetCut 40' source='file:macro, input:appQCD40' type='line'  />
+		<titleX v='mva disc. cut' />
+		<titleY v='N_{est}/N_{true}' />
+		<legend name='plotname' fonsize='12' />
+	</hist>
 	</plots>
 </HistPlotter>

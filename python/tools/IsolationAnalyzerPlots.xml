@@ -20,37 +20,6 @@
 		<legend name='plotname' fonsize='12' posX='40' />
 	</hist>
 
-	<hist name='var_norm_dPhiMuJ12' input='analyzeisolationMET/var_norm_DeltaPhiMuonJet12'>
-		<var name='qcd' source='file:qcd' type='line' style='1' color='2' />
-		<var name='top' source='file:top' type='line' style='1' color='4' />
-		<var name='wjets' source='file:wjets' type='line' style='1' color='8' />
-		<titleX v='\Delta\phi(\mu, jet 1) + \Delta\phi(\mu, jet 2)' />
-		<titleY v='AU' />
-		<!--			<logY v='1' />-->
-		<savefolder v='analysis' />
-		<legend name='plotname' fonsize='12' posX='40' />
-	</hist>
-	<hist name='var_norm_dPhiMuJ12' input='analyzeisolationMET/var_norm_DeltaPhiMuonJet12'>
-		<var name='qcd' source='file:qcd' type='line' style='1' color='2' />
-		<var name='top' source='file:top' type='line' style='1' color='4' />
-		<var name='wjets' source='file:wjets' type='line' style='1' color='8' />
-		<titleX v='\Delta\phi(\mu, jet 1) + \Delta\phi(\mu, jet 2)' />
-		<titleY v='AU' />
-		<!--			<logY v='1' />-->
-		<savefolder v='analysis' />
-		<legend name='plotname' fonsize='12' posX='40' />
-	</hist>
-	<hist name='var_norm_dPhiMETMu' input='analyzeisolationMET/var_norm_deltaPhiMETleadingMuon'>
-		<var name='qcd' source='file:qcd' type='line' style='1' color='2' />
-		<var name='top' source='file:top' type='line' style='1' color='4' />
-		<var name='wjets' source='file:wjets' type='line' style='1' color='8' />
-		<titleX v='\Delta\phi(\mu, jet 1) + \Delta\phi(\mu, jet 2)' />
-		<titleY v='AU' />
-		<!--			<logY v='1' />-->
-		<savefolder v='analysis' />
-		<legend name='plotname' fonsize='12' posX='40' />
-	</hist>
-	
 	<hist name='norm_MVAdisc' input='analyzeisolationMET/var_MVAdisc'>
 		<var name='qcd' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
 		<var name='top' source='file:top' type='line' style='1' color='4' norm='Integral' />
@@ -61,6 +30,29 @@
 		<savefolder v='analysis' />
 		<legend name='plotname' fonsize='12' posX='40' />
 	</hist>
+
+	<hist name='var_norm_dPhiMuJ12' input='analyzeisolationMET/var_norm_DeltaPhiMuonJet12'>
+		<var name='qcd' source='file:qcd' type='line' style='1' color='2' />
+		<var name='top' source='file:top' type='line' style='1' color='4' />
+		<var name='wjets' source='file:wjets' type='line' style='1' color='8' />
+		<titleX v='\Delta\phi(\mu, jet 1) + \Delta\phi(\mu, jet 2)' />
+		<titleY v='AU' />
+		<!--			<logY v='1' />-->
+		<savefolder v='analysis' />
+		<legend name='plotname' fonsize='12' posX='40' />
+	</hist>
+	<hist name='var_norm_dPhiMETMu' input='analyzeisolationMET/var_norm_deltaPhiMetleadingMuon'>
+		<var name='qcd' source='file:qcd' type='line' style='1' color='2' />
+		<var name='top' source='file:top' type='line' style='1' color='4' />
+		<var name='wjets' source='file:wjets' type='line' style='1' color='8' />
+		<titleX v='\Delta\phi(MET, muon)' />
+		<titleY v='AU' />
+		<!--			<logY v='1' />-->
+		<savefolder v='analysis' />
+		<legend name='plotname' fonsize='12' posX='40' />
+	</hist>
+	
+	
 
 	<hist name='norm_MET' input='analyzeisolationMET/var_norm_MET'>
 		<!-- name is also used for legend -->
@@ -74,5 +66,16 @@
 		<titleY v='AU' />
 		<savefolder v='analysis' />
 		<legend name='plotname' fonsize='12' />
+	</hist>
+	
+	<hist name='var_norm_Circ' input='analyzeEventShapeMuon/shp_cir'>
+		<var name='qcd' source='file:qcd20' type='line' style='1' color='2' norm='Integral' />
+		<var name='top' source='file:top20' type='line' style='1' color='4' norm='Integral' />
+		<var name='wjets' source='file:wjets20' type='line' style='1' color='8' norm='Integral' />
+		<titleX v='circularity' />
+		<titleY v='AU' />
+		<!--			<logY v='1' />-->
+		<savefolder v='analysis' />
+		<legend name='plotname' fonsize='12' posX='20' />
 	</hist>
 </HistSetup>

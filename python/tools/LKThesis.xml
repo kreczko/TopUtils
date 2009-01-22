@@ -22,6 +22,10 @@
 		<file id='qcd' name='{$QCD}' />
 		<file id='top' name='{$TOP}' />
 		<file id='wjets' name='{$WJETS}' />
+		<file id='qcd20' name='/playground/rootfiles/FINAL/MM_qcdmu_calib_final_20j20m.root' />
+		<file id='top20' name='/playground/rootfiles/FINAL/MM_top_calib_final_20j20m.root' />
+		<file id='wjets20' name='/playground/rootfiles/FINAL/MM_wjets_calib_final_20j20m.root' />
+		
 	</sources>
 	<!--
 		makes the canvas, mixes the histogramms defined in the histSetup summaryFile
@@ -33,8 +37,11 @@
 		<hist setup='MVAdisc_qcd' />
 		<hist setup="norm_MET" />
 		<hist setup='var_norm_dPhiMuJ12'  />
+		<hist setup='var_norm_dPhiMETMu' />
+		<hist setup='var_norm_Circ' />
+		
 		<hist setup='norm_MVAdisc' />
-
+	
 		<!-- MuonAnalyzer Plots -->
 		<hist setup='muon_pt' />
 		<hist setup='muon_calIso' />

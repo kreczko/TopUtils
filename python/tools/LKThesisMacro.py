@@ -1,4 +1,4 @@
-from ROOT import gROOT, TCanvas, TH1F, TFile, TF1, TPad
+from ROOT import gROOT, TCanvas, TH1F, TFile, TF1, TPad, TGaxis
 from math import sqrt
 import os
 from MatrixMethod import MatrixMethod
@@ -102,6 +102,7 @@ class Macro:
             
     def createFolders(self, parentfolder, folderlist):
         for i in folderlist:
+            if not self.output.GetDirectory(parentfolder).GetDirectory(i):
                 self.output.GetDirectory(parentfolder).mkdir(i)
             
     def makeMixed(self, inputfiles, dir):
@@ -290,13 +291,18 @@ class Macro:
         self.output.cd('applied')
         completedir = 'applied/'
         if outdir:
-            self.output.GetDirectory('applied').mkdir(outdir)
-            self.output.GetDirectory('applied').GetDirectory(outdir).mkdir(dir)
-            self.output.GetDirectory('applied').GetDirectory(outdir).GetDirectory(dir).mkdir('sig')
-            self.output.GetDirectory('applied').GetDirectory(outdir).GetDirectory(dir).mkdir('bkg')
+            if not self.output.GetDirectory('applied').GetDirectory(outdir):
+                self.output.GetDirectory('applied').mkdir(outdir)
+            if not self.output.GetDirectory('applied').GetDirectory(outdir).GetDirectory(dir):
+                self.output.GetDirectory('applied').GetDirectory(outdir).mkdir(dir)
+            if not self.output.GetDirectory('applied').GetDirectory(outdir).GetDirectory(dir).GetDirectory('sig'):
+                self.output.GetDirectory('applied').GetDirectory(outdir).GetDirectory(dir).mkdir('sig')
+            if not self.output.GetDirectory('applied').GetDirectory(outdir).GetDirectory(dir).GetDirectory('bkg'):
+                self.output.GetDirectory('applied').GetDirectory(outdir).GetDirectory(dir).mkdir('bkg')
             completedir+= outdir + '/' + dir
             self.output.cd(completedir)
         else:
+            print 'here ? '
             self.output.GetDirectory('applied').mkdir(dir)
             self.output.GetDirectory('applied').GetDirectory(dir).mkdir('sig')
             self.output.GetDirectory('applied').GetDirectory(dir).mkdir('bkg')
@@ -316,12 +322,13 @@ class Macro:
         qu[3].Write()
 #        for i in qu:
 #            i.Write()
-        
         self.output.Cd('/')
+        return qu
         
     def makeQualityHist(self, loose, tight, effsig, effsigerr, dir, scale = {'qcd':1, 'top':1, 'wjets':1}, basedir=''): 
         keys = self.effbg[dir].keys()
         keys.sort()
+       
 #        f = ''
 #        for i in basedir.split('/'):
 #            f = f + i +  '/'
@@ -336,9 +343,14 @@ class Macro:
 #            gROOT.mkdir('bkg')
 ##            gROOT.cd(basedir+ '/bkg')
 #        else:
-        gROOT.mkdir('sig')
-        gROOT.mkdir('bkg')
-        gROOT.cd('bkg')
+#        gROOT.mkdir('sig')
+#        gROOT.mkdir('bkg')
+#        gROOT.cd('bkg')
+        
+        t2 = basedir + dir + 'bkg'
+        t2 = t2.replace('/', '_')
+        gROOT.mkdir(t2)
+        gROOT.cd(t2)
         
         
         qualityBL = TH1F('quality_loose', 'quality_loose_BG', int(len(keys)), 0., eval(keys[len(keys)-1]))
@@ -348,7 +360,10 @@ class Macro:
 #        if basedir:
 #            gROOT.cd(basedir+ '/bkg')
 #        else:
-        gROOT.cd('bkg')
+        t1 = basedir + dir + 'sig'
+        t1 = t1.replace('/', '_')
+        gROOT.mkdir(t1)
+        gROOT.cd(t1)
         qualitySL = TH1F('quality_loose', 'quality_loose_SIG', int(len(keys)), 0., eval(keys[len(keys)-1]))
         qualityST = TH1F('quality_tight', 'quality_tight_SIG', int(len(keys)), 0., eval(keys[len(keys)-1]))
         
@@ -467,7 +482,7 @@ class Macro:
         return err
     
     
-    def saveReferencePlots(self, outputdir, files):
+    def saveReferencePlots(outputdir, files):
         save = '/playground/ThesisPlots/reference/%s/' % outputdir 
         f = open('LKThesis.xml')
         cfg = f.read()
@@ -475,18 +490,20 @@ class Macro:
         cfg = cfg.replace('{$QCD}', files['qcd'])
         cfg = cfg.replace('{$TOP}',  files['top'])
         cfg = cfg.replace('{$WJETS}',  files['wjets'])
-        self.savePlotsFromCfg(cfg, save)
+        Macro.savePlotsFromCfg(cfg, save)
+    saveReferencePlots = staticmethod(saveReferencePlots)
         
-    def saveMacroPlots(self, outputdir, file):
+    def saveMacroPlots(outputdir, file =  '/playground/rootfiles/FINAL/complete_hists_MM.root'):
         save = '/playground/ThesisPlots/macro/%s/' % outputdir 
         f = open('LKMacro.xml')
         cfg = f.read()
         f.close()
         cfg = cfg.replace('{$macro}', file)
-        self.savePlotsFromCfg(cfg, save)
+        Macro.savePlotsFromCfg(cfg, save)
+    saveMacroPlots = staticmethod(saveMacroPlots)
         
         
-    def savePlotsFromCfg(self,cfg, savedir):
+    def savePlotsFromCfg(cfg, savedir):
         f = open('tmp.xml', 'w')
         f.write(cfg)
         f.close()
@@ -524,10 +541,13 @@ class Macro:
             log = [hist.opt['logX'], hist.opt['logY']]
             Helper.saveHistsInOne(list,hist.opt['name'], savedir + hist.opt['savefolder'], leg, log)        
         os.remove('tmp.xml')
+    savePlotsFromCfg = staticmethod(savePlotsFromCfg)
         
-    def makeCutDependencyPlots(self, inputdirs, varcut):
+    def makeCutDependencyPlots(self, inputdirs, rcut):
         keys = qcdCfilesJ.keys()
         keys.sort()
+        cuteffsJ = {}
+        effs = {}
         for i in keys:
             filesC = {'qcd' : qcdCfilesJ[i], 'top' : topCfilesJ[i], 'wjets' : wjetsCfilesJ[i]}
             filesV = {'qcd' : qcdVfilesJ[i], 'top' : topVfilesJ[i], 'wjets' : wjetsVfilesJ[i]}
@@ -538,7 +558,13 @@ class Macro:
                 self.setN(dir, self.mixb.Integral(), self.mixa.Integral())
                 for type in ['qcd', 'top', 'wjets', 'mixed']:
                     self.calcEff(type, filesC, dir, outputdir)
-                self.applyToOthers(filesV, dir, outputdir)
+                effs[dir] = self.applyToOthers(filesV, dir, outputdir)
+                # 0,                     1            2          3            4         5
+        #[qualityBL, qualityBT,qualitySL, qualityST, effB, effQB]
+            eff = [effs['all'][0],effs['all'][0]]
+            cuteffsJ[i] = self.test1(eff, cuteffsJ, i)
+        self.test(cuteffsJ, 'Jcuts')
+                
         
         keys = qcdCfilesM.keys()
         keys.sort()
@@ -552,28 +578,82 @@ class Macro:
                 self.setN(dir, self.mixb.Integral(), self.mixa.Integral())
                 for type in ['qcd', 'top', 'wjets', 'mixed']:
                     self.calcEff(type, filesC, dir, outputdir)
-                self.applyToOthers(filesV, dir, outputdir)
+                effs[dir] = self.applyToOthers(filesV, dir, outputdir)
+                # 0,                     1            2          3            4         5
+        #[qualityBL, qualityBT,qualitySL, qualityST, effB, effQB]
+            eff = [effs['all'][0],effs['all'][1]]
+            cuteffsJ[i] = self.test1(eff, cuteffsJ, i)
+        self.test(cuteffsJ, 'Mcuts')
         
+    def test1(self, eff, cuteffsJ, i):
+        eGBC = eff[0].GetBinContent
+        eGBE = eff[0].GetBinError
+        eFB = eff[0].GetXaxis().FindBin
+        eGBC2 = eff[1].GetBinContent
+        eGBE2 = eff[1].GetBinError
+        eFB2 = eff[1].GetXaxis().FindBin
+        cuteffsJ[i] = {}
+        for varcut in self.cuts:
+            bin = eFB(varcut)
+            bin2= eFB2(varcut)
+            cuteffsJ[i][varcut] = [[eGBC(bin), eGBE(bin)],[eGBC2(bin2), eGBE2(bin2)]]
+        return cuteffsJ[i]
+    
+    def test(self, cuteffsJ, cutdir):        
+        k = cuteffsJ.keys()
+        k.sort()
+        if not self.output.GetDirectory('applied').GetDirectory(cutdir):
+            self.output.GetDirectory('applied').mkdir(cutdir)
+        self.output.cd('applied/' + cutdir)
+#        neu = TH1F('neu', 'neu', 7, 15, 45)
         
-    def saveAllPlots(self):
+        for cut in self.cuts:
+            name1 = 'quality_cut_%s_loose' % cut
+            name2 = 'quality_cut_%s_tight' % cut
+            neu = None
+            if cutdir == 'Mcuts':
+                neu = TH1F(name1, name1, 7, 17.5, 32.5)
+                neu2 = TH1F(name2, name2, 7, 17.5, 32.5)
+            elif cutdir == 'Jcuts':
+                neu = TH1F(name1, name1, 7, 15, 45)
+                neu2 = TH1F(name2, name2, 7, 15, 45)
+                
+            nSBC = neu.SetBinContent
+            nSBE = neu.SetBinError
+            n2SBC = neu2.SetBinContent
+            n2SBE = neu2.SetBinError
+            for i in k:
+                b = neu.FindBin(float(i))
+                nSBC(b, cuteffsJ[i][cut][0][0])
+                nSBE(b, cuteffsJ[i][cut][0][1])
+                n2SBC(b, cuteffsJ[i][cut][1][0])
+                n2SBE(b, cuteffsJ[i][cut][1][1])
+            neu.Write()
+            neu2.Write()
+        self.output.Cd('/')
+        
+    def saveAllPlots():
         keys = qcdCfilesJ.keys()
         keys.sort()
         for i in keys:
             files = {'qcd' : qcdCfilesJ[i], 'top' : topCfilesJ[i], 'wjets' : wjetsCfilesJ[i]}
             outputdir = 'jetcut_%s' % i
-            self.saveReferencePlots(outputdir, files)
+            Macro.saveReferencePlots(outputdir, files)
+            
         
         keys = qcdCfilesM.keys()
         keys.sort()
         for i in keys:
             files = {'qcd' : qcdCfilesM[i], 'top' : topCfilesM[i], 'wjets' : wjetsCfilesM[i]}
             outputdir = 'muoncut_%s' % i
-            self.saveReferencePlots(outputdir, files)
+            Macro.saveReferencePlots(outputdir, files)
         
-        self.saveMacroPlots("", self.output.GetName())
+        Macro.saveMacroPlots("")
+    saveAllPlots = staticmethod(saveAllPlots)
 
 if __name__ == '__main__':
     gROOT.Reset()
+    TGaxis.SetMaxDigits(3)
     #for white background
     gROOT.SetStyle("Plain")
     gROOT.SetBatch(True)
@@ -594,8 +674,8 @@ if __name__ == '__main__':
 #    mac.calcEff('wjets')
 #    mac.calcEff('mixed')
    # mac.applyToOthers(inputs, "track")
-    mac.makeCutDependencyPlots(inputdirs, 0.3)
+    mac.makeCutDependencyPlots(inputdirs, 0.15)
 #    for i in inputdirs:
 #        mac.applyToOthers(inputs, i)
-    mac.output.Close()
-    mac.saveAllPlots()
+#    mac.output.Close()
+#    Macro.saveAllPlots()

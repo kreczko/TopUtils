@@ -9,7 +9,7 @@
 			<var name='wjets' source='file:wjets'  type='line' style='1' color='8'  norm='Integral'/>
 <!--			<var name='signal' source='var:top,var:wjets' operation='add' type='filled'-->
 <!--				style='3005'  color='6' norm='Integral' />-->
-			<titleX v='muon p_{T} [GeV]' />
+			<titleX v='p_{T} [GeV]' />
 			<titleY v='AU' />
 			<savefolder v='analysis' />
 			<legend name='plotname' fonsize='12' />
@@ -63,7 +63,8 @@
 			<var name='qcd' source='file:qcd'  type='line' style='1' color='2' norm='Integral' />
 			<var name='top' source='file:top'  type='line' style='1' color='4'  norm='Integral'/>
 			<var name='wjets' source='file:wjets'  type='line' style='1' color='8'  norm='Integral'/>
-			<titleX v='muon \eta' />
+			<titleX v='\eta' />
+<!--			<logY v='1'/>-->
 			<titleY v='AU' />
 			<savefolder v='analysis' />
 			<legend name='plotname'  fonsize='12' />
