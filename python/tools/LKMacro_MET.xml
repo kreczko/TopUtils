@@ -77,7 +77,7 @@
 	<!-- Macro plots -->
 	<hist name='quality_QCDLoose' input='quality_loose' >
 		<var name='qcd' source='file:macro, input:appQCD' type='line' color='2' />
-		<titleX v='mva disc. cut' />
+		<titleX v='MET cut' />
 		<titleY v='N_{est}/N_{true}' />
 		<legend name='plotname' fonsize='12'   posX='50'/>
 		<max v='1.01' />
@@ -85,7 +85,7 @@
 	</hist>
 	<hist name='quality_SIGLoose' input='quality_loose' >
 		<var name='signal' source='file:macro, input:appSIG' type='line' color='4' />
-		<titleX v='mva disc. cut' />
+		<titleX v='MET cut' />
 		<titleY v='N_{est}/N_{true}' />
 		<legend name='plotname' fonsize='12'  />
 		<max v='0.2' />
@@ -93,7 +93,7 @@
 	</hist>
 	<hist name='quality_QCDTight' input='quality_tight' >
 		<var name='qcd' source='file:macro, input:appQCD' type='line' color='2' />
-		<titleX v='mva disc. cut' />
+		<titleX v='MET cut' />
 		<titleY v='N_{est}/N_{true}' />
 		<legend name='plotname' fonsize='12'  posX='50' />
 		<max v='1.35' />
@@ -102,11 +102,11 @@
 	<hist name='quality_SIGTight' input='quality_tight' >
 		<!-- name is also used for legend -->
 		<var name='signal' source='file:macro, input:appSIG' type='line' color='4' />
-		<titleX v='mva disc. cut' />
+		<titleX v='MET cut' />
 		<titleY v='N_{est}/N_{true}' />
 		<legend name='plotname' fonsize='12'  />
 		<max v='0.2' />
-		<min v='-0.2' />		
+		<min v='-0.18' />		
 	</hist>
 	<hist name='masterPlotAll' input='efficiency' >
 		<var name='qcd' source='file:macro, input:qcdAll' type='line' color='2' />
@@ -114,7 +114,7 @@
 		<var name='wjets' source='file:macro, input:wjetsAll' type='line' color='8' />
 <!--		<var name='signal' source='var:top,var:wjets' type='line' color='4' operation='add'/> -->
 		<var name='combined' source='file:macro, input:mixedAll' type='line' color='3' />
-		<titleX v='mva disc.' />
+		<titleX v='MET' />
 		<titleY v='iso. efficiency' />
 		<legend name='plotname' fonsize='12' posY="60"/>
 	</hist>
@@ -124,30 +124,40 @@
 		<var name='top' source='file:macro, input:topTrk' type='line' color='4' />
 		<var name='wjets' source='file:macro, input:wjetsTrk' type='line' color='8' />
 		<var name='combined' source='file:macro, input:mixedTrk' type='line' color='3' />
-		<titleX v='mva disc.' />
+		<titleX v='MET' />
 		<titleY v='iso. efficiency' />
 		<legend name='plotname' fonsize='12' posY="60"/>
 	</hist>
 	
 	<hist name='eff_MC_qcd' input='efficiency' >
 		<var name='qcd' source='file:macro, input:qcdAll' type='line' color='2' />
-		<titleX v='mva disc. cut' />
+		<titleX v='MET cut' />
 		<titleY v='iso. efficiency' />
 		<legend name='plotname' fonsize='12' posX='50' />
 	</hist>
 	<hist name='eff_qcd' input='effvsDiscCut_BG' >
 		<var name='qcd' source='file:macro, input:appQCD' type='line' color='2' />
-		<titleX v='mva disc. cut' />
+		<titleX v='MET cut' />
 		<titleY v='iso. efficiency' />
+		<max v='0.025' />
+		<min v='0.020' />		
 		<legend name='plotname' fonsize='12'  posX='50' />
 	</hist>
+<!--	<hist name='quality_cuts_loose' input='applied/Jcuts/quality_cut_0.15_loose' >-->
+<!--		<var name='qcd loose' source='file:macro' type='line' color='2' />-->
+<!--		<titleX v='jet cut' />-->
+<!--		<titleY v='N_{est}/N_{true}' />-->
+<!--		<max v='1.003' />-->
+<!--		<min v='0.997' />-->
+<!--		<legend name='plotname' fonsize='12'  posX='50' />-->
+<!--	</hist>-->
 	
 	<histlist name='quality_cuts_loose' input='test' >
 		<var name='qcd loose' source='file:macro' type='line' color='2' />
 		<titleX v='jet E_T cut [GeV]' />
 		<titleY v='N_{est}/N_{true}' />
-		<max v='1.008' />
-		<min v='0.997' />
+<!--		<max v='1.008' />-->
+<!--		<min v='0.997' />-->
 		<legend name='plotname' fonsize='12'  posX='50' />
 	</histlist>
 	<!-- Cut plots -->
@@ -157,7 +167,7 @@
 		<var name='jetCut 30' source='file:macro, input:appQCD30' type='marker' color='6' style='22' />
 		<var name='jetCut 35' source='file:macro, input:appQCD35' type='marker' color='8' style='23'/>
 		<var name='jetCut 40' source='file:macro, input:appQCD40' type='marker' style='27' />
-		<titleX v='mva disc. cut' />
+		<titleX v='MET cut' />
 		<titleY v='N_{est}/N_{true}' />
 		<legend name='plotname' fonsize='12' />
 	</hist>

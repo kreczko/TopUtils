@@ -8,6 +8,7 @@ from ConfigParser import *
 from Timer import Timer
 import copy
 from analysisFiles import *
+from array import array
 
 class Macro:
     outputdir = 'testing'
@@ -21,6 +22,7 @@ class Macro:
     
     def __init__(self, outputfile, inputfiles, inputdirs):
         self.cuts = self.frange(0.1, 1.05, 0.05)
+#        self.cuts = [20., 40., 60., 100., 150., 300.]
         self.plotsavefolder = self.outputdir + '/' + self.plotdir
         if not os.path.exists(self.outputdir):
             os.mkdir(self.outputdir)
@@ -28,23 +30,27 @@ class Macro:
             os.mkdir(self.plotsavefolder)
         self.effsig = {}
         self.effwjet = {}
+        self.effqcd = {}
         self.effbg = {}
         self.nloose = {}
         self.ntight = {}
+        
         self.nTtruebg = {}
         self.nTtruebg = {}
         self.nTtruesig = {}
         self.nLtruebg = {}
         self.nLtruesig = {}
-        self.nloose = {}
-        self.ntight = {}
-        self.effsig = {}
+
+
+        
         for i in inputdirs:
             self.effbg[i] = {}
             
         self.hists = {}
         self.hists['weighted'] = 'mbg_nVSdisc'
         self.hists['simple'] = 'mbg_nVSdiscSimple'
+#        self.hists['weighted'] = 'mbg_nVSmet'
+#        self.hists['simple'] = 'mbg_nVSmetSimple'
         
         self.inputdirs = inputdirs        
         
@@ -137,7 +143,6 @@ class Macro:
         self.mixb = Helper.setHistLabels(self.mixb, 'mva disc.', 'events')
         self.mixunwb = Helper.setHistLabels(self.mixunwb, 'mva disc.', 'unweigthed events')
         eff = Helper.setMarker(eff, 4, 3, 1)
-        #Helper.saveHist(eff, 'eff', 'testing/' + dir)
         eff.Write()            
         self.mixa.Write()
         self.mixunwa.Write()
@@ -168,6 +173,8 @@ class Macro:
             self.effsig[input] = [eff, err]
         elif type == 'wjets':
             self.effwjet[input] = [eff, err]
+        elif type == 'qcd':
+            self.effqcd
         elif type == 'mixed':
             self.effbg[input][cut] = [eff, err]
         
@@ -236,11 +243,7 @@ class Macro:
             leg = Helper.setLegendStyle(leg)
             eff = result[0]
             eff.SetTitle(title1)
-#                eff = Helper.setHistLabels(eff, 'mva disc.', 'efficiency in %')
-#                savefolder = self.plotsavefolder + '/' + i
-#                Helper.saveHist(eff, 'eff_MC_'+ type, savefolder, leg)
             eff.Write()
-#                leg.Write()
             after.Write()
             unwafter.Write()
             before.Write()
@@ -447,16 +450,6 @@ class Macro:
             qSBCSL(x, sigmaS)
             qSBESL(x, sigmaErrS)
             x += 1
-#        qualityL = Helper.setMarker(qualityL,4,3,1)
-#        qualityL = Helper.setHistLabels(qualityL, 'mva disc. cut', 'N_{est}/N_{MC}')
-#        qualityT = Helper.setMarker(qualityT,4,3,1)
-#        qualityT = Helper.setHistLabels(qualityT, 'mva disc. cut', 'N_{est}/N_{MC}')
-#        eff = Helper.setMarker(eff,4,3,1)
-#        eff = Helper.setHistLabels(eff, 'mva disc. cut', 'efficiency')
-#        savedir = self.plotsavefolder + '/' + dir
-#        Helper.saveHist(qualityL, "quality_loose_qcd", savedir)
-#        Helper.saveHist(qualityT, "quality_tight_qcd", savedir)
-#        Helper.saveHist(eff, "eff_qcd", savedir)
         return [qualityBL, qualityBT,qualitySL, qualityST, effB, effQB]
             
             
@@ -559,6 +552,8 @@ class Macro:
                 for type in ['qcd', 'top', 'wjets', 'mixed']:
                     self.calcEff(type, filesC, dir, outputdir)
                 effs[dir] = self.applyToOthers(filesV, dir, outputdir)
+            
+            self.makeTables()
                 # 0,                     1            2          3            4         5
         #[qualityBL, qualityBT,qualitySL, qualityST, effB, effQB]
             eff = [effs['all'][0],effs['all'][0]]
@@ -584,6 +579,13 @@ class Macro:
             eff = [effs['all'][0],effs['all'][1]]
             cuteffsJ[i] = self.test1(eff, cuteffsJ, i)
         self.test(cuteffsJ, 'Mcuts')
+        
+    def makeTables(self):
+        header = '\begin{table}[!ht]'
+        header += '\hline'
+        header += 'isolation & top signal iso. efficiency (in \%) & W+Jets iso. eff. (in \%)& QCD iso. eff. (in \%)'
+        header += '\hline \hline'
+        print header
         
     def test1(self, eff, cuteffsJ, i):
         eGBC = eff[0].GetBinContent
@@ -653,10 +655,12 @@ class Macro:
 
 if __name__ == '__main__':
     gROOT.Reset()
+    Helper.set_palette('', 999)
     TGaxis.SetMaxDigits(3)
     #for white background
     gROOT.SetStyle("Plain")
     gROOT.SetBatch(True)
+    #set color palette for TH2F
     inputfiles = {}
     folder = '/playground/rootfiles/FINAL/'
     inputfiles['qcd'] = folder + "MM_qcdmu_calib_final_20j20m.root"
@@ -669,13 +673,7 @@ if __name__ == '__main__':
     inputs['wjets'] = folder + "MM_wjets_valid_final_20j20m.root"
     mac = Macro(folder + 'complete_hists_MM.root', inputfiles, inputdirs)
     mac.debug = False
-#    mac.calcEff('qcd')
-#    mac.calcEff('top')
-#    mac.calcEff('wjets')
-#    mac.calcEff('mixed')
-   # mac.applyToOthers(inputs, "track")
     mac.makeCutDependencyPlots(inputdirs, 0.15)
-#    for i in inputdirs:
-#        mac.applyToOthers(inputs, i)
-#    mac.output.Close()
-#    Macro.saveAllPlots()
+    mac.output.Close()
+
+    Macro.saveAllPlots()

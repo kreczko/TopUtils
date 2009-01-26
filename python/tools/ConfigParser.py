@@ -546,11 +546,11 @@ class Histogram:
         if os.path.exists(file):
             f = TFile(file)
             #faster with alias
-            dir = f.Get(dir)
-            histlist = dir.GetListOfKeys()
+            d = f.Get(dir)
+            histlist = d.GetListOfKeys()
             for x in histlist:
                 hist = x.ReadObj()
-                path = dir.GetName() + '/' + hist.GetName()
+                path = dir + '/' + hist.GetName()
                 ret.append(path)
         else:
             msg = 'root file "' + file + ' "not found'
@@ -578,8 +578,11 @@ class Histogram:
                  
             for x in hists:
                 spl = x.split('/')
-                dir = spl[0]
-                hist = spl[1]
+                dir = ""
+                for i in range(0,len(spl)-1):
+                    dir +=spl[i] + '/'
+                dir.rstrip('/')
+                hist = spl[len(spl)-1]
                 tmp.opt['name'] = histlistname + '_' + hist 
                 tmp.opt['savefolder'] = dir
                 filter = Filter('exact', hist)
@@ -633,13 +636,16 @@ class Histogram:
                 #exact 1 source, 1 folder, 1 histogram of type exact!
                 err = not len(source) == 2
                 err = err and not len(input.folderlist) == 1
-                err = err and input.folderlist[0].hasFilters
+                err = err and input.folderlist[0].hasFilters()
                 if err :
                     raise ConfigError, 'invalid var source'
                 file = files[source[1]]
                 hist = ''
                 if text:
-                    hist = input
+                    if not wholeinput[sinput[1]].folderlist[0].hasFilters():
+                        hist = input
+                    else:
+                        hist = wholeinput[sinput[1]].folderlist[0].filterlist[0].value
                     folder = wholeinput[sinput[1]].folderlist[0].name
                     hist = folder + '/' + hist
                     

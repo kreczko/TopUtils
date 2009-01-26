@@ -15,18 +15,32 @@ class MatrixMethod:
     getNumbers = staticmethod(getNumbers)
     
     def errorNSTight(effqcd, effqcderr, effsig, effsigerr, Nloose, Ntight):
+#        print effqcd, effqcderr, effsig, effsigerr, Nloose, Ntight
         ########### dNsTight_deffsig
         tmp1 = effqcd * (effqcd * Nloose - Ntight)
         tmp2 = (effsig - effqcd) * (effsig - effqcd)
         d1 = tmp1 / tmp2
-        ########### dNsLoose_deffqcd
+#        tmp1 = (Ntight - effqcd*Nloose)*(effsig*effsig-effsig*effqcd)
+#        d1 = tmp1/tmp2
+        ########### dNsTight_deffqcd
         tmp1 = effsig * (Ntight - effsig * Nloose)
         d2 = tmp1 / tmp2
         ############ dNsTight_dN1
         d3 = (- effsig * effqcd) / (effsig - effqcd)
         ############ dNsTight_dN2
         d4 = effsig * (1 - effqcd) / (effsig - effqcd)
+#        print 'dNsTight_deffsig', d1
+#        print 'dNsLoose_deffqcd', d2
+#        print 'dNsTight_dN1', d3
+#        print 'dNsTight_dN2', d4
+#        print ''
+#        print 'dNsTight_deffsig^2*err', d1 * d1 * effsigerr * effsigerr
+#        print 'dNsLoose_deffqcd^2*err', d2 * d2 * effqcderr * effqcderr
+#        print 'dNsTight_dN1^2*err', d3 * d3 * (Nloose - Ntight)
+#        print 'dNsTight_dN2^2*err', d4 * d4 * Ntight
+#        print ''
         err = sqrt(d1 * d1 * effsigerr * effsigerr + d2 * d2 * effqcderr * effqcderr + d3 * d3 * (Nloose - Ntight) + d4 * d4 * Ntight)
+#        print 'err', err
         return err
     errorNSTight = staticmethod(errorNSTight)
     

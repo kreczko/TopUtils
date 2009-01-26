@@ -17,7 +17,7 @@
 		<!--				style='3005'  color='6' norm='Integral' />-->
 		<titleX v='jet 1 E_{T} [GeV]' />
 		<titleY v='AU' />
-		<savefolder v='analysis' />
+		<savefolder v='kin' />
 		<legend name='plotname' fonsize='12' />
 	</hist>
 	<hist name='jet2_et' input='analyzeSelJets/kin_e_1'>
@@ -35,7 +35,7 @@
 		<!--				style='3005'  color='6' norm='Integral' />-->
 		<titleX v='jet 2 E_{T} [GeV]' />
 		<titleY v='AU' />
-		<savefolder v='analysis' />
+		<savefolder v='kin' />
 		<legend name='plotname' fonsize='12' />
 	</hist>
 	<hist name='jet3_et' input='analyzeSelJets/kin_e_2'>
@@ -53,7 +53,7 @@
 		<!--				style='3005'  color='6' norm='Integral' />-->
 		<titleX v='jet 3 E_{T} [GeV]' />
 		<titleY v='AU' />
-		<savefolder v='analysis' />
+		<savefolder v='kin' />
 		<legend name='plotname' fonsize='12' />
 	</hist>
 	<hist name='jet4_et' input='analyzeSelJets/kin_e_3'>
@@ -71,7 +71,7 @@
 		<!--				style='3005'  color='6' norm='Integral' />-->
 		<titleX v='jet 4 E_{T} [GeV]' />
 		<titleY v='AU' />
-		<savefolder v='analysis' />
+		<savefolder v='kin' />
 		<legend name='plotname' fonsize='12' />
 	</hist>
 </HistSetup>

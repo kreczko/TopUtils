@@ -9,12 +9,14 @@
 	<include file='MatrixAnalyzerPlots.xml' />
 	<sources>
 		<!-- gets input from 1 histogram -->
-		<input name="before">
-			<folder name='allmbefore'>
+		<input name="ecalIsoPt">
+			<folder name='analyzeSelMuons'>
+				<filter type='exact' value='iso_dREcalPt' />
 			</folder>
 		</input>
-		<input name="after">
-			<folder name='allmafter'>
+		<input name="hcalIsoPt">
+			<folder name='analyzeSelMuons'>
+			<filter type='exact' value='iso_dRHcalPt' />
 			</folder>
 		</input>
 
@@ -25,7 +27,7 @@
 		<file id='qcd20' name='/playground/rootfiles/FINAL/MM_qcdmu_calib_final_20j20m.root' />
 		<file id='top20' name='/playground/rootfiles/FINAL/MM_top_calib_final_20j20m.root' />
 		<file id='wjets20' name='/playground/rootfiles/FINAL/MM_wjets_calib_final_20j20m.root' />
-		
+
 	</sources>
 	<!--
 		makes the canvas, mixes the histogramms defined in the histSetup summaryFile
@@ -36,12 +38,25 @@
 		<hist setup='MVAdisc_signal' />
 		<hist setup='MVAdisc_qcd' />
 		<hist setup="norm_MET" />
-		<hist setup='var_norm_dPhiMuJ12'  />
+		<hist setup='var_norm_dPhiMuJ12' />
 		<hist setup='var_norm_dPhiMETMu' />
 		<hist setup='var_norm_Circ' />
-		
 		<hist setup='norm_MVAdisc' />
-	
+		<hist setup='sumPhiMuJ1J2vsDphiJ1J2_qcd' />
+		<hist setup='corr_MVAdiscVScalo_qcd' />
+		<hist setup='corr_MVAdiscVSjetIso_qcd' />
+		<hist setup='corr_MVAdiscVStrack_qcd' />
+
+		<hist setup='sumPhiMuJ1J2vsDphiJ1J2_top' />
+		<hist setup='corr_MVAdiscVScalo_top' />
+		<hist setup='corr_MVAdiscVSjetIso_top' />
+		<hist setup='corr_MVAdiscVStrack_top' />
+
+		<hist setup='sumPhiMuJ1J2vsDphiJ1J2_wjets' />
+		<hist setup='corr_MVAdiscVScalo_wjets' />
+		<hist setup='corr_MVAdiscVSjetIso_wjets' />
+		<hist setup='corr_MVAdiscVStrack_wjets' />
+
 		<!-- MuonAnalyzer Plots -->
 		<hist setup='muon_pt' />
 		<hist setup='muon_calIso' />
@@ -50,6 +65,9 @@
 		<hist setup='muon_isoJet20' />
 		<hist setup='var_norm_dPhiMuJ12' />
 		<hist setup='muon_eta' />
+		<hist setup='muon_calomix' />
+		<hist setup='muon_trackIso' />
+		
 
 		<!-- JetAnalyzer plots -->
 		<hist setup='jet1_et' />
