@@ -193,7 +193,13 @@ class jobSplitter:
 ##  * print head for simple error message            
    def __errorMsg(self):
       print "**************************************************"
-      print "* Error:"
+      print "* Error  :"
+
+##-----------------------------------------------------------------------------------
+##  * print head for simple warning message            
+   def __warningMsg(self):
+      print "**************************************************"
+      print "* Warning:"      
 
 ##-----------------------------------------------------------------------------------
 ##  * take command token and value
@@ -207,10 +213,13 @@ class jobSplitter:
 
       if (not flag.search(command)):
          ## perform basic error treatment
-         self.__errorMsg()
+         self.__warningMsg()
          msg = '* * toToken :: token not found in command line: ' + token
          print msg
-         sys.exit(0)
+         ## take over and add the expected token plus value by hand
+         print '* * toToken :: adding token and value to command line'
+         command    += ' ' + token + ' ' + value.__str__()
+         ## sys.exit(0)
       else:
          replacement = ' ' + token + ' ' + value.__str__()
          command = flag.sub(replacement, command)         
@@ -372,7 +381,8 @@ class jobSplitter:
       print '\n'
       os.system('qstat -u `whoami`')
       print '-----------------------------------------------------------------------------'
-      print ' you can check the status of your jobs with    : \'qstat -u user\' '
+      print ' you can check the status of your jobs with: \'qstat -u user\' '
+      print ' you can kill specific jobs with           : \'qdel  jobid\' '      
       print ' you can combined histograms later von with: \'hadd output.root input_?.root'
       print '-----------------------------------------------------------------------------'
       print '\n'

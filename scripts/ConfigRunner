@@ -26,7 +26,7 @@ class CfgRunner:
     ## error  logfile
     __outputErr       = ''
     ## file service output path
-    __jobName         = '.'
+    __jobName         = 'runConfig'
     ## file service output name    
     __outputName      = ''
     ## cfg file for cmsRun
