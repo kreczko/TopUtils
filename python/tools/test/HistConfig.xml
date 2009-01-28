@@ -7,5 +7,5 @@
 
 	<hist name="eventplot">
 		<logY v='0' />
-	</hist>
+	</hist>		
 </HistSetup>
