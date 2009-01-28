@@ -174,7 +174,7 @@ class Macro:
         elif type == 'wjets':
             self.effwjet[input] = [eff, err]
         elif type == 'qcd':
-            self.effqcd
+            self.effqcd[input] = [eff, err]
         elif type == 'mixed':
             self.effbg[input][cut] = [eff, err]
         
@@ -553,7 +553,6 @@ class Macro:
                     self.calcEff(type, filesC, dir, outputdir)
                 effs[dir] = self.applyToOthers(filesV, dir, outputdir)
             
-            self.makeTables()
                 # 0,                     1            2          3            4         5
         #[qualityBL, qualityBT,qualitySL, qualityST, effB, effQB]
             eff = [effs['all'][0],effs['all'][0]]
@@ -581,11 +580,26 @@ class Macro:
         self.test(cuteffsJ, 'Mcuts')
         
     def makeTables(self):
-        header = '\begin{table}[!ht]'
-        header += '\hline'
-        header += 'isolation & top signal iso. efficiency (in \%) & W+Jets iso. eff. (in \%)& QCD iso. eff. (in \%)'
-        header += '\hline \hline'
-        print header
+        header = '\\begin{table}[!ht]'+ '\n' 
+        header += '\\begin{tabular}{@{} |l|c|c|c|}'+ '\n' 
+        header += '\\hline'+ '\n' 
+        header += 'isolation & top-signal& W+Jets & QCD \\\\'+ '\n' 
+        header += '\\hline \\hline'+ '\n' 
+        body = ''
+        k = self.effwjet.keys()
+        k.sort()
+        for i in k:
+            body += '%s & %1.3f $\\pm$ %1.3f & %1.3f $\\pm$ %1.3f & %1.3f $\\pm$ %1.3f \\\\ \n ' %(i, self.effsig[i][0], self.effsig[i][1], self.effwjet[i][0],self.effwjet[i][1], self.effqcd[i][0],self.effqcd[i][1])
+        footer =  '\\hline'+ '\n' 
+        footer += '\\end{tabular}'+ '\n' 
+        footer += '\\caption{Isolation efficiencies for top-signal, W+jets and QCD}'+ '\n' 
+        footer += '\\label{tab:iso}' + '\n' 
+        footer += '\\end{table}'+ '\n' 
+        
+        table = header + '\n' + body  + '\n' + footer + '\n' 
+        f = open('MacroTables.tex', 'w')
+        f.write(table)
+        f.close()
         
     def test1(self, eff, cuteffsJ, i):
         eGBC = eff[0].GetBinContent
@@ -663,9 +677,9 @@ if __name__ == '__main__':
     #set color palette for TH2F
     inputfiles = {}
     folder = '/playground/rootfiles/FINAL/'
-    inputfiles['qcd'] = folder + "MM_qcdmu_calib_final_20j20m.root"
-    inputfiles['top'] = folder + "MM_top_calib_final_20j20m.root"
-    inputfiles['wjets'] =folder + "MM_wjets_calib_final_20j20m.root"
+    inputfiles['qcd'] = folder + "MM_qcdmu_270109.root"
+    inputfiles['top'] = folder + "MM_top_270109.root"
+    inputfiles['wjets'] =folder + "MM_wjets_270109.root"
     inputdirs = ["all", "jetIso", "calo", "track"]
     inputs = {}
     inputs['qcd'] = folder + 'MM_qcdmu_valid_final_20j20m.root'
@@ -675,5 +689,5 @@ if __name__ == '__main__':
     mac.debug = False
     mac.makeCutDependencyPlots(inputdirs, 0.15)
     mac.output.Close()
-
+    mac.makeTables()
     Macro.saveAllPlots()

@@ -96,8 +96,8 @@
 		<titleX v='mva disc. cut' />
 		<titleY v='N_{est}/N_{true}' />
 		<legend name='plotname' fonsize='12'  posX='50' />
-		<max v='1.35' />
-		<min v='1.25' />		
+<!--		<max v='1.35' />-->
+<!--		<min v='1.25' />		-->
 	</hist>
 	<hist name='quality_SIGTight' input='quality_tight' >
 		<!-- name is also used for legend -->
@@ -105,8 +105,8 @@
 		<titleX v='mva disc. cut' />
 		<titleY v='N_{est}/N_{true}' />
 		<legend name='plotname' fonsize='12'  />
-		<max v='0.2' />
-		<min v='-0.2' />		
+<!--		<max v='0.2' />-->
+<!--		<min v='-0.2' />		-->
 	</hist>
 	<hist name='masterPlotAll' input='efficiency' >
 		<var name='qcd' source='file:macro, input:qcdAll' type='line' color='2' />

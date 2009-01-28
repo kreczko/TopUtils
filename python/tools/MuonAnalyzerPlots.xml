@@ -22,7 +22,7 @@
 		<titleX v='muon cal. iso. [GeV]' />
 		<titleY v='AU' />
 		<savefolder v='iso' />
-		<legend posX='20' name='plotname' fonsize='12' />
+		<legend name='plotname' fonsize='12' />
 	</hist>
 	
 		<hist name='muon_calomix' input=''>
@@ -36,10 +36,10 @@
 		<var name='qcd' source='var:qcdE, var:qcdH' type='line' style='1' color='2' norm='Integral'  operation='add' />
 		<var name='top' source='var:topE, var:topH' type='line' style='1' color='4' norm='Integral'  operation='add'/>
 		<var name='wjets' source='var:wjetsH, var:wjetsE' type='line' style='1' color='8' norm='Integral' operation='add' />
-		<titleX v='min. \Delta R(muon, caloTower)' />
+		<titleX v=' \Delta R(muon, caloTower)' />
 		<titleY v='AU' />
 		<savefolder v='iso' />
-		<legend name='plotname' fonsize='12' />
+		<legend name='plotname' fonsize='12' posX='40' />
 	</hist>
 	
 	<hist name='muon_trackIso' input='analyzeSelMuons/iso_isoTrkPt'>
@@ -73,12 +73,79 @@
 		<savefolder v='iso' />
 		<legend posX='20' name='plotname' fonsize='12' />
 	</hist>
+	
+	<hist name='muon_isoJet05' input='analyzeSelMuons/iso_isoJet5'>
+		<var name='qcd' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
+		<var name='top' source='file:top' type='line' style='1' color='4' norm='Integral' />
+		<var name='wjets' source='file:wjets' type='line' style='1' color='8'
+			norm='Integral' />
+		<titleX v='min. \Delta R(muon, jets(E_{T} > 5 GeV) )' />
+		<titleY v='AU' />
+		<savefolder v='iso' />
+		<legend name='plotname' fonsize='12' />
+	</hist>
+	
+	<hist name='muon_isoJet10' input='analyzeSelMuons/iso_isoJet10'>
+		<var name='qcd' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
+		<var name='top' source='file:top' type='line' style='1' color='4' norm='Integral' />
+		<var name='wjets' source='file:wjets' type='line' style='1' color='8'
+			norm='Integral' />
+		<titleX v='min. \Delta R(muon, jets(E_{T} > 10 GeV) )' />
+		<titleY v='AU' />
+		<savefolder v='iso' />
+		<legend name='plotname' fonsize='12' />
+	</hist>
+	
+	<hist name='muon_isoJet15' input='analyzeSelMuons/iso_isoJet15'>
+		<var name='qcd' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
+		<var name='top' source='file:top' type='line' style='1' color='4' norm='Integral' />
+		<var name='wjets' source='file:wjets' type='line' style='1' color='8'
+			norm='Integral' />
+		<titleX v='min. \Delta R(muon, jets(E_{T} > 15 GeV) )' />
+		<titleY v='AU' />
+		<savefolder v='iso' />
+		<legend name='plotname' fonsize='12' />
+	</hist>
+	
 	<hist name='muon_isoJet20' input='analyzeSelMuons/iso_isoJet20'>
 		<var name='qcd' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
 		<var name='top' source='file:top' type='line' style='1' color='4' norm='Integral' />
 		<var name='wjets' source='file:wjets' type='line' style='1' color='8'
 			norm='Integral' />
 		<titleX v='min. \Delta R(muon, jets(E_{T} > 20 GeV) )' />
+		<titleY v='AU' />
+		<savefolder v='iso' />
+		<legend name='plotname' fonsize='12' />
+	</hist>
+	
+	<hist name='muon_isoJet30' input='analyzeSelMuons/iso_isoJet30'>
+		<var name='qcd' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
+		<var name='top' source='file:top' type='line' style='1' color='4' norm='Integral' />
+		<var name='wjets' source='file:wjets' type='line' style='1' color='8'
+			norm='Integral' />
+		<titleX v='min. \Delta R(muon, jets(E_{T} > 30 GeV) )' />
+		<titleY v='AU' />
+		<savefolder v='iso' />
+		<legend name='plotname' fonsize='12' />
+	</hist>
+	
+	<hist name='muon_isoJet35' input='analyzeSelMuons/iso_isoJet35'>
+		<var name='qcd' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
+		<var name='top' source='file:top' type='line' style='1' color='4' norm='Integral' />
+		<var name='wjets' source='file:wjets' type='line' style='1' color='8'
+			norm='Integral' />
+		<titleX v='min. \Delta R(muon, jets(E_{T} > 35 GeV) )' />
+		<titleY v='AU' />
+		<savefolder v='iso' />
+		<legend name='plotname' fonsize='12' />
+	</hist>
+	
+	<hist name='muon_isoJet40' input='analyzeSelMuons/iso_isoJet40'>
+		<var name='qcd' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
+		<var name='top' source='file:top' type='line' style='1' color='4' norm='Integral' />
+		<var name='wjets' source='file:wjets' type='line' style='1' color='8'
+			norm='Integral' />
+		<titleX v='min. \Delta R(muon, jets(E_{T} > 40 GeV) )' />
 		<titleY v='AU' />
 		<savefolder v='iso' />
 		<legend name='plotname' fonsize='12' />

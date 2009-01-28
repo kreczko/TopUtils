@@ -13,9 +13,15 @@
 		<gridX v='0' />
 		<gridY v='0' />
 		<scale v='1.0' />
-		<showErros v='false' />
+		<showErrors v='true' />
 		<rotate v='False' />
 		<savefolder v = '' />
+		<drawOption v='' />
+		<!-- for TH2F -->
+		<maxX v='' />
+		<minX v='' />
+		<maxY v='' />
+		<minY v='' />
 		<!--
 			hist titles come from histograms. Only if they are empty the config
 		-->

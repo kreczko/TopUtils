@@ -24,9 +24,9 @@
 		<file id='qcd' name='{$QCD}' />
 		<file id='top' name='{$TOP}' />
 		<file id='wjets' name='{$WJETS}' />
-		<file id='qcd20' name='/playground/rootfiles/FINAL/MM_qcdmu_calib_final_20j20m.root' />
-		<file id='top20' name='/playground/rootfiles/FINAL/MM_top_calib_final_20j20m.root' />
-		<file id='wjets20' name='/playground/rootfiles/FINAL/MM_wjets_calib_final_20j20m.root' />
+		<file id='qcd20' name='/playground/rootfiles/FINAL/MM_qcdmu_270109.root' />
+		<file id='top20' name='/playground/rootfiles/FINAL/MM_top_270109.root' />
+		<file id='wjets20' name='/playground/rootfiles/FINAL/MM_wjets_270109.root' />
 
 	</sources>
 	<!--
@@ -39,7 +39,15 @@
 		<hist setup='MVAdisc_qcd' />
 		<hist setup="norm_MET" />
 		<hist setup='var_norm_dPhiMuJ12' />
+		<hist setup='corr_DphiMuJ1J2VScalo_qcd' />
+		<hist setup='corr_DphiMuJ1J2VStrack_qcd' />
+		<hist setup='corr_DphiMuJ1J2VSjetIso_qcd' />		
+		
 		<hist setup='var_norm_dPhiMETMu' />
+		<hist setup='corr_dPhiMETMuVScalo_qcd' />
+		<hist setup='corr_dPhiMETMuVStrack_qcd' />
+		<hist setup='corr_dPhiMETMuVSjetIso_qcd' />
+		
 		<hist setup='var_norm_Circ' />
 		<hist setup='norm_MVAdisc' />
 		<hist setup='sumPhiMuJ1J2vsDphiJ1J2_qcd' />
@@ -62,7 +70,13 @@
 		<hist setup='muon_calIso' />
 		<hist setup='muon_PtTracksVSdR' />
 		<hist setup='muon_NTracksVSdR' />
+		<hist setup='muon_isoJet05' />
+		<hist setup='muon_isoJet10' />
+		<hist setup='muon_isoJet15' />
 		<hist setup='muon_isoJet20' />
+		<hist setup='muon_isoJet30' />
+		<hist setup='muon_isoJet35' />
+		<hist setup='muon_isoJet40' />
 		<hist setup='var_norm_dPhiMuJ12' />
 		<hist setup='muon_eta' />
 		<hist setup='muon_calomix' />
@@ -74,8 +88,7 @@
 		<hist setup='jet2_et' />
 		<hist setup='jet3_et' />
 		<hist setup='jet4_et' />
-		<hist setup='muon_isoJet20' />
-		<hist setup='var_norm_dPhiMuJ12' />
-		<hist setup='muon_eta' />
+		<hist setup='nJets20' />
+		
 	</plots>
 </HistPlotter>

@@ -164,23 +164,7 @@ class Macro:
         all.Add(background)
         sb.Divide(all)
         return sb
-        
-    def makeAditionalPlots(self):
-        #summary plots:
-        # - Efficiency for all Isotypes in one plot
-        # - 
-        print 'printing all plots'
-        #walk through all types
-        #walk through all inputs
-        #get efficiency fom all imputs
-        #put all histograms together (have a look in inspect)
-        # Draw("samee")
-        
-    def getAllEfficienies(self, type):
-        #will return a canvas
-        for i in self.inputdirs:
-            print i
-        
+    
     def matrixMethod(self, effqcd, effsig, Nloose, Ntight):
         nbg = ((Nloose * effsig) - Ntight) / (effsig - effqcd)
         nbga = nbg * effqcd
