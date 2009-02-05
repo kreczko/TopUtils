@@ -280,7 +280,7 @@ class CfgRunner:
         ################################################            
         if (self.__jobName == ''):
             self.__jobName = 'job_'
-            self.__jobName+= datetime.today().strftime("%Y%M%d-%H%M%S")
+            self.__jobName+= datetime.today().strftime("%Y%m%d-%H%M%S")
             self.__warningMsg()
             msg = '* * no output directory for job specified. Directory \n'
             msg+= '* * name was set to ' + self.__jobName 

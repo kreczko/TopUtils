@@ -236,7 +236,7 @@ class jobSplitter:
         ################################################            
         if (self.__submitName == ''):
             self.__submitName = 'job_'
-            self.__submitName+= datetime.today().strftime("%Y%M%d-%H%M%S")
+            self.__submitName+= datetime.today().strftime("%Y%m%d-%H%M%S")
             self.__warningMsg()
             msg = '* * no job name specified for job. Job \n'
             msg+= '* * name was set to ' + self.__submitName 
