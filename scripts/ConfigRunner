@@ -7,6 +7,9 @@ import getopt
 import threading
 
 ## timer
+from datetime import time
+from datetime import date
+from datetime import datetime
 from TopAnalysis.TopUtils.tools.Timer import Timer
 
 ## configuration
@@ -26,9 +29,9 @@ class CfgRunner:
     ## error  logfile
     __outputErr       = ''
     ## file service output path
-    __jobName         = 'runConfig'
+    __jobName         = ''
     ## file service output name    
-    __outputName      = ''
+    __outputName      = 'none'
     ## cfg file for cmsRun
     __config          = ''
     ## physics process/sample
@@ -47,7 +50,7 @@ class CfgRunner:
     ##
 
     ## version
-    __version         = 'V00-00-01'
+    __version         = 'V00-00-02'
     ## time in seconds to wait
     __sleeptime       = 10
     ## internal farm parameters
@@ -174,6 +177,7 @@ class CfgRunner:
             else:
                 self.__errorMsg()
                 print '* * argument(s) not recognized. See --help for usage'
+                print "**************************************************"
         ## perform basic checks of the input
         self.__checkOptions()
         ## run and perform basic monitoring
@@ -196,8 +200,10 @@ class CfgRunner:
         print "              * input source             [-p].                               "
         print "              The input source is steered via vector defines in the file:    "
         print "              './TopAnalysis/Configuration/python/processes.py'              "
-        print "              Also user defined replacements are supported.                \n"
-        print " Options    : -h | --help         [ ]   print this message                  "
+        print "              Also user defined replacements are supported. The otuput [-o]  "
+        print "              can be specified as \'none\'. When specifying the no of evts   "
+        print "              to be processed with -1 all event will be processed          \n"
+        print " Options    : -h | --help         [ ]   print this message                   "
         print "              -v | --verbose      [ ]   run in verbose mode                  "
         print "              -i | --interactive  [ ]   run in interactive mode              "
         print "              -c | --cfg  ...     [x]   specify config file                  "
@@ -209,7 +215,7 @@ class CfgRunner:
         print "              -f | --farm ...     [ ]   specify name of cfg\'s for farm use\n"
         print "              -u | --user ...     [ ]   specify user defined sequences     \n"        
         print " [ ] optional                                                                "
-        print " [x] mandatory                                                               "                
+        print " [x] mandatory                                                               "
         print "\n"
 
 ##-----------------------------------------------------------------------------------            
@@ -218,6 +224,12 @@ class CfgRunner:
         print "**************************************************"
         print "* Error:"
 
+##-----------------------------------------------------------------------------------
+##  * print head for simple warning message            
+    def __warningMsg(self):
+        print "**************************************************"
+        print "* Warning:"
+      
 ##-----------------------------------------------------------------------------------
 ##  * print message on screen
 ##  * used in __waitForFirst        
@@ -233,6 +245,7 @@ class CfgRunner:
         if (self.__numberOfEvents == 0):
             self.__errorMsg()
             print '* * no events to be processed. Choose --evts to specify'
+            print "**************************************************"            
             sys.exit(0)
         ################################################
         ## physics process specified?
@@ -240,6 +253,7 @@ class CfgRunner:
         if (self.__process == ''):
             self.__errorMsg()
             print '* * no physics process specified. Choose --proc to specify'
+            print "**************************************************"
             sys.exit(0)            
         ################################################
         ## configfile specified and existent?
@@ -247,18 +261,32 @@ class CfgRunner:
         if (self.__config == ''):
             self.__errorMsg()
             print '* * no config file specified. Choose --cfg to specify'
+            print "**************************************************"            
         if (not os.path.exists(self.__config)):
             self.__errorMsg()
             print '* * config file doen\'t exist. Please check spelling'
+            print "**************************************************"
             sys.exit(0)
         ################################################
         ## name of output file specified?
         ################################################            
-        if (self.__outputName == ''):
-            self.__errorMsg()
-            print '* * no output name specified. Choose --out to specify'
-            sys.exit(0)
-
+        if (self.__outputName == 'none'):
+            self.__warningMsg()
+            print '* * no output name specified. Output name for file'
+            print '* * service will not be altered when registered'
+            print "**************************************************"
+        ################################################
+        ## output directory or jobname specified?
+        ################################################            
+        if (self.__jobName == ''):
+            self.__jobName = 'job_'
+            self.__jobName+= datetime.today().strftime("%Y%M%d-%H%M%S")
+            self.__warningMsg()
+            msg = '* * no output directory for job specified. Directory \n'
+            msg+= '* * name was set to ' + self.__jobName 
+            self.__printMsg(msg)
+            print "**************************************************"
+            
 ##-----------------------------------------------------------------------------------
 ##  * perform basic job monitoring
     def __monitorJob(self):
@@ -269,6 +297,7 @@ class CfgRunner:
         if '---- Configuration BEGIN' in self.__readFromFile(self.__outputErr):
             self.__errorMsg()
             print '* * Configuration error occured & job aborted; please check .err file'
+            print "**************************************************"
             err=True
         ################################################
         ## check for I/O errors
@@ -276,12 +305,14 @@ class CfgRunner:
         if '---- FileOpenError BEGIN' in self.__readFromFile(self.__outputErr):
             self.__errorMsg()
             print '* * I/O error occured & job aborted; please check .err file'
+            print "**************************************************"
             err=True            
         ################################################            
         ## check if run started properly
         ################################################            
         if 'Root_Error' in self.__readFromFile(self.__outputErr):
             print '* * RootError occured & job aborted; please check .err file'
+            print "**************************************************"
             err=True
         return err
     
@@ -359,6 +390,7 @@ class CfgRunner:
         else:
             self.__errorMsg()
             print '* * requested configfile does not exist: this should never happen!'
+            print "**************************************************"
 
 ##-----------------------------------------------------------------------------------
 ##  * create tmp config file
@@ -377,6 +409,8 @@ class CfgRunner:
         tmp+= "_cfg.py"
         process = cms.ConfigWrapper(self.__config, tmp, proc)
         ## modify events
+        if (self.__numberOfEvents <= 0):
+            self.__numberOfEvents = input.sizes[self.__process]
         process.modifyOption('events', self.__numberOfEvents)
         ## modify skips
         process.modifyOption('skips',  self.__numberOfSkips )
@@ -384,10 +418,16 @@ class CfgRunner:
         process.modifyOption('source', input.source[self.__process])
         ## modify output
         output = self.__jobName+'/'
-        output+= self.__outputName
-        output+= '_' + proc
-        output+= '.root'
-        process.modifyOption('output',output)
+        if (self.__outputName.lower() == 'none'):
+            output+= self.__jobName
+            output+= '_' + proc
+            output+= '.root'
+            process.modifyOption('output','none')            
+        else:
+            output+= self.__outputName
+            output+= '_' + proc
+            output+= '.root'
+            process.modifyOption('output',output)
         ## setup outputLogs
         self.__outputLog = output.__str__().replace('.root', '.out')
         self.__outputErr = output.__str__().replace('.root', '.err')
@@ -481,7 +521,8 @@ class CfgRunner:
                 self.__errorMsg()
                 print "* * not allowed process!"
                 print "* * allowed processes are: ", cms.Config.allowedProcesses
-                os._exit(1)
+                print "**************************************************"
+                os._exit(0)
                 
 ##-----------------------------------------------------------------------------------
 if __name__ == '__main__':

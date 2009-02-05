@@ -7,6 +7,9 @@ import sys
 import getopt
 
 ## timer
+from datetime import time
+from datetime import date
+from datetime import datetime
 from TopAnalysis.TopUtils.tools.Timer import Timer
 
 ##-----------------------------------------------------------------------------------
@@ -41,7 +44,7 @@ class jobSplitter:
    ##
 
    ## version
-   __version = 'V00-00-01'
+   __version = 'V00-00-02'
    ## name of the object 
    __name    = 'none'
    
@@ -157,9 +160,9 @@ class jobSplitter:
          else:
             self.__errorMsg()
             print '* * argument(s) not recognized. See --help for usage'
-
-      ## perform basic checks later here   
-
+            print "**************************************************"
+      ## perform basic checks of the input
+      self.__checkOptions()            
       ## do the job splitting
       self.__split()
 
@@ -172,7 +175,9 @@ class jobSplitter:
       print "              expected with cmsRun, but it can take any; the execution      "
       print "              should be specified as a full command line including all      "
       print "              its options in the --cmd option; submission expects tokens    "
-      print "              for -e, -s, -o, -d to be present in the command line.         "
+      print "              for -e, -s, -o, -d to be present in the command line. Token   "
+      print "              -s is added with 0 events to be skipped when not found. Token "
+      print "              -d is added with a default job name when not found.           "
       print "              Defaults are given but may be specified if different.       \n"        
       print " Options    : -h | --help           [ ]   print this message                "
       print "              -v | --verbose        [ ]   run in verbose mode               "
@@ -183,7 +188,7 @@ class jobSplitter:
       print "              -d | --dir    '-d'    [!]   specify token for the job dir     "
       print "              -f | --farm   '-f'    [ ]   specify token for farm internals  "      
       print "              -n | --njob   ....    [x]   nuber of jobs to be created       "
-      print "              -x | --name   ....    [x]   submission job directory        \n"        
+      print "              -x | --name   ....    [ ]   submission job directory        \n"        
       print " [ ] optional                                                               "
       print " [x] mandatory                                                              "
       print " [!] need to be present in the full command line [--cmd '...']              "        
@@ -202,6 +207,43 @@ class jobSplitter:
       print "* Warning:"      
 
 ##-----------------------------------------------------------------------------------
+##  * print message on screen
+##  * used in __waitForFirst        
+   def __printMsg(self, msg):
+      print msg
+
+##-----------------------------------------------------------------------------------
+##  * basic check of input configuration
+   def __checkOptions(self):
+        ################################################
+        ## execution command specified?
+        ################################################            
+        if (self.__command == ''):
+            self.__errorMsg()
+            print '* * no execution command specified. Choose --cmd to specify'
+            print "**************************************************"            
+            sys.exit(0)
+        ################################################
+        ## no of jobs specified?
+        ################################################            
+        if (self.__numberOfJobs == 0):
+            self.__errorMsg()
+            print '* * no of jobs not specified. Choose -n to specify'
+            print "**************************************************"            
+            sys.exit(0)            
+        ################################################
+        ## job name specified?
+        ################################################            
+        if (self.__submitName == ''):
+            self.__submitName = 'job_'
+            self.__submitName+= datetime.today().strftime("%Y%M%d-%H%M%S")
+            self.__warningMsg()
+            msg = '* * no job name specified for job. Job \n'
+            msg+= '* * name was set to ' + self.__submitName 
+            self.__printMsg(msg)
+            print "**************************************************"
+
+##-----------------------------------------------------------------------------------
 ##  * take command token and value
 ##  * replace object by value in token
 ##  * return modified command      
@@ -217,9 +259,9 @@ class jobSplitter:
          msg = '* * toToken :: token not found in command line: ' + token
          print msg
          ## take over and add the expected token plus value by hand
-         print '* * toToken :: adding token and value to command line'
+         print '* * toToken :: adding token and value'
+         print "**************************************************"
          command    += ' ' + token + ' ' + value.__str__()
-         ## sys.exit(0)
       else:
          replacement = ' ' + token + ' ' + value.__str__()
          command = flag.sub(replacement, command)         
@@ -240,17 +282,19 @@ class jobSplitter:
          self.__errorMsg()
          msg = '* * fromToken :: token not found in command line: ' + token
          print msg
+         print "**************************************************"
          sys.exit(0)
       else:
          value = flag.search(self.__command).group(2)         
          ## check sanity
          if(re.match(r'\d+', value) and re.search(r'\D+', value)):
             self.__errorMsg()
-            msg = '* * value extraced from token: ' + token
+            msg = '* * value extracted from token: ' + token
             msg+= ' does not contain \n'
             msg+= '*   only digits as expected: '
             msg+= value
             print msg
+            print "**************************************************"
             sys.exit(0)
       return value
 
@@ -300,8 +344,13 @@ class jobSplitter:
       subjob = self.__command
       ## replace output name
       newOutput = self.__fromToken(self.__outputToken)
-      newOutput+= '_' + job.__str__()
-      subjob    = self.__toToken(subjob, self.__outputToken, newOutput)
+      if (newOutput.lower() == 'none'):
+         ## in case of 'none' don't add the job label
+         subjob = self.__toToken(subjob, self.__outputToken, newOutput)
+      else:
+         ## add job label to the job output name
+         newOutput+= '_' + job.__str__()
+         subjob = self.__toToken(subjob, self.__outputToken, newOutput)
       ## replace skip
       newSkip   = self.__firstEvent(job).__str__()
       subjob    = self.__toToken(subjob, self.__skipsToken, newSkip)
@@ -312,7 +361,14 @@ class jobSplitter:
       newJob    = self.__submitName
       subjob    = self.__toToken(subjob, self.__submitToken, newJob)
       ## add name of cfg for farmjob at the end of the command line
-      newCfg    = ' ' + self.__farmToken + ' ' + newOutput
+      newCfg    = ' ' + self.__farmToken + ' '
+      if (newOutput.lower() == 'none'):
+         ## in case of 'none' give a special definition of the job
+         ## output name which is used for internal file administration
+         newCfg+= 'tmp_' + self.__submitName + '_' + job.__str__()
+      else:
+         ## add job output name for internal file administration
+         newCfg+= newOutput         
       subjob   += newCfg
       return subjob
 
@@ -323,6 +379,7 @@ class jobSplitter:
       if (self.__numberOfJobs<=0):
          self.__errorMsg()
          print "* * numberOfJobs <=0; this should never happen!!!"
+         print "**************************************************"
          sys.exit(0)
           
       for job in range(self.__numberOfJobs):
@@ -332,7 +389,10 @@ class jobSplitter:
          msg+= " last event = " + self.__lastEvent(job).__str__()
          print msg
 
-         print self.__subjob(job)
+         # create subjob string
+         subjobstr = self.__subjob(job)
+         print subjobstr
+         
          ## create job directory if it doesn't
          ## exist yet
          if (not os.path.exists(self.__submitName)):
@@ -345,8 +405,8 @@ class jobSplitter:
          submissionScript+='_'+job.__str__()
          submissionScript+='.sh'
          file = open(submissionScript, 'w')
-         file.write('echo ...executing '+ self.__subjob(job) + '\n')
-         file.write(self.__subjob(job))
+         file.write('echo ...executing '+ subjobstr + '\n')
+         file.write(subjobstr)
          file.close()
          os.system('chmod a+x '+submissionScript)
 

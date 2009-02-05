@@ -98,9 +98,10 @@ class ConfigWrapper:
                 self.__config += '\n'                
             if a in ('output'):
                 ## modify output file
-                self.__config += 'process.TFileService.fileName = \''
-                self.__config += self._options[a] + '\''
-                self.__config += '\n'                                
+                if(not self._options[a].lower() == 'none'):
+                    self.__config += 'process.TFileService.fileName = \''
+                    self.__config += self._options[a] + '\''
+                    self.__config += '\n'                                
             if a in ('paths' ):
                 ## modify event numbers
                 self.__config += self._options[a]
