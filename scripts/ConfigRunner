@@ -419,7 +419,13 @@ class CfgRunner:
         ## modify output
         output = self.__jobName+'/'
         if (self.__outputName.lower() == 'none'):
-            output+= self.__jobName
+            if (not self.__farmParams==''):
+                ## in case there is some feed through
+                ## by the farm script use this one
+                output+= self.__farmParams
+            else:
+                ## and the job name otherwise 
+                output+= self.__jobName
             output+= '_' + proc
             output+= '.root'
             process.modifyOption('output','none')            
