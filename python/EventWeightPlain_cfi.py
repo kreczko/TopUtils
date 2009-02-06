@@ -1,11 +1,11 @@
 import FWCore.ParameterSet.Config as cms
 
 eventWeight = cms.EDFilter("EventWeightPlain",
-                           nevts = cms.uint32(1),
-                           xsec  = cms.double(1.0),
-                           eff   = cms.double(1.0),
-                           lumi  = cms.double(1.0)
-                           )
+  nevts = cms.uint32(  1),    ## add the maximal number of events in the sample
+  xsec  = cms.double(1.0),    ## add the xsection for production
+  eff   = cms.double(1.0),    ## add filter efficiencies
+  lumi  = cms.double(1.0)     ## add the target lumi you aim for
+)
 
 makeWeights = cms.Sequence(eventWeight)
 
