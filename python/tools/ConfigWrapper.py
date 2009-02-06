@@ -31,7 +31,8 @@ class ConfigWrapper:
         ## define options
         self._options = {}
         self._options['source'] = ""  ## change source
-        self._options['output'] = ""  ## change output 
+        self._options['output'] = ""  ## change output
+        self._options['subset'] = ""  ## change subset output        
         self._options['events'] = ""  ## change number of events
         self._options['skips' ] = ""  ## change number of skipped events
         self._options['paths' ] = ""  ## add paths if specified
@@ -101,7 +102,12 @@ class ConfigWrapper:
                 if(not self._options[a].lower() == 'none'):
                     self.__config += 'process.TFileService.fileName = \''
                     self.__config += self._options[a] + '\''
-                    self.__config += '\n'                                
+                    self.__config += '\n'
+            if a in ('subset'):
+                ## modify output file
+                self.__config += 'process.out.fileName = \''
+                self.__config += self._options[a] + '\''
+                self.__config += '\n'                      
             if a in ('paths' ):
                 ## modify event numbers
                 self.__config += self._options[a]

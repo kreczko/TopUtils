@@ -30,6 +30,8 @@ class jobSplitter:
    __skipsToken     = '-s'
    ## job name token
    __outputToken    = '-o'
+   ## subset token
+   __subsetToken    = '-z'   
    ## submit token
    __submitToken    = '-d'
    ## farm token
@@ -44,7 +46,7 @@ class jobSplitter:
    ##
 
    ## version
-   __version = 'V00-00-02'
+   __version = 'V00-01-00'
    ## name of the object 
    __name    = 'none'
    
@@ -87,8 +89,8 @@ class jobSplitter:
    def main(self):       
       try:
          opts, args = getopt.getopt(sys.argv[1:],
-                                    'hvc:s:e:o:d:f:n:x:',
-                                    ['help','verbose','cmd=','skip=','evts=','out=','dir=','farm=','njob=','name=']
+                                    'hvc:s:e:o:z:d:f:n:x:',
+                                    ['help','verbose','cmd=','skip=','evts=','out=','sub=','dir=','farm=','njob=','name=']
                                     )
       except getopt.error, msg:
          print msg
@@ -135,6 +137,12 @@ class jobSplitter:
             if (not (a == '')):               
                self.__outputToken = a
          ################################################
+         ## token for subset name for 'cmd'
+         ################################################               
+         elif o in ("-z", "--sub"):
+            if (not (a == '')):               
+               self.__subsetToken = a               
+         ################################################
          ## token for job name for 'cmd'
          ################################################               
          elif o in ("-d", "--dir"):
@@ -170,28 +178,30 @@ class jobSplitter:
 ##  * print help message for the use of the ConfigRunner
    def __helpMsg(self):
       print "\n"
-      print " Synopsis   : submit [Option] -cmd '...' -n NEVTS --dir JOBNAME           \n"
-      print " Description: Script to submit jobs to the NAF farm system. Major is        "
-      print "              expected with cmsRun, but it can take any; the execution      "
-      print "              should be specified as a full command line including all      "
-      print "              its options in the --cmd option; submission expects tokens    "
+      print " Synopsis   : submit [Option] --cmd '...' -n NEVTS --name JOBNAME         \n"
+      print " Description: Script to submit jobs to the NAF farm system. Expected use    "
+      print "              is with cmsRun, but it can take any executing script; the     "
+      print "              execution should be specified as a full cmnd line including   "
+      print "              all options in the --cmd option; submission expects tokens    "
       print "              for -e, -s, -o, -d to be present in the command line. Token   "
       print "              -s is added with 0 events to be skipped when not found. Token "
-      print "              -d is added with a default job name when not found.           "
-      print "              Defaults are given but may be specified if different.       \n"        
+      print "              -d is added with a default job name when not found, which is  "
+      print "              created from date and time. Defaults for the expected tokens  "
+      print "              are given but may be specified when different.              \n"        
       print " Options    : -h | --help           [ ]   print this message                "
       print "              -v | --verbose        [ ]   run in verbose mode               "
       print "              -c | --cmd    ....    [x]   specify full command line         "
-      print "              -s | --skip   '-s'    [!]   specify token skip                "
+      print "              -s | --skip   '-s'    [ ]   specify token skip                "
       print "              -e | --evts   '-e'    [!]   specify token for the no of evts  "        
       print "              -o | --out    '-o'    [!]   specify token for output file     "
-      print "              -d | --dir    '-d'    [!]   specify token for the job dir     "
+      print "              -z | --sub    '-z'    [ ]   specify token for subset file     "      
+      print "              -d | --dir    '-d'    [ ]   specify token for the job dir     "
       print "              -f | --farm   '-f'    [ ]   specify token for farm internals  "      
       print "              -n | --njob   ....    [x]   nuber of jobs to be created       "
       print "              -x | --name   ....    [ ]   submission job directory        \n"        
       print " [ ] optional                                                               "
       print " [x] mandatory                                                              "
-      print " [!] need to be present in the full command line [--cmd '...']              "        
+      print " [!] need to be present in the execution command line [--cmd '...']         "        
       print "\n"
          
 ##-----------------------------------------------------------------------------------
@@ -269,7 +279,7 @@ class jobSplitter:
    
 ##-----------------------------------------------------------------------------------
 ##  * get object from token
-   def __fromToken(self, token):
+   def __fromToken(self, token, mandatory=True):
       ## return value
       value=''
       ## prepare regex
@@ -279,11 +289,12 @@ class jobSplitter:
 
       if (not flag.search(self.__command)):
          ## perform basic error treatment
-         self.__errorMsg()
-         msg = '* * fromToken :: token not found in command line: ' + token
-         print msg
-         print "**************************************************"
-         sys.exit(0)
+         if (mandatory):
+            self.__errorMsg()
+            msg = '* * fromToken :: token not found in command line: ' + token
+            print msg
+            print "**************************************************"
+            sys.exit(0)
       else:
          value = flag.search(self.__command).group(2)         
          ## check sanity
@@ -342,6 +353,13 @@ class jobSplitter:
 ##  * return final string
    def __subjob(self, job):
       subjob = self.__command
+      ## replace subset name
+      newSubset = self.__fromToken(self.__subsetToken, False) 
+      if ( not newSubset == ''):
+         ## in case the subset token is present in the
+         ## cmd line; and don't do anything otherwise
+         newSubset+= '_' + job.__str__()
+         subjob = self.__toToken(subjob, self.__subsetToken, newSubset)
       ## replace output name
       newOutput = self.__fromToken(self.__outputToken)
       if (newOutput.lower() == 'none'):

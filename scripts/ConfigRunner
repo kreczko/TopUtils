@@ -32,6 +32,8 @@ class CfgRunner:
     __jobName         = ''
     ## file service output name    
     __outputName      = 'none'
+    ## file service subset name    
+    __subsetName      = ''    
     ## cfg file for cmsRun
     __config          = ''
     ## physics process/sample
@@ -50,7 +52,7 @@ class CfgRunner:
     ##
 
     ## version
-    __version         = 'V00-00-02'
+    __version         = 'V00-01-00'
     ## time in seconds to wait
     __sleeptime       = 10
     ## internal farm parameters
@@ -104,8 +106,8 @@ class CfgRunner:
     def main(self):
         try:
             opts, args = getopt.getopt(sys.argv[1:],
-                                       'hvic:p:s:e:o:d:f:u:',
-                                       ['help','verbose','interactive','cfg=','proc=','skip=','evts=','out=','dir=','farm=','user=']
+                                       'hvic:p:s:e:o:z:d:f:u:',
+                                       ['help','verbose','interactive','cfg=','proc=','skip=','evts=','out=','sub=','dir=','farm=','user=']
                                        )
         except getopt.error, msg:
             print msg
@@ -156,6 +158,12 @@ class CfgRunner:
             elif o in ("-o", "--out"):
                 if (not (a == '')):
                     self.__outputName = a
+            ################################################                
+            ## define subset file with process suffix
+            ################################################
+            elif o in ("-z", "--sub"):
+                if (not (a == '')):
+                    self.__subsetName = a                    
             ################################################
             ## define error file with sample suffix
             ################################################                
@@ -193,7 +201,7 @@ class CfgRunner:
         print "\n"
         print " Synopsis   : ConfigRunner [Option] --cfg '...' -p PROC -e EVTS -o OUTPUT  \n"
         print " Description: Script to allow replacement of cfg file parameters for cmsRun  "
-        print "              via options; supported parameter replacements are:             "
+        print "              via command line options; supported parameter replacements are:"
         print "              * number of events         [-e],                               "
         print "              * number of skipped events [-s],                               "
         print "              * name of output file      [-o],                               "
@@ -201,8 +209,8 @@ class CfgRunner:
         print "              The input source is steered via vector defines in the file:    "
         print "              './TopAnalysis/Configuration/python/processes.py'              "
         print "              Also user defined replacements are supported. The otuput [-o]  "
-        print "              can be specified as \'none\'. When specifying the no of evts   "
-        print "              to be processed with -1 all event will be processed          \n"
+        print "              can be specified as \'none\'. When specifying the number of    "
+        print "              events to be processed with -1 all events will be processed  \n"
         print " Options    : -h | --help         [ ]   print this message                   "
         print "              -v | --verbose      [ ]   run in verbose mode                  "
         print "              -i | --interactive  [ ]   run in interactive mode              "
@@ -211,6 +219,7 @@ class CfgRunner:
         print "              -s | --skip ...     [ ]   specify no of evts to be skipped     "
         print "              -e | --evts ...     [x]   specify no of evts to be processed   "        
         print "              -o | --out  ...     [x]   specify name of output file          "
+        print "              -z | --sub  ...     [ ]   specify name of subset file          "        
         print "              -d | --dir  ...     [ ]   specify job directory                "
         print "              -f | --farm ...     [ ]   specify name of cfg\'s for farm use\n"
         print "              -u | --user ...     [ ]   specify user defined sequences     \n"        
@@ -416,9 +425,17 @@ class CfgRunner:
         process.modifyOption('skips',  self.__numberOfSkips )
         ## modify source
         process.modifyOption('source', input.source[self.__process])
+        ## modify subset
+        if (not self.__subsetName == ''):    
+            subset = self.__jobName+'/'
+            subset+= self.__subsetName
+            subset+= '_' + proc
+            subset+= '.root'
+            process.modifyOption('subset',subset)
         ## modify output
         output = self.__jobName+'/'
         if (self.__outputName.lower() == 'none'):
+        ## special treatment if we have 'none' output 
             if (not self.__farmParams==''):
                 ## in case there is some feed through
                 ## by the farm script use this one
@@ -434,6 +451,7 @@ class CfgRunner:
             output+= '_' + proc
             output+= '.root'
             process.modifyOption('output',output)
+
         ## setup outputLogs
         self.__outputLog = output.__str__().replace('.root', '.out')
         self.__outputErr = output.__str__().replace('.root', '.err')
