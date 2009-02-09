@@ -104,12 +104,13 @@ class ConfigWrapper:
                     self.__config += self._options[a] + '\''
                     self.__config += '\n'
             if a in ('subset'):
-                ## modify output file
-                self.__config += 'process.out.fileName = \''
-                self.__config += self._options[a] + '\''
-                self.__config += '\n'                      
+                ## modify subset file
+                if(not self._options[a].lower() == ''):
+                    self.__config += 'process.out.fileName = \''
+                    self.__config += self._options[a] + '\''
+                    self.__config += '\n'                      
             if a in ('paths' ):
-                ## modify event numbers
+                ## modify process paths
                 self.__config += self._options[a]
                 self.__config += '\n'                    
                 
