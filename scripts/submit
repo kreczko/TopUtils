@@ -452,26 +452,26 @@ class jobSplitter:
             
          ## --------------------------------------------------------------------------
          ## uncomment the following line(s) to run in interactive mode'
-         ## os.system('./'+submissionScript+'>>'+submissionLog+'.log')                  ## interactive
-         os.system('./'+submissionScript+'>>'+submissionLog+'.log'+ '< /dev/null&')     ## in batch on work group server
+         ## os.system('./'+submissionScript+'>>'+submissionLog+'.log')                     ## interactive
+         ## os.system('./'+submissionScript+'>>'+submissionLog+'.log'+ '< /dev/null&')     ## in batch on work group server
             
          ## --------------------------------------------------------------------------
          ## uncomment the following line(s) to run in batch mode; qsub parameters are
          ## explained above. For more details see:
          ## http://naf.desy.de/general_naf_docu/working_with_the_local_batch_system/
-#         farm = 'qsub'
-#         farm+= ' -l h_vmem=1G'                 ## increase memory to 1G
-#         farm+= ' -l h_cpu=48:00:00'            ## set maximally allowed cpu time
-#        #farm+= ' -l tmp_free=10G'              ## set maximally allowed space for output
-#         farm+= ' -cwd'                         ## execute job from current directory
-#         farm+= ' -V'                           ## inherit the current shell environment to the job
-#         farm+= ' -o '+submissionLog+'.farmout' ## farm output file
-#         farm+= ' -e '+submissionLog+'.farmerr' ## farm error file
-#         farm+= ' -m ae'                        ## send mail on end/abort
-#         farm+= ' '
+         farm = 'qsub'
+         farm+= ' -l h_vmem=3G'                 ## increase memory to 1G
+         farm+= ' -l h_cpu=48:00:00'            ## set maximally allowed cpu time
+        #farm+= ' -l tmp_free=10G'              ## set maximally allowed space for output
+         farm+= ' -cwd'                         ## execute job from current directory
+         farm+= ' -V'                           ## inherit the current shell environment to the job
+         farm+= ' -o '+submissionLog+'.farmout' ## farm output file
+         farm+= ' -e '+submissionLog+'.farmerr' ## farm error file
+         farm+= ' -m ae'                        ## send mail on end/abort
+         farm+= ' '
          #use with from python2.6.1 on
          #subprocess.check_call(farm+'./'+submissionScript+'>>'+submissionLog+'.farmlog', shell=True)
-#         os.system(farm+'./'+submissionScript+'>>'+submissionLog+'.farmlog')
+         os.system(farm+'./'+submissionScript+'>>'+submissionLog+'.farmlog')
          #os.spawnl(farm+'./'+submissionScript+'>>'+submissionLog+'.farmlog')         
          Timer.sleep(1)
       ## give submission summary and some final words
