@@ -53,28 +53,30 @@ foreach my $file (@myfiles) {
     # accumulate else voice error message ; first occurrence
     # semi leptonic second dileptonic preselection
     my $failed = 0;
-    if($semiLepMuonEta[0] =~ /\w\s+:\s+(\d+)\s+\(\s+(\d+\.?\d*)\)\s+\w+\s\w+\s+(\d+)\s+\(\s+(\d+\.?\d*)\)/) {
+    if($semiLepMuonEta[0] =~ /\w\s+:\s+(\d+)\s+\(\s*(\d+\.?\d*\w?\W?\d*)\)\s+\w+\s\w+\s+(\d+)\s+\(\s*(\d+\.?\d*\w?\W?\d*)\)/) {
       $nom1   = $nom1   + $1;
       $denom1 = $denom1 + $3;
     } else {
       $failed = 1;
       print ">> ERROR: didn't find semiLepMuonEta from $file <<\n";
+      print $semiLepMuonEta[0]
     };
-    if($semiLepMuonPt[0]  =~ /\w\s+:\s+(\d+)\s+\(\s+(\d+\.?\d*)\)\s+\w+\s\w+\s+(\d+)\s+\(\s+(\d+\.?\d*)\)/) {
+    if($semiLepMuonPt[0]  =~ /\w\s+:\s+(\d+)\s+\(\s*(\d+\.?\d*\w?\W?\d*)\)\s+\w+\s\w+\s+(\d+)\s+\(\s*(\d+\.?\d*\w?\W?\d*)\)/) {
       $nom2   = $nom2   + $1;
       $denom2 = $denom2 + $3;
     } else {
       $failed = 1;
       print ">> ERROR: didn't find semiLepMuonPt  from $file <<\n";
+      print $semiLepMuonPt[0];
     };
-    if($semiLepJetsEta[0] =~ /\w\s+:\s+(\d+)\s+\(\s+(\d+\.?\d*)\)\s+\w+\s\w+\s+(\d+)\s+\(\s+(\d+\.?\d*)\)/) {
+    if($semiLepJetsEta[0] =~ /\w\s+:\s+(\d+)\s+\(\s*(\d+\.?\d*\w?\W?\d*)\)\s+\w+\s\w+\s+(\d+)\s+\(\s*(\d+\.?\d*\w?\W?\d*)\)/) {
       $nom3   = $nom3   + $1;
       $denom3 = $denom3 + $3;
     } else {
       $failed = 1;
       print ">> ERROR: didn't find semiLepJetsEta from $file <<\n";
     };
-    if($semiLepJetsPt[0]  =~ /\w\s+:\s+(\d+)\s+\(\s+(\d+\.?\d*)\)\s+\w+\s\w+\s+(\d+)\s+\(\s+(\d+\.?\d*)\)/) {
+    if($semiLepJetsPt[0]  =~ /\w\s+:\s+(\d+)\s+\(\s*(\d+\.?\d*\w?\W?\d*)\)\s+\w+\s\w+\s+(\d+)\s+\(\s*(\d+\.?\d*\w?\W?\d*)\)/) {
       $nom4   = $nom4   + $1;
       $denom4 = $denom4 + $3;
     } else {
