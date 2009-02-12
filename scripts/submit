@@ -14,7 +14,7 @@ from TopAnalysis.TopUtils.tools.Timer import Timer
 
 ##-----------------------------------------------------------------------------------
 ## executive script for cmsRun, Version 1.1
-## twiki: https://twiki.cern.ch/twiki/bin/view/CMS/ConfigRunner
+## twiki: https://twiki.cern.ch/twiki/bin/view/CMS/TopUtils#Batch_job_submission
 class jobSplitter:
    ##
    ## configurables
@@ -183,7 +183,7 @@ class jobSplitter:
 ##  * print help message for the use of the ConfigRunner
    def __helpMsg(self):
       print "\n"
-      print " Synopsis   : submit [Option] --cmd '...' -n NEVTS --name JOBNAME         \n"
+      print " Synopsis   : submit [Option] --cmd '...' -n NJOBS --name JOBNAME         \n"
       print " Description: Script to submit jobs to the NAF farm system. Expected use    "
       print "              is with cmsRun, but it can take any executing script; the     "
       print "              execution should be specified as a full cmnd line including   "
@@ -460,7 +460,7 @@ class jobSplitter:
          ## explained above. For more details see:
          ## http://naf.desy.de/general_naf_docu/working_with_the_local_batch_system/
          farm = 'qsub'
-         farm+= ' -l h_vmem=3G'                 ## increase memory to 1G
+         farm+= ' -l h_vmem=3G'                 ## increase memory to 3G
          farm+= ' -l h_cpu=48:00:00'            ## set maximally allowed cpu time
         #farm+= ' -l tmp_free=10G'              ## set maximally allowed space for output
          farm+= ' -cwd'                         ## execute job from current directory
@@ -480,8 +480,8 @@ class jobSplitter:
       print '-----------------------------------------------------------------------------'
       print ' you can check the status of your jobs with: \'qstat -u user\' '
       print ' you can kill specific jobs with           : \'qdel  jobid\' '      
-      print ' you can combined histograms later von with: \'hadd output.root input_?.root'
-      print ' in case of problems mailto: naf-cms-support(at)desy(dot)de'
+      print ' you can combine root-files later on with  : \'hadd output.root input_?.root'
+      print ' in case of problems mail to               : naf-cms-support(at)desy(dot)de'
       print '-----------------------------------------------------------------------------'
       print '\n'
       
