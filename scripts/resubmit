@@ -1,0 +1,276 @@
+#! /usr/bin/env python
+
+## system imports
+import re
+import os
+import sys
+import getopt
+
+## timer
+from datetime import time
+from datetime import date
+from datetime import datetime
+from TopAnalysis.TopUtils.tools.Timer import Timer
+
+##-----------------------------------------------------------------------------------
+## script job re-submission to batch farm systems, Version 00-00-00
+## twiki: https://twiki.cern.ch/twiki/bin/view/CMS/TopUtils#Batch_job_submission
+class jobResubmission:
+   ##
+   ## configurables
+   ##
+
+   ## verbose mode
+   __verbose        = False
+   ## job name
+   __jobName        = ''
+   ## list of job ids
+   __jobIds         = ''
+
+   ##
+   ## internal variables
+   ##
+
+   ## version
+   __version = 'V00-00-02'
+   ## name of the object 
+   __name    = 'none'
+
+##-----------------------------------------------------------------------------------    
+##  Constructor
+   def __init__(self):
+      self.name = 'resubmit'
+
+##-----------------------------------------------------------------------------------        
+##  * start sequence
+   def beginJob(self):
+      versionLine = "*                                      "
+      versionLine+= self.__version + " *"              
+      print "**************************************************"
+      print "* starting JobResubmission...                    *"
+      print "*                                                *"
+      print "*                                                *"
+      print "*                                                *"    
+      print "*                                                *"
+      print versionLine
+      print "**************************************************"
+ 
+##-----------------------------------------------------------------------------------        
+##  * end sequence
+##  * this may contain the execution of histPlotter or something similar                
+   def endJob(self):
+      print "**************************************************"
+      print "* leaving JobResubmission...                     *"
+      print "*                                                *"
+      print "*                                                *"
+      print "*                                                *"    
+      print "*                                                *"
+      print "*                                      Good Bye! *"
+      print "**************************************************"          
+
+##-----------------------------------------------------------------------------------
+##  * Parse command line options
+##  * Do basic check whether the options make sense or not
+##  * Depending on the options execute ...
+   def main(self):
+      try:
+         opts, args = getopt.getopt(sys.argv[1:],
+                                    'hvj:i:',
+                                    ['help','verbose','job=','ids=']
+                                    )
+      except getopt.error, msg:
+         print msg
+         print "for help use --help"
+         sys.exit(2)
+         
+      for o, a in opts:
+         ################################################
+         ## get help
+         ################################################                
+         if o in ("-h", "--help"):
+            self.__helpMsg()
+            self.endJob()
+            sys.exit(0)
+            ################################################
+            ## run verbose mode
+            ################################################
+         elif o in ("-v", "--verbose"):
+            self.__verbose = True
+            ################################################                
+            ## job name
+            ################################################                
+         elif o in ("-j", "--job"):
+            self.__jobName = a
+            ################################################                
+            ## list of job ids
+            ################################################                
+         elif o in ("-i", "--ids"):
+            self.__jobIds = a
+         else:
+            self.__errorMsg()
+            print '* * argument(s) not recognized. See --help for usage'
+            print "**************************************************"
+      ## perform basic checks of the input
+      self.__checkOptions()
+      ## do the resubmission
+      self.__resubmit()
+
+##-----------------------------------------------------------------------------------
+##  * print help message for the use of the jobResubmission
+   def __helpMsg(self):
+      print "\n"
+      print " Synopsis   : resubmit [Option] --job '...' -i JOBIDs                     \n"
+      print " Description: Script to resubmit jobs to the NAF farm system. This script   "
+      print "              expects an executing script in the directory [job] and the    "
+      print "              subjob ids to be resubmitted as a \',\' separeted list w/o    "
+      print "              whitespace.                                                 \n"
+      print " Options    : -h | --help           [ ]   print this message                "
+      print "              -v | --verbose        [ ]   run in verbose mode               "
+      print "              -j | --cmd    ....    [x]   specify job directory             "
+      print "              -i | --skip   ....    [x]   specify subjob ids (,-separated)  "
+      print " [ ] optional                                                               "
+      print " [x] mandatory                                                              "
+      print "\n"
+      
+##-----------------------------------------------------------------------------------            
+##  * print head for simple error message            
+   def __errorMsg(self):
+      print "**************************************************"
+      print "* Error:"
+
+##-----------------------------------------------------------------------------------
+##  * print head for simple warning message            
+   def __warningMsg(self):
+      print "**************************************************"
+      print "* Warning:"
+      
+##-----------------------------------------------------------------------------------
+##  * print message on screen
+##  * used in __waitForFirst        
+   def __printMsg(self, msg):
+      print msg
+
+##-----------------------------------------------------------------------------------
+##  * basic check of input configuration
+   def __checkOptions(self):
+      ################################################
+      ## job name specified?
+      ################################################            
+      if (self.__jobName == ''):
+         self.__errorMsg()
+         print '* * no job name specified. Choose --job to specify'
+         print "**************************************************"
+         sys.exit(0)            
+      ################################################
+      ## job ids specified?
+      ################################################
+      if (self.__jobIds == ''):
+         self.__errorMsg()
+         print '* * no job ids specified. Choose --ids to specify'
+         print "**************************************************"            
+         sys.exit(0)
+            
+##-----------------------------------------------------------------------------------
+##  * create a vector from a list of objects in a string separated by an arbitary
+##    deliminator
+##  * used in __doAll                
+   def __vectorFromList(self, list, delim):
+      myBuffer = []
+      myVector = []
+      if delim in list:
+         myBuffer = list.split(delim)
+      else:
+         myBuffer = [list]
+         
+      for a in myBuffer:
+         myVector.append(a)
+         
+      return myVector
+
+##-----------------------------------------------------------------------------------
+##  * check if the farm logfiles do exist already
+##  * if it exists already 
+   def __resubName(self):
+      fileName = ''
+      busy = True
+      subs = 1
+      while busy:
+         if (not os.path.exists(self.__jobName+'_'+subs.__str__()) ):
+            fileName = self.__jobName+'_'+subs.__str__()
+            busy = False
+         subs=subs+1
+         if (subs>99):
+            self.__errorMsg()
+            print "* * caught in loop to check for free logfile slot "
+            print "* * I'll bale out here and stop all action..."
+            print "**************************************************"            
+            sys.exit(0)
+      return fileName
+            
+##-----------------------------------------------------------------------------------
+##  * split up jobs to be executed
+   def __resubmit(self):
+      ## create a new directory
+      newJobDir = self.__resubName()
+      os.system('mkdir ' + newJobDir)
+      ## create vector from input string
+      jobVector = {}
+      jobVector = self.__vectorFromList(self.__jobIds, ',')
+      ## loop the vector from input string
+      for job in jobVector:
+         msg = "...re-submitting job " + job.__str__() + ' to folder '
+         msg+= newJobDir
+         print msg
+
+         ## compose new log name
+         submissionLog    = newJobDir + '/'
+         submissionLog   += newJobDir
+         ## compose new script name
+         submissionScript = newJobDir + '/'
+         submissionScript+= self.__jobName + '_'
+         submissionScript+= job.__str__()          
+         submissionScript+= '.sh'
+         ## copy submission script
+         os.system('cp ' + self.__jobName + '/' + self.__jobName + '_' + job.__str__() + '.sh ' + submissionScript)
+         
+         ## --------------------------------------------------------------------------
+         ## uncomment the following line(s) to run in interactive mode'
+         ## os.system('./'+submissionScript+'>>'+submissionLog+'.log')                     ## interactive
+         ## os.system('./'+submissionScript+'>>'+submissionLog+'.log'+ '< /dev/null&')     ## in batch on work group server
+            
+         ## --------------------------------------------------------------------------
+         ## uncomment the following line(s) to run in batch mode; qsub parameters are
+         ## explained above. For more details see:
+         ## http://naf.desy.de/general_naf_docu/working_with_the_local_batch_system/
+         farm = 'qsub'
+         farm+= ' -l h_vmem=3G'                 ## increase memory to 1G
+         farm+= ' -l h_cpu=48:00:00'            ## set maximally allowed cpu time
+        #farm+= ' -l tmp_free=10G'              ## set maximally allowed space for output
+         farm+= ' -cwd'                         ## execute job from current directory
+         farm+= ' -V'                           ## inherit the current shell environment to the job
+         farm+= ' -o '+submissionLog+'.farmout' ## farm output file
+         farm+= ' -e '+submissionLog+'.farmerr' ## farm error file
+         farm+= ' -m ae'                        ## send mail on end/abort
+         farm+= ' '
+         #use with from python2.6.1 on
+         #subprocess.check_call(farm+'./'+submissionScript+'>>'+submissionLog+'.farmlog', shell=True)
+         os.system(farm+'./'+submissionScript+'>>'+submissionLog+'.farmlog')
+         #os.spawnl(farm+'./'+submissionScript+'>>'+submissionLog+'.farmlog')         
+         Timer.sleep(1)
+      ## give submission summary and some final words
+      print '\n'
+      os.system('qstat -u `whoami`')
+      print '-----------------------------------------------------------------------------'
+      print ' you can check the status of your jobs with: \'qstat -u user\' '
+      print ' you can kill specific jobs with           : \'qdel  jobid\' '      
+      print ' you can combined histograms later von with: \'hadd output.root input_?.root'
+      print ' in case of problems mailto: naf-cms-support(at)desy(dot)de'
+      print '-----------------------------------------------------------------------------'
+      print '\n'
+
+##-----------------------------------------------------------------------------------
+if __name__ == '__main__':
+    splitter = jobResubmission()
+    splitter.beginJob()
+    splitter.main()
+    splitter.endJob()

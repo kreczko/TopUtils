@@ -17,8 +17,8 @@ import TopAnalysis.Configuration.processes as input
 import TopAnalysis.TopUtils.tools.ConfigWrapper as cms
 
 ##-----------------------------------------------------------------------------------
-## executive script for cmsRun, Version 1.1
-## twiki: https://twiki.cern.ch/twiki/bin/view/CMS/ConfigRunner
+## executive script for cmsRun, Version 00-01-01
+## twiki: https://twiki.cern.ch/twiki/bin/view/CMS/TopUtils#ConfigRunner
 class CfgRunner:
     ##
     ## configurables
@@ -221,7 +221,7 @@ class CfgRunner:
         print "              -o | --out  ...     [x]   specify name of output file          "
         print "              -z | --sub  ...     [ ]   specify name of subset file          "        
         print "              -d | --dir  ...     [ ]   specify job directory                "
-        print "              -f | --farm ...     [ ]   specify name of cfg\'s for farm use\n"
+        print "              -f | --farm ...     [ ]   specify name of cfg\'s for farm use  "
         print "              -u | --user ...     [ ]   specify user defined sequences     \n"        
         print " [ ] optional                                                                "
         print " [x] mandatory                                                               "
@@ -280,21 +280,23 @@ class CfgRunner:
         ## name of output file specified?
         ################################################            
         if (self.__outputName == 'none'):
-            self.__warningMsg()
-            print '* * no output name specified. Output name for file'
-            print '* * service will not be altered when registered'
-            print "**************************************************"
+            if (self.__verbose):
+                self.__warningMsg()
+                print '* * no output name specified. Output name for file'
+                print '* * service will not be altered when registered'
+                print "**************************************************"
         ################################################
         ## output directory or jobname specified?
         ################################################            
         if (self.__jobName == ''):
             self.__jobName = 'job_'
             self.__jobName+= datetime.today().strftime("%Y%m%d-%H%M%S")
-            self.__warningMsg()
-            msg = '* * no output directory for job specified. Directory \n'
-            msg+= '* * name was set to ' + self.__jobName 
-            self.__printMsg(msg)
-            print "**************************************************"
+            if (self.__verbose):
+                self.__warningMsg()
+                msg = '* * no output directory for job specified. Directory \n'
+                msg+= '* * name was set to ' + self.__jobName 
+                self.__printMsg(msg)
+                print "**************************************************"
             
 ##-----------------------------------------------------------------------------------
 ##  * perform basic job monitoring
