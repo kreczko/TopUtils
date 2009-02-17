@@ -3,10 +3,9 @@
 	<!-- http://www.devmag.net/xml/xml_schema_elemente_attribute.htm -->
 	<!-- final steering file -->
 <HistPlotter>
-	<include file='MuonAnalyzerPlots.xml' />
-	<include file='IsolationAnalyzerPlots.xml' />
-	<include file='JetAnalyzerPlots.xml' />
-	<include file='MatrixAnalyzerPlots.xml' />
+	<include file='plotconfigs/MuonAnalyzerPlots.xml' />
+	<include file='plotconfigs/IsolationAnalyzerPlots.xml' />
+	<include file='plotconfigs/JetAnalyzerPlots.xml' />
 	<sources>
 		<!-- gets input from 1 histogram -->
 		<input name="ecalIsoPt">
@@ -24,24 +23,40 @@
 		<file id='qcd' name='{$QCD}' />
 		<file id='top' name='{$TOP}' />
 		<file id='wjets' name='{$WJETS}' />
-		<file id='qcd20' name='/playground/rootfiles/FINAL/MM_qcdmu_270109.root' />
-		<file id='top20' name='/playground/rootfiles/FINAL/MM_top_270109.root' />
-		<file id='wjets20' name='/playground/rootfiles/FINAL/MM_wjets_270109.root' />
+<!--		remove them:-->
+		<file id='qcd20' name='/playground/rootfiles/FINAL/qcdmu_20j20m.root' />
+		<file id='top20' name='/playground/rootfiles/FINAL/top_20j20m.root' />
+		<file id='wjets20' name='/playground/rootfiles/FINAL/wjets_20j20m.root' />
 
 	</sources>
 	<!--
 		makes the canvas, mixes the histogramms defined in the histSetup summaryFile
 		= ps oder pdf
 	-->
-	<plots create='eps,pdf' makeSummaryFile='true' summaryFile='inspect.pdf'>
+	<plots create='png' makeSummaryFile='true' summaryFile='inspect.pdf'>
 		<!-- IsolationAnalyzer Plots -->
 		<hist setup='MVAdisc_signal' />
 		<hist setup='MVAdisc_qcd' />
+		
+		<hist setup='norm_MVAdisc' />
+		<hist setup='norm_MVAdisc_OL' />
+		<hist setup='corr_MVAdiscVScalo_qcd' />
+		<hist setup='corr_MVAdiscVSjetIso_qcd' />
+		<hist setup='corr_MVAdiscVStrack_qcd' />
+				
 		<hist setup="norm_MET" />
+		<hist setup="corr_METVStrack_qcd" />
+		<hist setup="corr_METVScalo_qcd" />
+		<hist setup="corr_METVSjetiso_qcd" />
+		<hist setup="MET_reso" />
+<!--		-->
 		<hist setup='var_norm_dPhiMuJ12' />
 		<hist setup='corr_DphiMuJ1J2VScalo_qcd' />
 		<hist setup='corr_DphiMuJ1J2VStrack_qcd' />
 		<hist setup='corr_DphiMuJ1J2VSjetIso_qcd' />		
+		<hist setup='sumPhiMuJ1J2vsDphiJ1J2_qcd' />
+		<hist setup='sumPhiMuJ1J2vsDphiJ1J2_top' />
+		<hist setup='sumPhiMuJ1J2vsDphiJ1J2_wjets' />
 		
 		<hist setup='var_norm_dPhiMETMu' />
 		<hist setup='corr_dPhiMETMuVScalo_qcd' />
@@ -49,24 +64,29 @@
 		<hist setup='corr_dPhiMETMuVSjetIso_qcd' />
 		
 		<hist setup='var_norm_Circ' />
-		<hist setup='norm_MVAdisc' />
-		<hist setup='sumPhiMuJ1J2vsDphiJ1J2_qcd' />
-		<hist setup='corr_MVAdiscVScalo_qcd' />
-		<hist setup='corr_MVAdiscVSjetIso_qcd' />
-		<hist setup='corr_MVAdiscVStrack_qcd' />
-
-		<hist setup='sumPhiMuJ1J2vsDphiJ1J2_top' />
-		<hist setup='corr_MVAdiscVScalo_top' />
-		<hist setup='corr_MVAdiscVSjetIso_top' />
-		<hist setup='corr_MVAdiscVStrack_top' />
-
-		<hist setup='sumPhiMuJ1J2vsDphiJ1J2_wjets' />
-		<hist setup='corr_MVAdiscVScalo_wjets' />
-		<hist setup='corr_MVAdiscVSjetIso_wjets' />
-		<hist setup='corr_MVAdiscVStrack_wjets' />
+		<hist setup='corr_circVScalo_qcd' />
+		<hist setup='corr_circVStrack_qcd' />
+		<hist setup='corr_circVSjetiso_qcd' />
+		
+		<hist setup='corr_muonPtVScalo_qcd' />
+		<hist setup='corr_muonPtVStrack_qcd' />
+		<hist setup='corr_muonPtVSjetiso_qcd' />
+<!--		10 not used vars-->
+	<hist setup='norm_sumEtJet3Jet4' />
+	<hist setup='norm_MET_3sep' />
+	<hist setup='norm_METtimesJet1' />
+	<hist setup='norm_SumJet1Et2timesMuEt' />
+	<hist setup='norm_Sum4JetsMuEt'/>
+	<hist setup='norm_VecSumJetsMu' />
+	<hist setup='norm_dPhiMETJet2' />
+	<hist setup='norm_sphericity' />
+	<hist setup='norm_aplanarity' />
+	<hist setup='norm_isotropy' />
+		
 
 		<!-- MuonAnalyzer Plots -->
 		<hist setup='muon_pt' />
+		<hist setup='muon_pt2' />
 		<hist setup='muon_calIso' />
 		<hist setup='muon_PtTracksVSdR' />
 		<hist setup='muon_NTracksVSdR' />
@@ -77,7 +97,6 @@
 		<hist setup='muon_isoJet30' />
 		<hist setup='muon_isoJet35' />
 		<hist setup='muon_isoJet40' />
-		<hist setup='var_norm_dPhiMuJ12' />
 		<hist setup='muon_eta' />
 		<hist setup='muon_calomix' />
 		<hist setup='muon_trackIso' />

@@ -76,5 +76,39 @@
 			<var name='qcd' source='file:qcd' type='marker' style='22' color='23' />
 			<var name='signal' source='file:top'   type='marker'  style='23' color='blue' />
 		</histlist>
+		
+<!--		TODO: next round:-->
+<!--<hist name='mvadisc' setup='effplot' input='trackmafter/mbg_nVSdisc'>-->
+<!--			<titleX>mva disc.</titleX>-->
+<!--			<titleY>events</titleY>-->
+<!--			<var name='qcd' source='file:qcd'  type='line' style='22' color='23' />-->
+<!--			<var name='signal' source='file:top'  type='marker' style='23' color='blue' />-->
+<!--			<legend name='plotname' posx='20' posy='0' fonsize='12' />-->
+<!--		</hist>-->
+		
+<!--		for hist properties already implemented-->
+<!--		<hist setup='effplot' input='trackmafter/mbg_nVSdisc'>-->
+<!--		   <name>mvadisc</name>-->
+<!--			<titleX>mva disc.</titleX>-->
+<!--			<titleY>events</titleY>-->
+<!--			<var name = "qcd">-->
+<!--				<source>file:qcd</source>-->
+<!--				<input>trackmafter/mbg_nVSdisc</input>-->
+<!--				<type>line</type>-->
+<!--				<style>22</style>-->
+<!--				<color>2</color>-->
+<!--			</var>-->
+<!--			<var name='signal' source='file:top'  type='marker' style='23' color='rgb(0, 0, 255)' />-->
+<!--			<legend name='plotname' posx='20' posy='0' fonsize='12' />-->
+<!--		</hist>-->
+<!--		-->
+<!--		if "for" is missing it is taken for all plots, however individual definitions overwrite this-->
+<!--		<histlist input="i:allMuonPt">-->
+<!--		<titleX for="histname">Title for X-Axis</titleX>-->
+<!--		<titleX for="histname2">Title for X-Axis of another hist</titleX>-->
+<!--		<legend for= "histname"/>-->
+<!--		<legend />-->
+<!--		</histlist>-->
+		
 	</plots>
 </HistPlotter>

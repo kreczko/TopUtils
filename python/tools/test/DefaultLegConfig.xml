@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <LegSetup>
 	<leg name='DEFAULT'>
-	<posX v ='70' />
-	<posY v ='95' />
+<!--	NOTE: legend out of histspace causes segmentation fault-->
+	<posX v ='50' />
+	<posY v ='60' />
 <!--	<size v= '0.5' />-->
 	<fonsize v ='12' /> 
-	<sizeX v='20' />
+	<sizeX v='30' />
 	<sizeY v='20'/>
 	</leg>
 </LegSetup>

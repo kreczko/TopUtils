@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<HistPlotter>
+	<sources>
+		<!--
+			<file id="train" name="/playground/rootfiles/FINAL/train_monitoring.root" />
+		-->
+		<file id="train" name="/playground/rootfiles/FINAL/train_monitoring.root" />
+		<file id="train14V_QCDWJET" name="/playground/rootfiles/train_monitoring_qcdWjets.root" />
+		<file id="train14V_QCDTop" name="/playground/rootfiles/train_monitoring_qcdTop.root" />
+		<file id="train14V_TopWJET" name="/playground/rootfiles/train_monitoring_topWJet.root" />
+		<file id="train14V_All3" name="/playground/rootfiles/train_monitoring_all3.root" />
+	</sources>
+
+	<plots create='png' makeSummaryFile='true' summaryFile='inspect.pdf'>
+		<!-- Macro plots -->
+		<hist name='var_dphiMuJ12' input=''>
+			<var name='background' source='file:train' input="input_norm/input_dphiMuJ1J2_bkg"
+				type='filled' color='2' style='3005' norm='Integral' />
+			<var name='signal' source='file:train' input="input_norm/input_dphiMuJ1J2_sig"
+				color='4' norm='Integral' />
+			<titleX v='|\Delta\phi(\mu, jet 1) + \Delta\phi(\mu, jet 2)|' />
+			<titleY v='normalized to unit area' />
+		</hist>
+
+		<hist name='var_dphiMETmu' input=''>
+			<var name='background' source='file:train' input="input_norm/input_dphiMETLepton_bkg"
+				type='filled' color='2' style='3005' norm='Integral' />
+			<var name='signal' source='file:train' input="input_norm/input_dphiMETLepton_sig"
+				color='4' norm='Integral' />
+			<titleX v='|\Delta\phi(missing E_{T}, \mu) |' />
+			<titleY v='normalized to unit area' />
+		</hist>
+
+		<hist name='var_circ' input=''>
+			<var name='background' source='file:train' input="input_norm/input_circularity_bkg"
+				type='filled' color='2' style='3005' norm='Integral' />
+			<var name='signal' source='file:train' input="input_norm/input_circularity_sig"
+				color='4' norm='Integral' />
+			<titleX v='|\Delta\phi(\mu, jet 1) + \Delta\phi(\mu, jet 2)|' />
+			<titleY v='normalized to unit area' />
+		</hist>
+
+		<hist name='var_muPt' input=''>
+			<var name='background' source='file:train' input="input_norm/input_leptonPt_bkg"
+				type='filled' color='2' style='3005' norm='Integral' />
+			<var name='signal' source='file:train' input="input_norm/input_leptonPt_sig"
+				color='4' norm='Integral' />
+			<titleX v='p_{T}(\mu)' />
+			<titleY v='normalized to unit area' />
+			<maxX v= "200" />
+			<legend posX='35' sizeX="55" posY="30"/>
+		</hist>
+
+		<hist name='norm_MVAdisc'>
+			<var name='background' source='file:train' input="output/likelihood_discriminator_bkg"
+				type='filled' color='2' style='3005' norm='Integral'/>
+			<var name='signal' source='file:train' input="output/likelihood_discriminator_sig"
+				color='4' norm='Integral' />
+			<titleX v='MVA disc.' />
+			<titleY v='normalized to unit area' />
+			<legend posX="20"/>
+			 <smooth v="200"/> 
+		</hist>
+		
+		<hist name='norm_ProcMatrix'>
+			<var name='background' source='file:train' input="ProcMatrix_rot/CorrMatrix" />
+			<titleX v='' />
+			<titleY v='' />
+			 <drawOption v="COLZ" /> 
+		</hist>
+		
+		<hist name='norm_ProcMatrix_14V'>
+			<var name='background' source='file:train14V_All3' input="ProcMatrix_rot/CorrMatrix" />
+			<titleX v='' />
+			<titleY v='' />
+			 <drawOption v="COLZ" /> 
+		</hist>
+		
+		<hist name='norm_MVAdisc_All3'>
+			<var name='background' source='file:train14V_All3' input="output/likelihood_discriminator_bkg"
+				type='filled' color='2' style='3005' norm='Integral'/>
+			<var name='signal' source='file:train14V_All3' input="output/likelihood_discriminator_sig"
+				color='4' norm='Integral' />
+			<titleX v='MVA disc.' />
+			<titleY v='normalized to unit area' />
+			<legend posX="20"/>
+			 <smooth v="200"/> 
+		</hist>
+		
+		<hist name='norm_MVAdisc_QCDWJET'>
+			<var name='W+jets' source='file:train14V_QCDWJET' input="output/likelihood_discriminator_bkg"
+				type='filled' color='2' style='3005' norm='Integral'/>
+			<var name='qcdMuEnriched' source='file:train14V_QCDWJET' input="output/likelihood_discriminator_sig"
+				color='4' norm='Integral' />
+			<titleX v='MVA disc.' />
+			<titleY v='normalized to unit area' />
+			<legend posX="20"/>
+			 <smooth v="200"/> 
+		</hist>
+		
+		<hist name='norm_MVAdisc_QCDTop'>
+			<var name='qcdMuEnriched' source='file:train14V_QCDTop' input="output/likelihood_discriminator_bkg"
+				type='filled' color='2' style='3005' norm='Integral'/>
+			<var name='top-signal' source='file:train14V_QCDTop' input="output/likelihood_discriminator_sig"
+				color='4' norm='Integral' />
+			<titleX v='MVA disc.' />
+			<titleY v='normalized to unit area' />
+			<legend posX="20"/>
+			 <smooth v="200"/> 
+		</hist>
+		
+		<hist name='norm_MVAdisc_TopWjets'>
+			<var name='W+jets' source='file:train14V_TopWJET' input="output/likelihood_discriminator_bkg"
+				type='filled' color='2' style='3005' norm='Integral'/>
+			<var name='top-signal' source='file:train14V_TopWJET' input="output/likelihood_discriminator_sig"
+				color='4' norm='Integral' />
+			<titleX v='MVA disc.' />
+			<titleY v='normalized to unit area' />
+			<legend posX="20"/>
+			 <smooth v="200"/> 
+		</hist>
+		
+		
+	</plots>
+</HistPlotter>

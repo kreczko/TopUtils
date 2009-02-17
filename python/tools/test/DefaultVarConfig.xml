@@ -6,8 +6,10 @@
 		<size v='2' />
 		<color v='1' />
 		<source v ='' />
+		<input v ='' />
 		<operation v= 'none' />
 		<norm v='' />
 		<draw v='1' /> 
+		<drawOption v=""/>
 	</var>
 </VarSetup>

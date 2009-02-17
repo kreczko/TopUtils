@@ -1,18 +1,22 @@
-from ROOT import TLegend, TBox, TColor, gStyle, TPaletteAxis, TPaveText
+from ROOT import TLegend, TBox, TColor, gStyle, TPaletteAxis, TPaveText, TPaveStats, TF1, TAxis
 import PadService as ps
 import os
 from math import log
 from array import array
 
 class Helper:
+    """
+    Tool for the layout of histograms
+    """
     drawOption = ''
+    varOption = ""
     allowedFormats = ['eps', 'ps', 'pdf', 'png', 'jpg']
     def makePlainLegend(x, y, sizeX, sizeY):
         x = float(x) / 100
         y = float(y) / 100
         sizeX = float(sizeX) / 100
         sizeY = float(sizeY) / 100
-        leg = TLegend(x, y - sizeY, x + sizeX, y) 
+        leg = TLegend(x, y, x + sizeX, y+sizeY) 
         leg = Helper.setLegendStyle(leg)
         return leg
         
@@ -22,12 +26,15 @@ class Helper:
         leg.SetFillStyle(0)
         leg.SetFillColor(0)
         leg.SetBorderSize(0)
+        leg.SetLineWidth(8)
         return leg
     setLegendStyle = staticmethod(setLegendStyle)
     
     def setHistLabels(hist, titleX, titleY, rotate=False):
         hist.SetTitle("")
-        hist.SetStats(0);
+#        if not  ["TF1", "TGraph"] in hist.__str__() :
+        if not 1 in [c in hist.__str__() for c in ["TF1", "TGraph"] ]:
+            hist.SetStats(0);
         hist.SetFillColor(0)
         hist.GetXaxis().SetTitle(titleX)
         hist.GetXaxis().SetTitleSize(0.06)
@@ -42,36 +49,29 @@ class Helper:
         hist.GetYaxis().SetTitle(titleY)
         hist.GetYaxis().SetTitleSize(0.07)
         hist.GetYaxis().SetTitleColor(1)
-        hist.GetYaxis().SetTitleOffset(1.0)
+        hist.GetYaxis().SetTitleOffset(1.3)
         hist.GetYaxis().SetTitleFont(62)
         hist.GetYaxis().SetLabelSize(0.05)
         hist.GetYaxis().SetLabelFont(62)
         hist.GetYaxis().RotateTitle(rotate)
         
-        if Helper.drawOption:
+        if Helper.drawOption and "TH2F" in hist.__str__():
             hist.GetZaxis().SetTitleSize(0.07)
             hist.GetZaxis().SetTitleColor(1)
             hist.GetZaxis().SetTitleOffset(1.0)
             hist.GetZaxis().SetTitleFont(62)
             hist.GetZaxis().SetLabelSize(0.05)
             hist.GetZaxis().SetLabelFont(62)
-            hist.GetZaxis().SetTitle('# of events')
+            if "Matrix" in hist.GetName():
+                hist.GetZaxis().SetTitle('correlation factor')
+                hist.GetYaxis().SetTitleOffset(-0.5)
+            else:
+                hist.GetZaxis().SetTitle('# of events')
             hist.SetContour(99)
             if Helper.drawOption == 'LEGO':                
                 hist.GetXaxis().SetTitleSize(0.06)
                 hist.GetYaxis().SetTitleSize(0.06)
                 hist.GetYaxis().SetTitleOffset(1.2)
-#            if Helper.drawOption == 'COLZ':
-#                palette = TPaletteAxis(0.7950905,0.06660464,0.8516713,10.0728,hist)
-#                palette.SetLabelColor(1)
-#                palette.SetLabelFont(62)
-#                palette.SetLabelOffset(0.005)
-#                palette.SetLabelSize(0.04)
-#                palette.SetTitleOffset(1)
-#                palette.SetTitleSize(0.04)
-#                palette.SetFillColor(1)
-#                palette.SetFillStyle(1001) 
-#                hist.GetListOfFunctions().Add(palette,"br")
                 
         return hist
     setHistLabels = staticmethod(setHistLabels)
@@ -89,6 +89,11 @@ class Helper:
             red   = [1.00, 0.84, 0.61, 0.34, 0.00]
             green = [1.00, 0.84, 0.61, 0.34, 0.00]
             blue  = [1.00, 0.84, 0.61, 0.34, 0.00]
+        elif name =="simple":
+            stops = [0.00, 0.25, 0.50, 0.75, 1.00 ]
+            red   = [0.00, 0.00, 1.00, 1.00, 1.00 ]
+            green = [0.00, 1.00, 1.00, 1.00, 0.00 ]
+            blue  = [1.00, 1.00, 1.00, 0.00, 0.00 ]
     # elif name == "whatever":
         # (define more palettes)
         else:
@@ -140,11 +145,30 @@ class Helper:
         cor = hist.GetCorrelationFactor(1,2)
         corr = 'CF: %1.4f' % cor
 #        pt = TPaveText(midX,0.92*maxY,maxX - abs(maxX*0.2),0.98*maxY, "correlation factor") 
-        pt = TPaveText(0.5,0.85,0.72,0.9, "NDC") 
-        pt.SetFillColor(0)
-        pt.SetTextSize(0.04) 
-        pt.SetTextAlign(12)
-        pt.AddText(corr.__str__())
+        pt = None
+        if not "norm_ProcMatrix" in filename:
+            pt = TPaveText(0.5,0.85,0.72,0.9, "NDC") 
+            pt.SetFillColor(0)
+            pt.SetTextSize(0.04) 
+            pt.SetTextAlign(12)
+            pt.AddText(corr.__str__())
+        else:
+            
+            hist.GetZaxis().SetTitle('correlation factor')
+            hist.GetXaxis().SetBinLabel(1, "|#DeltaPhi(MET, #mu)|")
+            hist.GetXaxis().SetBinLabel(2, "|#Sigma#DeltaPhi(#mu, jet1,2)|")
+            hist.GetXaxis().SetBinLabel(3, "p_{T}(#mu)")
+            hist.GetXaxis().SetBinLabel(4, "circularity")
+            
+            hist.GetYaxis().SetBinLabel(1, "|#DeltaPhi(MET, #mu)|")
+            hist.GetYaxis().SetBinLabel(2, "|#Sigma#DeltaPhi(#mu, jet1,2)|")
+            hist.GetYaxis().SetBinLabel(3, "p_{T}(#mu)")
+            hist.GetYaxis().SetBinLabel(4, "circularity")
+#            hist.GetYaxis().SetBit(TAxis.kLabelsDown)
+            hist.GetYaxis().SetLabelSize(0.04)
+            hist.GetYaxis().CenterTitle(True)
+           
+            
             
                     
         if not os.path.exists(folder):
@@ -154,10 +178,13 @@ class Helper:
         pad = Helper.setPadLayout(pad)
         if Helper.drawOption == 'COLZ':
             pad.SetRightMargin(0.13)
+        if "norm_ProcMatrix" in filename:
+            pad.SetLeftMargin(0.2)
 #        for i in pad.GetListOfPrimitives():
 #            i.SetFillColor(0)
         hist.Draw(Helper.drawOption)
-        pt.Draw()
+        if not "norm_ProcMatrix" in filename:
+            pt.Draw()
 
         for i in printAs:
             if i in Helper.allowedFormats:
@@ -166,14 +193,27 @@ class Helper:
     
     def setPadLayout(pad):
         pad.SetFillStyle(4000)
-        pad.SetLeftMargin(0.15)
+        pad.SetLeftMargin(0.17)
         pad.SetRightMargin(0.05)
         pad.SetBottomMargin(0.15)
         pad.SetTopMargin(0.05)
         return pad
     setPadLayout = staticmethod(setPadLayout)
         
-    def saveHistsInOne(histlist, filename, folder, legend=None, logH=['0', '0'], err=False, printAs=['eps', 'png']):
+#================================================================================
+# TODO: change to accepting histconfig as a parameter and doing applyConfig by its own
+#================================================================================
+        
+    def saveHistsInOne(histlist, histCfg, savedir, printAs=['eps', 'png']):
+        filename = histCfg.opt['name']        
+        folder = savedir + histCfg.opt['savefolder']
+        logH = [histCfg.opt['logX'], histCfg.opt['logY']]
+        err = histCfg.opt['showErrors'].upper() == 'TRUE'
+        legend = histCfg.legend
+        if legend:
+                legend = Helper.makePlainLegend(legend.opt['posX'], legend.opt['posY'], legend.opt['sizeX'], legend.opt['sizeX'])
+                
+        filename = filename.replace('.','')    
         folder = folder.rstrip('/')
         f = ''
         for i in folder.split('/'):
@@ -192,28 +232,88 @@ class Helper:
         max = mm[1]
         x = 0
         #do something else, if hist TH2F
-        
-        for hist in histlist:
+        for histkey in histlist.keys():
+            hist = histlist[histkey]
+#        for hist in histlist.itervalues():
             if "TH2F" in hist.__str__():
                 Helper.saveTH2(hist, filename, folder, legend, printAs)
 #                print "TH2F"
                 break
-                
+            
+#===============================================================================
+#            fit is not implemented yet, therefore a dirty hack is used
+#            the code below is from the root macro created for the fit
+#===============================================================================
+            if filename == 'MET_reso':
+                ptstats = TPaveStats(0.67,0.45,0.97,1,"brNDC")
+                ptstats.SetName("stats")
+                ptstats.SetBorderSize(2)
+                ptstats.SetFillColor(0)
+                ptstats.SetTextAlign(12)
+                text = ptstats.AddText("#chi^{2} / ndf = 4.669e+07 / 197")
+                text = ptstats.AddText("Constant = 4.846e+05 #pm 11 ")
+                text = ptstats.AddText("Mean     = -3.121 #pm 0.001 ")
+                text = ptstats.AddText("Sigma    = 20.84 #pm 0.00 ")
+                ptstats.SetOptStat(0)
+                ptstats.SetOptFit(1)
+                ptstats.Draw()
+                hist.GetListOfFunctions().Add(ptstats)
+                ptstats.SetParent(hist.GetListOfFunctions())
+   
+                lastFitFunc =TF1("lastFitFunc","gaus",-100,100)
+                lastFitFunc.SetFillColor(19)
+                lastFitFunc.SetFillStyle(0)
+                lastFitFunc.SetLineWidth(3)
+                lastFitFunc.SetChisquare(4.668531e+07)
+                lastFitFunc.SetNDF(197)
+                lastFitFunc.SetParameter(0,484642)
+                lastFitFunc.SetParError(0,10.74295)
+                lastFitFunc.SetParLimits(0,0,0)
+                lastFitFunc.SetParameter(1,-3.120982)
+                lastFitFunc.SetParError(1,0.000531762)
+                lastFitFunc.SetParLimits(1,0,0)
+                lastFitFunc.SetParameter(2,20.83625)
+                lastFitFunc.SetParError(2,0.0005538997)
+                lastFitFunc.SetParLimits(2,0,234.9833)
+                hist.Fit(lastFitFunc, "WW")
+                hist.GetListOfFunctions().Add(lastFitFunc)
+#                
             if not logH[1] == '1':
                 hist.SetMaximum(max)
                 hist.SetMinimum(min)
             if legend:
                 legend.AddEntry(hist, hist.GetName())
+            
             if x == 0:
-                if err:
+                if not histCfg.opt["drawOption"] == "":
+                    hist.Draw(histCfg.opt["drawOption"])
+                elif histCfg.opt["drawOption"] == "" and not histCfg.getVarByName(histkey).opt["drawOption"] == "":
+                    hist.SetFillColor(hist.GetLineColor())
+                    hist.Draw(histCfg.getVarByName(histkey).opt["drawOption"])
+                elif err and Helper.drawOption == "":
                     hist.Draw('e')
                 else:
-                    hist.Draw()
+#                    hist.SetError(array('d', noerr))
+                    if filename in ['quality_QCDLoose_Jcuts', 'quality_QCDLoose_Mcuts', 'quality_QCDTight_Jcuts', 'quality_QCDTight_Mcuts', 
+                                    'bbs_QCDLoose_Jcuts', 'bbs_QCDTight_Jcuts', 'bbs_QCDLoose_Mcuts', 'bbs_QCDTight_Mcuts']:
+                        hist.Draw('HISTP')
+                    else:
+                        hist.Draw()
             else:
-                if err:
+                if not histCfg.opt["drawOption"] == "":
+                        hist.Draw("same"+histCfg.opt["drawOption"] )
+                elif histCfg.opt["drawOption"] == "" and not histCfg.getVarByName(histkey).opt["drawOption"] == "":
+                    hist.SetFillColor(hist.GetLineColor())
+                    hist.Draw("same"+histCfg.getVarByName(histkey).opt["drawOption"])
+                elif err and histCfg.opt["drawOption"] == "":
                     hist.Draw('samee')
                 else:
-                    hist.Draw("same")
+#                    hist.SetError(array('d',noerr))
+                    if filename in ['quality_QCDLoose_Jcuts', 'quality_QCDLoose_Mcuts', 'quality_QCDTight_Jcuts', 'quality_QCDTight_Mcuts', 
+                                    'bbs_QCDLoose_Jcuts', 'bbs_QCDTight_Jcuts', 'bbs_QCDLoose_Mcuts', 'bbs_QCDTight_Mcuts']:
+                        hist.Draw('HISTPsame')
+                    else:
+                        hist.Draw("same")
             x += 1
         if legend:
             legend.Draw("same")
@@ -230,7 +330,7 @@ class Helper:
         hist.SetMarkerStyle(int(style))
         hist.SetLineWidth(int(size))
         hist.SetLineColor(int(color))
-        hist.SetOption("scat");
+        hist.SetOption("P");
         return hist
     setMarker = staticmethod(setMarker)
     
@@ -247,47 +347,47 @@ class Helper:
         
         hist.SetFillColor(int(color))
         hist.SetFillStyle(int(style))
-        hist.SetOption("col")       
         return hist
     setFilled = staticmethod(setFilled)   
     
     def applyHistConfig(hist, histconfig, var):
+        noerr = []
+
+        if not histconfig.opt['smooth'] =="0":
+            hist.Smooth(int(histconfig.opt['smooth']))
         if histconfig.opt['drawOption']:
             Helper.drawOption = histconfig.opt['drawOption']
         else: #reset drawOption
             Helper.drawOption = ''
-        if "TH2F" in hist.__str__():
-            if histconfig.opt['maxX'] and histconfig.opt['minX']:
-#                min = hist.GetXaxis().GetXmin()
-                min = float(histconfig.opt['minX'])
-                max = float(histconfig.opt['maxX'])
-                hist.SetAxisRange(min, max, 'X')
-                
-#            if histconfig.opt['minX']:
-#                min = float(histconfig.opt['minX'])
-#                max = hist.GetXaxis().GetXmax()
-#                hist.SetAxisRange(min, max, 'X')
-                
-            if histconfig.opt['maxY'] and histconfig.opt['minY']:
-#                min = hist.GetYaxis().GetXmin()
-                min = float(histconfig.opt['minY'])
-                max = float(histconfig.opt['maxY'])
-                hist.SetAxisRange(min, max, 'Y')
-                
-#            if histconfig.opt['minY']:
-#                min = float(histconfig.opt['minX'])
-#                max = hist.GetYaxis().GetXmax()
-#                hist.SetAxisRange(min, max, 'Y')
-#            if histconfig.opt['minX']:
-#                hist.GetXaxis().SetMinimum(float(histconfig.opt['minX']))
-#            if histconfig.opt['maxY']:
-#                 hist.GetYaxis().SetMaximum(float(histconfig.opt['maxY']))
-#            if histconfig.opt['minY']:
-#                hist.GetYaxis().SetMinimum(float(histconfig.opt['minY']))
-             
-#            hist.SetDrawOption(histconfig.opt['drawOption'])
-        #set titles
-        hist = Helper.setHistLabels(hist, histconfig.opt['titleX'], histconfig.opt['titleY'], histconfig.opt['rotate'].upper() == 'T')
+        min = None
+        max = None
+#------------------------------------------------------------------------------ X axis
+        if histconfig.opt['maxX']:
+            max = float(histconfig.opt['maxX'])
+        if histconfig.opt['minX']:
+            min = float(histconfig.opt['minX'])
+        if min == None:
+            min = hist.GetXaxis().GetXmin()
+        if max == None:
+            max = hist.GetXaxis().GetXmax()
+        
+        #this "if" prevents the destruction of the root intern automatic scaling
+        if histconfig.opt['maxX'] or histconfig.opt['minX']:
+#------------------------------------------------------------------------------ change to GetXaxis().SetRangeUser(min, max)?
+            hist.SetAxisRange(min, max, 'X')
+#------------------------------------------------------------------------------ Y axis
+        if histconfig.opt['maxY']:# and histconfig.opt['minX']:
+            max = float(histconfig.opt['maxY'])
+        if histconfig.opt['minY']:# and histconfig.opt['minX']:
+            min = float(histconfig.opt['minY'])
+        if min == None:
+            min = hist.GetYaxis().GetXmin()
+        if max == None:
+            max = hist.GetYaxis().GetXmax()
+        if histconfig.opt['maxY'] or histconfig.opt['minY']:
+            hist.SetAxisRange(min, max, 'Y')
+#------------------------------------------------------------ set titles
+        hist = Helper.setHistLabels(hist, histconfig.opt['titleX'], histconfig.opt['titleY'], histconfig.opt['rotate'].upper() == 'TRUE')
         if var.opt['type'] == 'filled':
             hist = Helper.setFilled(hist, var.opt['color'], var.opt['size'], var.opt['style'])
         elif var.opt['type'] == 'marker':
@@ -296,12 +396,12 @@ class Helper:
             hist = Helper.setLine(hist, var.opt['color'], var.opt['size'], var.opt['style'])
         
         hist.SetName(var.opt['name'])
+#===============================================================================
+# norm it --TODO change it to scale, so floats AND Integral can be used
+#===============================================================================
         if var.opt['norm'] == 'Integral':
-            hist.Scale(1 / hist.Integral())
-        if histconfig.opt['max']:
-            hist.SetMaximum(float(histconfig.opt['max']))
-        if histconfig.opt['min']:
-            hist.SetMinimum(float(histconfig.opt['min']))
+            if not hist.Integral()==0:
+                hist.Scale(1 / hist.Integral())
             
         return hist
     applyHistConfig = staticmethod(applyHistConfig)
@@ -310,7 +410,7 @@ class Helper:
         yScale = 1.0
         max = 0
         x = 0
-        for i in histlist:
+        for i in histlist.itervalues():
             mx = i.GetMaximum()
             if x == 0:
                 max = mx
@@ -326,7 +426,7 @@ class Helper:
         yScale = 1.00
         min = 0
         x = 0
-        for i in histlist:
+        for i in histlist.itervalues():
             mn = i.GetMinimum()
             if x == 0:
                 min = mn

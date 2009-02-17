@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+	<!-- Works with LKThesis.xml -->
+<HistSetup>
+	<!-- From MuonAnalyzer -->
+	<hist name='muon_pt' input='analyzeSelMuons/kin_pt'>
+		<!-- name is also used for legend -->
+		<var name='qcd' source='file:qcd' color='2' norm='Integral' />
+		<var name='top' source='file:top' color='4' norm='Integral' />
+		<var name='wjets' source='file:wjets' color='8' norm='Integral' />
+		<titleX v='p_{T}(#mu) [GeV]' />
+		<titleY v='normalized to unit area' />
+		<savefolder v='kin' />
+		<!--		<legend />-->
+	</hist>
+	
+	<hist name='muon_pt2' input='analyzeSelMuons/kin_pt'>
+		<!-- name is also used for legend -->
+		<var name='qcdMuEnriched' source='file:qcd' color='2' norm='Integral' />
+		<var name='top-signal' source='file:top' color='4' norm='Integral' />
+		<var name='W + jets' source='file:wjets' color='8' norm='Integral' />
+		<titleX v='p_{T}(#mu) [GeV]' />
+		<titleY v='normalized to unit area' />
+		<savefolder v='kin' />
+		<legend posX="37" sizeX="60" posY="35" sizeY="50"/>
+	</hist>
+	
+	<hist name='muon_calIso' input='analyzeSelMuons/iso_isoCalPt'>
+		<!-- name is also used for legend -->
+		<var name='qcdMuEnriched' source='file:qcd' color='2' norm='Integral' />
+		<var name='top-signal' source='file:top' color='4' norm='Integral' />
+		<var name='W + jets' source='file:wjets' color='8' norm='Integral' />
+		<titleX v='#Sigma_{#Delta R &lt; 0.3} E_{T}(calotower) [GeV]' />
+		<titleY v='normalized to unit area' />
+		<savefolder v='iso' />
+		<legend posX="25" sizeX="65" posY="20" />
+	</hist>
+
+	<hist name='muon_calomix' input=''>
+		<var name='qcdE' source='file:qcd, input:ecalIsoPt' color='2' draw='0' />
+		<var name='topE' source='file:top, input:ecalIsoPt' color='4' draw='0' />
+		<var name='wjetsE' source='file:wjets, input:ecalIsoPt' color='8' draw='0' />
+		<var name='qcdH' source='file:qcd, input:hcalIsoPt' color='2' draw='0' />
+		<var name='topH' source='file:top, input:hcalIsoPt' color='4' draw='0' />
+		<var name='wjetsH' source='file:wjets, input:hcalIsoPt' color='8' draw='0' />
+
+		<var name='qcd' source='var:qcdE, var:qcdH' color='2' norm='Integral'
+			operation='add' />
+		<var name='top' source='var:topE, var:topH' color='4' norm='Integral'
+			operation='add' />
+		<var name='wjets' source='var:wjetsH, var:wjetsE' color='8' norm='Integral'
+			operation='add' />
+		<titleX v=' #Delta R(#mu, caloTower)' />
+		<titleY v='normalized to unit area' />
+		<maxX v='1' />
+		<minX v='0' />
+		<savefolder v='iso' />
+<!--		<legend posX='25' />-->
+	</hist>
+
+	<hist name='muon_trackIso' input='analyzeSelMuons/iso_isoTrkPt'>
+		<!-- name is also used for legend -->
+		<var name='qcdMuEnriched' source='file:qcd' color='2' norm='Integral' />
+		<var name='top-signal' source='file:top' color='4' norm='Integral' />
+		<var name='W + jets' source='file:wjets' color='8' norm='Integral' />
+		<titleX v="#Sigma_{#Delta R &lt; 0.3} p_{T}(tracks)[GeV]" />
+		<titleY v='normalized to unit area' />
+		<savefolder v='iso' />
+		<legend posX='25' sizeX="65" posY="20"/>
+	</hist>
+
+	<hist name='muon_PtTracksVSdR' input='analyzeSelMuons/iso_dRTrkPt'>
+		<!-- name is also used for legend -->
+		<var name='qcdMuEnriched' source='file:qcd' color='2' />
+		<var name='top-signal' source='file:top' color='4' />
+		<var name='W + jets' source='file:wjets' color='8' />
+		<titleX v='#Delta R(#mu, track)' />
+		<titleY v='#Sigma p_{T} of tracks within #Delta R' />
+		<savefolder v='iso' />
+		<legend posX='20' />
+	</hist>
+	<hist name='muon_NTracksVSdR' input='analyzeSelMuons/iso_dRTrkN'>
+		<var name='qcd' source='file:qcd' color='2' />
+		<var name='top' source='file:top' color='4' />
+		<var name='wjets' source='file:wjets' color='8' />
+		<titleX v='#Delta R(#mu, track)' />
+		<titleY v='# of tracks within #Delta R' />
+		<savefolder v='iso' />
+		<maxX v="1" />
+		<minX v="0" />
+<!--		<legend posX='20' />-->
+	</hist>
+
+	<hist name='muon_isoJet05' input='analyzeSelMuons/iso_isoJet5'>
+		<var name='qcdMuEnriched' source='file:qcd' color='2' norm='Integral' />
+		<var name='top-signal' source='file:top' color='4' norm='Integral' />
+		<var name='W + jets' source='file:wjets' color='8' norm='Integral' />
+		<titleX v='min. #Delta R(#mu, jet(E_{T}>5 GeV))' />
+		<titleY v='normalized to unit area' />
+		<savefolder v='iso' />
+		<legend posX ="25" sizeX="60" posY="30"/>
+	</hist>
+
+	<hist name='muon_isoJet10' input='analyzeSelMuons/iso_isoJet10'>
+		<var name='qcd' source='file:qcd' color='2' norm='Integral' />
+		<var name='top' source='file:top' color='4' norm='Integral' />
+		<var name='wjets' source='file:wjets' color='8' norm='Integral' />
+		<titleX v='min. #Delta R(#mu,jet(E_{T}>10 GeV))' />
+		<titleY v='normalized to unit area' />
+		<savefolder v='iso' />
+<!--		<legend />-->
+	</hist>
+
+	<hist name='muon_isoJet15' input='analyzeSelMuons/iso_isoJet15'>
+		<var name='qcd' source='file:qcd' color='2' norm='Integral' />
+		<var name='top' source='file:top' color='4' norm='Integral' />
+		<var name='wjets' source='file:wjets' color='8' norm='Integral' />
+		<titleX v='min. #Delta R(#mu,jet(E_{T}>15 GeV))' />
+		<titleY v='normalized to unit area' />
+<!--		<savefolder v='iso' />-->
+<!--		<legend />-->
+	</hist>
+
+	<hist name='muon_isoJet20' input='analyzeSelMuons/iso_isoJet20'>
+		<var name='qcdMuEnriched' source='file:qcd' color='2' norm='Integral' />
+		<var name='top-signal' source='file:top' color='4' norm='Integral' />
+		<var name='W + jets' source='file:wjets' color='8' norm='Integral' />
+		<titleX v='min. #Delta R(#mu,jets(E_{T}>20 GeV))' />
+		<titleY v='normalized to unit area' />
+		<savefolder v='iso' />
+		<legend posX ="25" sizeX="60" posY="20"/>
+	</hist>
+
+	<hist name='muon_isoJet30' input='analyzeSelMuons/iso_isoJet30'>
+		<var name='qcd' source='file:qcd' color='2' norm='Integral' />
+		<var name='top' source='file:top' color='4' norm='Integral' />
+		<var name='wjets' source='file:wjets' color='8' norm='Integral' />
+		<titleX v='min. #Delta R(#mu,jet(E_{T}>30 GeV))' />
+		<titleY v='normalized to unit area' />
+		<savefolder v='iso' />
+<!--		<legend />-->
+	</hist>
+
+	<hist name='muon_isoJet35' input='analyzeSelMuons/iso_isoJet35'>
+		<var name='qcd' source='file:qcd' color='2' norm='Integral' />
+		<var name='top' source='file:top' color='4' norm='Integral' />
+		<var name='wjets' source='file:wjets' color='8' norm='Integral' />
+		<titleX v='min. #Delta R(#mu,jet(E_{T}>35 GeV))' />
+		<titleY v='normalized to unit area' />
+		<savefolder v='iso' />
+<!--		<legend />-->
+	</hist>
+
+	<hist name='muon_isoJet40' input='analyzeSelMuons/iso_isoJet40'>
+		<var name='qcd' source='file:qcd' color='2' norm='Integral' />
+		<var name='top' source='file:top' color='4' norm='Integral' />
+		<var name='wjets' source='file:wjets' color='8' norm='Integral' />
+		<titleX v='min. #Delta R(#mu,jet(E_{T}>40 GeV))' />
+		<titleY v='normalized to unit area' />
+		<savefolder v='iso' />
+<!--		<legend />-->
+	</hist>
+
+	<hist name='muon_eta' input='analyzeSelMuons/kin_eta'>
+		<!-- name is also used for legend -->
+		<var name='qcd' source='file:qcd' color='2' norm='Integral' />
+		<var name='top' source='file:top' color='4' norm='Integral' />
+		<var name='wjets' source='file:wjets' color='8' norm='Integral' />
+		<titleX v='#eta(#mu)' />
+		<titleY v='normalized to unit area' />
+		<savefolder v='kin' />
+		<!--		<legend />-->
+	</hist>
+
+</HistSetup>

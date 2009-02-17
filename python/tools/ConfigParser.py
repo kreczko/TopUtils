@@ -599,7 +599,9 @@ class Histogram:
             #get var input and combine it with inputfolders and filters
         for i in self.varlist:
             source = i.opt['source']
-            if Variable.ksourceFile in source and not Variable.ksourceInput in source:
+            inp = i.opt["input"]
+            #only file description in source
+            if Variable.ksourceFile in source and not Variable.ksourceInput in source and not inp:
                 source = source.split(Variable.typeDelimiter)
                 #exact 1 source, 1 folder, 1 histogram of type exact!
                 err = not len(source) == 2
@@ -627,9 +629,23 @@ class Histogram:
                     xv = iv.split(Variable.typeDelimiter)[1]
                     vxx = self.getVarByName(xv)
                     i.rootsource += vxx.rootsource + Variable.entryDelimiter
-                    i.hist = vxx.hist
+                    i.hist += vxx.hist + Variable.entryDelimiter
                 i.rootsource = i.rootsource.rstrip(Variable.entryDelimiter)
+                
+            elif inp and not self.opt["input"]:
+                source = source.split(Variable.typeDelimiter)
+                file = files[source[1]]
+                i.rootsource = file
+                if Histogram.inputswitch in inp:
+                    print 'not implemented yet'
+                else:
+                    i.hist = inp
+                i.rootsource = i.rootsource.rstrip(Variable.entryDelimiter)
+            #if the input comes from the input section
             elif Variable.ksourceInput in source:
+#===============================================================================
+#                print "deprecated, use input=.. instead"
+#===============================================================================
                 sources = source.split(Variable.entryDelimiter)
                 source = sources[0].split(Variable.typeDelimiter)
                 sinput = sources[1].split(Variable.typeDelimiter)
@@ -701,6 +717,9 @@ class Histogram:
 A class for checking and access to the histogramm input
 """        
 class Variable:
+#===============================================================================
+#    TODO: implement operations
+#===============================================================================
     #the default variable where all possible options with their defaults are defined
     defaultXML = 'test/DefaultVarConfig.xml'
     ksourceFile = 'file'

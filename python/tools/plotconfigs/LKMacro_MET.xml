@@ -73,92 +73,83 @@
 		makes the canvas, mixes the histogramms defined in the histSetup summaryFile
 		= ps oder pdf
 	-->
-	<plots create='eps,pdf' makeSummaryFile='true' summaryFile='inspect.pdf'>
+	<plots create='png' makeSummaryFile='true' summaryFile='inspect.pdf'>
 	<!-- Macro plots -->
 	<hist name='quality_QCDLoose' input='quality_loose' >
-		<var name='qcd' source='file:macro, input:appQCD' type='line' color='2' />
-		<titleX v='MET cut' />
+		<var name='qcdMuEnriched' source='file:macro, input:appQCD'  color='2' />
+		<titleX v='MET cut [GeV]' />
 		<titleY v='N_{est}/N_{true}' />
-		<legend name='plotname' fonsize='12'   posX='50'/>
-		<max v='1.01' />
-		<min v='1.006' />	
+		<legend posX='20'  posY="0" sizeX="55"/>
+		<maxY v='1.012' />
+		<minY v='1.008' />	
 	</hist>
 	<hist name='quality_SIGLoose' input='quality_loose' >
-		<var name='signal' source='file:macro, input:appSIG' type='line' color='4' />
-		<titleX v='MET cut' />
+		<var name='signal' source='file:macro, input:appSIG'  color='4' />
+		<titleX v='MET cut [GeV]' />
 		<titleY v='N_{est}/N_{true}' />
-		<legend name='plotname' fonsize='12'  />
-		<max v='0.2' />
-		<min v='-0.2' />		
+		<legend  posY="70"/>
+		<maxY v='0.2' />
+		<minY v='-0.1' />		
 	</hist>
 	<hist name='quality_QCDTight' input='quality_tight' >
-		<var name='qcd' source='file:macro, input:appQCD' type='line' color='2' />
-		<titleX v='MET cut' />
+		<var name='qcd' source='file:macro, input:appQCD'  color='2' />
+		<titleX v='MET cut [GeV]' />
 		<titleY v='N_{est}/N_{true}' />
-		<legend name='plotname' fonsize='12'  posX='50' />
-		<max v='1.35' />
-		<min v='1.25' />		
+<!--		<legend  posX='50' />-->
+		<maxY v='1.43' />
+		<minY v='1.32' />		
 	</hist>
 	<hist name='quality_SIGTight' input='quality_tight' >
 		<!-- name is also used for legend -->
-		<var name='signal' source='file:macro, input:appSIG' type='line' color='4' />
-		<titleX v='MET cut' />
+		<var name='signal' source='file:macro, input:appSIG'  color='4' />
+		<titleX v='MET cut [GeV]' />
 		<titleY v='N_{est}/N_{true}' />
-		<legend name='plotname' fonsize='12'  />
-		<max v='0.2' />
-		<min v='-0.18' />		
+<!--		<legend  />-->
+		<maxY v='0.2' />
+		<minY v='-0.1' />		
 	</hist>
 	<hist name='masterPlotAll' input='efficiency' >
-		<var name='qcd' source='file:macro, input:qcdAll' type='line' color='2' />
-		<var name='top' source='file:macro, input:topAll' type='line' color='4' />
-		<var name='wjets' source='file:macro, input:wjetsAll' type='line' color='8' />
-<!--		<var name='signal' source='var:top,var:wjets' type='line' color='4' operation='add'/> -->
-		<var name='combined' source='file:macro, input:mixedAll' type='line' color='3' />
-		<titleX v='MET' />
+		<var name='qcdMuEnriched' source='file:macro, input:qcdAll'  color='2' />
+		<var name='top-signal' source='file:macro, input:topAll'  color='4' />
+		<var name='W + jets' source='file:macro, input:wjetsAll'  color='8' />
+		<var name='combined' source='file:macro, input:mixedAll'  color='1' />
+		<titleX v='MET [GeV]' />
 		<titleY v='iso. efficiency' />
-		<legend name='plotname' fonsize='12' posY="60"/>
+		<legend posY="25" posX="20" sizeX="50"/>
 	</hist>
 	
 	<hist name='masterPlotTrk' input='efficiency' >
-		<var name='qcd' source='file:macro, input:qcdTrk' type='line' color='2' />
-		<var name='top' source='file:macro, input:topTrk' type='line' color='4' />
-		<var name='wjets' source='file:macro, input:wjetsTrk' type='line' color='8' />
-		<var name='combined' source='file:macro, input:mixedTrk' type='line' color='3' />
-		<titleX v='MET' />
+		<var name='qcd' source='file:macro, input:qcdTrk'  color='2' />
+		<var name='top' source='file:macro, input:topTrk'  color='4' />
+		<var name='wjets' source='file:macro, input:wjetsTrk'  color='8' />
+		<var name='combined' source='file:macro, input:mixedTrk'  color='3' />
+		<titleX v='MET [GeV]' />
 		<titleY v='iso. efficiency' />
-		<legend name='plotname' fonsize='12' posY="60"/>
+		<legend posY="60"/>
 	</hist>
 	
 	<hist name='eff_MC_qcd' input='efficiency' >
-		<var name='qcd' source='file:macro, input:qcdAll' type='line' color='2' />
-		<titleX v='MET cut' />
+		<var name='qcd' source='file:macro, input:qcdAll'  color='2' />
+		<titleX v='MET cut [GeV]' />
 		<titleY v='iso. efficiency' />
-		<legend name='plotname' fonsize='12' posX='50' />
+		<legend posX='50' />
 	</hist>
 	<hist name='eff_qcd' input='effvsDiscCut_BG' >
-		<var name='qcd' source='file:macro, input:appQCD' type='line' color='2' />
-		<titleX v='MET cut' />
+		<var name='qcd' source='file:macro, input:appQCD'  color='2' />
+		<titleX v='MET cut [GeV]' />
 		<titleY v='iso. efficiency' />
-		<max v='0.025' />
-		<min v='0.020' />		
-		<legend name='plotname' fonsize='12'  posX='50' />
+		<max v='0.026' />
+		<min v='0.024' />		
+		<legend  posX='50' />
 	</hist>
-<!--	<hist name='quality_cuts_loose' input='applied/Jcuts/quality_cut_0.15_loose' >-->
-<!--		<var name='qcd loose' source='file:macro' type='line' color='2' />-->
-<!--		<titleX v='jet cut' />-->
-<!--		<titleY v='N_{est}/N_{true}' />-->
-<!--		<max v='1.003' />-->
-<!--		<min v='0.997' />-->
-<!--		<legend name='plotname' fonsize='12'  posX='50' />-->
-<!--	</hist>-->
 	
 	<histlist name='quality_cuts_loose' input='test' >
-		<var name='qcd loose' source='file:macro' type='line' color='2' />
-		<titleX v='jet E_T cut [GeV]' />
+		<var name='qcd loose' source='file:macro'  color='2' />
+		<titleX v='jet E_{T} cut [GeV]' />
 		<titleY v='N_{est}/N_{true}' />
 <!--		<max v='1.008' />-->
 <!--		<min v='0.997' />-->
-		<legend name='plotname' fonsize='12'  posX='50' />
+		<legend  posX='50' />
 	</histlist>
 	<!-- Cut plots -->
 	<hist name='quality_QCDLoose_cuts' input='quality_loose' >
@@ -167,9 +158,9 @@
 		<var name='jetCut 30' source='file:macro, input:appQCD30' type='marker' color='6' style='22' />
 		<var name='jetCut 35' source='file:macro, input:appQCD35' type='marker' color='8' style='23'/>
 		<var name='jetCut 40' source='file:macro, input:appQCD40' type='marker' style='27' />
-		<titleX v='MET cut' />
+		<titleX v='MET cut [GeV]' />
 		<titleY v='N_{est}/N_{true}' />
-		<legend name='plotname' fonsize='12' />
+		<legend posY='70'/>
 	</hist>
 	</plots>
 </HistPlotter>

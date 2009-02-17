@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+	<!-- rule declaration possible -->
+	<!-- http://www.devmag.net/xml/xml_schema_elemente_attribute.htm -->
+	<!-- final steering file -->
+<HistPlotter>
+	<sources>
+		<!-- gets input from 1 histogram -->
+		<input name='qcd20'>
+			<folder name="qcd/jetcut_20" />
+		</input>
+		<input name='top20'>
+			<folder name="top/jetcut_20" />
+		</input>
+		<input name='wjets20'>
+			<folder name="wjets/jetcut_20" />
+		</input>
+		<input name='mixed20'>
+			<folder name="mixed/jetcut_20" />
+		</input>
+		<input name='jcuts'>
+			<folder name='applied/Jcuts' />
+		</input>
+
+		<input name='mcuts'>
+			<folder name='applied/Mcuts' />
+		</input>
+		<input name='app20'>
+			<folder name="applied/jetcut_20/all" />
+		</input>
+		<input name='app25'>
+			<folder name="applied/jetcut_25/all" />
+		</input>
+		<input name='app30'>
+			<folder name="applied/jetcut_30/all" />
+		</input>
+		<input name='app35'>
+			<folder name="applied/jetcut_35/all" />
+		</input>
+		<input name='app40'>
+			<folder name="applied/jetcut_40/all" />
+		</input>
+
+		<input name='app20m'>
+			<folder name="applied/muoncut_20/all" />
+		</input>
+		<input name='app22.5m'>
+			<folder name="applied/muoncut_22.5/all" />
+		</input>
+		<input name='app25m'>
+			<folder name="applied/muoncut_25/all" />
+		</input>
+		<input name='app27.5m'>
+			<folder name="applied/muoncut_27.5/all" />
+		</input>
+		<input name='app30m'>
+			<folder name="applied/muoncut_30/all" />
+		</input>
+
+		<file id="macro" name="{$macro}" />
+	</sources>
+	<plots create='png' makeSummaryFile='true' summaryFile='inspect.pdf'>
+		<!-- Macro plots -->
+
+		<hist name='bbs_QCDTight_MET' input='bkg/bgOverbgs_tightMET'>
+			<var name='qcd' source='file:macro, input:app20' type='line' color='2' />
+			<titleX v='MET [GeV]' />
+			<titleY v='B/(B+S)' />
+		</hist>
+
+		<hist name='NfractionVSmvaCut' input=''>
+			<var name='loose' source='file:macro' input="applied/muoncut_20/all/bkg/NvsCutloose" color='2' />
+			<var name='tight' source='file:macro' input="applied/muoncut_20/all/bkg/NvsCuttight" color='4' />
+			<titleX v='mva disc. cut' />
+			<titleY v="N(MVA disc. cut)/N_{QCD}" />
+			<legend posX="40" posY="30" />
+		</hist>
+		
+		<hist name='NfractionVSmvaCut_M30' input=''>
+			<var name='loose' source='file:macro' input="applied/muoncut_30/all/bkg/NvsCutloose" color='2' />
+			<var name='tight' source='file:macro' input="applied/muoncut_30/all/bkg/NvsCuttight" color='4' />
+			<titleX v='mva disc. cut' />
+			<titleY v="N(MVA disc. cut)/N_{QCD}" />
+			<legend posX="20" posY="60" />
+		</hist>
+		
+		<hist name='NfractionVSmvaCut_J40' input=''>
+			<var name='loose' source='file:macro' input="applied/jetcut_40/all/bkg/NvsCutloose" color='2' />
+			<var name='tight' source='file:macro' input="applied/jetcut_40/all/bkg/NvsCuttight" color='4' />
+			<titleX v='mva disc. cut' />
+			<titleY v="N(MVA disc. cut)/N_{QCD}" />
+			<legend posX="40" posY="30" />
+		</hist>
+
+		<hist name='bbs_QCD' input=''>
+			<var name='loose' source='file:macro' input="applied/muoncut_20/all/bkg/bgOverbgs_loose"
+				color="2" />
+			<var name='tight' source='file:macro' input="applied/muoncut_20/all/bkg/bgOverbgs_tight"
+				color="4" />
+			<titleX v='mva disc.' />
+			<titleY v='B/(B+S)' />
+			<legend posX="20" posY="30" />
+		</hist>
+
+		<hist name='bbs_QCD_J40' input=''>
+			<var name='loose' source='file:macro' input="applied/jetcut_40/all/bkg/bgOverbgs_loose"
+				color="2" />
+			<var name='tight' source='file:macro' input="applied/jetcut_40/all/bkg/bgOverbgs_tight"
+				color="4" />
+			<titleX v='mva disc.' />
+			<titleY v='B/(B+S)' />
+		</hist>
+
+		<hist name='bbs_QCD_M30' input=''>
+			<var name='loose' source='file:macro' input="applied/muoncut_30/all/bkg/bgOverbgs_loose"
+				color="2" />
+			<var name='tight' source='file:macro' input="applied/muoncut_30/all/bkg/bgOverbgs_tight"
+				color="4" />
+			<titleX v='mva disc.' />
+			<titleY v='B/(B+S)' />
+		</hist>
+
+		<hist name='bbs_QCDLoose_MET' input='bkg/bgOverbgs_looseMET'>
+			<var name='qcd' source='file:macro, input:app20' type='line' color='2' />
+			<titleX v='MET [GeV]' />
+			<titleY v='B/(B+S)' />
+		</hist>
+
+		<hist name='quality_QCDLoose' input='bkg/quality_loose'>
+			<var name='qcd' source='file:macro, input:app20' type='line' color='2' />
+			<titleX v='mva disc. cut' />
+			<titleY v='N_{est}/N_{true}' />
+			<legend posX='50' />
+			<!--		<maxY v='1.01' />-->
+			<!--		<minY v='1.006' />	-->
+			<showErrors v='true' />
+		</hist>
+		<hist name='quality_SIGLoose' input='sig/quality_loose'>
+			<var name='signal' source='file:macro, input:app20' type='line' color='4' />
+			<titleX v='mva disc. cut' />
+			<titleY v='N_{est}/N_{true}' />
+			<legend />
+			<!--		<maxY v='0.2' />-->
+			<!--		<minY v='-0.2' />		-->
+			<showErrors v='true' />
+		</hist>
+		<hist name='quality_QCDTight' input='bkg/quality_tight'>
+			<var name='qcd' source='file:macro, input:app20' type='line' color='2' />
+			<titleX v='mva disc. cut' />
+			<titleY v='N_{est}/N_{true}' />
+			<legend posX='50' />
+			<!--		<maxY v='1.35' />-->
+			<!--		<minY v='1.25' />		-->
+			<showErrors v='true' />
+		</hist>
+		<hist name='quality_SIGTight' input='sig/quality_tight'>
+			<var name='signal' source='file:macro, input:app20' type='line' color='4' />
+			<titleX v='mva disc. cut' />
+			<titleY v='N_{est}/N_{true}' />
+			<legend />
+			<!--		<maxY v='0.2' />-->
+			<!--		<minY v='-0.2' />		-->
+			<showErrors v='true' />
+		</hist>
+		<hist name='masterPlotAll' input='all/efficiency'>
+			<var name='qcd' source='file:macro, input:qcd20' type='line' color='2' />
+			<var name='top' source='file:macro, input:top20' type='line' color='4' />
+			<var name='wjets' source='file:macro, input:wjets20' type='line' color='8' />
+			<var name='combined' source='file:macro, input:mixed20' type='line'
+				color='24' />
+			<titleX v='mva disc.' />
+			<titleY v='iso. efficiency' />
+			<legend posY="60" />
+			<showErrors v='true' />
+		</hist>
+
+		<hist name='masterPlotTrk' input='track/efficiency'>
+			<var name='qcd' source='file:macro, input:qcd20' type='line' color='2' />
+			<var name='top' source='file:macro, input:top20' type='line' color='4' />
+			<var name='wjets' source='file:macro, input:wjets20' type='line' color='8' />
+			<var name='combined' source='file:macro, input:mixed20' type='line'
+				color='24' />
+			<titleX v='mva disc.' />
+			<titleY v='iso. efficiency' />
+			<legend posY="60" />
+			<showErrors v='true' />
+		</hist>
+
+		<hist name='eff_MC_qcd' input='all/efficiency'>
+			<var name='qcd' source='file:macro, input:qcd20' type='line' color='2' />
+			<titleX v='mva disc.' />
+			<titleY v='iso. efficiency' />
+			<!--			<legend posX='70' />-->
+			<showErrors v='true' />
+			<maxY v="0.026" />
+		</hist>
+		
+		<hist name='eff_MC_qcd_M30' input='qcd/muoncut_30/all/efficiency'>
+			<var name='qcd' source='file:macro' color='2' />
+			<titleX v='mva disc.' />
+			<titleY v='iso. efficiency' />
+			<showErrors v='true' />
+			<maxY v="0.018" />
+		</hist>
+
+		<hist name='eff_qcd' input='bkg/effvsDiscCut_BG'>
+			<var name='qcd' source='file:macro, input:app20' type='line' color='2' />
+			<titleX v='mva disc. cut' />
+			<titleY v='iso. efficiency' />
+			<!--			<legend posX='50' />-->
+			<showErrors v='true' />
+		</hist>
+
+		<!--		<histlist name='quality_cuts_loose' input='jcuts'>-->
+		<!--			<var name='qcd loose' source='file:macro' type='line' color='2' />-->
+		<!--			<titleX v='jet E_T cut [GeV]' />-->
+		<!--			<titleY v='N_{est}/N_{true}' />-->
+		<!--					<maxY v='1.008' />-->
+		<!--					<minY v='0.997' />-->
+		<!--			<showErrors v='true' />-->
+		<!--			<legend posX='50' />-->
+		<!--		</histlist>-->
+<!---->
+		<!--		<histlist name='quality_cuts_loose' input='mcuts'>-->
+		<!--			<var name='qcd loose' source='file:macro' type='line' color='2' />-->
+		<!--			<titleX v='muon p_T cut [GeV]' />-->
+		<!--			<titleY v='N_{est}/N_{true}' />-->
+		<!--					<maxY v='1.008' />-->
+		<!--					<minY v='0.997' />-->
+		<!--			<showErrors v='true' />-->
+		<!--			<legend posX='50' />-->
+		<!--		</histlist>-->
+
+		<!-- Cut plots -->
+		<hist name='quality_QCDLoose_Jcuts' input='bkg/quality_loose'>
+			<var name='jetCut 20' source='file:macro, input:app20' type='marker'
+				color='2' style='20' />
+			<var name='jetCut 25' source='file:macro, input:app25' type='marker'
+				color='4' style='21' />
+			<var name='jetCut 30' source='file:macro, input:app30' type='marker'
+				color='6' style='22' />
+			<var name='jetCut 35' source='file:macro, input:app35' type='marker'
+				color='8' style='23' />
+			<var name='jetCut 40' source='file:macro, input:app40' type='marker'
+				style='27' />
+			<titleX v='mva disc. cut' />
+			<titleY v='N_{est}/N_{true}' />
+<!--			<legend posX='20' />-->
+		</hist>
+
+		<hist name='bbs_QCDLoose_Jcuts' input='bkg/bgOverbgs_loose'>
+			<var name='jetCut 20' source='file:macro, input:app20' type='marker'
+				color='2' style='20' />
+			<var name='jetCut 25' source='file:macro, input:app25' type='marker'
+				color='4' style='21' />
+			<var name='jetCut 30' source='file:macro, input:app30' type='marker'
+				color='6' style='22' />
+			<var name='jetCut 35' source='file:macro, input:app35' type='marker'
+				color='8' style='23' />
+			<var name='jetCut 40' source='file:macro, input:app40' type='marker'
+				style='27' />
+			<titleX v='mva disc.' />
+			<titleY v='B/(B+S)' />
+<!--			<legend posX='20' posY='40' />-->
+		</hist>
+
+		<hist name='bbs_QCDTight_Jcuts' input='bkg/bgOverbgs_tight'>
+			<var name='jetCut 20' source='file:macro, input:app20' type='marker'
+				color='2' style='20' />
+			<var name='jetCut 25' source='file:macro, input:app25' type='marker'
+				color='4' style='21' />
+			<var name='jetCut 30' source='file:macro, input:app30' type='marker'
+				color='6' style='22' />
+			<var name='jetCut 35' source='file:macro, input:app35' type='marker'
+				color='8' style='23' />
+			<var name='jetCut 40' source='file:macro, input:app40' type='marker'
+				style='27' />
+			<titleX v='mva disc.' />
+			<titleY v='B/(B+S)' />
+<!--			<legend posX='70' />-->
+		</hist>
+
+		<hist name='quality_QCDTight_Jcuts' input='bkg/quality_tight'>
+			<var name='E_{T}(jet 1-4) &gt; 20' source='file:macro, input:app20'
+				type='marker' color='2' style='20' />
+			<var name='E_{T}(jet 1-4) &gt; 25' source='file:macro, input:app25'
+				type='marker' color='4' style='21' />
+			<var name='E_{T}(jet 1-4) &gt; 30' source='file:macro, input:app30'
+				type='marker' color='6' style='22' />
+			<var name='E_{T}(jet 1-4) &gt; 35' source='file:macro, input:app35'
+				type='marker' color='8' style='23' />
+			<var name='E_{T}(jet 1-4) &gt; 40' source='file:macro, input:app40'
+				type='marker' style='27' />
+			<titleX v='mva disc. cut' />
+			<titleY v='N_{est}/N_{true}' />
+			<legend posX='20' sizeX="40" posY="50"/>
+		</hist>
+
+		<hist name='quality_QCDLoose_Mcuts' input='bkg/quality_loose'>
+			<var name='p_{T}(#mu) > 20' source='file:macro, input:app20m' type='marker'
+				color='2' style='20' />
+			<var name='p_{T}(#mu) > 22.5' source='file:macro, input:app22.5m' type='marker'
+				color='4' style='21' />
+			<var name='p_{T}(#mu) > 25' source='file:macro, input:app25m' type='marker'
+				color='6' style='22' />
+			<var name='p_{T}(#mu) > 27.5' source='file:macro, input:app27.5m' type='marker'
+				color='8' style='23' />
+			<var name='p_{T}(#mu) > 30' source='file:macro, input:app30m' type='marker'
+				style='27' />
+			<titleX v='mva disc. cut' />
+			<titleY v='N_{est}/N_{true}' />
+<!--			<legend posX='20' sizeX="40" posY="50" />-->
+		</hist>
+
+		<hist name='quality_QCDTight_Mcuts' input='bkg/quality_tight'>
+			<var name='p_{T}(#mu) > 20' source='file:macro, input:app20m' type='marker'
+				color='2' style='20' />
+			<var name='p_{T}(#mu)  > 22.5' source='file:macro, input:app22.5m' type='marker'
+				color='4' style='21' />
+			<var name='p_{T}(#mu) > 25' source='file:macro, input:app25m' type='marker'
+				color='6' style='22' />
+			<var name='p_{T}(#mu)  > 27.5' source='file:macro, input:app27.5m' type='marker'
+				color='8' style='23' />
+			<var name='p_{T}(#mu)  > 30' source='file:macro, input:app30m' type='marker'
+				style='27' />
+			<titleX v='mva disc. cut' />
+			<titleY v='N_{est}/N_{true}' />
+			<legend posX='20' sizeX="40" posY="50" />
+		</hist>
+
+		<hist name='bbs_QCDLoose_Mcuts' input='bkg/bgOverbgs_loose'>
+			<var name='muon p_T > 20' source='file:macro, input:app20m' type='marker'
+				color='2' style='20' />
+			<var name='muon p_T > 22.5' source='file:macro, input:app22.5m' type='marker'
+				color='4' style='21' />
+			<var name='muon p_T > 25' source='file:macro, input:app25m' type='marker'
+				color='6' style='22' />
+			<var name='muon p_T > 27.5' source='file:macro, input:app27.5m' type='marker'
+				color='8' style='23' />
+			<var name='muon p_T > 30' source='file:macro, input:app30m' type='marker'
+				style='27' />
+			<titleX v='mva disc.' />
+			<titleY v='B/(B+S)' />
+			<legend posX='20' posY='40' />
+		</hist>
+
+		<hist name='bbs_QCDTight_Mcuts' input='bkg/bgOverbgs_tight'>
+			<var name='muon p_T > 20' source='file:macro, input:app20m' type='marker'
+				color='2' style='20' />
+			<var name='muon p_T > 22.5' source='file:macro, input:app22.5m' type='marker'
+				color='4' style='21' />
+			<var name='muon p_T > 25' source='file:macro, input:app25m' type='marker'
+				color='6' style='22' />
+			<var name='muon p_T > 27.5' source='file:macro, input:app27.5m' type='marker'
+				color='8' style='23' />
+			<var name='muon p_T > 30' source='file:macro, input:app30m' type='marker'
+				style='27' />
+			<titleX v='mva disc.' />
+			<titleY v='B/(B+S)' />
+			<legend posX='70' />
+		</hist>
+	</plots>
+</HistPlotter>

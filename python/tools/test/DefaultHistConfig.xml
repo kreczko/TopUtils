@@ -13,7 +13,7 @@
 		<gridX v='0' />
 		<gridY v='0' />
 		<scale v='1.0' />
-		<showErrors v='true' />
+		<showErrors v='false' />
 		<rotate v='False' />
 		<savefolder v = '' />
 		<drawOption v='' />
@@ -22,6 +22,7 @@
 		<minX v='' />
 		<maxY v='' />
 		<minY v='' />
+		<smooth v="0" />
 		<!--
 			hist titles come from histograms. Only if they are empty the config
 		-->
