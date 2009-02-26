@@ -231,8 +231,10 @@ class Helper:
         min = mm[0]
         max = mm[1]
         x = 0
-        #do something else, if hist TH2F
-        for histkey in histlist.keys():
+        histkeys = histlist.keys()
+        histkeys.sort()
+        
+        for histkey in histkeys:
             hist = histlist[histkey]
 #        for hist in histlist.itervalues():
             if "TH2F" in hist.__str__():

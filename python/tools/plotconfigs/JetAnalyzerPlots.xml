@@ -2,7 +2,7 @@
 	<!-- Works with LKThesis.xml -->
 <HistSetup>
 	<hist name='jet1_et' input='analyzeSelJets/kin_e_0'>
-		<var name='qcdMuEnriched' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
+		<var name='QCD(#mu enriched)' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
 		<var name='top-signal' source='file:top' type='line' style='1' color='4' norm='Integral' />
 		<var name='W + jets' source='file:wjets' type='line' style='1' color='8'
 			norm='Integral' />

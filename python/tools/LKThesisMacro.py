@@ -24,12 +24,12 @@ class Macro:
     #cuts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] 
     latexfile = 'Macro.tex'
     
-    def __init__(self, outputfile, inputdirs, var='mva'):
+    def __init__(self, outputfile, inputdirs, var='MVA'):
         self.tables = ''
         self.hists = {}
         self.var = var
         
-        if self.var == 'mva':
+        if self.var == 'MVA':
             self.cuts = self.frange(0.05, 1.05, 0.05)
             self.hists['weighted'] = 'mbg_nVSdisc'
             self.hists['simple'] = 'mbg_nVSdiscSimple'
@@ -175,12 +175,12 @@ class Macro:
         self.output.cd('mixed' + '/' + outdir + '/' + dir)
         result = self.getEffHist(self.mixb, self.mixa, self.mixunwb)
         eff = result[0]
-        if self.var == 'mva':
-            eff = Helper.setHistLabels(eff, 'mva disc.', 'effieciency in %')
-            self.mixa = Helper.setHistLabels(self.mixa, 'mva disc.', 'events')
-            self.mixunwa = Helper.setHistLabels(self.mixunwa, 'mva disc.', 'unweigthed events')
-            self.mixb = Helper.setHistLabels(self.mixb, 'mva disc.', 'events')
-            self.mixunwb = Helper.setHistLabels(self.mixunwb, 'mva disc.', 'unweigthed events')
+        if self.var == 'MVA':
+            eff = Helper.setHistLabels(eff, 'MVA disc.', 'effieciency in %')
+            self.mixa = Helper.setHistLabels(self.mixa, 'MVA disc.', 'events')
+            self.mixunwa = Helper.setHistLabels(self.mixunwa, 'MVA disc.', 'unweigthed events')
+            self.mixb = Helper.setHistLabels(self.mixb, 'MVA disc.', 'events')
+            self.mixunwb = Helper.setHistLabels(self.mixunwb, 'MVA disc.', 'unweigthed events')
         elif self.var == 'met':
             eff = Helper.setHistLabels(eff, 'missing E_{T} [GeV]', 'effieciency in %')
             self.mixa = Helper.setHistLabels(self.mixa, 'missing E_{T} [GeV]', 'events')
@@ -289,6 +289,8 @@ class Macro:
             eff = result[0]
             eff.SetTitle(title1)
             eff.Write()
+            after.Scale(self.scale[type])
+            before.Scale(self.scale[type])
             after.Write()
             unwafter.Write()
             before.Write()
@@ -397,6 +399,7 @@ class Macro:
         qu[5].Write()
         qu[6].Write()
         qu[7].Write()
+        qu[8].Write()
         backroundoverSignalA.Write()
         backroundoverSignalB.Write()
         mbackroundoverSignalA.Write()
@@ -425,7 +428,10 @@ class Macro:
         qualityBT = None
         effB = None
         effQB = None
-            
+        effQCDmcVSCUT = copy.deepcopy(self.qcdhisttight.Clone('effMC_vs_MVAcut'))
+        EQMSBC = effQCDmcVSCUT.SetBinContent
+        EQMSBE = effQCDmcVSCUT.SetBinError
+    
         qualityBL = copy.deepcopy(self.qcdhistloose.Clone('quality_loose'))
         qualityBL.SetName('quality_loose')
         qualityBL.SetTitle('quality_loose_BG')
@@ -563,9 +569,10 @@ class Macro:
                 print i, sigma, '+-', sigmaErr 
                 print i, sigmaS, '+-', sigmaErrS
             
-            
+            EQMSBC(x, qcdTSel/qcdLSel)
+            EQMSBE(x, self.getStatError(qcdTSel/qcdLSel, qcdLSel/5))
             err = sqrt(trueQCDEffErr * trueQCDEffErr + effqcderr * effqcderr)
-            eSBCQ(x, effqcd - trueQCDEff)
+            eSBCQ(x, effqcd/trueQCDEff)
             eSBEQ(x, err)
             
             qSBCBT(x, sigma)
@@ -591,7 +598,7 @@ class Macro:
             qSBCSL(x, sigmaS)
             qSBESL(x, sigmaErrS)
             x += 1
-        return [qualityBL, qualityBT, qualitySL, qualityST, effB, effQB, NvsCL, NvsCT]
+        return [qualityBL, qualityBT, qualitySL, qualityST, effB, effQB, NvsCL, NvsCT, effQCDmcVSCUT]
             
             
     def makeEstimationHist(self, effqcd, effqcderr, sigEffHist, sigLooseHist, looseHist, tightHist):
@@ -629,7 +636,7 @@ class Macro:
     
     def saveMVAPlots(self,outputdir):
         Helper.set_palette("simple", 127)
-        save = '/playground/ThesisPlots/mvaTraining/%s/' % outputdir
+        save = '/playground/ThesisPlots/MVATraining/%s/' % outputdir
         cfg = 'plotconfigs/MVAHists.xml'
         f = open(cfg)
         cfg = f.read()
@@ -638,12 +645,12 @@ class Macro:
         
     def saveMacroPlots(self,outputdir, file='/playground/rootfiles/FINAL/complete_hists_MM.root'):
         save = ''
-        if self.var == 'mva':
+        if self.var == 'MVA':
             save = '/playground/ThesisPlots/macro/%s/' % outputdir
         elif self.var == 'met':
             save = '/playground/ThesisPlots/macro_MET/%s/' % outputdir
         cfg = ''
-        if self.var == 'mva':
+        if self.var == 'MVA':
             cfg = 'plotconfigs/LKMacro.xml'
         elif self.var == 'met':
             cfg = 'plotconfigs/LKMacro_MET.xml'
@@ -652,6 +659,13 @@ class Macro:
         f.close()
         cfg = cfg.replace('{$macro}', file)
         Macro.savePlotsFromCfg(cfg, save)
+        
+    def saveShapePlots(self, outputdir, file='/playground/rootfiles/FINAL/complete_hists_MM.root'):
+        save = ''
+        if self.var == 'MVA':
+            save = '/playground/ThesisPlots/macro/%s/' % outputdir
+        elif self.var == 'met':
+            save = '/playground/ThesisPlots/macro_MET/%s/' % outputdir
         cfg = "plotconfigs/LKMacro2.xml"
         f = open(cfg)
         cfg = f.read()
@@ -673,7 +687,7 @@ class Macro:
 #        shapes = ["ptUp", "circularityUp", "dPhiMJ12Up", "dPhiMETMuUp","ptDown", "circularityDown", "dPhiMJ12Down", "dPhiMETMuDown"]
         self.makeJCutPlots(inputdirs)
         self.makeMCutPlots(inputdirs)
-        if self.var == "mva":
+        if self.var == "MVA":
             self.makeShapeDependencyPlots(inputdirs)
         
     def makeJCutPlots(self,inputdirs):
@@ -755,17 +769,22 @@ class Macro:
         
 #        circSIG = TF1("circSIG","-x*x +2*x" , 0, 1)
 #        circBG = TF1("circBG", "x*x -2*x +1", 0, 1)
-        METMuBG = TH1F("METMuBG", "METMuBG", 100, 0, 4)
-        METMuSIG = TH1F("METMuSIG", "METMuSIG", 100, 0, 4)
+        METMuBG = TH1F("METMuBG", "METMuBG", 200, -4, 4)
+        METMuSIG = TH1F("METMuSIG", "METMuSIG", 200, -4, 4)
         METMuBG.Add(TF1("TMETMuBG","1/(1.5/pi *x + 0.5)" ,0, 4))
+        METMuBG.Add(TF1("TMETMuBG","1/(-1.5/pi *x + 0.5)" ,-4, 0))
         METMuSIG.Add(TF1("TMETMuSIG", "1.5/pi *x + 0.5", 0, 4))
+        METMuSIG.Add(TF1("TMETMuSIG", "-1.5/pi *x + 0.5", -4, 0))
+        
         testBG = TF1("TtMETMuBG","1/(1.5/pi *x + 0.5)" ,0, 4)
         testSIG = TF1("TtMETMuSIG", "1.5/pi *x + 0.5", 0, 4)
         
-        MJ12BG = TH1F("MJ12BG", "MJ12BG", 100,0, 6.3)
-        MJ12SIG = TH1F("MJ12SIG", "MJ12SIG", 100, 0, 6.3)
+        MJ12BG = TH1F("MJ12BG", "MJ12BG", 200,-6.3, 6.3)
+        MJ12SIG = TH1F("MJ12SIG", "MJ12SIG", 200, -6.3, 6.3)
         MJ12SIG.Add(TF1("tMJ12SIG", "(1/pi/pi)*x*x - 2/pi*x + 1", 0, 6.3))
+        MJ12SIG.Add(TF1("tMJ12SIG", "(1/pi/pi)*x*x + 2/pi*x + 1", -6.3, 0))
         MJ12BG.Add(TF1("tMJ12BG", "1-((1/pi/pi)*x*x - 2/pi*x + 1)", 0, 6.3))
+        MJ12BG.Add(TF1("tMJ12BG", "1-((1/pi/pi)*x*x + 2/pi*x + 1)", -6.3, 0))
         
         ptBG.Write()
         ptSIG.Write()
@@ -815,21 +834,36 @@ class Macro:
                 
                 self.qcdhisttight = qcdfile.Get(dir + self.after + '/' + "var_MVAdisc").Clone('nVSdiscQCDTight')                
                 self.qcdhistloose = qcdfile.Get(dir + self.before + '/' + "var_MVAdisc").Clone('nVSdiscQCDLoose')
-                if k == "dPhiMETMuSIG":
-                    ql.Multiply(testSIG)
-                    qt.Multiply(testSIG)
-                    self.qcdhistloose = ql
-                    self.qcdhisttight = qt
-                elif k == "dPhiMETMuBG":
-                    ql.Multiply(testBG)
-                    qt.Multiply(testBG)
-                    self.qcdhistloose = ql
-                    self.qcdhisttight = qt
+#                if k == "dPhiMETMuSIG":
+#                    ql.Multiply(testSIG)
+#                    qt.Multiply(testSIG)
+#                    self.qcdhistloose = ql
+#                    self.qcdhisttight = qt
+#                elif k == "dPhiMETMuBG":
+#                    ql.Multiply(testBG)
+#                    qt.Multiply(testBG)
+#                    self.qcdhistloose = ql
+#                    self.qcdhisttight = qt
                 #------------------------------------------------------------------------------ rescaling to right amount
                 self.qcdhistloose.Scale(1/self.qcdhistloose.Integral())
                 self.qcdhisttight.Scale(1/self.qcdhisttight.Integral())   
                 self.qcdhistloose.Scale(qcdloose)
                 self.qcdhisttight.Scale(qcdtight)   
+                effqcd = copy.deepcopy(self.qcdhisttight.Clone("efficiency"))
+                effqcd.Sumw2()
+                effqcd.Divide(self.qcdhistloose)
+                allT = self.tophisttight.Clone("tmp1")
+                allT.Add(self.wjethisttight)
+                allT.Add(self.qcdhisttight)
+                
+                allL = self.tophistloose.Clone("tmp2")
+                allL.Add(self.wjethistloose)
+                allL.Add(self.qcdhistloose)
+                backroundoverSignalB = self.qcdhistloose.Clone("bgOverbgs_loose")
+                backroundoverSignalA = self.qcdhisttight.Clone("bgOverbgs_tight")
+                backroundoverSignalA.Divide(allT)
+                backroundoverSignalB.Divide(allL)
+#                effqcd.Sumw2()
 #===============================================================================
 #            mix all
 #===============================================================================
@@ -865,6 +899,10 @@ class Macro:
                 qu[5].Write()
                 qu[6].Write()
                 qu[7].Write()
+                qu[8].Write()
+                backroundoverSignalB.Write()
+                backroundoverSignalA.Write()
+                effqcd.Write()
                 self.output.Cd('/')
                 self.output.cd(completedir + '/sig')
                 qu[2].Write()
@@ -1000,13 +1038,15 @@ class Macro:
             outputdir = 'muoncut_%s' % i
             Macro.saveReferencePlots(outputdir, files)
             
-    def saveAllPlots(self, what=["cuts", "macro", "mva"]):
+    def saveAllPlots(self, what=["cuts", "macro", "MVA"]):
         if "cuts" in what:
             self.saveCutPlots()
         if "macro" in what:        
             self.saveMacroPlots("")
-        if "mva" in what:
+        if "MVA" in what:
             self.saveMVAPlots('')
+        if "shapes" in what:
+            self.saveShapePlots('')
 #    saveAllPlots = staticmethod(saveAllPlots)
 
 if __name__ == '__main__':
@@ -1034,9 +1074,9 @@ if __name__ == '__main__':
 #    inputs['qcd'] = folder + "qcdmu_20j20m.root"
 #    inputs['top'] = folder +  "top_20j20m.root"
 #    inputs['wjets'] = folder + "wjets_20j20m.root"
-    mac = Macro(folder + 'complete_hists_MM.root', inputdirs, 'mva')
+    mac = Macro(folder + 'complete_hists_MM.root', inputdirs, 'MVA')
     mac.debug = False
     mac.makeCutDependencyPlots(inputdirs, '0.2')
     mac.output.Close()
-#    mac.writeTables()
-    mac.saveAllPlots(["macro"])
+    mac.writeTables()
+    mac.saveAllPlots(["cuts"])

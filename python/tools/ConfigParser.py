@@ -363,7 +363,7 @@ class Histogram:
     Compare function. Compares two instances of Histogram by their names
     """    
     def __cmp__(self, other):
-        return cmp(self.name, other.name)
+        return cmp(self.opt["name"], other.opt["name"])
             
     """
     Writes the options from a Histogram template if it wasn't overwritten in the configfile
@@ -803,7 +803,12 @@ class Variable:
         #for all children attributes named 'v'
         return defaults
         #in the defaults file all attributes are defined
-    
+        
+    """
+    Compare function. Compares two instances of Histogram by their names
+    """    
+    def __cmp__(self, other):
+        return cmp(self.opt["name"], other.opt["name"])
 """
 Just a simple container
 """
@@ -835,6 +840,12 @@ class Filter:
             raise ConfigError, 'invalid filter value'
         return Filter(type, value)
     getFromNode = staticmethod(getFromNode)
+
+    def applyFilter(rootfile, inputfolders):
+        """
+        Should aplly filter and return only full histogram paths
+        """
+        print "STUB"
             
 class Input:
     def __init__(self, folderlist):
@@ -920,5 +931,6 @@ class Legend:
             optlist[name] = value
         return Legend(optlist)
     getFromNode = staticmethod(getFromNode)    
+    
     
         

@@ -62,16 +62,19 @@ class MatrixMethod:
     
     def errorNQ(effqcd, effqcderr, effsig, effsigerr, Nloose, Ntight):
         ############dNs_deffsig
-        tmp1 = Ntight - (Nloose - Ntight) * effqcd
+        tmp1 = Ntight - Nloose*effqcd
         tmp2 = (effsig - effqcd) * (effsig - effqcd)
         d1 = tmp1 / tmp2
         #############dNs_deffqcd
-        tmp1 = Ntight + (Nloose - Ntight) * (effsig - 2 * effqcd)
+#        tmp1 = Ntight + (Nloose - Ntight) * (effsig - 2 * effqcd)
+        tmp1 = Nloose*effsig - Ntight
         d2 = tmp1 / tmp2
         #############dNs_dN1
-        d3 = effqcd / (effsig - effqcd)
+        d3 = effsig / (effsig - effqcd)
         #############dNs_dN2
-        d4 = (1 - effqcd) / (effsig - effqcd)
+        d4 = (effsig -1) / (effsig - effqcd)
+        msg = "NL = %d, NT=%d, d1=%f, d2=%f, d3=%f, d4=%f" % (Nloose, Ntight, d1 * d1 * effsigerr * effsigerr, d2 * d2 * effqcderr * effqcderr, d3 * d3 * (Nloose - Ntight), d4 * d4 * Ntight)
+#        print msg
         err = sqrt(d1 * d1 * effsigerr * effsigerr + d2 * d2 * effqcderr * effqcderr + d3 * d3 * (Nloose - Ntight) + d4 * d4 * Ntight)
         return err
     errorNQ = staticmethod(errorNQ)
@@ -88,7 +91,7 @@ class MatrixMethod:
         ######################dNqcdTight_dNloose
         d3 = effsig * effqcd / (effsig - effqcd)
         ###################dNqcdTight_dNtight
-        d4 = - effqcd / (effsig - effqcd)
+        d4 = effqcd * (effsig -1) / (effsig - effqcd)
         err = sqrt(d1 * d1 * effsigerr * effsigerr + d2 * d2 * effqcderr * effqcderr + d3 * d3 * Ntight + d4 * d4 * (Nloose - Ntight))
         return err
     errorNQCDTight = staticmethod(errorNQCDTight)

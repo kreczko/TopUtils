@@ -76,7 +76,7 @@
 	<plots create='png' makeSummaryFile='true' summaryFile='inspect.pdf'>
 	<!-- Macro plots -->
 	<hist name='quality_QCDLoose' input='quality_loose' >
-		<var name='qcdMuEnriched' source='file:macro, input:appQCD'  color='2' />
+		<var name='QCD(#mu enriched)' source='file:macro, input:appQCD'  color='2' />
 		<titleX v='MET cut [GeV]' />
 		<titleY v='N_{est}/N_{true}' />
 		<legend posX='20'  posY="0" sizeX="55"/>
@@ -109,7 +109,7 @@
 		<minY v='-0.1' />		
 	</hist>
 	<hist name='masterPlotAll' input='efficiency' >
-		<var name='qcdMuEnriched' source='file:macro, input:qcdAll'  color='2' />
+		<var name='QCD(#mu enriched)' source='file:macro, input:qcdAll'  color='2' />
 		<var name='top-signal' source='file:macro, input:topAll'  color='4' />
 		<var name='W + jets' source='file:macro, input:wjetsAll'  color='8' />
 		<var name='combined' source='file:macro, input:mixedAll'  color='1' />

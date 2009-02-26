@@ -90,7 +90,7 @@
 		<hist name='norm_MVAdisc_QCDWJET'>
 			<var name='W+jets' source='file:train14V_QCDWJET' input="output/likelihood_discriminator_bkg"
 				type='filled' color='2' style='3005' norm='Integral'/>
-			<var name='qcdMuEnriched' source='file:train14V_QCDWJET' input="output/likelihood_discriminator_sig"
+			<var name='QCD(#mu enriched)' source='file:train14V_QCDWJET' input="output/likelihood_discriminator_sig"
 				color='4' norm='Integral' />
 			<titleX v='MVA disc.' />
 			<titleY v='normalized to unit area' />
@@ -99,7 +99,7 @@
 		</hist>
 		
 		<hist name='norm_MVAdisc_QCDTop'>
-			<var name='qcdMuEnriched' source='file:train14V_QCDTop' input="output/likelihood_discriminator_bkg"
+			<var name='QCD(#mu enriched)' source='file:train14V_QCDTop' input="output/likelihood_discriminator_bkg"
 				type='filled' color='2' style='3005' norm='Integral'/>
 			<var name='top-signal' source='file:train14V_QCDTop' input="output/likelihood_discriminator_sig"
 				color='4' norm='Integral' />
