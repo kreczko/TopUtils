@@ -1,10 +1,10 @@
 import FWCore.ParameterSet.Config as cms
 
 #-------------------------------------------------
-# cfg file for the analysis of selected muon
-# quantities
+# test cfg file for tqaflayer1 & 2 production from
+# fullsim for semi-leptonic ttbar events 
 #-------------------------------------------------
-process = cms.Process("Muon")
+process = cms.Process("Step0")
 
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
@@ -18,7 +18,7 @@ process.MessageLogger.cerr.threshold = 'INFO'
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-    ## add your favourite file here
+    ## add your favourite file here    
     )
 )
 
@@ -32,25 +32,8 @@ process.options = cms.untracked.PSet(
     wantSummary = cms.untracked.bool(False)
 )
 
-#-------------------------------------------------
-# add event weight
-#-------------------------------------------------
-
-## add event weight information
-process.load("TopAnalysis.TopUtils.EventWeightPlain_cfi")
-process.eventWeight.nevts = 1
-process.eventWeight.xsec  = 1
-process.eventWeight.lumi  = 1
-process.eventWeight.eff   = 1
-
 ## configure output module
 process.out = cms.OutputModule("PoolOutputModule",
-    fileName     = cms.untracked.string('patTuple.root')
-    eventContent = cms.PSet(
-      outputCommands = cms.untracked.vstring('keep *_*_*_*')  ## keep all
-    )
+    fileName = cms.untracked.string('patTuple.root')
 )
-
-process.p1 = cms.Path(process.eventWeight *
-                      process.out
-                      )
+process.p1 = cms.Path(process.out)
