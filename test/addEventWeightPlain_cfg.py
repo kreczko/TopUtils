@@ -45,12 +45,12 @@ process.eventWeight.eff   = 1
 
 ## configure output module
 process.out = cms.OutputModule("PoolOutputModule",
-    fileName     = cms.untracked.string('patTuple.root')
+    fileName     = cms.untracked.string('patTuple.root'),
     eventContent = cms.PSet(
       outputCommands = cms.untracked.vstring('keep *_*_*_*')  ## keep all
     )
 )
 
-process.p1 = cms.Path(process.eventWeight *
-                      process.out
+process.p1 = cms.Path(process.eventWeight ## *
+##                    process.out
                       )
