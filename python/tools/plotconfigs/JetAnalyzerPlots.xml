@@ -9,7 +9,7 @@
 		<titleX v='E_{T}(jet 1) [GeV]' />
 		<titleY v='normalized to unit area' />
 		<savefolder v='kin' />
-		<legend posX="45" sizeX="50" sizeY="5" posY="45"/>
+		<legend posX="45" sizeX="50" sizeY="40" posY="45"/>
 	</hist>
 	<hist name='jet2_et' input='analyzeSelJets/kin_e_1'>
 		<var name='qcd' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
@@ -52,5 +52,17 @@
 		<titleY v='normalized to unit area' />
 		<savefolder v='kin' />
 <!--		<legend />-->
+	</hist>
+	
+	<hist name='nJets20_leg' input='analyzeSelJets/kin_n20'>
+		<!-- name is also used for legend -->
+		<var name='QCD(#mu enriched)' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
+		<var name='Top(signal)' source='file:top' type='line' style='1' color='4' norm='Integral' />
+		<var name='W+jets' source='file:wjets' type='line' style='1' color='8'
+			norm='Integral' />
+		<titleX v='N_{jets} (E_{T} > 20GeV)' />
+		<titleY v='normalized to unit area' />
+		<savefolder v='kin' />
+		<legend sizeX= "50" posX="45"/>
 	</hist>
 </HistSetup>

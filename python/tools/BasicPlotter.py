@@ -58,10 +58,14 @@ class Plotter:
 #                                print h1
 #                                print var.hist
 #                                print h.GetName()
+                                if hist.opt["showErrors"].upper() == "TRUE":
+                                    h.Sumw2()
                                 h.Divide(f.Get(h1))
+#                                if hist.opt["showErrors"]:
+#                                    h.Sumw2()
                             else:
                                 print 'unknown operation'
-#                        integ += 1
+
 #===============================================================================
 #                once you have the histogram, apply the configuration to it.
 #===============================================================================

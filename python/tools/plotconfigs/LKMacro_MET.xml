@@ -75,9 +75,24 @@
 	-->
 	<plots create='png' makeSummaryFile='true' summaryFile='inspect.pdf'>
 	<!-- Macro plots -->
+	<hist name='bbs_QCD_MET'>
+			<var name='loose' source='file:macro' input="applied/jetcut_20/all/bkg/bgOverbgs_looseMET" color='2' />
+			<var name='tight' source='file:macro' input ="applied/jetcut_20/all/bkg/bgOverbgs_tightMET" color='4' />
+			<legend posY="40"/>
+			<titleX v='MET [GeV]' />
+			<titleY v='B/(B+S)' />
+			<minY v="0" />
+			<maxY v="1" />
+		</hist>
+		
+<!--	<hist name='bbs_QCDTight_MET' input='bkg/bgOverbgs_tightMET'>-->
+<!--			<var name='qcd' source='file:macro, input:app20' color='2' />-->
+<!--			<titleX v='MET [GeV]' />-->
+<!--			<titleY v='B/(B+S)' />-->
+<!--		</hist>-->
 	<hist name='quality_QCDLoose' input='quality_loose' >
 		<var name='QCD(#mu enriched)' source='file:macro, input:appQCD'  color='2' />
-		<titleX v='MET cut [GeV]' />
+		<titleX v='Cut on MET [GeV]' />
 		<titleY v='N_{est}/N_{true}' />
 		<legend posX='20'  posY="0" sizeX="55"/>
 		<maxY v='1.012' />
@@ -85,7 +100,7 @@
 	</hist>
 	<hist name='quality_SIGLoose' input='quality_loose' >
 		<var name='signal' source='file:macro, input:appSIG'  color='4' />
-		<titleX v='MET cut [GeV]' />
+		<titleX v='Cut on MET [GeV]' />
 		<titleY v='N_{est}/N_{true}' />
 		<legend  posY="70"/>
 		<maxY v='0.2' />
@@ -93,28 +108,28 @@
 	</hist>
 	<hist name='quality_QCDTight' input='quality_tight' >
 		<var name='qcd' source='file:macro, input:appQCD'  color='2' />
-		<titleX v='MET cut [GeV]' />
-		<titleY v='N_{est}/N_{true}' />
+		<titleX v='Cut on MET [GeV]' />
+		<titleY v='N^{est}_{QCD} /N^{true}_{QCD}' />
 <!--		<legend  posX='50' />-->
 		<maxY v='1.43' />
-		<minY v='1.32' />		
+		<minY v='0' />		
 	</hist>
 	<hist name='quality_SIGTight' input='quality_tight' >
 		<!-- name is also used for legend -->
 		<var name='signal' source='file:macro, input:appSIG'  color='4' />
-		<titleX v='MET cut [GeV]' />
-		<titleY v='N_{est}/N_{true}' />
+		<titleX v='Cut on MET [GeV]' />
+		<titleY v='N^{est}_{sig} /N^{true}_{sig}' />
 <!--		<legend  />-->
 		<maxY v='0.2' />
 		<minY v='-0.1' />		
 	</hist>
 	<hist name='masterPlotAll' input='efficiency' >
 		<var name='QCD(#mu enriched)' source='file:macro, input:qcdAll'  color='2' />
-		<var name='top-signal' source='file:macro, input:topAll'  color='4' />
+		<var name='Top(signal)' source='file:macro, input:topAll'  color='4' />
 		<var name='W + jets' source='file:macro, input:wjetsAll'  color='8' />
 		<var name='combined' source='file:macro, input:mixedAll'  color='1' />
 		<titleX v='MET [GeV]' />
-		<titleY v='iso. efficiency' />
+		<titleY v='isolation efficiency' />
 		<legend posY="25" posX="20" sizeX="50"/>
 	</hist>
 	
@@ -124,19 +139,19 @@
 		<var name='wjets' source='file:macro, input:wjetsTrk'  color='8' />
 		<var name='combined' source='file:macro, input:mixedTrk'  color='3' />
 		<titleX v='MET [GeV]' />
-		<titleY v='iso. efficiency' />
+		<titleY v='isolation efficiency' />
 		<legend posY="60"/>
 	</hist>
 	
 	<hist name='eff_MC_qcd' input='efficiency' >
 		<var name='qcd' source='file:macro, input:qcdAll'  color='2' />
-		<titleX v='MET cut [GeV]' />
-		<titleY v='iso. efficiency' />
-		<legend posX='50' />
+		<titleX v='MET [GeV]' />
+		<titleY v='#epsilon_{QCD}^{true}' />
+<!--		<legend posX='50' />-->
 	</hist>
 	<hist name='eff_qcd' input='effvsDiscCut_BG' >
 		<var name='qcd' source='file:macro, input:appQCD'  color='2' />
-		<titleX v='MET cut [GeV]' />
+		<titleX v='Cut on MET [GeV]' />
 		<titleY v='iso. efficiency' />
 		<max v='0.026' />
 		<min v='0.024' />		
@@ -158,7 +173,7 @@
 		<var name='jetCut 30' source='file:macro, input:appQCD30' type='marker' color='6' style='22' />
 		<var name='jetCut 35' source='file:macro, input:appQCD35' type='marker' color='8' style='23'/>
 		<var name='jetCut 40' source='file:macro, input:appQCD40' type='marker' style='27' />
-		<titleX v='MET cut [GeV]' />
+		<titleX v='Cut on MET [GeV]' />
 		<titleY v='N_{est}/N_{true}' />
 		<legend posY='70'/>
 	</hist>

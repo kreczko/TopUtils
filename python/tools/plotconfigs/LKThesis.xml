@@ -25,6 +25,7 @@
 		<file id='wjets' name='{$WJETS}' />
 <!--		remove them:-->
 		<file id='qcd20' name='/playground/rootfiles/FINAL/qcdmu_20j20m.root' />
+		<file id='qcdMET' name='/playground/rootfiles/FINAL/shapes/qcdMu_MJ12SIG.root' />
 		<file id='top20' name='/playground/rootfiles/FINAL/top_20j20m.root' />
 		<file id='wjets20' name='/playground/rootfiles/FINAL/wjets_20j20m.root' />
 
@@ -37,19 +38,23 @@
 		<!-- IsolationAnalyzer Plots -->
 		<hist setup='MVAdisc_signal' />
 		<hist setup='MVAdisc_qcd' />
+		<hist setup="deltaPhiJet1Jet2" />
 		
 		<hist setup='norm_MVAdisc' />
 		<hist setup='norm_MVAdisc_OL' />
 		<hist setup='corr_MVAdiscVScalo_qcd' />
 		<hist setup='corr_MVAdiscVSjetIso_qcd' />
 		<hist setup='corr_MVAdiscVStrack_qcd' />
-				
+<!--				-->
 		<hist setup="norm_MET" />
 		<hist setup="corr_METVStrack_qcd" />
 		<hist setup="corr_METVScalo_qcd" />
 		<hist setup="corr_METVSjetiso_qcd" />
 		<hist setup="MET_reso" />
-<!--		-->
+		<hist setup="MET_reso_Top" />
+		<hist setup="MET_reso_Wjets" />
+		<hist setup="MET_reso_normed" />
+		
 		<hist setup='var_norm_dPhiMuJ12' />
 		<hist setup='corr_DphiMuJ1J2VScalo_qcd' />
 		<hist setup='corr_DphiMuJ1J2VStrack_qcd' />
@@ -108,6 +113,7 @@
 		<hist setup='jet3_et' />
 		<hist setup='jet4_et' />
 		<hist setup='nJets20' />
+<hist setup='nJets20_leg' />
 		
 	</plots>
 </HistPlotter>

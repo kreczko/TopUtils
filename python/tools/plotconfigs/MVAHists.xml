@@ -36,7 +36,7 @@
 				type='filled' color='2' style='3005' norm='Integral' />
 			<var name='signal' source='file:train' input="input_norm/input_circularity_sig"
 				color='4' norm='Integral' />
-			<titleX v='|\Delta\phi(\mu, jet 1) + \Delta\phi(\mu, jet 2)|' />
+			<titleX v="circularity" />
 			<titleY v='normalized to unit area' />
 		</hist>
 
@@ -56,9 +56,9 @@
 				type='filled' color='2' style='3005' norm='Integral'/>
 			<var name='signal' source='file:train' input="output/likelihood_discriminator_sig"
 				color='4' norm='Integral' />
-			<titleX v='MVA disc.' />
+			<titleX v='d_{MVA}' />
 			<titleY v='normalized to unit area' />
-			<legend posX="20"/>
+			<legend posX="20" sizeX="50"/>
 			 <smooth v="200"/> 
 		</hist>
 		
@@ -81,7 +81,7 @@
 				type='filled' color='2' style='3005' norm='Integral'/>
 			<var name='signal' source='file:train14V_All3' input="output/likelihood_discriminator_sig"
 				color='4' norm='Integral' />
-			<titleX v='MVA disc.' />
+			<titleX v='d_{MVA}' />
 			<titleY v='normalized to unit area' />
 			<legend posX="20"/>
 			 <smooth v="200"/> 
@@ -92,7 +92,7 @@
 				type='filled' color='2' style='3005' norm='Integral'/>
 			<var name='QCD(#mu enriched)' source='file:train14V_QCDWJET' input="output/likelihood_discriminator_sig"
 				color='4' norm='Integral' />
-			<titleX v='MVA disc.' />
+			<titleX v='d_{MVA}' />
 			<titleY v='normalized to unit area' />
 			<legend posX="20"/>
 			 <smooth v="200"/> 
@@ -103,7 +103,7 @@
 				type='filled' color='2' style='3005' norm='Integral'/>
 			<var name='top-signal' source='file:train14V_QCDTop' input="output/likelihood_discriminator_sig"
 				color='4' norm='Integral' />
-			<titleX v='MVA disc.' />
+			<titleX v='d_{MVA}' />
 			<titleY v='normalized to unit area' />
 			<legend posX="20"/>
 			 <smooth v="200"/> 
@@ -114,7 +114,7 @@
 				type='filled' color='2' style='3005' norm='Integral'/>
 			<var name='top-signal' source='file:train14V_TopWJET' input="output/likelihood_discriminator_sig"
 				color='4' norm='Integral' />
-			<titleX v='MVA disc.' />
+			<titleX v='d_{MVA}' />
 			<titleY v='normalized to unit area' />
 			<legend posX="20"/>
 			 <smooth v="200"/> 

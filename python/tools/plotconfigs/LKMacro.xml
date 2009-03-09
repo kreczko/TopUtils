@@ -65,21 +65,15 @@
 	</sources>
 	<plots create='png' makeSummaryFile='true' summaryFile='inspect.pdf'>
 		<!-- Macro plots -->
-
-		<hist name='bbs_QCDTight_MET' input='bkg/bgOverbgs_tightMET'>
-			<var name='qcd' source='file:macro, input:app20' color='2' />
-			<titleX v='MET [GeV]' />
-			<titleY v='B/(B+S)' />
-		</hist>
-
 		<hist name='NfractionVSMVACut'>
 			<var name='loose' source='file:macro' input="applied/muoncut_20/all/bkg/NvsCutloose"
 				color='2' />
 			<var name='tight' source='file:macro' input="applied/muoncut_20/all/bkg/NvsCuttight"
 				color='4' />
-			<titleX v='MVA disc. cut' />
-			<titleY v="N(MVA disc. cut)/N_{QCD}" />
+			<titleX v='d_{MVA}^{thresh.}' />
+			<titleY v="N_{QCD}(d_{MVA} &lt; d_{MVA}^{thresh.})/N_{QCD}" />
 			<legend posX="40" posY="30" />
+			<minY v="0" />
 		</hist>
 
 		<hist name='NfractionVSMVACut_M30'>
@@ -87,8 +81,8 @@
 				color='2' />
 			<var name='tight' source='file:macro' input="applied/muoncut_30/all/bkg/NvsCuttight"
 				color='4' />
-			<titleX v='MVA disc. cut' />
-			<titleY v="N(MVA disc. cut)/N_{QCD}" />
+			<titleX v='d_{MVA}^{thresh.}' />
+			<titleY v="N(d_{MVA}^{thresh.})/N_{QCD}" />
 			<legend posX="20" posY="60" />
 		</hist>
 
@@ -97,8 +91,8 @@
 				color='2' />
 			<var name='tight' source='file:macro' input="applied/jetcut_40/all/bkg/NvsCuttight"
 				color='4' />
-			<titleX v='MVA disc. cut' />
-			<titleY v="N(MVA disc. cut)/N_{QCD}" />
+			<titleX v='d_{MVA}^{thresh.}' />
+			<titleY v="N(d_{MVA}^{thresh.})/N_{QCD}" />
 			<legend posX="40" posY="30" />
 		</hist>
 
@@ -107,9 +101,10 @@
 				color="2" />
 			<var name='tight' source='file:macro' input="applied/muoncut_20/all/bkg/bgOverbgs_tight"
 				color="4" />
-			<titleX v='MVA disc.' />
+			<titleX v='d_{MVA}' />
 			<titleY v='B/(B+S)' />
 			<legend posX="20" posY="30" />
+			<minY v="0" />
 		</hist>
 
 		<hist name='bbs_QCD5'>
@@ -125,9 +120,10 @@
 			<var name='tmp2' source='file:QCD5' input="mixed/muoncut_20/all/nVSdiscTight"
 				draw="0" />
 			<var name='QCD(#mu enriched) x 5' source='var:tmp1, var:tmp2' operation="div" color="2" />
-			<titleX v='MVA disc.' />
+			<titleX v='d_{MVA}' />
 			<titleY v='B/(B+S)' />
 			<legend posX="20" posY="10" sizeX="50"/>
+			<minY v="0" />
 		</hist>
 
 		<hist name='bbs_QCD_J40'>
@@ -135,8 +131,9 @@
 				color="2" />
 			<var name='tight' source='file:macro' input="applied/jetcut_40/all/bkg/bgOverbgs_tight"
 				color="4" />
-			<titleX v='MVA disc.' />
+			<titleX v='d_{MVA}' />
 			<titleY v='B/(B+S)' />
+			<minY v="0" />
 		</hist>
 
 		<hist name='bbs_QCD_M30'>
@@ -144,19 +141,14 @@
 				color="2" />
 			<var name='tight' source='file:macro' input="applied/muoncut_30/all/bkg/bgOverbgs_tight"
 				color="4" />
-			<titleX v='MVA disc.' />
+			<titleX v='d_{MVA}' />
 			<titleY v='B/(B+S)' />
+			<minY v="0" />
 		</hist>
-
-		<hist name='bbs_QCDLoose_MET' input='bkg/bgOverbgs_looseMET'>
-			<var name='qcd' source='file:macro, input:app20' color='2' />
-			<titleX v='MET [GeV]' />
-			<titleY v='B/(B+S)' />
-		</hist>
-
+		
 		<hist name='quality_QCDLoose' input='bkg/quality_loose'>
 			<var name='QCD(#mu enriched)' source='file:macro, input:app20' color='2' />
-			<titleX v='MVA disc. cut' />
+			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='N_{est}/N_{true}' />
 			<legend posX='20' sizeX="50" posY="50"/>
 					<maxY v='1.4' />	
@@ -166,16 +158,16 @@
 		
 		<hist name='quality_QCDTight' input='bkg/quality_tight'>
 			<var name='QCD(#mu enriched)' source='file:macro, input:app20' color='2' />
-			<titleX v='MVA disc. cut' />
+			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='N_{est}/N_{true}' />
-			<legend posX='20' sizeX="50"  posY="50"/>
+			<legend posX='20' sizeX="50"  posY="74"/>
 			<!--		<maxY v='1.01' />-->
 			<!--		<minY v='1.006' />	-->
 			<showErrors v='true' />
 		</hist>
 		<hist name='quality_QCDLoose_5' input='bkg/quality_loose'>
 			<var name='qcd' source='file:QCD5, input:app20' color='2' />
-			<titleX v='MVA disc. cut' />
+			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='N_{est}/N_{true}' />
 			<!--		<maxY v='1.01' />-->
 			<!--		<minY v='1.006' />	-->
@@ -183,7 +175,7 @@
 		</hist>
 		<hist name='quality_SIGLoose' input='sig/quality_loose'>
 			<var name='signal' source='file:macro, input:app20' color='4' />
-			<titleX v='MVA disc. cut' />
+			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='N_{est}/N_{true}' />
 			<legend posX='50' sizeX="30" />
 			<!--		<maxY v='0.2' />-->
@@ -193,13 +185,13 @@
 		
 		<hist name='eff_MC_cut' input="applied/jetcut_20/all/bkg/effMC_vs_MVAcut" >
 			<var name='qcd' source="file:macro" color="2"/>
-			<titleX v='MVA disc. cut' />
+			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='true #epsilon_{QCD}' />
 		</hist>
 		
 		<hist name='quality_SIGTight' input='sig/quality_tight'>
 			<var name='signal' source='file:macro, input:app20' color='4' />
-			<titleX v='MVA disc. cut' />
+			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='N_{est}/N_{true}' />
 			<legend posX='50' sizeX="30" />
 			<!--		<maxY v='0.2' />-->
@@ -210,27 +202,29 @@
 		<hist name='quality_qcd_eff_5' input='bkg/quality_eff_BG'>
 			<var name='QCD(#mu enriched) x 5'  source='file:QCD5, input:app20' color='2' />
 			<var name='QCD(#mu enriched)' source='file:macro, input:app20' />
-			<titleX v='MVA disc. cut' />
+			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='#epsilon_{QCD, data} / #epsilon_{QCD, true}' />
 			<showErrors v='true' /><legend posX="25" posY="50" sizeX="50"></legend>
 		</hist>
 		
-		<hist name='quality_qcd_eff_5' input='bkg/quality_eff_BG'>
-			<var name='QCD(#mu enriched) x 5'  source='file:QCD5, input:app20' color='2' />
-			<var name='QCD(#mu enriched)' source='file:macro, input:app20' />
-			<titleX v='MVA disc. cut' />
-			<titleY v='#epsilon_{QCD, data} / #epsilon_{QCD, true}' />
-			<showErrors v='true' /><legend posX="25" posY="50" sizeX="50"></legend>
+		<hist name='quality_qcd_eff_both'>
+		<var name='from data' source='file:macro'
+				input='applied/muoncut_20/all/bkg/effvsDiscCut_BG' />
+			<var name='from simulation' source='file:macro'
+				input='applied/muoncut_20/all/bkg/effMC_vs_MVAcut' color='2' />
+			<titleX v='d_{MVA}^{thresh.}' />
+			<titleY v='#epsilon_{QCD}' />
+			<showErrors v='true' />
+			<legend posX="30" sizeX="60" posY="20" sizeY="30"/>
 		</hist>
 		<hist name='masterPlotAll' input='all/efficiency'>
-			<var name='qcd' source='file:macro, input:qcd20' color='2' />
-			<var name='top' source='file:macro, input:top20' color='4' />
-			<var name='wjets' source='file:macro, input:wjets20' color='8' />
-			<var name='combined' source='file:macro, input:mixed20'
-				color='24' />
-			<titleX v='MVA disc.' />
-			<titleY v='iso. efficiency' />
-			<legend posY="60" />
+			<var name='QCD(#mu enriched)' source='file:macro, input:qcd20' color='2' />
+			<var name='Top(signal)' source='file:macro, input:top20' color='4' />
+			<var name='W+jets' source='file:macro, input:wjets20' color='8' />
+			<var name='combined' source='file:macro, input:mixed20' />
+			<titleX v='d_{MVA}' />
+			<titleY v='isolation efficiency' />
+			<legend  posY="45" posX=""/>
 			<showErrors v='true' />
 		</hist>
 
@@ -240,17 +234,16 @@
 			<var name='wjets' source='file:macro, input:wjets20' color='8' />
 			<var name='combined' source='file:macro, input:mixed20'
 				color='24' />
-			<titleX v='MVA disc.' />
-			<titleY v='iso. efficiency' />
+			<titleX v='d_{MVA}' />
+			<titleY v='isolation efficiency' />
 			<legend posY="60" />
 			<showErrors v='true' />
 		</hist>
 
 		<hist name='eff_MC_qcd' input='all/efficiency'>
 			<var name='qcd' source='file:macro, input:qcd20' color='2' />
-			<titleX v='MVA disc.' />
-			<titleY v='iso. efficiency' />
-			<!--			<legend posX='70' />-->
+			<titleX v='d_{MVA}' />
+			<titleY v='#epsilon_{QCD}^{true}' />
 			<showErrors v='true' />
 			<maxY v="0.026" />
 		</hist>
@@ -260,8 +253,8 @@
 				input='applied/muoncut_30/all/bkg/effvsDiscCut_BG' />
 			<var name='from simulation' source='file:macro'
 				input='applied/muoncut_30/all/bkg/effMC_vs_MVAcut' color='2' />
-			<titleX v='MVA disc. cut' />
-			<titleY v='iso. efficiency' />
+			<titleX v='d_{MVA}^{thresh.}' />
+			<titleY v='#epsilon_{QCD}' />
 			<showErrors v='true' />
 			<!--			<maxY v="0.018" />-->
 			<maxY v="0.032" />
@@ -270,16 +263,16 @@
 
 		<hist name='eff_qcd' input='bkg/effvsDiscCut_BG'>
 			<var name='QCD(#mu enriched)' source='file:macro, input:app20' color='2' />
-			<titleX v='MVA disc. cut' />
-			<titleY v='iso. efficiency' />
+			<titleX v='d_{MVA}^{thresh.}' />
+			<titleY v='#epsilon_{QCD}^{est.}' />
 			<!--			<legend posX='50' />-->
 			<showErrors v='true' />
 		</hist>
 
 		<hist name='eff_qcd5' input='bkg/effvsDiscCut_BG'>
 			<var name='qcd' source='file:QCD5, input:app20' color='2' />
-			<titleX v='MVA disc. cut' />
-			<titleY v='iso. efficiency' />
+			<titleX v='d_{MVA}^{thresh.}' />
+			<titleY v='#epsilon_{QCD}^{est.}' />
 			<!--			<legend posX='50' />-->
 			<showErrors v='true' />
 		</hist>
@@ -316,8 +309,10 @@
 				type='marker' color='8' style='23' />
 			<var name='E_{T}(jet 1-4) &gt; 40' source='file:macro, input:app40'
 				type='marker' style='27' />
-			<titleX v='MVA disc. cut' />
+			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='N_{est}/N_{true}' />
+			<maxY v="1.04" />
+			<minY v="0.99" />
 			<!--			<legend posX='20' />-->
 		</hist>
 
@@ -332,7 +327,7 @@
 				type='marker' color='8' style='23' />
 			<var name='E_{T}(jet 1-4) &gt; 40' source='file:macro, input:app40'
 				type='marker' style='27' />
-			<titleX v='MVA disc.' />
+			<titleX v='d_{MVA}' />
 			<titleY v='B/(B+S)' />
 			<!--			<legend posX='20' posY='40' />-->
 		</hist>
@@ -348,7 +343,7 @@
 				type='marker' color='8' style='23' />
 			<var name='E_{T}(jet 1-4) &gt; 40' source='file:macro, input:app40'
 				type='marker' style='27' />
-			<titleX v='MVA disc.' />
+			<titleX v='d_{MVA}' />
 			<titleY v='B/(B+S)' />
 			<!--			<legend posX='70' />-->
 		</hist>
@@ -364,9 +359,9 @@
 				type='marker' color='8' style='23' />
 			<var name='E_{T}(jet 1-4) &gt; 40' source='file:macro, input:app40'
 				type='marker' style='27' />
-			<titleX v='MVA disc. cut' />
+			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='N_{est}/N_{true}' />
-			<legend posX='20' sizeX="40" posY="50" />
+			<legend posX='20' sizeX="40" posY="55" sizeY="40" />
 		</hist>
 
 		<hist name='quality_QCDLoose_Mcuts' input='bkg/quality_loose'>
@@ -380,8 +375,9 @@
 				color='8' style='23' />
 			<var name='p_{T}(#mu) > 30' source='file:macro, input:app30m' type='marker'
 				style='27' />
-			<titleX v='MVA disc. cut' />
+			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='N_{est}/N_{true}' />
+			<showErrors v="1" />
 			<!--			<legend posX='20' sizeX="40" posY="50" />-->
 		</hist>
 
@@ -396,9 +392,10 @@
 				color='8' style='23' />
 			<var name='p_{T}(#mu) > 30' source='file:macro, input:app30m' type='marker'
 				style='27' />
-			<titleX v='MVA disc. cut' />
+			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='N_{est}/N_{true}' />
-			<legend posX='20' sizeX="40" posY="50" />
+			<showErrors v="1" />
+			<legend posX='20' sizeX="40" posY="50" sizeY="40" />
 		</hist>
 
 		<hist name='bbs_QCDLoose_Mcuts' input='bkg/bgOverbgs_loose'>
@@ -412,9 +409,9 @@
 				color='8' style='23' />
 			<var name='p_{T}(#mu) > 30' source='file:macro, input:app30m' type='marker'
 				style='27' />
-			<titleX v='MVA disc.' />
+			<titleX v='d_{MVA}' />
 			<titleY v='B/(B+S)' />
-			<legend posX='20' posY='40' />
+			<legend posX='20' posY='40'  sizeY="30"/>
 		</hist>
 
 		<hist name='bbs_QCDTight_Mcuts' input='bkg/bgOverbgs_tight'>
@@ -428,9 +425,9 @@
 				color='8' style='23' />
 			<var name='p_{T}(#mu) > 30' source='file:macro, input:app30m' type='marker'
 				style='27' />
-			<titleX v='MVA disc.' />
+			<titleX v='d_{MVA}' />
 			<titleY v='B/(B+S)' />
-			<legend posX='70' />
+			<legend posX='70'  sizeY="30"/>
 		</hist>
 	</plots>
 </HistPlotter>
