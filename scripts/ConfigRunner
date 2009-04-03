@@ -390,11 +390,11 @@ class CfgRunner:
             if os.path.exists(self.__outputErr):
                 os.remove(self.__outputErr)   
             ## needs runtime environment to be set first
+            self.__cmsRunTimer[self.__process].start()
             if (self.__interactive):
                 os.system('cmsRun ' + configfile + " >" + self.__outputLog + " 2> " + self.__outputErr + " < /dev/null&")
             else:
                 os.system('cmsRun ' + configfile + " >" + self.__outputLog + " 2> " + self.__outputErr + " < /dev/null" )                    
-            self.__cmsRunTimer[self.__process].start()
             print '* * '
             self.__waitForFirst(self.__process)
             self.__jobStarted = True
