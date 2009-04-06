@@ -358,8 +358,15 @@ class CfgRunner:
                 print "* * aborting job..."
                 os.sys.exit(0)
         ## waits until first event has been read
-        while (self.__readFromFile(self.__outputErr) == ""):
+        errfile = self.__readFromFile(self.__outputErr)
+        while (errfile == ""):
             Timer.sleep(1)
+        ## check if errors occurred
+        for i in self.__errorToken:
+            if i in errfile:
+                print "* * an error occured, check log file %s" % self.__outputErr
+                print "* * aborting job..."
+                sys.exit(0)
         ## clear printtimer
         for i in printtimer:
             printtimer[i].cancel()
