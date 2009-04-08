@@ -462,7 +462,7 @@ class jobSplitter:
          ## explained above. For more details see:
          ## http://naf.desy.de/general_naf_docu/working_with_the_local_batch_system/
          farm = 'qsub'
-         farm+= ' -l h_vmem=3G'                 ## increase memory to 3G
+         farm+= ' -l h_vmem=2G'                 ## increase memory to 2G
          farm+= ' -l h_cpu=48:00:00'            ## set maximally allowed cpu time
         #farm+= ' -l tmp_free=10G'              ## set maximally allowed space for output
          farm+= ' -cwd'                         ## execute job from current directory
