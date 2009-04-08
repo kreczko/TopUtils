@@ -1,6 +1,7 @@
 <use name=FWCore/MessageLogger>
 <use name=rootgraphics>
 <use name=root>
+<use name=DataFormats/PatCandidates>
 
 <export>
    <lib name=TopAnalysisTopUtils>
