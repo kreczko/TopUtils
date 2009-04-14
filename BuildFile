@@ -2,9 +2,11 @@
 <use name=rootgraphics>
 <use name=root>
 <use name=DataFormats/PatCandidates>
+<use name=TopQuarkAnalysis/TopTools>
 
 <export>
    <lib name=TopAnalysisTopUtils>
+   <use name=TopQuarkAnalysis/TopTools>
    <use name=FWCore/MessageLogger>
    <use name=rootgraphics>
    <use name=root>
