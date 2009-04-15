@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<Plotter>
+	<include file='plotconfigs/HistConfig.xml' />
+	<sources>
+		<input name='allMuonPt'>
+			<folder name='analyzeAllMuon'>
+				<filter type='contains' value='pt' />
+				<filter type='!contains' value='res' />
+			</folder>
+			<folder name='analyzeSelMuon'>
+				<filter type='contains' value='pt' />
+				<filter type='!contains' value='res' />
+			</folder>
+		</input>
+		<input name='muonpt'>
+			<folder name='analyzeAllMuon'>
+				<filter type='exact' value='muonpt' />
+			</folder>
+		</input>
+		<input name='SelectedMuons'>
+			<folder name='analyzeSelMuon' />
+		</input>
+
+		<file id='qcd' name='test/background.root' />
+		<file id='top' name='test/signal.root' />
+		<file id='kin' name='test/analyzeMuon.root' />
+	</sources>
+	<plots summaryFile='inspect.pdf'>
+		<hist name='mvadisc' setup='effplot' input='trackmafter/mbg_nVSdisc'>
+			<titleX v="mva disc." />
+			<var name='qcd' source='file:qcd' color='2' />
+			<var name='signal' source='file:top' color='4' />
+			<legend name='plotname' posx='20' posy='0' />
+		</hist>
+
+		<!--		if input endswith "/" its considered as a folder-->
+		<hist name='mvadisc2' setup='effplot' input='f:trackmafter/'>
+			<titleX v="mva disc." />
+			<var name='qcd' source='file:qcd' input="mbg_nVSdisc"  color='2' />
+			<var name='signal' source='file:top' input="mbg_nVSdisc" color='4' />
+			<legend name='plotname' posx='20' posy='0' />
+		</hist>
+
+		<hist setup='effplot'>
+			<name>effplot</name>
+			<titleX>mva disc.</titleX>
+			<var name="after">
+				<source>file:qcd</source>
+				<input>trackmafter/mbg_nVSdisc</input>
+				<draw>0</draw>
+			</var>
+			<var name="before">
+				<source>file:qcd</source>
+				<input>trackmbefore/mbg_nVSdisc</input>
+				<draw>0</draw>
+			</var>
+			<legend name='plotname' posx='20' posy='0' />
+			<var name="eff">
+				<source>var:before, var:after</source>
+				<color>2</color>
+				<operation>div</operation>
+			</var>
+		</hist>
+
+		<histlist input="i:allMuonPt">
+		<var name="var" source="file:kin" />
+			<titleX for="kin_pt">#mu p_{T}</titleX>
+			<titleX for="iso_ptVsCalIso">caliso</titleX>
+			<legend for="kin_pt" />
+			<savefolder>kin</savefolder>
+		</histlist>
+
+	</plots>
+</Plotter>
