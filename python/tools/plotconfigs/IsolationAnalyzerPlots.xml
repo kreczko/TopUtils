@@ -93,7 +93,7 @@
 	<hist name='corr_DphiMuJ1J2VScalo_qcd' input='analyzeisolationMET/corr_DeltaPhiMuonJet12VScalo'>
 		<!-- name is also used for legend -->
 		<var name='wjets' source='file:qcd' color='2' />
-		<titleY v='\Sigma_{\Delta R 0.3} E_{T}(calotower) [GeV]' />
+		<titleY v='E_{T}^{weighted} [GeV]' />
 		<titleX v='\Delta\phi(\mu, jet 1) + \Delta\phi(\mu, jet 2)' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
@@ -135,7 +135,7 @@
 	<hist name='corr_dPhiMETMuVScalo_qcd' input='analyzeisolationMET/corr_deltaPhiMetleadingMuonVScalo'>
 		<!-- name is also used for legend -->
 		<var name='wjets' source='file:qcd' color='2' />
-		<titleY v='#Sigma_{\Delta R 0.3} E_{T}(calotower)[GeV]' />
+		<titleY v='E_{T}^{weighted} [GeV]' />
 		<titleX v='\Delta\phi(missing E_T, muon)' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
@@ -189,7 +189,7 @@
 
 	<hist name='corr_METVScalo_qcd' input='analyzeisolationMET/corr_METVScalo'>
 		<var name='wjets' source='file:qcd' color='2' />
-		<titleY v='#Sigma_{\Delta R 0.3} E_{T}(calotower)[GeV]' />
+		<titleY v='E_{T}^{weighted} GeV]' />
 		<titleX v='\Delta\phi(missing E_T, muon)' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
@@ -220,7 +220,7 @@
 	<hist name='corr_circVScalo_qcd' input='analyzeisolationMET/corr_circularityVScalo'>
 		<!-- name is also used for legend -->
 		<var name="QCD(#mu enriched)" source='file:qcd20' color='2' />
-		<titleY v='#Sigma_{\Delta R 0.3} E_{T}(calotower)[GeV]' />
+		<titleY v='E_{T}^{weighted} [GeV]' />
 		<titleX v='circularity' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
@@ -251,7 +251,7 @@
 	<hist name='corr_muonPtVScalo_qcd' input='analyzeisolationMET/corr_muon_ptVScalo'>
 		<!-- name is also used for legend -->
 		<var name="QCD(#mu enriched)" source='file:qcd20' color='2' />
-		<titleY v='\Sigma_{\Delta R 0.3} E_{T}(tower) [GeV]' />
+		<titleY v='E_{T}^{weighted}  [GeV]' />
 		<titleX v='p_{T}(#mu) [GeV]' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
@@ -296,7 +296,7 @@
 	<hist name='corr_MVAdiscVScalo_qcd' input='analyzeisolationMET/corr_MVAdiscVScalo'>
 		<!-- name is also used for legend -->
 		<var name="QCD(#mu enriched)" source='file:qcd' color='2' />
-		<titleY v='\Sigma_{\Delta R 0.3} E_{T}(tower) [GeV]' />
+		<titleY v='E_{T}^{weighted}  [GeV]' />
 		<titleX v='d_{MVA}' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
@@ -342,7 +342,7 @@
 	<hist name='corr_MVAdiscVScalo_top' input='analyzeisolationMET/corr_MVAdiscVScalo'>
 		<!-- name is also used for legend -->
 		<var name='top' source='file:top' color='2' />
-		<titleY v='\Sigma_{\Delta R 0.3} E_{T}(tower) [GeV]' />
+		<titleY v='E_{T}^{weighted}  [GeV]' />
 		<titleX v='d_{MVA}' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
@@ -476,5 +476,6 @@
 		<titleY v='normalized to unit area' />
 		<savefolder v='notusedMVA' />
 	</hist>
+<!--	other not used-->
 
 </HistSetup>

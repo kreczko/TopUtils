@@ -62,31 +62,32 @@
 		<hist setup='sumPhiMuJ1J2vsDphiJ1J2_qcd' />
 		<hist setup='sumPhiMuJ1J2vsDphiJ1J2_top' />
 		<hist setup='sumPhiMuJ1J2vsDphiJ1J2_wjets' />
-		
+<!--		-->
 		<hist setup='var_norm_dPhiMETMu' />
 		<hist setup='corr_dPhiMETMuVScalo_qcd' />
 		<hist setup='corr_dPhiMETMuVStrack_qcd' />
 		<hist setup='corr_dPhiMETMuVSjetIso_qcd' />
-		
+<!--		-->
 		<hist setup='var_norm_Circ' />
 		<hist setup='corr_circVScalo_qcd' />
 		<hist setup='corr_circVStrack_qcd' />
 		<hist setup='corr_circVSjetiso_qcd' />
-		
+<!--		-->
 		<hist setup='corr_muonPtVScalo_qcd' />
 		<hist setup='corr_muonPtVStrack_qcd' />
 		<hist setup='corr_muonPtVSjetiso_qcd' />
 <!--		10 not used vars-->
-	<hist setup='norm_sumEtJet3Jet4' />
-	<hist setup='norm_MET_3sep' />
-	<hist setup='norm_METtimesJet1' />
-	<hist setup='norm_SumJet1Et2timesMuEt' />
-	<hist setup='norm_Sum4JetsMuEt'/>
-	<hist setup='norm_VecSumJetsMu' />
-	<hist setup='norm_dPhiMETJet2' />
-	<hist setup='norm_sphericity' />
-	<hist setup='norm_aplanarity' />
-	<hist setup='norm_isotropy' />
+<!--	<hist setup='norm_sumEtJet3Jet4' />-->
+<!--	<hist setup='norm_MET_3sep' />-->
+<!--	<hist setup='norm_METtimesJet1' />-->
+<!--	<hist setup='norm_SumJet1Et2timesMuEt' />-->
+<!--	<hist setup='norm_Sum4JetsMuEt'/>-->
+<!--	<hist setup='norm_VecSumJetsMu' />-->
+<!--	<hist setup='norm_dPhiMETJet2' />-->
+<!--	<hist setup='norm_sphericity' />-->
+<!--	<hist setup='norm_aplanarity' />-->
+<!--	<hist setup='norm_isotropy' />-->
+<!--	other not used vars-->
 		
 
 		<!-- MuonAnalyzer Plots -->
@@ -108,12 +109,12 @@
 		
 
 		<!-- JetAnalyzer plots -->
-		<hist setup='jet1_et' />
-		<hist setup='jet2_et' />
-		<hist setup='jet3_et' />
-		<hist setup='jet4_et' />
-		<hist setup='nJets20' />
-<hist setup='nJets20_leg' />
+<!--		<hist setup='jet1_et' />-->
+<!--		<hist setup='jet2_et' />-->
+<!--		<hist setup='jet3_et' />-->
+<!--		<hist setup='jet4_et' />-->
+<!--		<hist setup='nJets20' />-->
+<!--<hist setup='nJets20_leg' />-->
 		
 	</plots>
 </HistPlotter>

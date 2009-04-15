@@ -29,7 +29,7 @@
 		<var name='QCD(#mu enriched)' source='file:qcd' color='2' norm='Integral' />
 		<var name='Top(signal)' source='file:top' color='4' norm='Integral' />
 		<var name='W + jets' source='file:wjets' color='8' norm='Integral' />
-		<titleX v='#Sigma_{#Delta R &lt; 0.3} E_{T}(tower) [GeV]' />
+		<titleX v='E_{T}^{weighted} [GeV]' />
 		<titleY v='normalized to unit area' />
 		<savefolder v='iso' />
 		<legend posX="25" sizeX="65" />
@@ -43,14 +43,14 @@
 		<var name='topH' source='file:top, input:hcalIsoPt' color='4' draw='0' />
 		<var name='wjetsH' source='file:wjets, input:hcalIsoPt' color='8' draw='0' />
 
-		<var name='qcd' source='var:qcdE, var:qcdH' color='2' norm='Integral'
+		<var name='qcd' source='var:qcdE, var:qcdH' color='2' 
 			operation='add' />
-		<var name='top' source='var:topE, var:topH' color='4' norm='Integral'
+		<var name='top' source='var:topE, var:topH' color='4' 
 			operation='add' />
-		<var name='wjets' source='var:wjetsH, var:wjetsE' color='8' norm='Integral'
+		<var name='wjets' source='var:wjetsH, var:wjetsE' color='8' 
 			operation='add' />
 		<titleX v=' #Delta R(#mu, tower)' />
-		<titleY v='normalized to unit area' />
+		<titleY v='#Sigma E_{T}(tower) per #mu' />
 		<maxX v='1' />
 		<minX v='0' />
 		<savefolder v='iso' />
@@ -83,7 +83,7 @@
 		<var name='top' source='file:top' color='4' />
 		<var name='wjets' source='file:wjets' color='8' />
 		<titleX v='#Delta R(#mu, track)' />
-		<titleY v='# of tracks within #Delta R' />
+		<titleY v='# of tracks within #Delta R per #mu' />
 		<savefolder v='iso' />
 		<maxX v="1" />
 		<minX v="0" />

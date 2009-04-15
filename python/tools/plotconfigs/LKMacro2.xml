@@ -26,8 +26,8 @@
 	<plots create='png' makeSummaryFile='true' summaryFile='inspect.pdf'>
 		<!-- Macro plots -->
 		<hist name='weights'>
-			<var name='up-weighted' source='file:macro' input="shapes/circSIG" color='4' />
-			<var name='down-weighted' source='file:macro' input="shapes/circBG" color='2' />
+			<var name='down-weighted' source='file:macro' input="shapes/circSIG" color='4' />
+			<var name='up-weighted' source='file:macro' input="shapes/circBG" color='2' />
 			<titleX v='circularity' />
 			<titleY v='weigth factor' />
 			<savefolder v="shapes/circ" />
@@ -119,8 +119,8 @@
 
 		<hist name='norm_MVA' >
 			<var name='central' source='file:qcd' input="allmbefore/mbg_nVSdisc" norm='Integral' />
-			<var name='down-weighted' source='file:qcdCircBG' input="analyzeisolationMET/var_MVAdisc" color='2' norm='Integral' />
-			<var name='up-weighted' source='file:qcdCircSIG' input="analyzeisolationMET/var_MVAdisc" color='4' norm='Integral' />
+			<var name='up-weighted' source='file:qcdCircBG' input="analyzeisolationMET/var_MVAdisc" color='2' norm='Integral' />
+			<var name='down-weighted' source='file:qcdCircSIG' input="analyzeisolationMET/var_MVAdisc" color='4' norm='Integral' />
 			<titleX v='d_{MVA}' />
 			<titleY v='normalized to unit area' />
 			<legend sizeX="40" posY="40"/>
@@ -129,8 +129,8 @@
 
 		<!--		PT-->
 		<hist name='weights'>
-			<var name='down-weighted' source='file:macro' input="shapes/ptBG" color='2' />
-			<var name='up-weighted' source='file:macro' input="shapes/ptSIG" color='4' />
+			<var name='up-weighted' source='file:macro' input="shapes/ptBG" color='2' />
+			<var name='down-weighted' source='file:macro' input="shapes/ptSIG" color='4' />
 			<titleX v='p_{T}(#mu) [GeV]' />
 			<titleY v='weight factor' />
 			<savefolder v="shapes/pt" />
@@ -215,8 +215,8 @@
 
 		<hist name='norm_MVA' >
 		<var name='central' source='file:qcd' input="allmbefore/mbg_nVSdisc" norm='Integral' />
-			<var name='down-weighted' source='file:qcdPtBG' input="analyzeisolationMET/var_MVAdisc" color='2' norm='Integral' />
-			<var name='up-weighted' source='file:qcdPtSIG' input="analyzeisolationMET/var_MVAdisc" color='4' norm='Integral' />
+			<var name='up-weighted' source='file:qcdPtBG' input="analyzeisolationMET/var_MVAdisc" color='2' norm='Integral' />
+			<var name='down-weighted' source='file:qcdPtSIG' input="analyzeisolationMET/var_MVAdisc" color='4' norm='Integral' />
 			<legend sizeX="40" posY="40"/>
 <!--			<var name='qcd' source='file:qcd' norm='Integral' />-->
 <!--			<var name='qcdBG' source='file:qcdPtBG' color='2' norm='Integral' />-->
@@ -229,7 +229,7 @@
 
 		<!--		MJ12-->
 		<hist name='weights'>
-			<var name='down-weighted' source='file:macro' input="shapes/MJ12BG" color='2' />
+			<var name='up-weighted' source='file:macro' input="shapes/MJ12BG" color='2' />
 			<var name='sig.like' source='file:macro' input="shapes/MJ12SIG" color='4' />
 			<titleX v='\Delta\phi(\mu, jet 1) + \Delta\phi(\mu, jet 2)' />
 			<titleY v='weight factor' />
@@ -313,8 +313,8 @@
 
 		<hist name='norm_MVA' >
 		<var name='central' source='file:qcd' input="allmbefore/mbg_nVSdisc" norm='Integral' />
-			<var name='down-weighted' source='file:qcdMJ12BG' input="analyzeisolationMET/var_MVAdisc" color='2' norm='Integral' />
-			<var name='up-weighted' source='file:qcdMJ12SIG' input="analyzeisolationMET/var_MVAdisc" color='4' norm='Integral' />
+			<var name='up-weighted' source='file:qcdMJ12BG' input="analyzeisolationMET/var_MVAdisc" color='2' norm='Integral' />
+			<var name='down-weighted' source='file:qcdMJ12SIG' input="analyzeisolationMET/var_MVAdisc" color='4' norm='Integral' />
 			<legend sizeX="40" posY="40"/>
 <!--			<var name='qcd' source='file:qcd' norm='Integral' />-->
 <!--			<var name='qcdUp' source='file:qcdMJ12BG' color='2' norm='Integral' />-->
@@ -326,8 +326,8 @@
 
 		<!--		MET MU-->
 		<hist name='weights'>
-			<var name='down-weighted' source='file:macro' input="shapes/METMuBG" color='2' />
-			<var name='up-weighted' source='file:macro' input="shapes/METMuSIG" color='4' />
+			<var name='up-weighted' source='file:macro' input="shapes/METMuBG" color='2' />
+			<var name='down-weighted' source='file:macro' input="shapes/METMuSIG" color='4' />
 			<titleX v='\Delta\Phi(MET,\mu)' />
 			<titleY v='weight factor' />
 			<legend posX="28" posY="68"/>
@@ -412,8 +412,8 @@
 
 		<hist name='norm_MVA'>
 		<var name='central' source='file:qcd' input="allmbefore/mbg_nVSdisc" norm='Integral' />
-			<var name='down-weighted' source='file:qcdMETMuBG' input="analyzeisolationMET/var_MVAdisc" color='2' norm='Integral' />
-			<var name='up-weighted' source='file:qcdMETMuSIG' input="analyzeisolationMET/var_MVAdisc" color='4' norm='Integral' />
+			<var name='up-weighted' source='file:qcdMETMuBG' input="analyzeisolationMET/var_MVAdisc" color='2' norm='Integral' />
+			<var name='down-weighted' source='file:qcdMETMuSIG' input="analyzeisolationMET/var_MVAdisc" color='4' norm='Integral' />
 			<legend sizeX="45" posY="70" posX="30"/>
 <!--			<var name='qcd' source='file:qcd' norm='Integral' />-->
 <!--			<var name='qcdUp' source='file:qcdMETMuBG' color='2' norm='Integral' />-->
