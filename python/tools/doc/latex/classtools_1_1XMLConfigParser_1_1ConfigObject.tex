@@ -1,0 +1,104 @@
+\hypertarget{classtools_1_1XMLConfigParser_1_1ConfigObject}{
+\section{tools::XMLConfigParser::ConfigObject Class Reference}
+\label{classtools_1_1XMLConfigParser_1_1ConfigObject}\index{tools::XMLConfigParser::ConfigObject@{tools::XMLConfigParser::ConfigObject}}
+}
+An simple configurable object.  
+
+
+Inheritance diagram for tools::XMLConfigParser::ConfigObject::\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classtools_1_1XMLConfigParser_1_1ConfigObject}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+def \hyperlink{classtools_1_1XMLConfigParser_1_1ConfigObject_da2c248a8db2c816f489af71f314c37c}{\_\-\_\-init\_\-\_\-}
+\begin{CompactList}\small\item\em The standard constructor. \item\end{CompactList}\item 
+\hypertarget{classtools_1_1XMLConfigParser_1_1ConfigObject_0862df3a12f28c29566910ad410ab308}{
+def \textbf{setOption}}
+\label{classtools_1_1XMLConfigParser_1_1ConfigObject_0862df3a12f28c29566910ad410ab308}
+
+\item 
+def \hyperlink{classtools_1_1XMLConfigParser_1_1ConfigObject_74b01910a3f928e337b2ee658ddea97b}{getOption}
+\item 
+\hypertarget{classtools_1_1XMLConfigParser_1_1ConfigObject_09d996cb6905edb9b830fac3564c02aa}{
+def \textbf{readDefaults}}
+\label{classtools_1_1XMLConfigParser_1_1ConfigObject_09d996cb6905edb9b830fac3564c02aa}
+
+\item 
+\hypertarget{classtools_1_1XMLConfigParser_1_1ConfigObject_f6cf63837cff0257365350121dfe17bb}{
+def \hyperlink{classtools_1_1XMLConfigParser_1_1ConfigObject_f6cf63837cff0257365350121dfe17bb}{parseFromNode}}
+\label{classtools_1_1XMLConfigParser_1_1ConfigObject_f6cf63837cff0257365350121dfe17bb}
+
+\begin{CompactList}\small\item\em gets all attributes of the node and textnodes which are not in \char`\"{}doNotParse\char`\"{} and and adds them as options \item\end{CompactList}\end{CompactItemize}
+\subsection*{Public Attributes}
+\begin{CompactItemize}
+\item 
+\hypertarget{classtools_1_1XMLConfigParser_1_1ConfigObject_00284e82b6ab5406ca91d6ffb33e4ddf}{
+\textbf{rootName}}
+\label{classtools_1_1XMLConfigParser_1_1ConfigObject_00284e82b6ab5406ca91d6ffb33e4ddf}
+
+\item 
+\hypertarget{classtools_1_1XMLConfigParser_1_1ConfigObject_dbe854fff96e72df0ab11f74463e0df4}{
+\textbf{doNotParse}}
+\label{classtools_1_1XMLConfigParser_1_1ConfigObject_dbe854fff96e72df0ab11f74463e0df4}
+
+\item 
+\hypertarget{classtools_1_1XMLConfigParser_1_1ConfigObject_8c642c6b47664723d47fbb5d3beb406f}{
+\textbf{options}}
+\label{classtools_1_1XMLConfigParser_1_1ConfigObject_8c642c6b47664723d47fbb5d3beb406f}
+
+\item 
+\hypertarget{classtools_1_1XMLConfigParser_1_1ConfigObject_69bde8a5db8dfe812abb2e0f411c5c9d}{
+\textbf{mandatoryObjects}}
+\label{classtools_1_1XMLConfigParser_1_1ConfigObject_69bde8a5db8dfe812abb2e0f411c5c9d}
+
+\item 
+\hypertarget{classtools_1_1XMLConfigParser_1_1ConfigObject_bcca5d83893ea94d5644bb1af1b67f53}{
+\textbf{subobjects}}
+\label{classtools_1_1XMLConfigParser_1_1ConfigObject_bcca5d83893ea94d5644bb1af1b67f53}
+
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+An simple configurable object. 
+
+\subsection{Member Function Documentation}
+\hypertarget{classtools_1_1XMLConfigParser_1_1ConfigObject_da2c248a8db2c816f489af71f314c37c}{
+\index{tools::XMLConfigParser::ConfigObject@{tools::XMLConfigParser::ConfigObject}!\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}}
+\index{\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}!tools::XMLConfigParser::ConfigObject@{tools::XMLConfigParser::ConfigObject}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}def tools::XMLConfigParser::ConfigObject::\_\-\_\-init\_\-\_\- ( {\em self}, \/   {\em rootNodeName} = {\tt \char`\"{}\char`\"{}}, \/   {\em doNotParse} = {\tt \mbox{[}\mbox{]}}, \/   {\em mandatoryObjects} = {\tt \mbox{[}\mbox{]}})}}
+\label{classtools_1_1XMLConfigParser_1_1ConfigObject_da2c248a8db2c816f489af71f314c37c}
+
+
+The standard constructor. 
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em rootNodeName}]the name of the initial XML node for parsing. DEPRACATED \item[{\em doNotParse}]list of complex objects which should not be parsed as options \item[{\em mandatoryObjects}]complex objects which have te exists. NOT IN USE \end{description}
+\end{Desc}
+\hypertarget{classtools_1_1XMLConfigParser_1_1ConfigObject_74b01910a3f928e337b2ee658ddea97b}{
+\index{tools::XMLConfigParser::ConfigObject@{tools::XMLConfigParser::ConfigObject}!getOption@{getOption}}
+\index{getOption@{getOption}!tools::XMLConfigParser::ConfigObject@{tools::XMLConfigParser::ConfigObject}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}def tools::XMLConfigParser::ConfigObject::getOption ( {\em self}, \/   {\em name})}}
+\label{classtools_1_1XMLConfigParser_1_1ConfigObject_74b01910a3f928e337b2ee658ddea97b}
+
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em name}]the name of the option  \par
+ raises \hyperlink{classtools_1_1XMLConfigParser_1_1ConfigError}{ConfigError} if the option name is empty  \par
+ raises KeyError if the option does not exist \end{description}
+\end{Desc}
+\begin{Desc}
+\item[Returns:]value of the option with the name = name \end{Desc}
+
+
+The documentation for this class was generated from the following file:\begin{CompactItemize}
+\item 
+XMLConfigParser.py\end{CompactItemize}

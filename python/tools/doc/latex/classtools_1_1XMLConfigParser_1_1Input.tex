@@ -1,0 +1,84 @@
+\hypertarget{classtools_1_1XMLConfigParser_1_1Input}{
+\section{tools::XMLConfigParser::Input Class Reference}
+\label{classtools_1_1XMLConfigParser_1_1Input}\index{tools::XMLConfigParser::Input@{tools::XMLConfigParser::Input}}
+}
+defines an input for a histogram : does not know anything about files  
+
+
+Inheritance diagram for tools::XMLConfigParser::Input::\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classtools_1_1XMLConfigParser_1_1Input}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+\hypertarget{classtools_1_1XMLConfigParser_1_1Input_65cca4bf221d237f5893e547adb1a3f4}{
+def \textbf{\_\-\_\-init\_\-\_\-}}
+\label{classtools_1_1XMLConfigParser_1_1Input_65cca4bf221d237f5893e547adb1a3f4}
+
+\item 
+\hypertarget{classtools_1_1XMLConfigParser_1_1Input_db1d4fac10a17fadc1e2392c4181c915}{
+def \textbf{setContent}}
+\label{classtools_1_1XMLConfigParser_1_1Input_db1d4fac10a17fadc1e2392c4181c915}
+
+\item 
+\hypertarget{classtools_1_1XMLConfigParser_1_1Input_0bf591eb6932a4550d6c2c4bc8432a81}{
+def \textbf{getFilteredContent}}
+\label{classtools_1_1XMLConfigParser_1_1Input_0bf591eb6932a4550d6c2c4bc8432a81}
+
+\end{CompactItemize}
+\subsection*{Public Attributes}
+\begin{CompactItemize}
+\item 
+\hypertarget{classtools_1_1XMLConfigParser_1_1Input_74306ef1655f005fa860125d3e809583}{
+\textbf{content}}
+\label{classtools_1_1XMLConfigParser_1_1Input_74306ef1655f005fa860125d3e809583}
+
+\end{CompactItemize}
+\subsection*{Static Public Attributes}
+\begin{CompactItemize}
+\item 
+\hypertarget{classtools_1_1XMLConfigParser_1_1Input_6a1fe6d410ed958cede99812e070212f}{
+string \hyperlink{classtools_1_1XMLConfigParser_1_1Input_6a1fe6d410ed958cede99812e070212f}{separator} = \char`\"{}:\char`\"{}}
+\label{classtools_1_1XMLConfigParser_1_1Input_6a1fe6d410ed958cede99812e070212f}
+
+\begin{CompactList}\small\item\em separator between shortcut and input \item\end{CompactList}\item 
+\hypertarget{classtools_1_1XMLConfigParser_1_1Input_06abafad4788d8027a19cdf2f2819940}{
+string \textbf{rootNodeName} = \char`\"{}input\char`\"{}}
+\label{classtools_1_1XMLConfigParser_1_1Input_06abafad4788d8027a19cdf2f2819940}
+
+\item 
+list \hyperlink{classtools_1_1XMLConfigParser_1_1Input_02daa3ad92bdc203274e117a88ec8543}{doNotParse} = \mbox{[}\char`\"{}folder\char`\"{}\mbox{]}
+\begin{CompactList}\small\item\em marks complex objects which have their own class. \item\end{CompactList}\item 
+\hypertarget{classtools_1_1XMLConfigParser_1_1Input_d96187f7a89c6b7879473eb102622375}{
+dictionary \hyperlink{classtools_1_1XMLConfigParser_1_1Input_d96187f7a89c6b7879473eb102622375}{inputTypes} = \{\char`\"{}f\char`\"{}:\char`\"{}folder\char`\"{}, \char`\"{}i\char`\"{}:\char`\"{}input\char`\"{}\}}
+\label{classtools_1_1XMLConfigParser_1_1Input_d96187f7a89c6b7879473eb102622375}
+
+\begin{CompactList}\small\item\em defines shortcuts for inputs \par
+ f:foldername uses a folder as input\par
+ i:inputName uses an input previously defined in the configuration file:\par
+ if it is no shortcut is present the input will be interpreted as direct input (full path to histogram) \item\end{CompactList}\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+defines an input for a histogram : does not know anything about files 
+
+\subsection{Member Data Documentation}
+\hypertarget{classtools_1_1XMLConfigParser_1_1Input_02daa3ad92bdc203274e117a88ec8543}{
+\index{tools::XMLConfigParser::Input@{tools::XMLConfigParser::Input}!doNotParse@{doNotParse}}
+\index{doNotParse@{doNotParse}!tools::XMLConfigParser::Input@{tools::XMLConfigParser::Input}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}list {\bf tools::XMLConfigParser::Input::doNotParse} = \mbox{[}\char`\"{}folder\char`\"{}\mbox{]}\hspace{0.3cm}{\tt  \mbox{[}static\mbox{]}}}}
+\label{classtools_1_1XMLConfigParser_1_1Input_02daa3ad92bdc203274e117a88ec8543}
+
+
+marks complex objects which have their own class. 
+
+
+
+Reimplemented from \hyperlink{classtools_1_1XMLConfigParser_1_1ConfigObject}{tools::XMLConfigParser::ConfigObject}.
+
+The documentation for this class was generated from the following file:\begin{CompactItemize}
+\item 
+XMLConfigParser.py\end{CompactItemize}

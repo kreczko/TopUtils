@@ -1,0 +1,112 @@
+\hypertarget{classtools_1_1XMLConfigParser_1_1OptionSet}{
+\section{tools::XMLConfigParser::OptionSet Class Reference}
+\label{classtools_1_1XMLConfigParser_1_1OptionSet}\index{tools::XMLConfigParser::OptionSet@{tools::XMLConfigParser::OptionSet}}
+}
+stores the options of an \hyperlink{classtools_1_1XMLConfigParser_1_1ConfigObject}{ConfigObject} and their defaults  
+
+
+\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+\hypertarget{classtools_1_1XMLConfigParser_1_1OptionSet_c10781767756a542cd9c5b2beae78186}{
+def \textbf{\_\-\_\-init\_\-\_\-}}
+\label{classtools_1_1XMLConfigParser_1_1OptionSet_c10781767756a542cd9c5b2beae78186}
+
+\item 
+def \hyperlink{classtools_1_1XMLConfigParser_1_1OptionSet_50ceb2f5657667e4c0b3ccd71fbf0986}{getOption}
+\item 
+\hypertarget{classtools_1_1XMLConfigParser_1_1OptionSet_806b094a77a3f5a3d60134d23c850d26}{
+def \hyperlink{classtools_1_1XMLConfigParser_1_1OptionSet_806b094a77a3f5a3d60134d23c850d26}{addOption}}
+\label{classtools_1_1XMLConfigParser_1_1OptionSet_806b094a77a3f5a3d60134d23c850d26}
+
+\begin{CompactList}\small\item\em adds an option to the \hyperlink{classtools_1_1XMLConfigParser_1_1OptionSet}{OptionSet} \item\end{CompactList}\item 
+def \hyperlink{classtools_1_1XMLConfigParser_1_1OptionSet_6c3e2b6ef7030f2f9525bb52de68531d}{setDefaults}
+\begin{CompactList}\small\item\em Sets the default values. \item\end{CompactList}\item 
+\hypertarget{classtools_1_1XMLConfigParser_1_1OptionSet_175d8fae91a86d08e6e84c607f014128}{
+def \hyperlink{classtools_1_1XMLConfigParser_1_1OptionSet_175d8fae91a86d08e6e84c607f014128}{setOptions}}
+\label{classtools_1_1XMLConfigParser_1_1OptionSet_175d8fae91a86d08e6e84c607f014128}
+
+\begin{CompactList}\small\item\em Sets the options. \item\end{CompactList}\item 
+def \hyperlink{classtools_1_1XMLConfigParser_1_1OptionSet_ed3b8e8b77f780936f38389ab833f5ff}{setOption}
+\begin{CompactList}\small\item\em sets an option to a value The option has to be defined in the default configuration If the option is reset a second time in one \hyperlink{classtools_1_1XMLConfigParser_1_1ConfigObject}{ConfigObject} a warning is given. \item\end{CompactList}\item 
+def \hyperlink{classtools_1_1XMLConfigParser_1_1OptionSet_118681455ca2ff1e108084dd04452802}{checkOptionValue}
+\begin{CompactList}\small\item\em check if the option value is allowed. \item\end{CompactList}\item 
+def \hyperlink{classtools_1_1XMLConfigParser_1_1OptionSet_66effebc086caf0e5494f51502455f27}{hasOption}
+\end{CompactItemize}
+\subsection*{Public Attributes}
+\begin{CompactItemize}
+\item 
+\hypertarget{classtools_1_1XMLConfigParser_1_1OptionSet_25ca2ef97315f87f05e8353ebff49537}{
+\textbf{options}}
+\label{classtools_1_1XMLConfigParser_1_1OptionSet_25ca2ef97315f87f05e8353ebff49537}
+
+\item 
+\hypertarget{classtools_1_1XMLConfigParser_1_1OptionSet_d17cc4d3ac989f378d3a06210775edaa}{
+\textbf{defaults}}
+\label{classtools_1_1XMLConfigParser_1_1OptionSet_d17cc4d3ac989f378d3a06210775edaa}
+
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+stores the options of an \hyperlink{classtools_1_1XMLConfigParser_1_1ConfigObject}{ConfigObject} and their defaults 
+
+\subsection{Member Function Documentation}
+\hypertarget{classtools_1_1XMLConfigParser_1_1OptionSet_50ceb2f5657667e4c0b3ccd71fbf0986}{
+\index{tools::XMLConfigParser::OptionSet@{tools::XMLConfigParser::OptionSet}!getOption@{getOption}}
+\index{getOption@{getOption}!tools::XMLConfigParser::OptionSet@{tools::XMLConfigParser::OptionSet}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}def tools::XMLConfigParser::OptionSet::getOption ( {\em self}, \/   {\em option})}}
+\label{classtools_1_1XMLConfigParser_1_1OptionSet_50ceb2f5657667e4c0b3ccd71fbf0986}
+
+
+\begin{Desc}
+\item[Returns:]the option with given name, if it exists. Otherwise raises \hyperlink{classtools_1_1XMLConfigParser_1_1ConfigError}{ConfigError}. \end{Desc}
+\hypertarget{classtools_1_1XMLConfigParser_1_1OptionSet_6c3e2b6ef7030f2f9525bb52de68531d}{
+\index{tools::XMLConfigParser::OptionSet@{tools::XMLConfigParser::OptionSet}!setDefaults@{setDefaults}}
+\index{setDefaults@{setDefaults}!tools::XMLConfigParser::OptionSet@{tools::XMLConfigParser::OptionSet}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}def tools::XMLConfigParser::OptionSet::setDefaults ( {\em self}, \/   {\em options})}}
+\label{classtools_1_1XMLConfigParser_1_1OptionSet_6c3e2b6ef7030f2f9525bb52de68531d}
+
+
+Sets the default values. 
+
+\begin{Desc}
+\item[\hyperlink{deprecated__deprecated000001}{Deprecated}]: will be deleted \end{Desc}
+\hypertarget{classtools_1_1XMLConfigParser_1_1OptionSet_ed3b8e8b77f780936f38389ab833f5ff}{
+\index{tools::XMLConfigParser::OptionSet@{tools::XMLConfigParser::OptionSet}!setOption@{setOption}}
+\index{setOption@{setOption}!tools::XMLConfigParser::OptionSet@{tools::XMLConfigParser::OptionSet}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}def tools::XMLConfigParser::OptionSet::setOption ( {\em self}, \/   {\em option}, \/   {\em value})}}
+\label{classtools_1_1XMLConfigParser_1_1OptionSet_ed3b8e8b77f780936f38389ab833f5ff}
+
+
+sets an option to a value The option has to be defined in the default configuration If the option is reset a second time in one \hyperlink{classtools_1_1XMLConfigParser_1_1ConfigObject}{ConfigObject} a warning is given. 
+
+If the optionvalue is the same as the default value a warning is given \begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em option,:}]the option to change  \par
+ raises \hyperlink{classtools_1_1XMLConfigParser_1_1ConfigError}{ConfigError} if option is unknown \item[{\em value,:}]the value of the option \end{description}
+\end{Desc}
+\hypertarget{classtools_1_1XMLConfigParser_1_1OptionSet_118681455ca2ff1e108084dd04452802}{
+\index{tools::XMLConfigParser::OptionSet@{tools::XMLConfigParser::OptionSet}!checkOptionValue@{checkOptionValue}}
+\index{checkOptionValue@{checkOptionValue}!tools::XMLConfigParser::OptionSet@{tools::XMLConfigParser::OptionSet}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}def tools::XMLConfigParser::OptionSet::checkOptionValue ( {\em self}, \/   {\em option}, \/   {\em type})}}
+\label{classtools_1_1XMLConfigParser_1_1OptionSet_118681455ca2ff1e108084dd04452802}
+
+
+check if the option value is allowed. 
+
+In simplest case check if string, integer or float, see typedef \hypertarget{classtools_1_1XMLConfigParser_1_1OptionSet_66effebc086caf0e5494f51502455f27}{
+\index{tools::XMLConfigParser::OptionSet@{tools::XMLConfigParser::OptionSet}!hasOption@{hasOption}}
+\index{hasOption@{hasOption}!tools::XMLConfigParser::OptionSet@{tools::XMLConfigParser::OptionSet}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}def tools::XMLConfigParser::OptionSet::hasOption ( {\em self}, \/   {\em option})}}
+\label{classtools_1_1XMLConfigParser_1_1OptionSet_66effebc086caf0e5494f51502455f27}
+
+
+\begin{Desc}
+\item[Returns:]: if option is in the set \end{Desc}
+
+
+The documentation for this class was generated from the following file:\begin{CompactItemize}
+\item 
+XMLConfigParser.py\end{CompactItemize}

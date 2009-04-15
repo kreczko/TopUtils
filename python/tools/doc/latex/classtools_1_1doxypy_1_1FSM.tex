@@ -1,0 +1,86 @@
+\hypertarget{classtools_1_1doxypy_1_1FSM}{
+\section{tools::doxypy::FSM Class Reference}
+\label{classtools_1_1doxypy_1_1FSM}\index{tools::doxypy::FSM@{tools::doxypy::FSM}}
+}
+Implements a finite state machine.  
+
+
+\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+\hypertarget{classtools_1_1doxypy_1_1FSM_3a7e99c01a55c7b51716223bdcbf4f09}{
+def \textbf{\_\-\_\-init\_\-\_\-}}
+\label{classtools_1_1doxypy_1_1FSM_3a7e99c01a55c7b51716223bdcbf4f09}
+
+\item 
+\hypertarget{classtools_1_1doxypy_1_1FSM_26b92e58bb51352633a59b986f1d7ed8}{
+def \textbf{setStartState}}
+\label{classtools_1_1doxypy_1_1FSM_26b92e58bb51352633a59b986f1d7ed8}
+
+\item 
+\hypertarget{classtools_1_1doxypy_1_1FSM_399f96a5cd0fb809675d8d0358173e14}{
+def \textbf{addTransition}}
+\label{classtools_1_1doxypy_1_1FSM_399f96a5cd0fb809675d8d0358173e14}
+
+\item 
+def \hyperlink{classtools_1_1doxypy_1_1FSM_fd6f235b6e8f7bc9ad65574d3d626fd9}{makeTransition}
+\begin{CompactList}\small\item\em Makes a transition based on the given input. \item\end{CompactList}\end{CompactItemize}
+\subsection*{Public Attributes}
+\begin{CompactItemize}
+\item 
+\hypertarget{classtools_1_1doxypy_1_1FSM_178e6451e7c4df649180afbc2585e561}{
+\textbf{transitions}}
+\label{classtools_1_1doxypy_1_1FSM_178e6451e7c4df649180afbc2585e561}
+
+\item 
+\hypertarget{classtools_1_1doxypy_1_1FSM_b964ab2171ee650260f1ef2041fa8680}{
+\textbf{current\_\-state}}
+\label{classtools_1_1doxypy_1_1FSM_b964ab2171ee650260f1ef2041fa8680}
+
+\item 
+\hypertarget{classtools_1_1doxypy_1_1FSM_9bbf8d8b267c39e8b8b8055393f52e53}{
+\textbf{current\_\-input}}
+\label{classtools_1_1doxypy_1_1FSM_9bbf8d8b267c39e8b8b8055393f52e53}
+
+\item 
+\hypertarget{classtools_1_1doxypy_1_1FSM_ee547a8ac8a2e13c735fff54cbe391a1}{
+\textbf{current\_\-transition}}
+\label{classtools_1_1doxypy_1_1FSM_ee547a8ac8a2e13c735fff54cbe391a1}
+
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+Implements a finite state machine. 
+
+Transitions are given as 4-tuples, consisting of an origin state, a target state, a condition for the transition (given as a reference to a function which gets called with a given piece of input) and a pointer to a function to be called upon the execution of the given transition.
+
+\footnotesize\begin{verbatim}
+@var transitions holds the transitions
+@var current_state holds the current state
+@var current_input holds the current input
+@var current_transition hold the currently active transition
+\end{verbatim}
+\normalsize
+ 
+
+\subsection{Member Function Documentation}
+\hypertarget{classtools_1_1doxypy_1_1FSM_fd6f235b6e8f7bc9ad65574d3d626fd9}{
+\index{tools::doxypy::FSM@{tools::doxypy::FSM}!makeTransition@{makeTransition}}
+\index{makeTransition@{makeTransition}!tools::doxypy::FSM@{tools::doxypy::FSM}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}def tools::doxypy::FSM::makeTransition ( {\em self}, \/   {\em input})}}
+\label{classtools_1_1doxypy_1_1FSM_fd6f235b6e8f7bc9ad65574d3d626fd9}
+
+
+Makes a transition based on the given input. 
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em input}]input to parse by the \hyperlink{classtools_1_1doxypy_1_1FSM}{FSM} \end{description}
+\end{Desc}
+
+
+The documentation for this class was generated from the following file:\begin{CompactItemize}
+\item 
+doxypy.py\end{CompactItemize}
