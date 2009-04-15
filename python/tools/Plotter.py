@@ -1,12 +1,10 @@
 from XMLConfigParser import *
-import os, sys
+import os
 from ROOT import gROOT, TGaxis
 from DrawHelper import Helper
 
-class Validator():
-    pass
 
-class Plotter():
+class Plotter:
     
     def __init__(self, configfile):
         self.config = ""

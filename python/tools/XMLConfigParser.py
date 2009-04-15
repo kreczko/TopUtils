@@ -22,7 +22,7 @@ defaults = {"plots" : "test/DefaultPlotConfig.xml",
                     "var" : "test/DefaultVarConfig.xml"
                 }
 
-class Configuration():
+class Configuration:
     
     """ \brief The definitions of the configuration"""
     def __init__(self, configRoot="Plotter", verbose=False):
@@ -138,7 +138,7 @@ class Configuration():
 #===============================================================================
 # stores the options of an ConfigObject and their defaults        
 #===============================================================================
-class OptionSet():
+class OptionSet:
     """
     \brief stores the options of an ConfigObject and their defaults        
     """
@@ -241,7 +241,7 @@ class OptionSet():
         return self.options.has_key(option)
             
             
-class ConfigObject():
+class ConfigObject:
     """An simple configurable object"""
     
     def __init__(self, rootNodeName="", doNotParse=[], mandatoryObjects=[]):
@@ -264,6 +264,7 @@ class ConfigObject():
     
     def setOption(self, option, value):
         self.options.setOption(option, value)
+
     def getOption(self, name):
         """
         @param name the name of the option
@@ -332,7 +333,7 @@ A simple Exception implementations for customized errors
         return repr(self.value)
     
 #only static functions
-class Parser():
+class Parser:
     
 #===============================================================================
 #    A wrapper for the minidom childNodes function.
@@ -444,7 +445,7 @@ class Parser():
 #===============================================================================
 # A wrapper for any file or TFile related issues
 #===============================================================================
-class FileService():
+class FileService:
 #===============================================================================
 #    @return if a file exists. If it doesn't an IOError is raised
 #===============================================================================
