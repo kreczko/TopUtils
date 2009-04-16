@@ -1,7 +1,7 @@
 from XMLConfigParser import *
 import os
 from ROOT import gROOT
-from DrawHelper import Helper
+from Drawer import Drawer
 
 
 class Plotter:
@@ -68,7 +68,7 @@ class Plotter:
 #===============================================================================
 #                once you have the histogram, apply the configuration to it.
 #===============================================================================
-                h = Helper.applyHistConfig(h, hist, var)
+                h = Drawer.applyHistConfig(h, hist, var)
 #===============================================================================
 #                only hists which are marked to be draw are added to list
 #===============================================================================
@@ -78,8 +78,8 @@ class Plotter:
 #===============================================================================
 #                save all histograms in one file
 #===============================================================================
-            Helper.saveHistsInOne(list, hist, savedir, writeAs) 
+            Drawer.saveHistsInOne(list, hist, savedir, writeAs) 
 if __name__ == "__main__":
-    Helper.setDefaultLayout()
+    Drawer.setDefaultLayout()
     pl = Plotter("test/NewConfig.xml")
     pl.savePlotsFromCfg("plots")

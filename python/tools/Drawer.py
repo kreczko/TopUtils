@@ -5,7 +5,7 @@ from math import log
 from array import array
 
 
-class Helper:
+class Drawer:
     """
     Tool for the layout of histograms
     """
@@ -16,7 +16,7 @@ class Helper:
     def setDefaultLayout():
         gROOT.Reset()
         #set color palette
-        Helper.set_palette('', 999)
+        Drawer.set_palette('', 999)
         #max 3 digits on axis title
         TGaxis.SetMaxDigits(3)
         # for white background
@@ -33,7 +33,7 @@ class Helper:
         leg = TLegend(x, y, x + sizeX, y+sizeY) 
         leg.SetY1NDC(y+sizeY)
         leg.SetY2NDC(y)
-        leg = Helper.setLegendStyle(leg)
+        leg = Drawer.setLegendStyle(leg)
         return leg
         
     makePlainLegend = staticmethod(makePlainLegend)
@@ -71,7 +71,7 @@ class Helper:
         hist.GetYaxis().SetLabelFont(62)
         hist.GetYaxis().RotateTitle(rotate)
         
-        if Helper.drawOption and "TH2F" in hist.__str__():
+        if Drawer.drawOption and "TH2F" in hist.__str__():
             hist.GetZaxis().SetTitleSize(0.07)
             hist.GetZaxis().SetTitleColor(1)
             hist.GetZaxis().SetTitleOffset(1.0)
@@ -84,7 +84,7 @@ class Helper:
             else:
                 hist.GetZaxis().SetTitle('# of events')
             hist.SetContour(99)
-            if Helper.drawOption == 'LEGO':                
+            if Drawer.drawOption == 'LEGO':                
                 hist.GetXaxis().SetTitleSize(0.06)
                 hist.GetYaxis().SetTitleSize(0.06)
                 hist.GetYaxis().SetTitleOffset(1.2)
@@ -140,7 +140,7 @@ class Helper:
         x1 = x2 *0.05
         minY = hist.GetYaxis().GetXmin()
         maxY = hist.GetYaxis().GetXmax()
-        if Helper.drawOption == 'COLZ':
+        if Drawer.drawOption == 'COLZ':
                 
 #                print 'y',min, max
                 
@@ -194,19 +194,19 @@ class Helper:
             os.mkdir(folder)
         pads = ps.PadService('testTH2', 'testingTH2', 1)
         pad = pads.Next()
-        pad = Helper.setPadLayout(pad)
-        if Helper.drawOption == 'COLZ':
+        pad = Drawer.setPadLayout(pad)
+        if Drawer.drawOption == 'COLZ':
             pad.SetRightMargin(0.13)
         if "norm_ProcMatrix" in filename:
             pad.SetLeftMargin(0.2)
 #        for i in pad.GetListOfPrimitives():
 #            i.SetFillColor(0)
-        hist.Draw(Helper.drawOption)
+        hist.Draw(Drawer.drawOption)
         if not "norm_ProcMatrix" in filename:
             pt.Draw()
 
         for i in printAs:
-            if i in Helper.allowedFormats:
+            if i in Drawer.allowedFormats:
                 pad.Print(folder + '/' + filename + '.' + i)
     saveTH2 = staticmethod(saveTH2)
     
@@ -233,7 +233,7 @@ class Helper:
             if histCfg.subobjects["legend"]:
                 legend = histCfg.subobjects["legend"][0]
         if legend:
-                legend = Helper.makePlainLegend(legend.getOption('posX'), legend.getOption('posY'), legend.getOption('sizeX'), 
+                legend = Drawer.makePlainLegend(legend.getOption('posX'), legend.getOption('posY'), legend.getOption('sizeX'), 
 legend.getOption('sizeY'))
                 
         filename = filename.replace('.','')    
@@ -245,12 +245,12 @@ legend.getOption('sizeY'))
                 os.mkdir(f)
         pads = ps.PadService('test', 'testing', 1)
         pad = pads.Next()
-        pad = Helper.setPadLayout(pad)
+        pad = Drawer.setPadLayout(pad)
         if logH[0] == '1':
             pad.SetLogx(1)
         if logH[1] == '1':
             pad.SetLogy(1)
-        mm = Helper.getMM(histlist)
+        mm = Drawer.getMM(histlist)
         min = mm[0]
         max = mm[1]
         x = 0
@@ -261,7 +261,7 @@ legend.getOption('sizeY'))
             hist = histlist[histkey]
 #        for hist in histlist.itervalues():
             if "TH2F" in hist.__str__():
-                Helper.saveTH2(hist, filename, folder, legend, printAs)
+                Drawer.saveTH2(hist, filename, folder, legend, printAs)
 #                print "TH2F"
                 break
             
@@ -274,13 +274,13 @@ legend.getOption('sizeY'))
                 legend.AddEntry(hist, hist.GetName())
             
             if x == 0:
-                draws = Helper.doSpecial(hist, filename)
+                draws = Drawer.doSpecial(hist, filename)
                 if not histCfg.getOption("drawOption") == "":
                     hist.Draw(histCfg.getOption("drawOption"))
                 elif histCfg.getOption("drawOption") == "" and not histCfg.getVariable(histkey).getOption("drawOption") == "":
                     hist.SetFillColor(hist.GetLineColor())
                     hist.Draw(histCfg.getVariable(histkey).getOption("drawOption"))
-                elif err and Helper.drawOption == "":
+                elif err and Drawer.drawOption == "":
                     hist.Draw('e')
                 else:
 #                    hist.SetError(array('d', noerr))
@@ -313,7 +313,7 @@ legend.getOption('sizeY'))
         if not "TH2F" in hist.__str__():
             pad.RedrawAxis();
             for i in printAs:
-                if i in Helper.allowedFormats:
+                if i in Drawer.allowedFormats:
                     pad.Print(folder + '/' + filename + '.' + i)
     saveHistsInOne = staticmethod(saveHistsInOne)
         
@@ -349,9 +349,9 @@ legend.getOption('sizeY'))
         if not histconfig.getOption('smooth') =="0":
             hist.Smooth(int(histconfig.getOption('smooth') ))
         if histconfig.getOption('drawOption'):
-            Helper.drawOption = histconfig.getOption('drawOption')
+            Drawer.drawOption = histconfig.getOption('drawOption')
         else: #reset drawOption
-            Helper.drawOption = ''
+            Drawer.drawOption = ''
         min = None
         max = None
 #------------------------------------------------------------------------------ X axis
@@ -380,14 +380,14 @@ legend.getOption('sizeY'))
         if histconfig.getOption('maxY') or histconfig.getOption('minY'):
             hist.SetAxisRange(min, max, 'Y')
 #------------------------------------------------------------ set titles
-        hist = Helper.setHistLabels(hist, histconfig.getOption('titleX'), histconfig.getOption('titleY'), histconfig.getOption('rotate').upper() == 
+        hist = Drawer.setHistLabels(hist, histconfig.getOption('titleX'), histconfig.getOption('titleY'), histconfig.getOption('rotate').upper() == 
 'TRUE')
         if var.getOption('type') == 'filled':
-            hist = Helper.setFilled(hist, var.getOption('color'), var.getOption('size'), var.getOption('style'))
+            hist = Drawer.setFilled(hist, var.getOption('color'), var.getOption('size'), var.getOption('style'))
         elif var.getOption('type') == 'marker':
-            hist = Helper.setMarker(hist, var.getOption('color'), var.getOption('size'), var.getOption('style'))
+            hist = Drawer.setMarker(hist, var.getOption('color'), var.getOption('size'), var.getOption('style'))
         else:
-            hist = Helper.setLine(hist, var.getOption('color'), var.getOption('size'), var.getOption('style'))
+            hist = Drawer.setLine(hist, var.getOption('color'), var.getOption('size'), var.getOption('style'))
         
         hist.SetName(var.getOption('name'))
 #===============================================================================
@@ -437,8 +437,8 @@ legend.getOption('sizeY'))
         
     def getMM(histlist):
         yScale = 0.1
-        min = Helper.getMin(histlist)
-        max = Helper.getMax(histlist)
+        min = Drawer.getMin(histlist)
+        max = Drawer.getMax(histlist)
         dm = max - min
         max = max + dm * yScale
         nmin = min - dm * yScale
