@@ -148,7 +148,10 @@ class blockCreator:
 ##  * writes a string to a file (overwriting existing files)
     def __createFileBlock(self):
         ## create head of file
-        self.__writeToFile('######################################################################\n', 'w')
+        self.__writeToFile('from TopAnalysis.Configuration.defines import sizes \n', 'w')
+        self.__writeToFile('from TopAnalysis.Configuration.defines import source\n')
+        self.__writeToFile('\n')        
+        self.__writeToFile('######################################################################\n')
         self.__writeToFile('#                                                                     \n')
         self.__writeToFile('# -----------                                                         \n')
         self.__writeToFile('#                                                                     \n')
@@ -166,23 +169,26 @@ class blockCreator:
         numberOfBlocks=numberOfFiles-(numberOfFiles%self.__blockSize)+1
         
         iBlock=-1
+        blockVector=[]
         for i in range(len(inputFiles)):
             ## write sizes to the top of each block
             if (i%self.__blockSize==0):
                 iBlock=iBlock+1
+                ## create blockString
+                blockString =self.__sample
+                blockString+='_'
+                blockString+=iBlock.__str__()
+                blockVector.append(blockString)
+                ## create sizeString
                 sizesString ='sizes [\''
-                sizesString+=self.__sample
-                sizesString+='_'
-                sizesString+=iBlock.__str__()
+                sizesString+=blockString
                 sizesString+='\'] = 99999999'
                 sizesString+='\n'
                 self.__writeToFile(sizesString)
-            ## write source for each file in the block
+            ## create source string
             bufferString =inputFiles[i].replace(self.__commonReplacement, '/')
             sourceString ='source[\''
-            sourceString+=self.__sample
-            sourceString+='_'
-            sourceString+=iBlock.__str__()
+            sourceString+=blockString
             if (i%self.__blockSize==0):
                 sourceString+='\'] =\'\\\''
             else:
@@ -195,6 +201,20 @@ class blockCreator:
                 sourceString+='\\\',\''
             sourceString+='\n'
             self.__writeToFile(sourceString)
+
+        ## create submit script to determine block sizes in events
+        submissionScript = open(self.__output+'.sh', 'w')
+        for i in range(len(blockVector)):
+            ## create submissionString
+            submissionString = 'submit --cmd \'ConfigRunner --cfg \'TopAnalysis/TopUtils/test/addEventWeightPlain_cfg.py\' -p '
+            submissionString+= blockVector[i]
+            submissionString+= ' -e 9999999 -o None\' -n 1 --name '
+            submissionString+= blockVector[i]
+            submissionString+= '\n'            
+            ## create submissionScript
+            submissionScript.write(submissionString)
+        submissionScript.close()
+        os.system('chmod a+x '+self.__output+'.sh')
 
 ##-----------------------------------------------------------------------------------            
 ##  * writes a string to a file (overwriting existing files)
