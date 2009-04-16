@@ -419,7 +419,6 @@ class CfgRunner:
         inputList=''
         adjustSkips=True
         if (input.sizes[self.__process]=='blocks'):
-            print 'hallo'
             ## if sizes holds the keyword 'blocks' assume that the block
             ## names are contained in sources instead of the files names
             blocks=self.__vectorFromList(input.source[self.__process], ',')
@@ -506,10 +505,10 @@ class CfgRunner:
         self.__analysisTimer[proc] = Timer()
 
         ## uncomment for testing
-        print "produced file: " + process.returnTempCfg(self.__jobName)
+        ## print "produced file: " + process.returnTempCfg(self.__jobName)
+        ## sys.exit(0)        
         ## start cmsRun
-        ## self.__executeCMSrun(process.returnTempCfg(self.__jobName))
-        sys.exit(0)
+        self.__executeCMSrun(process.returnTempCfg(self.__jobName))
 
 ##-----------------------------------------------------------------------------------
 ##  * create a vector from a list of objects in a string separated by an arbitary
