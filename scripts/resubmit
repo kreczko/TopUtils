@@ -13,7 +13,7 @@ from datetime import datetime
 from TopAnalysis.TopUtils.tools.Timer import Timer
 
 ##-----------------------------------------------------------------------------------
-## script job re-submission to batch farm systems, Version 00-00-00
+## script for job re-submission to batch farm systems,
 ## twiki: https://twiki.cern.ch/twiki/bin/view/CMS/TopUtils#Batch_job_submission
 class jobResubmission:
    ##
@@ -39,7 +39,7 @@ class jobResubmission:
 ##-----------------------------------------------------------------------------------    
 ##  Constructor
    def __init__(self):
-      self.name = 'resubmit'
+      self.__name = 'resubmit'
 
 ##-----------------------------------------------------------------------------------        
 ##  * start sequence

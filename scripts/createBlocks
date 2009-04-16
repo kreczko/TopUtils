@@ -1,0 +1,212 @@
+#! /usr/bin/env python
+
+## system imports
+import os
+import sys
+import glob
+import getopt
+
+##-----------------------------------------------------------------------------------
+## 
+## 
+class blockCreator:
+    ##
+    ## configurables
+    ##
+
+    ## verbose mode
+    __verbose   = False
+    ## path to the input files
+    __path      = ''
+    ## sample name
+    __sample    = ''
+    ## name of output file
+    __output    = ''
+    ## number of files per block
+    __blockSize = 10
+
+    ##
+    ## internal variables
+    ##
+
+    ## version
+    __version   = 'V00-00-00'
+    ## name of the object
+    __name      = 'none'
+    ## common filename replacement
+    __commonReplacement = '/pnfs/desy.de/cms/tier2/'
+
+##-----------------------------------------------------------------------------------    
+##  Constructor
+    def __init__(self):
+        self.__name  = 'blockCreator'
+
+##-----------------------------------------------------------------------------------        
+##  * start sequence
+    def beginJob(self):
+        versionLine = "*                                      "
+        versionLine+= self.__version + " *"              
+        print "**************************************************"
+        print "* starting file block creation...                *"
+        print "*                                                *"
+        print "*                                                *"
+        print "*                                                *"    
+        print "*                                                *"
+        print versionLine
+        print "**************************************************"
+ 
+##-----------------------------------------------------------------------------------        
+##  * end sequence
+##  * this may contain the execution of histPlotter or something similar                
+    def endJob(self):
+        print "**************************************************"
+        print "* leaving file block creation...                 *"
+        print "*                                                *"
+        print "*                                                *"
+        print "*                                                *"    
+        print "*                                                *"
+        print "*                                      Good Bye! *"
+        print "**************************************************"          
+        
+##-----------------------------------------------------------------------------------
+##  * parse command line options
+##  * do basic check whether the options make sense or not
+##  * depending on the options execute ...
+    def main(self):
+        try:
+            opts, args = getopt.getopt(sys.argv[1:],
+                                       'hvs:p:o:n:',
+                                       ['help','verbose','sample=','path=','out=','size=']
+                                       )
+        except getopt.error, msg:
+            print msg
+            print "for help use --help"
+            sys.exit(2)
+
+        for o, a in opts:
+            ################################################
+            ## get help
+            ################################################                
+            if o in ("-h", "--help"):
+                self.__helpMsg()
+                self.endJob()
+                sys.exit(0)
+            ################################################
+            ## run verbose mode
+            ################################################
+            elif o in ("-v", "--verbose"):
+                self.__verbose = True
+            ################################################                
+            ## name of global sample tag
+            ################################################                
+            elif o in ("-s", "--sample"):
+                self.__sample = a
+            ################################################                
+            ## path to input files
+            ################################################                
+            elif o in ("-p", "--path"):
+                self.__path = a
+            ################################################                
+            ## path and name of output file
+            ################################################
+            elif o in ("-o", "--out"):
+                if (not (a == '')):
+                    self.__output = a
+            ################################################                
+            ## number of files per block
+            ################################################
+            elif o in ("-n", "--size"):
+                if (not (a == '')):
+                    self.__blockSize = int(a)
+            else:
+                self.__errorMsg()
+                print '* * argument(s) not recognized. See --help for usage'
+                print "**************************************************"
+        ## perform basic checks of the input
+        ## self.__checkOptions()
+        ## run and perform basic monitoring
+        self.__createFileBlock()
+
+##-----------------------------------------------------------------------------------
+##  * print help message for the use of the ConfigRunner
+    def __helpMsg(self):
+        print "\n"
+        print " Synopsis   : createBlock [Option] --path '...' -p PROC -o OUTPUT          \n"
+        print " Description: Script to create file blocks as input to the ConfigRunner via  "
+        print "              command line options                                          \n"
+        print " Options    : -h | --help         [ ]   print this message                   "
+        print "              -v | --verbose      [ ]   run in verbose mode                  "
+        print "              -p | --path ...     [x]   path to the input files              "
+        print "              -p | --proc ...     [x]   specify process name                 "
+        print "              -o | --out  ...     [x]   specify output file name and path    "
+        print "              -n | --size ...     [ ]   change block size (default is 10)    "
+        print " [ ] optional                                                                "
+        print " [x] mandatory                                                               "
+        print "\n"
+
+##-----------------------------------------------------------------------------------            
+##  * writes a string to a file (overwriting existing files)
+    def __createFileBlock(self):
+        ## create head of file
+        self.__writeToFile('######################################################################\n', 'w')
+        self.__writeToFile('#                                                                     \n')
+        self.__writeToFile('# -----------                                                         \n')
+        self.__writeToFile('#                                                                     \n')
+        self.__writeToFile('#                                                                     \n')        
+        self.__writeToFile('# Events      :                                                       \n')
+        self.__writeToFile('# xsec(pb)  LO:                                                       \n')
+        self.__writeToFile('# xsec(pb) NLO:                                                       \n')
+        self.__writeToFile('# eff         :                                                       \n')
+        self.__writeToFile('######################################################################\n')           
+        ## get sorted list of input files
+        pathName=self.__path+'*.root'
+        inputFiles=glob.glob(pathName)
+        inputFiles.sort()
+        numberOfFiles=len(inputFiles)
+        numberOfBlocks=numberOfFiles-(numberOfFiles%self.__blockSize)+1
+        
+        iBlock=-1
+        for i in range(len(inputFiles)):
+            ## write sizes to the top of each block
+            if (i%self.__blockSize==0):
+                iBlock=iBlock+1
+                sizesString ='sizes [\''
+                sizesString+=self.__sample
+                sizesString+='_'
+                sizesString+=iBlock.__str__()
+                sizesString+='\'] = 99999999'
+                sizesString+='\n'
+                self.__writeToFile(sizesString)
+            ## write source for each file in the block
+            bufferString =inputFiles[i].replace(self.__commonReplacement, '/')
+            sourceString ='source[\''
+            sourceString+=self.__sample
+            sourceString+='_'
+            sourceString+=iBlock.__str__()
+            if (i%self.__blockSize==0):
+                sourceString+='\'] =\'\\\''
+            else:
+                sourceString+='\']+=\'\\\''
+            sourceString+=bufferString ##inputFiles[i]
+            if (i%self.__blockSize==self.__blockSize-1 or i==len(inputFiles)-1):
+                sourceString+='\\\'\''
+                sourceString+='\n'
+            else:
+                sourceString+='\\\',\''
+            sourceString+='\n'
+            self.__writeToFile(sourceString)
+
+##-----------------------------------------------------------------------------------            
+##  * writes a string to a file (overwriting existing files)
+    def __writeToFile(self, str, option='a'):
+        name = self.__output+'.py'
+        file = open(name, option)
+        file.write(str)
+        file.close()
+
+##-----------------------------------------------------------------------------------
+if __name__ == '__main__':
+    runner = blockCreator()
+    runner.beginJob()
+    runner.main()
+    runner.endJob()

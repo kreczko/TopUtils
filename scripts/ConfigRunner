@@ -52,7 +52,7 @@ class CfgRunner:
     ##
 
     ## version
-    __version         = 'V00-01-00'
+    __version         = 'V00-02-00'
     ## time in seconds to wait
     __sleeptime       = 10
     ## internal farm parameters
@@ -411,6 +411,42 @@ class CfgRunner:
             print "**************************************************"
 
 ##-----------------------------------------------------------------------------------
+##  * prepare list of input files, which may be organized in blocks to improve the 
+##    runtime stability of cmsRun
+##  * adjust numberOfSkips accordingly 
+    def __modifiedInput(self):
+        blockEvts= 0
+        inputList=''
+        adjustSkips=True
+        if (input.sizes[self.__process]=='blocks'):
+            print 'hallo'
+            ## if sizes holds the keyword 'blocks' assume that the block
+            ## names are contained in sources instead of the files names
+            blocks=self.__vectorFromList(input.source[self.__process], ',')
+            for i in blocks:
+                ## kept for adjustment of numberOfSkips
+                bufferEvts=blockEvts
+                blockEvts+=input.sizes[i]
+                if (self.__numberOfSkips < blockEvts):
+                    ## if numberOfSkips is smaller than blockEvts the
+                    ## following block of files should be added
+                    inputList+=input.source[i]
+                    inputList+=','
+                    if (adjustSkips):
+                        ## for the first time  numberOfSkips is smaller
+                        ## than blockEvts adjust numberOfSkips to the
+                        ## situation of skipped files
+                        adjustSkips=False
+                        self.__numberOfSkips=self.__numberOfSkips-bufferEvts 
+            ## strip the last comma in the list
+            inputList=inputList.strip(',')
+        else:
+            ## transparent behavior if sizes does not contain the key word
+            ## blocks
+            inputList+=input.source[self.__process]
+        return inputList
+
+##-----------------------------------------------------------------------------------
 ##  * create tmp config file
 ##  * modify std configurables            
 ##  * call executeCMSrun            
@@ -426,14 +462,15 @@ class CfgRunner:
             tmp = self.__farmParams
         tmp+= "_cfg.py"
         process = cms.ConfigWrapper(self.__config, tmp, proc)
+        ## modify source
+        ## process.modifyOption('source', input.source[self.__process])
+        process.modifyOption('source', self.__modifiedInput())
         ## modify events
         if (self.__numberOfEvents <= 0):
             self.__numberOfEvents = input.sizes[self.__process]
         process.modifyOption('events', self.__numberOfEvents)
         ## modify skips
         process.modifyOption('skips',  self.__numberOfSkips )
-        ## modify source
-        process.modifyOption('source', input.source[self.__process])
         ## modify subset
         if (not self.__subsetName == ''):    
             subset = self.__jobName+'/'
@@ -469,9 +506,10 @@ class CfgRunner:
         self.__analysisTimer[proc] = Timer()
 
         ## uncomment for testing
-        ## print "produced file: " + process.returnTempCfg(self.__jobName)
+        print "produced file: " + process.returnTempCfg(self.__jobName)
         ## start cmsRun
-        self.__executeCMSrun(process.returnTempCfg(self.__jobName))
+        ## self.__executeCMSrun(process.returnTempCfg(self.__jobName))
+        sys.exit(0)
 
 ##-----------------------------------------------------------------------------------
 ##  * create a vector from a list of objects in a string separated by an arbitary
