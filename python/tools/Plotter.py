@@ -1,6 +1,6 @@
 from XMLConfigParser import *
 import os
-from ROOT import gROOT, TGaxis
+from ROOT import gROOT
 from DrawHelper import Helper
 
 
@@ -25,14 +25,14 @@ class Plotter:
         for hist in histlist:
             list = {}
             h = None
-
             for var in hist.subobjects["var"]:
                 source = var.getOption("source")
                 if var.getOption('operation') == 'none':
                     file = source[0]
                     h1 = source[1]
                     f = TFile(file)
-                    h = f.Get(h1)
+                    gROOT.cd()
+                    h = f.Get(h1).Clone()
                 else: #combine histograms with operations
                     integ = 0
                     varhists = []
@@ -46,8 +46,9 @@ class Plotter:
                     for xxx in range(0, len(varroots)):
                         f = TFile(varroots[xxx])
                         h1 = varhists[xxx]
+                        gROOT.cd()
                         if xxx == 0:#load first variable
-                            h = copy.deepcopy(f.Get(h1).Clone())
+                            h = f.Get(h1).Clone()
                         else:#add or divide by the 2nd variable
                             #TODO: in order to make real math, all variables need to be saved temporaly
                             if var.getOption('operation') == 'add':
@@ -79,15 +80,6 @@ class Plotter:
 #===============================================================================
             Helper.saveHistsInOne(list, hist, savedir, writeAs) 
 if __name__ == "__main__":
-    gROOT.Reset()
-    Helper.set_palette('', 999)
-    TGaxis.SetMaxDigits(3)
-#===============================================================================
-#    for white background
-#===============================================================================
-    gROOT.SetStyle("Plain")
-    gROOT.SetBatch(True)
-#    pl = Plotter("test/NewConfig.xml")
-#    pl.savePlotsFromCfg("plots")
-    pl2 = Plotter("plotconfigs/MVAHists.xml")
-    pl2.savePlotsFromCfg("mva", "HistPlotter")
+    Helper.setDefaultLayout()
+    pl = Plotter("test/NewConfig.xml")
+    pl.savePlotsFromCfg("plots")

@@ -1,8 +1,9 @@
-from ROOT import TLegend, TBox, TColor, gStyle, TPaletteAxis, TPaveText, TPaveStats, TF1, TAxis, TLine
+from ROOT import TLegend, TBox, TColor, gStyle, TPaletteAxis, TPaveText, TPaveStats, TF1, TAxis, TLine, gROOT, TGaxis
 import PadService as ps
 import os
 from math import log
 from array import array
+
 
 class Helper:
     """
@@ -11,6 +12,18 @@ class Helper:
     drawOption = ''
     varOption = ""
     allowedFormats = ['eps', 'ps', 'pdf', 'png', 'jpg']
+    
+    def setDefaultLayout():
+        gROOT.Reset()
+        #set color palette
+        Helper.set_palette('', 999)
+        #max 3 digits on axis title
+        TGaxis.SetMaxDigits(3)
+        # for white background
+        gROOT.SetStyle("Plain")
+        gROOT.SetBatch(True)
+    setDefaultLayout = staticmethod(setDefaultLayout)
+    
     def makePlainLegend(x, y, sizeX, sizeY):
         x = float(x) / 100
         y = float(y) / 100
