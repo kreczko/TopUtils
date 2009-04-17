@@ -225,7 +225,7 @@ class Drawer:
         
     def saveHistsInOne(histlist, histCfg, savedir, printAs=['eps', 'png']):
         filename = histCfg.getOption('name')        
-        folder = savedir + histCfg.getOption('savefolder')
+        folder = savedir +"/" + histCfg.getOption('savefolder')
         logH = [histCfg.getOption('logX'), histCfg.getOption('logY')]
         err = histCfg.getOption('showErrors').upper() == 'TRUE'
         legend = None

@@ -16,12 +16,7 @@ class Plotter:
         else:
             self.config = configfile
             
-    def savePlotsFromCfg(self,savedir, cfg = "Plotter"):
-        cfg = Configuration(cfg)
-        cfg.loadConfiguration(self.config)
-        plots = cfg.getPlots()
-        writeAs = plots.getOption("create").split(",")
-        histlist = plots.subobjects["hist"]
+    def doHistList(self, histlist, savedir, writeAs):
         for hist in histlist:
             list = {}
             h = None
@@ -73,12 +68,23 @@ class Plotter:
 #                only hists which are marked to be draw are added to list
 #===============================================================================
                 if var.getOption('draw') == '1':
-                    list[var.getOption("name")] = copy.deepcopy(h.Clone())
+                    list[var.getOption("name")] =h.Clone()
 #                    list.append(copy.deepcopy(h.Clone()))
 #===============================================================================
 #                save all histograms in one file
 #===============================================================================
             Drawer.saveHistsInOne(list, hist, savedir, writeAs) 
+    def savePlotsFromCfg(self,savedir, cfg = "Plotter"):
+        cfg = Configuration(cfg)
+        cfg.loadConfiguration(self.config)
+        plots = cfg.getPlots()
+        writeAs = plots.getOption("create").split(",")
+        histlist = plots.subobjects["hist"]
+        self.doHistList(histlist, savedir, writeAs)
+        histlists = plots.subobjects["histlist"]
+        for i in histlists:
+            self.doHistList(i.subobjects["hist"], savedir, writeAs)
+        
 if __name__ == "__main__":
     Drawer.setDefaultLayout()
     pl = Plotter("test/NewConfig.xml")

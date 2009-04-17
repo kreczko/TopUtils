@@ -3,8 +3,10 @@ import copy
 from xml.dom.minidom import Document
 import unittest
 
-from XMLConfigParser import *
+import XMLConfigParser
+from XMLConfigParser import * 
 
+XMLConfigParser.verbose = True
 ##an how-it-should-be config
 ##both config types should be supported
 testxml = 'test/NewConfig.xml'
@@ -114,7 +116,7 @@ class TestFolder(unittest.TestCase):
 class TestConfiguration(unittest.TestCase):
     
     def testloadConfiguration(self):
-        obj = Configuration(verbose=True)
+        obj = Configuration()
         obj.loadConfiguration(testxml)
         self.assertEqual(obj.getFilenameByID("top"), "test/signal.root")
         self.assertEqual(obj.getInputByName("allMuonPt").subobjects["folder"][0].getOption("name"), "analyzeAllMuon")
@@ -182,7 +184,25 @@ class TestFileService(unittest.TestCase):
                    'analyzeSelMuon/cal_Phi', 'analyzeSelMuon/res_Phi']
         self.assertEqual(c, content)
         
+class TestHistogramList(unittest.TestCase):
+    
+    def setUp(self):
+        obj = Configuration()
+        obj.loadConfiguration(testxml)
+        self.histlistnode = Parser.getNodeList(testxml, "histlist")[0]
+        self.histlist = obj.getPlots().subobjects["histlist"][0]
+        self.inputs = obj.inputs
         
+    def testOptions(self):
+        self.assertEqual(self.histlist.getOption("savefolder"), "kin")
+        self.assertEqual(self.histlist.getOption("name"), "")
+    
+    def testHists(self):
+        hists = self.histlist.subobjects["hist"]
+        self.assertEqual(len(hists), 6)
+        for i in hists:
+            self.assertNotEqual(i.getOption("name"), "DEFAULT")
+            self.assertNotEqual(i.getOption("savefolder"), "")
         
 def suite():
     suite = unittest.TestSuite()
@@ -193,7 +213,7 @@ def suite():
     suite.addTest(unittest.makeSuite(TestFilter))
     suite.addTest(unittest.makeSuite(TestConfiguration))
     suite.addTest(unittest.makeSuite(TestFileService))
-
+    suite.addTest(unittest.makeSuite(TestHistogramList))
     return suite
 
 if __name__ == "__main__":

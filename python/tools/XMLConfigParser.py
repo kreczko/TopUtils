@@ -2,7 +2,6 @@ import xml.dom.minidom as parser
 import os, sys
 from ROOT import TFile
 from sets import Set
-import copy
 #from types import type
 
 # xmlTag => Python class
@@ -21,14 +20,24 @@ defaults = {"plots" : "test/DefaultPlotConfig.xml",
                     "legend" : "test/DefaultLegConfig.xml",
                     "var" : "test/DefaultVarConfig.xml"
                 }
-
+verbose = False
+#===============================================================================
+#    prints a message if the verbose option was used
+#===============================================================================
+def Print(msg):
+        """
+        prints a message if the verbose option was used
+        @param msg: the message to be printed 
+        """
+        if verbose:
+            print "======== " + msg + " ========="
+            
 class Configuration:
     
     """ \brief The definitions of the configuration"""
-    def __init__(self, configRoot="Plotter", verbose=False):
-        self.verbose = verbose
-        self.Print("Begin configuration")
-        self.Print("Creating configuration with '%s' as document root" % configRoot)
+    def __init__(self, configRoot="Plotter"):
+        Print("Begin configuration")
+        Print("Creating configuration with '%s' as document root" % configRoot)
         if not configRoot == "":
             self.root = configRoot
         else:
@@ -46,7 +55,7 @@ class Configuration:
         """
         if not os.path.exists(xmlfile):
             raise IOError, "Configuration file '%s' does not exist" %xmlfile
-        self.Print("Loading configuration file %s" % xmlfile)
+        Print("Loading configuration file %s" % xmlfile)
         rootnode = Parser.getDocumentRoot(xmlfile)
         if self.root == rootnode.localName:#right configuration file
             #get includes, sources, plots
@@ -70,16 +79,15 @@ class Configuration:
             
         
     def readPlots(self, node):
-        plots = Plots()
+        self.plots = Plots()
 #        plots.readDefaults(self.defaults["plots"])
-        plots.parseFromNode(node)
-        self.plots = plots
+        self.plots.parseFromNode(node)
     
     def getPlots(self):
         return self.plots
     
     def readFiles(self, nodelist):
-        self.Print("Reading files...")
+        Print("Reading files...")
         for i in nodelist:
             file = ConfigObject(rootNodeName = "file")
             file.parseFromNode(i)
@@ -88,7 +96,7 @@ class Configuration:
             if self.files.has_key(id):
                 raise ConfigError, "multiple entries for file id %s" %id
             else:
-                self.Print("Adding file '%s' with id='%s'" %(name, id))
+                Print("Adding file '%s' with id='%s'" %(name, id))
                 self.files[id] = name
                 
     def readInputs(self, nodelist):
@@ -99,7 +107,7 @@ class Configuration:
             if self.inputs.has_key(name):
                 raise ConfigError, "multiple entries for file id %s" %name
             else:
-                self.Print("Adding input '%s'" %name)
+                Print("Adding input '%s'" %name)
                 self.inputs[name] = input
                 
     def getInputByName(self, name):
@@ -108,16 +116,6 @@ class Configuration:
     def getInputs(self):
         return self.inputs
     
-#===============================================================================
-#    prints a message if the verbose option was used
-#===============================================================================
-    def Print(self, msg):
-        """
-        prints a message if the verbose option was used
-        @param msg: the message to be printed 
-        """
-        if self.verbose:
-            print "======== " + msg + " ========="
             
 #===============================================================================
 #    @param id: the id of the file specified in the config
@@ -158,7 +156,7 @@ class OptionSet:
         if self.hasOption(option):
             return self.options[option]
         else:
-            raise ConfigError, "Option is not known."
+            raise ConfigError, "Option '%s' is not known."%option
 
 #===============================================================================
 #            adds an option to the OptionSet
@@ -195,6 +193,16 @@ class OptionSet:
             """
             for i in options.keys():
                 self.addOption(i, options[i])
+                
+    def Copy(self):
+        newset = OptionSet()
+        newop = {}
+        for i in self.options.keys():
+            newkey = "%s" %i
+            newitem = "%s" %self.options[i]
+            newop[newkey] = newitem
+        newset.setOptions(newop)
+        return newset
                 
                 
 #===============================================================================
@@ -244,7 +252,7 @@ class OptionSet:
 class ConfigObject:
     """An simple configurable object"""
     
-    def __init__(self, rootNodeName="", doNotParse=[], mandatoryObjects=[]):
+    def __init__(self, rootNodeName="", doNotParse=[], mandatoryObjects=[], mandatoryOptions=[]):
         """
         The standard constructor
         @param rootNodeName the name of the initial XML node for parsing. DEPRACATED
@@ -258,12 +266,16 @@ class ConfigObject:
         self.doNotParse = doNotParse
         self.options = OptionSet()
         self.mandatoryObjects = mandatoryObjects
+        self.mandatoryOptions = mandatoryOptions
         self.subobjects = {}
         for i in self.doNotParse:
             self.subobjects[i] = []
     
     def setOption(self, option, value):
         self.options.setOption(option, value)
+        
+    def hasOption(self, option):
+        return self.options.hasOption(option)
 
     def getOption(self, name):
         """
@@ -291,7 +303,6 @@ class ConfigObject:
         if defaults.has_key(root):
             self.readDefaults(defaults[root])
         atts = Parser.getListOfAttributes(node)
-#        children = copy.deepcopy(Parser.getAllChildNodes(copy.deepcopy(node)))
         children = Parser.getAllChildNodes(node)
         for i in atts:
             self.options.addOption(i, atts[i])
@@ -307,11 +318,22 @@ class ConfigObject:
                     str = classmap[i.localName]
                     src = str + "()"
                     obj = eval(src)
-#                    obj.parseFromNode(copy.deepcopy(i))
                 else:
                     obj = ConfigObject(rootNodeName = i.localName)
                 obj.parseFromNode(i)
                 self.subobjects[i.localName].append(obj)
+            
+            for opt in self.mandatoryOptions:
+                if not self.hasOption(opt):
+                    self.options.addOption(opt, "")
+            for obj in self.mandatoryObjects:
+                if not self.subobjects[obj]:
+                    raise ConfigError, "Mandatory object '%s' not found" % obj
+                
+    def Copy(self):
+        obj = ConfigObject(self.rootName)
+        obj.options = self.options.Copy()
+        return obj
                 
     
     
@@ -346,7 +368,6 @@ class Parser:
             raise ConfigError, "parent node is empty"
         for i in parentnode.childNodes:
             if i and i.localName:
-#                ret.append(copy.deepcopy(i))
                 ret.append(i)
         return ret
     getAllChildNodes = staticmethod(getAllChildNodes)
@@ -367,7 +388,6 @@ class Parser:
 #    @return a list of nodes from a XML file
 #===============================================================================
     def getNodeList(xmlFile, nodename):
-#        return copy.deepcopy(Parser.getDocument(xmlFile).getElementsByTagName(nodename))
         return Parser.getDocument(xmlFile).getElementsByTagName(nodename)
     getNodeList = staticmethod(getNodeList)
     
@@ -532,16 +552,16 @@ class Histogram(ConfigObject):
         for i in self.subobjects["var"]:
             if i.getOption("name") == name:
                 ret = i
-#        if name in self.variables.keys():
-#            return self.variables[name]
         return ret
         
     def resolveInputs(self, files, inputs):
-        histinput = self.getOption("input")
+#        histinput = self.getOption("input")
         for var in self.subobjects["var"]:
-            varinput = var.getOption("input")
+            varinput = var.getOption("source")
             varsource = self.getVarSourceFile(var)
-            if isinstance(varsource, unicode):
+#            print "var", varinput, "source", varsource
+            #TODO hERERERERER!!!!
+            if isinstance(varsource, unicode) and varsource:
                 var.setOption("source", [files[varsource], self.getVarInput(var)])
             else:
                 vars = []
@@ -571,6 +591,9 @@ class Histogram(ConfigObject):
                 ret = histinput + varinput
             else:
                 ret = histinput+ "/" + varinput
+#        elif histinput and not varinput:
+#            ret = histinput
+#        elif varinput and not histinput
         return ret
                 
             
@@ -594,31 +617,105 @@ class Histogram(ConfigObject):
     
         
 class HistogramList(ConfigObject):
-    rootNodeName = "hist"
-    doNotParse = ["var", "legend", "statbox"]      
+    rootNodeName = "histlist"
+    doNotParse = ["var", "hist"]
+    mandatoryOptions = ["name"]      
+    mandatoryObjects = ["var"]
     
     def __init__(self):
-        ConfigObject.__init__(self, self.rootNodeName, self.doNotParse)
+        ConfigObject.__init__(self, self.rootNodeName, self.doNotParse, 
+                              mandatoryObjects = self.mandatoryObjects, 
+                              mandatoryOptions= self.mandatoryOptions)
+        Print("Creating HistogramList Object")
         #TODO: only vars with file input!
         #additional parameter "for"
+        
+    def parseFromNode(self, node):
+        """
+        gets all attributes of the node and textnodes which are not in "doNotParse" and and adds them as options
+        """
+        Print("Executing special parseFromNode in HistogramList")
+        if not node:
+            raise ConfigError, "Cannot parse an empty node"
+        root = node.localName 
+        if defaults.has_key(root):
+            self.readDefaults(defaults[root])
+        atts = Parser.getListOfAttributes(node)
+        children = Parser.getAllChildNodes(node)
+        for i in atts:
+            self.options.addOption(i, atts[i])
+        for i in children:
+            if i.localName not in self.doNotParse:
+                if Parser.hasAttribute(i, "v"):#get value from <tag v="value" />
+                    self.options.addOption(i.localName, Parser.getAttributeValue(i, "v"))
+                else:#get value from <tag>value</tag>
+                    self.options.addOption(i.localName, Parser.getText(i))
+            else:
+                obj = None
+                if classmap.has_key(i.localName):
+                    str = classmap[i.localName]
+                    src = str + "()"
+                    obj = eval(src)
+                else:
+                    obj = ConfigObject(rootNodeName = i.localName)
+                obj.parseFromNode(i)
+                self.subobjects[i.localName].append(obj)
+            for opt in self.mandatoryOptions:
+                if not self.hasOption(opt):
+                    Print("mandatory option '%s' not found, creating empty option " % opt)
+                    self.options.addOption(opt, "")
+            for obj in self.mandatoryObjects:
+                if not self.subobjects[obj]:
+                    raise ConfigError, "Mandatory object '%s' not found" % obj
 
     def resolveInputs(self, files, inputs):
-        for var in self.subobjects["var"]:
-            varsource = self.getVarSourceFile(var)
-            if isinstance(varsource, unicode):
-                file = files[varsource]
-                input = self.getVarInput(var, inputs)
-                filecontent = FileService.getFileContent(file)
-                input.setContent(filecontent)
-                print input.getFilteredContent()
-#                var.setOption("source", [files[varsource], self.getVarInput(var)])
-            else:
-                vars = []
-                for i in varsource:
-                    print i
-                    vars.append(self.getVariable(i))
-                print vars
-                var.setOption("source", vars)
+        Print("Resolving HistogramList inputs")
+        input = None
+        if self.hasOption("input") and "i%s"%Input.separator in self.getOption("input"):
+            input = self.getOption("input").replace("i" + Input.separator, "")
+        if inputs.has_key(input):
+            input = inputs[input]
+        else:
+            raise ConfigError, "Input '%s' could not be found"%input
+        var0 = self.subobjects["var"][0]
+        varsource = self.getVarSourceFile(var0)
+        content = FileService.getFileContent(files[varsource])
+        input.setContent(content)
+        content = input.getFilteredContent()
+        
+        for i in content:
+            hist = Histogram()
+            hist.readDefaults(defaults["hist"])
+            hist.setOption("input", i)
+            #TODO: set savefolder
+            nameAndFolder = self.getNameAndFolder(i)
+            hist.setOption("name", nameAndFolder[0])
+            hist.setOption("savefolder", self.getOption("savefolder") + "/" + nameAndFolder[1])
+#            print len(self.subobjects["var"])
+#            print i
+            for var in self.subobjects["var"]:
+                #DEEPCOPY!!!!!
+                hist.subobjects["var"].append(var.Copy())
+            hist.resolveInputs(files, inputs)
+            self.subobjects["hist"].append(hist)
+            
+    def getNameAndFolder(self, input):
+        dirs = input.split("/")
+        folder = ""
+        hist = dirs[len(dirs)-1]
+        for x in range(0, len(dirs)-1):
+            folder += "%s/" %dirs[x]
+        return [hist, folder]
+#        for var in self.subobjects["var"]:
+#            varsource = self.getVarSourceFile(var)
+#            if isinstance(varsource, unicode):
+#                file = files[varsource]
+#                filecontent = FileService.getFileContent(file)
+#            else:
+#                vars = []
+#                for i in varsource:
+#                    vars.append(self.getVariable(i))
+#                var.setOption("source", vars)
                 
     def getVarSourceFile(self,var):
         ret = None
