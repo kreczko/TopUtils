@@ -19,7 +19,7 @@ import TopAnalysis.TopUtils.tools.ConfigWrapper as cms
 ##-----------------------------------------------------------------------------------
 ## executive script for cmsRun, Version 00-01-01
 ## twiki: https://twiki.cern.ch/twiki/bin/view/CMS/TopUtils#ConfigRunner
-class CfgRunner:
+class configRunner:
     ##
     ## configurables
     ##
@@ -80,9 +80,6 @@ class CfgRunner:
         print "**************************************************"
         print "* starting ConfigRunner...                       *"
         print "*                                                *"
-        print "*                                                *"
-        print "*                                                *"    
-        print "*                                                *"
         print versionLine
         print "**************************************************"
         
@@ -92,9 +89,6 @@ class CfgRunner:
     def endJob(self):
         print "**************************************************"
         print "* leaving ConfigRunner...                        *"
-        print "*                                                *"
-        print "*                                                *"
-        print "*                                                *"    
         print "*                                                *"
         print "*                                      Good Bye! *"
         print "**************************************************"  
@@ -184,7 +178,7 @@ class CfgRunner:
                     self.__userParams = a                    
             else:
                 self.__errorMsg()
-                print '* * argument(s) not recognized. See --help for usage'
+                print '*   argument(s) not recognized. See --help for usage'
                 print "**************************************************"
         ## perform basic checks of the input
         self.__checkOptions()
@@ -199,16 +193,16 @@ class CfgRunner:
 ##  * print help message for the use of the ConfigRunner
     def __helpMsg(self):
         print "\n"
-        print " Synopsis   : ConfigRunner [Option] --cfg '...' -p PROC -e EVTS -o OUTPUT  \n"
-        print " Description: Script to allow replacement of cfg file parameters for cmsRun  "
+        print " Synopsis   : configRunner [Option] --cfg '...' -p PROC -e EVTS -o OUTPUT  \n"
+        print " Description: script to allow replacement of cfg file parameters for cmsRun  "
         print "              via command line options; supported parameter replacements are:"
         print "              * number of events         [-e],                               "
         print "              * number of skipped events [-s],                               "
         print "              * name of output file      [-o],                               "
-        print "              * input source             [-p].                               "
-        print "              The input source is steered via vectors defined in the file:   "
-        print "              './TopAnalysis/Configuration/python/processes.py'              "
-        print "              Also user defined replacements are supported. The otuput [-o]  "
+        print "              * input source             [-p];                               "
+        print "              the input source is steered via vectors defined in the file:   "
+        print "              './TopAnalysis/Configuration/python/processes.py';             "
+        print "              also user defined replacements are supported. The otuput [-o]  "
         print "              can be specified as \'none\'. When specifying the number of    "
         print "              events to be processed with -1 all events will be processed  \n"
         print " Options    : -h | --help         [ ]   print this message                   "
@@ -253,7 +247,7 @@ class CfgRunner:
         ################################################        
         if (self.__numberOfEvents == 0):
             self.__errorMsg()
-            print '* * no events to be processed. Choose --evts to specify'
+            print '*   no events to be processed. Choose --evts to specify'
             print "**************************************************"            
             sys.exit(0)
         ################################################
@@ -261,7 +255,7 @@ class CfgRunner:
         ################################################            
         if (self.__process == ''):
             self.__errorMsg()
-            print '* * no physics process specified. Choose --proc to specify'
+            print '*   no physics process specified. Choose --proc to specify'
             print "**************************************************"
             sys.exit(0)            
         ################################################
@@ -269,11 +263,11 @@ class CfgRunner:
         ################################################            
         if (self.__config == ''):
             self.__errorMsg()
-            print '* * no config file specified. Choose --cfg to specify'
+            print '*   no config file specified. Choose --cfg to specify'
             print "**************************************************"            
         if (not os.path.exists(self.__config)):
             self.__errorMsg()
-            print '* * config file doen\'t exist. Please check spelling'
+            print '*   config file doen\'t exist. Please check spelling'
             print "**************************************************"
             sys.exit(0)
         ################################################
@@ -282,8 +276,8 @@ class CfgRunner:
         if (self.__outputName == 'none'):
             if (self.__verbose):
                 self.__warningMsg()
-                print '* * no output name specified. Output name for file'
-                print '* * service will not be altered when registered'
+                print '*   no output name specified. Output name for file'
+                print '*   service will not be altered when registered'
                 print "**************************************************"
         ################################################
         ## output directory or jobname specified?
@@ -293,8 +287,8 @@ class CfgRunner:
             self.__jobName+= datetime.today().strftime("%Y%m%d-%H%M%S")
             if (self.__verbose):
                 self.__warningMsg()
-                msg = '* * no output directory for job specified. Directory \n'
-                msg+= '* * name was set to ' + self.__jobName 
+                msg = '*   no output directory for job specified. Directory \n'
+                msg+= '*   name was set to ' + self.__jobName 
                 self.__printMsg(msg)
                 print "**************************************************"
             
@@ -307,7 +301,7 @@ class CfgRunner:
         ################################################        
         if '---- Configuration BEGIN' in self.__readFromFile(self.__outputErr):
             self.__errorMsg()
-            print '* * Configuration error occured & job aborted; please check .err file'
+            print '*   Configuration error occured & job aborted; please check .err file'
             print "**************************************************"
             err=True
         ################################################
@@ -315,14 +309,14 @@ class CfgRunner:
         ################################################        
         if '---- FileOpenError BEGIN' in self.__readFromFile(self.__outputErr):
             self.__errorMsg()
-            print '* * I/O error occured & job aborted; please check .err file'
+            print '*   I/O error occured & job aborted; please check .err file'
             print "**************************************************"
             err=True            
         ################################################            
         ## check if run started properly
         ################################################            
         if 'Root_Error' in self.__readFromFile(self.__outputErr):
-            print '* * RootError occured & job aborted; please check .err file'
+            print '*   RootError occured & job aborted; please check .err file'
             print "**************************************************"
             err=True
         return err
@@ -343,7 +337,7 @@ class CfgRunner:
 ##  * start runtime estimate            
     def __waitForFirst(self, process):
         printEvery = self.__sleeptime*1.3
-        msg = "* * waiting for the 1st event for '" + str(process) + "' to be processed..." 
+        msg = "*   waiting for the 1st event for '" + str(process) + "' to be processed..." 
         printtimer = {}
         ## print msg up to 10 times
         for i in range(0,10):
@@ -354,8 +348,8 @@ class CfgRunner:
             Timer.sleep(1)
             ## if after 1min no file is created the script aborts
             if self.__cmsRunTimer[process].timePassed(os.times()) > 60:
-                print "* * waited more then 1min for job to begin"
-                print "* * aborting job..."
+                print "*   waited more then 1min for job to begin"
+                print "*   aborting job..."
                 os.sys.exit(0)
         ## waits until first event has been read
         errfile = self.__readFromFile(self.__outputErr)
@@ -364,8 +358,8 @@ class CfgRunner:
         ## check if errors occurred
         for i in self.__errorToken:
             if i in errfile:
-                print "* * an error occured, check log file %s" % self.__outputErr
-                print "* * aborting job..."
+                print "*   an error occured, check log file %s" % self.__outputErr
+                print "*   aborting job..."
                 sys.exit(0)
         ## clear printtimer
         for i in printtimer:
@@ -381,7 +375,7 @@ class CfgRunner:
         ## stop runstart timer
         self.__cmsRunTimer[process].stop()
         ## print time to screen to get cmsRun starting
-        print '* * time elapsed to start cmsRun:', self.__cmsRunTimer[process].getMeasuredTime() 
+        print '*   time elapsed to start cmsRun:', self.__cmsRunTimer[process].getMeasuredTime() 
         ## start analysis timer
         self.__analysisTimer[process].start()
 
@@ -389,9 +383,9 @@ class CfgRunner:
 ##  * execute cmsRun via shell console
 ##  * needs runtime environment to be set first            
     def __executeCMSrun(self, configfile):
-        print '* * executing cmsRun...'
+        print '*   executing cmsRun...'
         if os.path.exists(configfile):
-            print '* * >> cmsRun ' + configfile
+            print '*   >> cmsRun ' + configfile
             if os.path.exists(self.__outputLog):
                 os.remove(self.__outputLog)
             if os.path.exists(self.__outputErr):
@@ -402,12 +396,12 @@ class CfgRunner:
                 os.system('cmsRun ' + configfile + " >" + self.__outputLog + " 2> " + self.__outputErr + " < /dev/null&")
             else:
                 os.system('cmsRun ' + configfile + " >" + self.__outputLog + " 2> " + self.__outputErr + " < /dev/null" )                    
-            print '* * '
+            print '*   '
             self.__waitForFirst(self.__process)
             self.__jobStarted = True
         else:
             self.__errorMsg()
-            print '* * requested configfile does not exist: this should never happen!'
+            print '*   requested configfile does not exist: this should never happen!'
             print "**************************************************"
 
 ##-----------------------------------------------------------------------------------
@@ -543,7 +537,7 @@ class CfgRunner:
         
         ## print 'waiting up to 100 times
         printtimer = {}
-        msg = "* * waiting for '" + str(process) + "' to end..."
+        msg = "*   waiting for '" + str(process) + "' to end..."
         if printEvery > 0:
             for i in range(0,100):
                 printtimer[i] = threading.Timer(printEvery*i, self.__printMsg, [msg])
@@ -556,15 +550,15 @@ class CfgRunner:
             err = self.__monitorJob()
             Timer.sleep(1)
             if((self.__analysisTimer[process].timePassed(os.times()) % printEvery) == 0):
-                print '* * waiting for ', process, ' to end...'
-        print '* * process ', process, ' finished'
+                print '*   waiting for ', process, ' to end...'
+        print '*   process ', process, ' finished'
 
         if printEvery > 0:
             ## clear printtimer
             for i in printtimer:
                 printtimer[i].cancel()
         self.__analysisTimer[process].stop()
-        print '* * time elapsed to exec  cmsRun:', self.__analysisTimer[process].getMeasuredTime()
+        print '*   time elapsed to exec  cmsRun:', self.__analysisTimer[process].getMeasuredTime()
 
 ##-----------------------------------------------------------------------------------
 ##  * start at least one job for each physics process
@@ -589,14 +583,14 @@ class CfgRunner:
                 os._exit(0)
             else:
                 self.__errorMsg()
-                print "* * not allowed process!"
-                print "* * allowed processes are: ", cms.Config.allowedProcesses
+                print "*   not allowed process!"
+                print "*   allowed processes are: ", cms.Config.allowedProcesses
                 print "**************************************************"
                 os._exit(0)
                 
 ##-----------------------------------------------------------------------------------
 if __name__ == '__main__':
-    runner = CfgRunner()
+    runner = configRunner()
     runner.beginJob()
     runner.main()
     runner.endJob()

@@ -38,6 +38,8 @@ class jobSplitter:
    __farmToken      = '-f'   
    ## submit name
    __submitName     = ''
+   ## farm queue
+   __farmQueue      = 'medium'
    ## number of jobs
    __numberOfJobs   = 0
 
@@ -48,7 +50,7 @@ class jobSplitter:
    ## event offset
    __offset  = 0 
    ## version
-   __version = 'V00-01-01'
+   __version = 'V00-01-02'
    ## name of the object 
    __name    = 'none'
    
@@ -65,9 +67,6 @@ class jobSplitter:
       print "**************************************************"
       print "* starting JobSplitter...                        *"
       print "*                                                *"
-      print "*                                                *"
-      print "*                                                *"    
-      print "*                                                *"
       print versionLine
       print "**************************************************"
       
@@ -77,9 +76,6 @@ class jobSplitter:
    def endJob(self):
       print "**************************************************"
       print "* leaving JobSplitter...                         *"
-      print "*                                                *"
-      print "*                                                *"
-      print "*                                                *"    
       print "*                                                *"
       print "*                                      Good Bye! *"
       print "**************************************************"          
@@ -91,8 +87,8 @@ class jobSplitter:
    def main(self):       
       try:
          opts, args = getopt.getopt(sys.argv[1:],
-                                    'hvc:s:e:o:z:d:f:n:x:',
-                                    ['help','verbose','cmd=','skip=','evts=','out=','sub=','dir=','farm=','njob=','name=']
+                                    'hvq:c:s:e:o:z:d:f:n:x:',
+                                    ['help','verbose','queue=','cmd=','skip=','evts=','out=','sub=','dir=','farm=','njob=','name=']
                                     )
       except getopt.error, msg:
          print msg
@@ -143,7 +139,7 @@ class jobSplitter:
          ################################################               
          elif o in ("-z", "--sub"):
             if (not (a == '')):               
-               self.__subsetToken = a               
+               self.__subsetToken = a
          ################################################
          ## token for job name for 'cmd'
          ################################################               
@@ -167,9 +163,15 @@ class jobSplitter:
          ################################################               
          elif o in ("-n", "--njob"):
             self.__numberOfJobs = int(a)                  
+         ################################################
+         ## farm queue
+         ################################################            
+         elif o in ("-q", "--queue"):
+            if (not (a == '')):
+               self.__farmQueue = a.lower()
          else:
             self.__errorMsg()
-            print '* * argument(s) not recognized. See --help for usage'
+            print '*   argument(s) not recognized. See --help for usage'
             print "**************************************************"
       ## perform basic checks of the input
       self.__checkOptions()
@@ -184,26 +186,30 @@ class jobSplitter:
    def __helpMsg(self):
       print "\n"
       print " Synopsis   : submit [Option] --cmd '...' -n NJOBS --name JOBNAME         \n"
-      print " Description: Script to submit jobs to the NAF farm system. Expected use    "
+      print " Description: script to submit jobs to the NAF farm system. Expected use    "
       print "              is with cmsRun, but it can take any executing script; the     "
       print "              execution should be specified as a full cmd line including    "
       print "              all options in the --cmd option; submission expects tokens    "
-      print "              for -e, -s, -o, -d to be present in the command line. Token   "
-      print "              -s is added with 0 events to be skipped when not found. Token "
+      print "              for -e, -s, -o, -d to be present in the command line; token   "
+      print "              -s is added with 0 events to be skipped when not found; token "
       print "              -d is added with a default job name when not found, which is  "
       print "              created from date and time. Defaults for the expected tokens  "
-      print "              are given but may be specified when different.              \n"        
+      print "              are given but may be specified when different; option -queue  "
+      print "              allows to specify different queue slots from xshort (<15min), "
+      print "              short (<1h), medium (<12h) and long (<48h); memory assertion  "
+      print "              is set to 2G.                                               \n"
       print " Options    : -h | --help           [ ]   print this message                "
       print "              -v | --verbose        [ ]   run in verbose mode               "
       print "              -c | --cmd    ....    [x]   specify full command line         "
       print "              -s | --skip   '-s'    [ ]   specify token skip                "
       print "              -e | --evts   '-e'    [!]   specify token for the no of evts  "        
       print "              -o | --out    '-o'    [!]   specify token for output file     "
-      print "              -z | --sub    '-z'    [ ]   specify token for subset file     "      
+      print "              -z | --sub    '-z'    [ ]   specify token for subset file     "
       print "              -d | --dir    '-d'    [ ]   specify token for the job dir     "
-      print "              -f | --farm   '-f'    [ ]   specify token for farm internals  "      
+      print "              -f | --farm   '-f'    [ ]   specify token for farm internals  "
       print "              -n | --njob   ....    [x]   nuber of jobs to be created       "
-      print "              -x | --name   ....    [ ]   submission job directory        \n"        
+      print "              -x | --name   ....    [ ]   submission job directory          "
+      print "              -q | --queue  ....    [ ]   specify queue (default: medium) \n"            
       print " [ ] optional                                                               "
       print " [x] mandatory                                                              "
       print " [!] need to be present in the execution command line [--cmd '...']         "        
@@ -230,34 +236,48 @@ class jobSplitter:
 ##-----------------------------------------------------------------------------------
 ##  * basic check of input configuration
    def __checkOptions(self):
-        ################################################
-        ## execution command specified?
-        ################################################            
-        if (self.__command == ''):
-            self.__errorMsg()
-            print '* * no execution command specified. Choose --cmd to specify'
-            print "**************************************************"            
-            sys.exit(0)
-        ################################################
-        ## no of jobs specified?
-        ################################################            
-        if (self.__numberOfJobs == 0):
-            self.__errorMsg()
-            print '* * no of jobs not specified. Choose -n to specify'
-            print "**************************************************"            
-            sys.exit(0)            
-        ################################################
-        ## job name specified?
-        ################################################            
-        if (self.__submitName == ''):
-            self.__submitName = 'job_'
-            self.__submitName+= datetime.today().strftime("%Y%m%d-%H%M%S")
-            if (self.__verbose):
-               self.__warningMsg()
-               msg = '* * no job name specified for job. Job \n'
-               msg+= '* * name was set to ' + self.__submitName 
-               self.__printMsg(msg)
-               print "**************************************************"
+      ################################################
+      ## execution command specified?
+      ################################################            
+      if (self.__command == ''):
+         self.__errorMsg()
+         print '*   no execution command specified; choose --cmd to specify'
+         print "**************************************************"            
+         sys.exit(0)
+      ################################################
+      ## no of jobs specified?
+      ################################################            
+      if (self.__numberOfJobs == 0):
+         self.__errorMsg()
+         print '*   no of jobs not specified; choose -n to specify'
+         print "**************************************************"            
+         sys.exit(0)
+      ################################################
+      ## correct choice of farm queue?
+      ################################################            
+      if (not (self.__farmQueue=='xshort' or self.__farmQueue=='short'
+           or  self.__farmQueue=='medium' or self.__farmQueue=='long')
+          ):
+         self.__errorMsg()
+         print '*   unknown queue; choose between:                '
+         print '*     - xshort ( <15min )                         '
+         print '*     - short  ( < 1h   )                         '
+         print '*     - medium ( <12h   )                         '
+         print '*     - long   ( <48h   )                         '            
+         print "**************************************************"            
+         sys.exit(0)                     
+      ################################################
+      ## job name specified?
+      ################################################            
+      if (self.__submitName == ''):
+         self.__submitName = 'job_'
+         self.__submitName+= datetime.today().strftime("%Y%m%d-%H%M%S")
+         if (self.__verbose):
+            self.__warningMsg()
+            msg = '*   no job name specified for job. Job \n'
+            msg+= '*   name was set to ' + self.__submitName 
+            self.__printMsg(msg)
+            print "**************************************************"
 
 ##-----------------------------------------------------------------------------------
 ##  * check if an offset is given for events to be skipped
@@ -284,10 +304,10 @@ class jobSplitter:
          ## perform basic error treatment
          if (self.__verbose):
             self.__warningMsg()
-            msg = '* * toToken :: token not found in command line: ' + token
+            msg = '*   toToken :: token not found in command line: ' + token
             print msg
             ## take over and add the expected token plus value by hand
-            print '* * toToken :: adding token and value'
+            print '*   toToken :: adding token and value'
             print "**************************************************"
          command    += ' ' + token + ' ' + value.__str__()
       else:
@@ -309,7 +329,7 @@ class jobSplitter:
          ## perform basic error treatment
          if (mandatory):
             self.__errorMsg()
-            msg = '* * fromToken :: token not found in command line: ' + token
+            msg = '*   fromToken :: token not found in command line: ' + token
             print msg
             print "**************************************************"
             sys.exit(0)
@@ -318,7 +338,7 @@ class jobSplitter:
          ## check sanity
          if(re.match(r'\d+', value) and re.search(r'\D+', value)):
             self.__errorMsg()
-            msg = '* * value extracted from token: ' + token
+            msg = '*   value extracted from token: ' + token
             msg+= ' does not contain \n'
             msg+= '*   only digits as expected: '
             msg+= value
@@ -414,7 +434,7 @@ class jobSplitter:
       ## catch pathological cases
       if (self.__numberOfJobs<=0):
          self.__errorMsg()
-         print "* * numberOfJobs <=0; this should never happen!!!"
+         print "*   numberOfJobs <=0; this should never happen!!!"
          print "**************************************************"
          sys.exit(0)
           
@@ -461,9 +481,22 @@ class jobSplitter:
          ## uncomment the following line(s) to run in batch mode; qsub parameters are
          ## explained above. For more details see:
          ## http://naf.desy.de/general_naf_docu/working_with_the_local_batch_system/
+
+         ## determine farm queue
+         queue=' -l h_cpu='
+         if   (self.__farmQueue=='xshort'):
+            queue+='00:14:59'
+         elif (self.__farmQueue=='short' ):
+            queue+='00:59:59'
+         elif (self.__farmQueue=='medium'):
+            queue+='11:59:59'
+         else:
+            queue+='48:00:00'
+
+         ## prepare farm word
          farm = 'qsub'
          farm+= ' -l h_vmem=2G'                 ## increase memory to 2G
-         farm+= ' -l h_cpu=48:00:00'            ## set maximally allowed cpu time
+         farm+= queue                           ## set maximally allowed cpu time
         #farm+= ' -l tmp_free=10G'              ## set maximally allowed space for output
          farm+= ' -cwd'                         ## execute job from current directory
          farm+= ' -V'                           ## inherit the current shell environment to the job

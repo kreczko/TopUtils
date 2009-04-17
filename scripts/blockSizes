@@ -1,0 +1,190 @@
+#! /usr/bin/env python
+
+## system imports
+import os
+import sys
+import glob
+import getopt
+
+##-----------------------------------------------------------------------------------
+## 
+## 
+class blockSizes:
+    ##
+    ## configurables
+    ##
+
+    ## verbose mode
+    __verbose   = False
+    ## path to the input files
+    __input     = ''
+    ## name of output file
+    __output    = ''
+
+    ##
+    ## internal variables
+    ##
+
+    ## version
+    __version   = 'V00-00-01'
+    ## name of the object
+    __name      = 'none'
+
+##-----------------------------------------------------------------------------------    
+##  Constructor
+    def __init__(self):
+        self.__name  = 'blockSizes'
+
+##-----------------------------------------------------------------------------------        
+##  * start sequence
+    def beginJob(self):
+        versionLine = "*                                      "
+        versionLine+= self.__version + " *"              
+        print "**************************************************"
+        print "* starting file block size evaluation...         *"
+        print "*                                                *"
+        print versionLine
+        print "**************************************************"
+ 
+##-----------------------------------------------------------------------------------        
+##  * end sequence
+##  * this may contain the execution of histPlotter or something similar                
+    def endJob(self):
+        print "**************************************************"
+        print "* leaving file block size evaluation...          *"
+        print "*                                                *"
+        print "*                                      Good Bye! *"
+        print "**************************************************"          
+        
+##-----------------------------------------------------------------------------------
+##  * parse command line options
+##  * do basic check whether the options make sense or not
+##  * depending on the options execute ...
+    def main(self):
+        try:
+            opts, args = getopt.getopt(sys.argv[1:],
+                                       'hvi:o:',
+                                       ['help','verbose','input=','out=']
+                                       )
+        except getopt.error, msg:
+            print msg
+            print "for help use --help"
+            sys.exit(2)
+
+        for o, a in opts:
+            ################################################
+            ## get help
+            ################################################                
+            if o in ("-h", "--help"):
+                self.__helpMsg()
+                self.endJob()
+                sys.exit(0)
+            ################################################
+            ## run verbose mode
+            ################################################
+            elif o in ("-v", "--verbose"):
+                self.__verbose = True
+            ################################################                
+            ## path to input files
+            ################################################                
+            elif o in ("-i", "--input"):
+                self.__input = a
+            ################################################                
+            ## path and name of output file
+            ################################################
+            elif o in ("-o", "--out"):
+                if (not (a == '')):
+                    self.__output = a
+            else:
+                self.__errorMsg()
+                print '*   argument(s) not recognized. See --help for usage'
+                print "**************************************************"
+        ## perform basic checks of the input
+        ## self.__checkOptions()
+        ## run and perform basic monitoring
+        self.__measureBlockSize()
+
+##-----------------------------------------------------------------------------------
+##  * print help message for the use of the ConfigRunner
+    def __helpMsg(self):
+        print "\n"
+        print " Synopsis   : blockSizes [Option] --input '...' --ouput '...'              \n"
+        print " Description: script to evaluate the size of the blocks created with the     "
+        print "              script blockMaker in events; event numbers are read from -i    "
+        print "              with the help of grep (all linux wildcarts are allowed) and    "
+        print "              directly written to -o.                                        "        
+        print " Options    : -h | --help         [ ]   print this message                   "
+        print "              -v | --verbose      [ ]   run in verbose mode                  "
+        print "              -i | --input ...    [x]   path to the input file(s)            "
+        print "              -o | --out   ...    [x]   output file name and path            "
+        print " [ ] optional                                                                "
+        print " [x] mandatory                                                               "
+        print "\n"
+
+##-----------------------------------------------------------------------------------            
+##  * writes a string to a file (overwriting existing files)
+    def __measureBlockSize(self):
+        ## get ordered list of input files
+        pathName=self.__input
+        inputFiles=glob.glob(pathName)
+        inputFiles.sort()
+        
+        if (os.path.exists('measureBlocks.tmp')):
+            ## remove tmp file if it still exists
+            os.system('rm measureBlocks.tmp')
+            
+        for i in range(len(inputFiles)):
+            ## get label from job directory
+            label = inputFiles[i].split('/')[0]
+            os.system('echo \''+label+'\'>>measureBlocks.tmp')
+            ## write sizes to the top of each block
+            check = 'grep MessageLogger -B 5 '
+            check+= inputFiles[i]
+            check+= ' | grep record | awk \'{print $4}\'>>measureBlocks.tmp'
+            os.system(check)
+
+        ## read results back from the tmp file
+        tmpfile = open('measureBlocks.tmp', 'r')
+        inputString=tmpfile.read()
+        tmpfile.close()
+        ## remove file, which is not needed
+        ## anymore
+        os.system('rm measureBlocks.tmp')
+
+        keyList=[]
+        valList=[]
+        ## convert inputString into a list
+        inputList=inputString.splitlines()
+        for i in range(len(inputList)):
+            ## re-key lists and values
+            if(i%2==0):
+                keyList.append(inputList[i])
+            else:
+                ## get rid of nasty endings at the same time
+                valList.append(inputList[i].rstrip('sthndr'))
+
+        ## open output file and read its content
+        print self.__output
+        outfile = open(self.__output, 'r')
+        outputString=outfile.read()
+        outfile.close()
+        for i in range(len(keyList)):
+            ## do the replaqcement
+            keyElement ='sizes [\''
+            keyElement+=keyList[i]
+            keyElement+='\'] = '
+            searchString =keyElement+'99999999'
+            replaceString=keyElement+valList[i]
+            outputString=outputString.replace(searchString, replaceString)
+        ## write the strong back to the same file
+        ## the old file will be replaced 
+        outfile = open(self.__output, 'w')
+        outfile.write(outputString)
+        outfile.close()            
+
+##-----------------------------------------------------------------------------------
+if __name__ == '__main__':
+    runner = blockSizes()
+    runner.beginJob()
+    runner.main()
+    runner.endJob()

@@ -9,7 +9,7 @@ import getopt
 ##-----------------------------------------------------------------------------------
 ## 
 ## 
-class blockCreator:
+class blockMaker:
     ##
     ## configurables
     ##
@@ -30,7 +30,7 @@ class blockCreator:
     ##
 
     ## version
-    __version   = 'V00-00-00'
+    __version   = 'V00-01-00'
     ## name of the object
     __name      = 'none'
     ## common filename replacement
@@ -39,7 +39,7 @@ class blockCreator:
 ##-----------------------------------------------------------------------------------    
 ##  Constructor
     def __init__(self):
-        self.__name  = 'blockCreator'
+        self.__name  = 'blockMaker'
 
 ##-----------------------------------------------------------------------------------        
 ##  * start sequence
@@ -48,9 +48,6 @@ class blockCreator:
         versionLine+= self.__version + " *"              
         print "**************************************************"
         print "* starting file block creation...                *"
-        print "*                                                *"
-        print "*                                                *"
-        print "*                                                *"    
         print "*                                                *"
         print versionLine
         print "**************************************************"
@@ -62,9 +59,6 @@ class blockCreator:
         print "**************************************************"
         print "* leaving file block creation...                 *"
         print "*                                                *"
-        print "*                                                *"
-        print "*                                                *"    
-        print "*                                                *"
         print "*                                      Good Bye! *"
         print "**************************************************"          
         
@@ -75,8 +69,8 @@ class blockCreator:
     def main(self):
         try:
             opts, args = getopt.getopt(sys.argv[1:],
-                                       'hvs:p:o:n:',
-                                       ['help','verbose','sample=','path=','out=','size=']
+                                       'hvp:f:o:n:',
+                                       ['help','verbose','proc=','path=','out=','size=']
                                        )
         except getopt.error, msg:
             print msg
@@ -99,12 +93,12 @@ class blockCreator:
             ################################################                
             ## name of global sample tag
             ################################################                
-            elif o in ("-s", "--sample"):
+            elif o in ("-p", "--proc"):
                 self.__sample = a
             ################################################                
             ## path to input files
             ################################################                
-            elif o in ("-p", "--path"):
+            elif o in ("-f", "--path"):
                 self.__path = a
             ################################################                
             ## path and name of output file
@@ -131,9 +125,16 @@ class blockCreator:
 ##  * print help message for the use of the ConfigRunner
     def __helpMsg(self):
         print "\n"
-        print " Synopsis   : createBlock [Option] --path '...' -p PROC -o OUTPUT          \n"
-        print " Description: Script to create file blocks as input to the ConfigRunner via  "
-        print "              command line options                                          \n"
+        print " Synopsis   : blockMaker [Option] --path '...' -p PROC -o OUTPUT           \n"
+        print " Description: script to create file blocks as input to the ConfigRunner via  "
+        print "              command line options; input files are read from --path (all    "
+        print "              linux wildcarts are allowed) and directed to -o; the process   "
+        print "              label is given by -p; the default block size is 10 files, but  "
+        print "              may be specified by the -n option. Block sizes in events are   "
+        print "              set to large numbers; the script also provides a shell script  "
+        print "              to determine the exact block size in events; it is recommended "
+        print "              to run this script and the blockSizes script to finalize the   "
+        print "              block creation process.                                      \n"        
         print " Options    : -h | --help         [ ]   print this message                   "
         print "              -v | --verbose      [ ]   run in verbose mode                  "
         print "              -p | --path ...     [x]   path to the input files              "
@@ -210,7 +211,8 @@ class blockCreator:
             submissionString+= blockVector[i]
             submissionString+= ' -e 9999999 -o None\' -n 1 --name '
             submissionString+= blockVector[i]
-            submissionString+= '\n'            
+            submissionString+= ' -q short'
+            submissionString+= '\n'                        
             ## create submissionScript
             submissionScript.write(submissionString)
         submissionScript.close()
@@ -226,7 +228,7 @@ class blockCreator:
 
 ##-----------------------------------------------------------------------------------
 if __name__ == '__main__':
-    runner = blockCreator()
+    runner = blockMaker()
     runner.beginJob()
     runner.main()
     runner.endJob()
