@@ -17,7 +17,7 @@ class blockMaker:
     ## verbose mode
     __verbose   = False
     ## path to the input files
-    __path      = ''
+    __input     = ''
     ## sample name
     __sample    = ''
     ## name of output file
@@ -69,8 +69,8 @@ class blockMaker:
     def main(self):
         try:
             opts, args = getopt.getopt(sys.argv[1:],
-                                       'hvp:f:o:n:',
-                                       ['help','verbose','proc=','path=','out=','size=']
+                                       'hvp:i:o:s:',
+                                       ['help','verbose','proc=','input=','out=','size=']
                                        )
         except getopt.error, msg:
             print msg
@@ -98,8 +98,8 @@ class blockMaker:
             ################################################                
             ## path to input files
             ################################################                
-            elif o in ("-f", "--path"):
-                self.__path = a
+            elif o in ("-i", "--input"):
+                self.__input = a
             ################################################                
             ## path and name of output file
             ################################################
@@ -109,7 +109,7 @@ class blockMaker:
             ################################################                
             ## number of files per block
             ################################################
-            elif o in ("-n", "--size"):
+            elif o in ("-s", "--size"):
                 if (not (a == '')):
                     self.__blockSize = int(a)
             else:
@@ -125,7 +125,7 @@ class blockMaker:
 ##  * print help message for the use of the ConfigRunner
     def __helpMsg(self):
         print "\n"
-        print " Synopsis   : blockMaker [Option] --path '...' -p PROC -o OUTPUT           \n"
+        print " Synopsis   : blockMaker [Option] -input '...' -p PROC -o OUTPUT           \n"
         print " Description: script to create file blocks as input to the ConfigRunner via  "
         print "              command line options; input files are read from --path (all    "
         print "              linux wildcarts are allowed) and directed to -o; the process   "
@@ -137,10 +137,10 @@ class blockMaker:
         print "              block creation process.                                      \n"        
         print " Options    : -h | --help         [ ]   print this message                   "
         print "              -v | --verbose      [ ]   run in verbose mode                  "
-        print "              -p | --path ...     [x]   path to the input files              "
-        print "              -p | --proc ...     [x]   specify process name                 "
-        print "              -o | --out  ...     [x]   specify output file name and path    "
-        print "              -n | --size ...     [ ]   change block size (default is 10)    "
+        print "              -i | --input ...    [x]   path to the input files              "
+        print "              -p | --proc  ...    [x]   specify process name                 "
+        print "              -o | --out   ...    [x]   specify output file name and path    "
+        print "              -n | --size  ...    [ ]   change block size (default is 10)    "
         print " [ ] optional                                                                "
         print " [x] mandatory                                                               "
         print "\n"
@@ -163,7 +163,7 @@ class blockMaker:
         self.__writeToFile('# eff         :                                                       \n')
         self.__writeToFile('######################################################################\n')           
         ## get sorted list of input files
-        pathName=self.__path+'*.root'
+        pathName=self.__input+'*.root'
         inputFiles=glob.glob(pathName)
         inputFiles.sort()
         numberOfFiles=len(inputFiles)
