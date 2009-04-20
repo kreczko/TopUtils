@@ -165,8 +165,16 @@ class blockSizes:
                 valList.append(inputList[i].rstrip('sthndr'))
                 sumList+=valList[len(valList)-1]
 
-        ## open output file and read its content
-        print self.__output
+        ## print a small summary to the screen
+        summaryString = '* '
+        summaryString+= sumList.__str__()
+        summaryString+= ' event in '
+        summaryString+= len(keyList).__str__()
+        summaryString+= ' blocks in file: '
+        summaryString+=self.__output
+        print summaryString
+        
+        ## open output file and read its content        
         outfile = open(self.__output, 'r')
         outputString=outfile.read()
         outfile.close()
