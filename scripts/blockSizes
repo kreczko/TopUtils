@@ -151,6 +151,7 @@ class blockSizes:
         ## anymore
         os.system('rm measureBlocks.tmp')
 
+        sumList=0
         keyList=[]
         valList=[]
         ## convert inputString into a list
@@ -162,6 +163,7 @@ class blockSizes:
             else:
                 ## get rid of nasty endings at the same time
                 valList.append(inputList[i].rstrip('sthndr'))
+                sumList+=valList[len(valList)-1]
 
         ## open output file and read its content
         print self.__output
