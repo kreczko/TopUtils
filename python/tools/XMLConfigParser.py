@@ -44,6 +44,7 @@ class Configuration:
             raise ConfigError, "Configuration cannot have an empty rootnode"
         self.files = {}
         self.inputs = {}
+        self.includes = []
         self.plots = None
         
 #===============================================================================
@@ -109,7 +110,18 @@ class Configuration:
             else:
                 Print("Adding input '%s'" %name)
                 self.inputs[name] = input
-                
+
+    def readIncludes(self, nodelist):
+        for node in nodelist:
+            include = Include()
+            include.parseFromNode(node)
+            self.includes.append(include)
+    
+    def readSetups(self):
+        if self.includes:
+            for inc in self.includes:
+                pass
+            
     def getInputByName(self, name):
         return self.getInputs()[name]
     
@@ -673,7 +685,9 @@ class HistogramList(ConfigObject):
         input = None
         if self.hasOption("input") and "i%s"%Input.separator in self.getOption("input"):
             input = self.getOption("input").replace("i" + Input.separator, "")
-        if inputs.has_key(input):
+        if not input:
+            input = Input.createInput()
+        elif inputs.has_key(input):
             input = inputs[input]
         else:
             raise ConfigError, "Input '%s' could not be found"%input
@@ -803,19 +817,31 @@ class Folder(ConfigObject):
         return self.content
     
     def getFilteredContent(self):
-        folder = self.getOption("name")
-        for i in self.content:
-            if folder + self.pathtoken in i:
-                res = i.replace(folder + self.pathtoken, "")
-                for x in self.subobjects["filter"]:
-                    res = x.applyFilter(res)
-                if res:
-                    self.filtered.append(folder + self.pathtoken + res)
+        folder = ""
+        self.filtered = []
+        if self.isMetaFolder():
+            self.filtered = self.content
+        else:
+            folder = self.getOption("name")
+            
+            for i in self.content:
+                if folder + self.pathtoken in i:
+                    res = i.replace(folder + self.pathtoken, "")
+                    for x in self.subobjects["filter"]:
+                        res = x.applyFilter(res)
+                    if res:
+                        self.filtered.append(folder + self.pathtoken + res)
         return self.filtered
     
     def setContent(self, list):
         if list:
             self.content = list
+            
+    def isMetaFolder(self):
+        ret = False
+        if "*" in self.getOption("name"):
+            ret = True
+        return ret
     
 #===============================================================================
 # defines an input for a histogram
@@ -844,7 +870,7 @@ class Input(ConfigObject):
         for dir in self.subobjects["folder"]:
             l = []
             for hist in list:
-                if dir.getOption("name") in hist:
+                if dir.getOption("name") in hist or dir.isMetaFolder() :
                     l.append(hist)
             if l:
                 dir.setContent(l) 
@@ -854,3 +880,24 @@ class Input(ConfigObject):
         for dir in self.subobjects["folder"]:
             content.extend(dir.getFilteredContent())
         return content
+    
+    def createInput():
+        inp = Input()
+        folder = Folder()
+        folder.options.addOption("name", "*")
+        inp.subobjects["folder"] = [folder]
+        return inp
+    createInput = staticmethod(createInput)
+    
+class Include(ConfigObject):
+    def __init__(self):
+        ConfigObject.__init__(self, rootNodeName= "include", doNotParse = [], mandatoryObjects = [], mandatoryOptions = [])
+    
+    def parseFromNode(self, node):
+        file = ""
+        if Parser.hasAttribute(node, "file"):
+            file = Parser.getAttributeValue(node, "file")
+        else:#try to read as TextNode
+            file = Parser.getText(node)
+        FileService.exists(file)
+        self.options.addOption("file", file)

@@ -74,7 +74,7 @@ class Plotter:
 #                save all histograms in one file
 #===============================================================================
             Drawer.saveHistsInOne(list, hist, savedir, writeAs) 
-    def savePlotsFromCfg(self,savedir, cfg = "Plotter"):
+    def savePlots(self,savedir, cfg = "Plotter"):
         cfg = Configuration(cfg)
         cfg.loadConfiguration(self.config)
         plots = cfg.getPlots()
@@ -88,4 +88,4 @@ class Plotter:
 if __name__ == "__main__":
     Drawer.setDefaultLayout()
     pl = Plotter("test/NewConfig.xml")
-    pl.savePlotsFromCfg("plots")
+    pl.savePlots("plots")

@@ -191,6 +191,7 @@ class TestHistogramList(unittest.TestCase):
         obj.loadConfiguration(testxml)
         self.histlistnode = Parser.getNodeList(testxml, "histlist")[0]
         self.histlist = obj.getPlots().subobjects["histlist"][0]
+        self.histlist2 = obj.getPlots().subobjects["histlist"][1]
         self.inputs = obj.inputs
         
     def testOptions(self):
@@ -200,6 +201,7 @@ class TestHistogramList(unittest.TestCase):
     def testHists(self):
         hists = self.histlist.subobjects["hist"]
         self.assertEqual(len(hists), 6)
+        self.assertEqual(len(self.histlist2.subobjects["hist"]), len(FileService.getFileContent("test/analyzeMuon.root")))
         for i in hists:
             self.assertNotEqual(i.getOption("name"), "DEFAULT")
             self.assertNotEqual(i.getOption("savefolder"), "")
