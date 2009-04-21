@@ -549,7 +549,7 @@ class configRunner:
             printEvery = self.__sleeptime*180
         else:
             ## every 100s for each 100 events else
-            t = self.__numberOfEvents/100 - self.__numberOfEvents%100
+            t = int(self.__numberOfEvents)/100 - int(self.__numberOfEvents)%100
             printEvery = self.__sleeptime*t
         
         ## print 'waiting up to 100 times
