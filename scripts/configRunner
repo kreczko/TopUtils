@@ -140,7 +140,7 @@ class configRunner:
             ## number of events to be processed
             ################################################                                
             elif o in ("-e", "--evts"):
-                self.__numberOfEvents = int(a)
+                self.__numberOfEvents = a
             ################################################                
             ## number of events to be skipped
             ################################################                                
@@ -405,6 +405,23 @@ class configRunner:
             print "**************************************************"
 
 ##-----------------------------------------------------------------------------------
+##  * return number of all events independend of whether sizes in processes.py 
+##    is switched to blocks or not
+    def __numberOfAllEvents(self):
+        allEvents=0;
+        if (input.sizes[self.__process]=='blocks'):
+            ## if sizes holds the keyword 'blocks' assume that the block
+            ## names are contained in sources instead of the files names
+            blocks=self.__vectorFromList(input.source[self.__process], ',')
+            for i in blocks:
+                ## loop all input blocks and add up the events contained
+                ## in there
+                allEvents+=input.sizes[i]
+        else:
+            allEvents+=input.sizes[self.__process]
+        return allEvents
+
+##-----------------------------------------------------------------------------------
 ##  * prepare list of input files, which may be organized in blocks to improve the 
 ##    runtime stability of cmsRun
 ##  * adjust numberOfSkips accordingly 
@@ -459,8 +476,8 @@ class configRunner:
         ## process.modifyOption('source', input.source[self.__process])
         process.modifyOption('source', self.__modifiedInput())
         ## modify events
-        if (self.__numberOfEvents <= 0):
-            self.__numberOfEvents = input.sizes[self.__process]
+        if (self.__numberOfEvents=='all'):
+            self.__numberOfEvents = self.__numberOfAllEvents()
         process.modifyOption('events', self.__numberOfEvents)
         ## modify skips
         process.modifyOption('skips',  self.__numberOfSkips )
