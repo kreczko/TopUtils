@@ -537,10 +537,6 @@ class FileService:
             return dir
             
     followDirs = staticmethod(followDirs)
-#        while(tlist.pop()):
-#            print tlist.pop()
-#        for i in  TFile(file).GetListOfKeys():
-#            print i
     
     
 class Plots(ConfigObject):
@@ -571,8 +567,6 @@ class Histogram(ConfigObject):
         for var in self.subobjects["var"]:
             varinput = var.getOption("source")
             varsource = self.getVarSourceFile(var)
-#            print "var", varinput, "source", varsource
-            #TODO hERERERERER!!!!
             if isinstance(varsource, unicode) and varsource:
                 var.setOption("source", [files[varsource], self.getVarInput(var)])
             else:
@@ -631,7 +625,7 @@ class Histogram(ConfigObject):
 class HistogramList(ConfigObject):
     rootNodeName = "histlist"
     doNotParse = ["var", "hist"]
-    mandatoryOptions = ["name"]      
+    mandatoryOptions = ["name", "input"]      
     mandatoryObjects = ["var"]
     
     def __init__(self):
@@ -683,32 +677,42 @@ class HistogramList(ConfigObject):
     def resolveInputs(self, files, inputs):
         Print("Resolving HistogramList inputs")
         input = None
-        if self.hasOption("input") and "i%s"%Input.separator in self.getOption("input"):
-            input = self.getOption("input").replace("i" + Input.separator, "")
+#        if self.hasOption("input") and "i%s"%Input.separator in self.getOption("input"):
+#            input = self.getOption("input").replace("i" + Input.separator, "")
+        var0 = self.subobjects["var"][0]
+        input = self.getVarInput(var0, inputs, self.getOption("input"))
         if not input:
             input = Input.createInput()
-        elif inputs.has_key(input):
-            input = inputs[input]
-        else:
-            raise ConfigError, "Input '%s' could not be found"%input
-        var0 = self.subobjects["var"][0]
+#        elif inputs.has_key(input):
+#            input = inputs[input]
+#        else:
+#            raise ConfigError, "Input '%s' could not be found"%input
+       
         varsource = self.getVarSourceFile(var0)
         content = FileService.getFileContent(files[varsource])
         input.setContent(content)
         content = input.getFilteredContent()
-        
-        for i in content:
+        for i in range(0, len(content)):
             hist = Histogram()
             hist.readDefaults(defaults["hist"])
-            hist.setOption("input", i)
+#            hist.setOption("input", i)
             #TODO: set savefolder
-            nameAndFolder = self.getNameAndFolder(i)
+            nameAndFolder = self.getNameAndFolder(content[i])
+            hist.setOption("input", nameAndFolder[0])#same hist for all vars
             hist.setOption("name", nameAndFolder[0])
             hist.setOption("savefolder", self.getOption("savefolder") + "/" + nameAndFolder[1])
-#            print len(self.subobjects["var"])
-#            print i
+
             for var in self.subobjects["var"]:
-                #DEEPCOPY!!!!!
+                if i ==0:
+                    inputtmp = self.getVarInput(var, inputs, self.getOption("input"))
+                    varsource = self.getVarSourceFile(var)
+                    contenttmp = FileService.getFileContent(files[varsource])
+                    if not inputtmp:
+                        inputtmp = Input.createInput()
+                    inputtmp.setContent(contenttmp)
+                    contenttmp = inputtmp.getFilteredContent()
+                    nameAndFoldertmp = self.getNameAndFolder(contenttmp[i])
+                    var.setOption("input","f%s%s" %(Input.separator, nameAndFoldertmp[1]))
                 hist.subobjects["var"].append(var.Copy())
             hist.resolveInputs(files, inputs)
             self.subobjects["hist"].append(hist)
@@ -720,16 +724,6 @@ class HistogramList(ConfigObject):
         for x in range(0, len(dirs)-1):
             folder += "%s/" %dirs[x]
         return [hist, folder]
-#        for var in self.subobjects["var"]:
-#            varsource = self.getVarSourceFile(var)
-#            if isinstance(varsource, unicode):
-#                file = files[varsource]
-#                filecontent = FileService.getFileContent(file)
-#            else:
-#                vars = []
-#                for i in varsource:
-#                    vars.append(self.getVariable(i))
-#                var.setOption("source", vars)
                 
     def getVarSourceFile(self,var):
         ret = None
@@ -746,19 +740,37 @@ class HistogramList(ConfigObject):
                 ret.append(v.strip())
         return ret
     
-    def getVarInput(self, var, inputs):
-        histinput = self.getOption("input")
+    def getVarInput(self, var, inputs, histinput = ""):
+#        histinput = self.getOption("input")
         varinput = var.getOption("input")
         ret = None
-        if "i" + Input.separator in histinput:
-            ret = histinput.replace("i"+Input.separator, "")
-        elif "i" + Input.separator in varinput:
-            ret = varinput.replace("i"+Input.separator, "")
-        if inputs.has_key(ret):
-            ret = inputs[ret]
-        else:
-            raise ConfigError, "Used input '%s' is not defined." % ret
-            
+        if not Input.separator in varinput and not Input.separator in histinput:
+            if varinput:
+                ret = varinput
+            else:
+                ret = histinput
+        elif "f"+Input.separator in varinput and histinput:
+            varinput = varinput.replace("f"+Input.separator, "")
+            if varinput.endswith("/"):
+                ret = varinput + histinput
+            else:
+                ret = varinput + "/" + histinput
+        elif "f"+Input.separator in histinput and varinput:
+            histinput = histinput.replace("f"+Input.separator, "")
+            if histinput.endswith("/"):
+                ret = histinput + varinput
+            else:
+                ret = histinput+ "/" + varinput
+        elif "i"+ Input.separator in histinput or "i" + Input.separator in varinput:
+            if varinput:
+                ret = varinput.replace("i"+Input.separator, "")
+            else:
+                ret = histinput.replace("i"+Input.separator, "")
+            if inputs.has_key(ret):
+                ret = inputs[ret]
+#        elif histinput and not varinput:
+#            ret = histinput
+#        elif varinput and not histinput
         return ret
         
 class Variable(ConfigObject):
@@ -823,7 +835,12 @@ class Folder(ConfigObject):
             self.filtered = self.content
         else:
             folder = self.getOption("name")
-            
+            if not self.subobjects["filter"]:
+                f = Filter()
+                #TODO: change mandatory options
+                f.options.addOption("type", "")
+                f.options.addOption("value", "")
+                self.subobjects["filter"].append(f)
             for i in self.content:
                 if folder + self.pathtoken in i:
                     res = i.replace(folder + self.pathtoken, "")

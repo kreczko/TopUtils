@@ -1,8 +1,9 @@
-from ROOT import TLegend, TBox, TColor, gStyle, TPaletteAxis, TPaveText, TPaveStats, TF1, TAxis, TLine, gROOT, TGaxis
+from ROOT import *
 import PadService as ps
 import os
 from math import log
 from array import array
+
 
 
 class Drawer:
@@ -12,6 +13,9 @@ class Drawer:
     drawOption = ''
     varOption = ""
     allowedFormats = ['eps', 'ps', 'pdf', 'png', 'jpg']
+    makeSummary = False
+    summaryList = []
+    summary = None
     
     def setDefaultLayout():
         gROOT.Reset()
@@ -204,7 +208,10 @@ class Drawer:
         hist.Draw(Drawer.drawOption)
         if not "norm_ProcMatrix" in filename:
             pt.Draw()
-
+        Drawer.addToSummary(pad, [hist], legend)
+#        if Drawer.makeSummary:
+#            gROOT.cd()
+#            Drawer.summaryList.append(hist.Clone(filename))
         for i in printAs:
             if i in Drawer.allowedFormats:
                 pad.Print(folder + '/' + filename + '.' + i)
@@ -256,7 +263,7 @@ legend.getOption('sizeY'))
         x = 0
         histkeys = histlist.keys()
         histkeys.sort()
-        
+        listi = []
         for histkey in histkeys:
             hist = histlist[histkey]
 #        for hist in histlist.itervalues():
@@ -265,7 +272,6 @@ legend.getOption('sizeY'))
 #                print "TH2F"
                 break
             
-
 #                
             if not logH[1] == '1':
                 hist.SetMaximum(max)
@@ -307,11 +313,28 @@ legend.getOption('sizeY'))
 #                        hist.Draw('HISTPsame')
 #                    else:
                     hist.Draw("same")
+            gROOT.cd()
+            listi.append(hist.Clone())
             x += 1
         if legend:
             legend.Draw("same")
         if not "TH2F" in hist.__str__():
             pad.RedrawAxis();
+#            if Drawer.summary:
+#            Drawer.addToSummary(pad, listi, legend)
+#            pad.Draw()
+#            Drawer.summary.NewPage()
+#            pad.Draw()
+#            TPostScript("/playground/ThesisPlots/MVATraining/inspect3.ps", 111)
+#            gROOT.cd()
+#            pad.Draw()
+#            p = TPad()
+#            pad.Copy(p)
+#            print p.Clone()
+#            Drawer.summaryList.append(p)
+#            if Drawer.makeSummary:
+#                gROOT.cd()
+            Drawer.summaryList.append((listi,legend))#.Clone(filename))
             for i in printAs:
                 if i in Drawer.allowedFormats:
                     pad.Print(folder + '/' + filename + '.' + i)
@@ -499,3 +522,45 @@ legend.getOption('sizeY'))
 
         return []
     doSpecial = staticmethod(doSpecial)
+    
+    def drawSummary(folder, filename):
+        if True:
+            print "sum", Drawer.summaryList
+            folder = folder.rstrip("/")
+            #documentation: http://root.cern.ch/root/html/TPostScript.html
+            if filename.endswith(".ps"):
+                ps = TPostScript("%s/%s"%(folder, filename), 111)
+#                ps.Range(16,24);
+                for hist in Drawer.summaryList:
+                    ps.NewPage()
+                    for x in range(0,len(hist[0])):
+                        if x ==0:
+                            hist[0][x].Draw()
+                        else:
+                            hist[0][x].Draw("same")
+                    if hist[1]:#legend
+                        hist[1].Draw()
+                ps.Close()
+    drawSummary = staticmethod(drawSummary)
+    
+    def createSummary(folder, filename):
+        folder = folder.rstrip("/")
+#        print "%s/%s"%(folder, filename)
+        #documentation: http://root.cern.ch/root/html/TPostScript.html
+        if filename.endswith(".ps"):
+            Drawer.summary = TPostScript("%s/%s"%(folder, filename), 111)
+    createSummary = staticmethod(createSummary)
+    
+    def addToSummary(pad, histi, legend):
+        if Drawer.summary:
+            pad.cd()
+            for hist in histi:
+                hist.Draw()
+            if legend:
+                legend.Draw()
+            #Drawer.summary.NewPage()
+            pad.RedrawAxis();
+            pad.Draw()
+            gROOT.cd()
+    addToSummary = staticmethod(addToSummary)
+    

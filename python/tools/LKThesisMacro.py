@@ -2,10 +2,10 @@ from ROOT import gROOT, TCanvas, TH1F, TFile, TF1, TPad, TGaxis, TGraph
 from math import sqrt
 import os
 from MatrixMethod import MatrixMethod
-from DrawHelper import Helper
+from Drawer import Drawer
 import PadService as ps
 #from ConfigParser import *
-from BasicPlotter import Plotter
+from Plotter import Plotter
 from Timer import Timer
 import copy
 from analysisFiles import *
@@ -176,18 +176,18 @@ class Macro:
         result = self.getEffHist(self.mixb, self.mixa, self.mixunwb)
         eff = result[0]
         if self.var == 'MVA':
-            eff = Helper.setHistLabels(eff, 'MVA disc.', 'effieciency in %')
-            self.mixa = Helper.setHistLabels(self.mixa, 'MVA disc.', 'events')
-            self.mixunwa = Helper.setHistLabels(self.mixunwa, 'MVA disc.', 'unweigthed events')
-            self.mixb = Helper.setHistLabels(self.mixb, 'MVA disc.', 'events')
-            self.mixunwb = Helper.setHistLabels(self.mixunwb, 'MVA disc.', 'unweigthed events')
+            eff = Drawer.setHistLabels(eff, 'MVA disc.', 'effieciency in %')
+            self.mixa = Drawer.setHistLabels(self.mixa, 'MVA disc.', 'events')
+            self.mixunwa = Drawer.setHistLabels(self.mixunwa, 'MVA disc.', 'unweigthed events')
+            self.mixb = Drawer.setHistLabels(self.mixb, 'MVA disc.', 'events')
+            self.mixunwb = Drawer.setHistLabels(self.mixunwb, 'MVA disc.', 'unweigthed events')
         elif self.var == 'met':
-            eff = Helper.setHistLabels(eff, 'missing E_{T} [GeV]', 'effieciency in %')
-            self.mixa = Helper.setHistLabels(self.mixa, 'missing E_{T} [GeV]', 'events')
-            self.mixunwa = Helper.setHistLabels(self.mixunwa, 'missing E_{T} [GeV]', 'unweigthed events')
-            self.mixb = Helper.setHistLabels(self.mixb, 'missing E_{T} [GeV]', 'events')
-            self.mixunwb = Helper.setHistLabels(self.mixunwb, 'missing E_{T} [GeV]', 'unweigthed events')
-        eff = Helper.setMarker(eff, 4, 3, 1)
+            eff = Drawer.setHistLabels(eff, 'missing E_{T} [GeV]', 'effieciency in %')
+            self.mixa = Drawer.setHistLabels(self.mixa, 'missing E_{T} [GeV]', 'events')
+            self.mixunwa = Drawer.setHistLabels(self.mixunwa, 'missing E_{T} [GeV]', 'unweigthed events')
+            self.mixb = Drawer.setHistLabels(self.mixb, 'missing E_{T} [GeV]', 'events')
+            self.mixunwb = Drawer.setHistLabels(self.mixunwb, 'missing E_{T} [GeV]', 'unweigthed events')
+        eff = Drawer.setMarker(eff, 4, 3, 1)
         eff.Write()            
         self.mixa.Write()
         self.mixunwa.Write()
@@ -282,10 +282,10 @@ class Macro:
 #                for effs in result[1]:          
 #                    print 'Eff for %s disc < %1.2f : %1.3f +- %1.3f' % (i, effs[0], effs[1], effs[2])
 #                    self.setEff(type, i,  effs[0], effs[1], effs[2])
-            leg = Helper.makePlainLegend(25 , 95, 70, 25)
+            leg = Drawer.makePlainLegend(25 , 95, 70, 25)
             title1 = 'overall eff. %1.4f \pm %1.4f' % (mceff, mcerr)   
             leg.SetHeader(title1)
-            leg = Helper.setLegendStyle(leg)
+            leg = Drawer.setLegendStyle(leg)
             eff = result[0]
             eff.SetTitle(title1)
             eff.Write()
@@ -629,6 +629,7 @@ class Macro:
         save = '/playground/ThesisPlots/reference/%s/' % outputdir 
         f = open('plotconfigs/LKThesis.xml')
         cfg = f.read()
+        print cfg
         f.close()
         cfg = cfg.replace('{$QCD}', files['qcd'])
         cfg = cfg.replace('{$TOP}', files['top'])
@@ -637,7 +638,7 @@ class Macro:
     saveReferencePlots = staticmethod(saveReferencePlots)
     
     def saveMVAPlots(self,outputdir):
-        Helper.set_palette("simple", 127)
+        Drawer.set_palette("simple", 127)
         save = '/playground/ThesisPlots/MVATraining/%s/' % outputdir
         cfg = 'plotconfigs/MVAHists.xml'
         f = open(cfg)
@@ -680,7 +681,8 @@ class Macro:
         f = open('tmp.xml', 'w')
         f.write(cfg)
         f.close()
-        Plotter.savePlotsFromCfg('tmp.xml', savedir)
+        Plotter('tmp.xml').savePlots(savedir, "HistPlotter")
+#        Plotter.savePlots('tmp.xml', savedir)
 #        cp = ConfigParser('tmp.xml') 
         os.remove('tmp.xml')
     savePlotsFromCfg = staticmethod(savePlotsFromCfg)
@@ -1058,7 +1060,7 @@ if __name__ == '__main__':
     if os.path.exists('MacroTables.tex'):
         os.remove('MacroTables.tex')
     gROOT.Reset()
-    Helper.set_palette('', 999)
+    Drawer.set_palette('', 999)
     TGaxis.SetMaxDigits(3)
 #===============================================================================
 #    for white background
@@ -1081,4 +1083,4 @@ if __name__ == '__main__':
     mac.makeCutDependencyPlots(inputdirs, '0.2')
     mac.output.Close()
     mac.writeTables()
-    mac.saveAllPlots(["cuts"])
+    mac.saveAllPlots(["MVA"])
