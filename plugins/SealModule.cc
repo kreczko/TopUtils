@@ -2,7 +2,9 @@
 
 #include "TopAnalysis/TopUtils/plugins/EventWeight.h"
 #include "TopAnalysis/TopUtils/plugins/EventWeightPlain.h"
+#include "TopAnalysis/TopUtils/plugins/JetEnergyScale.h"
 
 DEFINE_FWK_MODULE( EventWeight );
 DEFINE_FWK_MODULE( EventWeightPlain );
+DEFINE_FWK_MODULE( JetEnergyScale );
 
