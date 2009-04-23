@@ -28,7 +28,7 @@
 		<file id='top' name='test/signal.root' />
 		<file id='kin' name='test/analyzeMuon.root' />
 	</sources>
-	<plots summaryFile='inspect.ps'>
+	<plots summaryFile='inspect.pdf'>
 		<hist name='mvadisc' setup='effplot' input='trackmafter/mbg_nVSdisc'>
 			<titleX v="mva disc." />
 			<var name='qcd' source='file:qcd' color='2' />

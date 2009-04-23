@@ -13,7 +13,8 @@ class Drawer:
     drawOption = ''
     varOption = ""
     allowedFormats = ['eps', 'ps', 'pdf', 'png', 'jpg']
-    makeSummary = False
+    summaryFile = ""
+    summaryBegin = True
     summaryList = []
     summary = None
     
@@ -208,10 +209,7 @@ class Drawer:
         hist.Draw(Drawer.drawOption)
         if not "norm_ProcMatrix" in filename:
             pt.Draw()
-        Drawer.addToSummary(pad, [hist], legend)
-#        if Drawer.makeSummary:
-#            gROOT.cd()
-#            Drawer.summaryList.append(hist.Clone(filename))
+        Drawer.printSummary(pad)
         for i in printAs:
             if i in Drawer.allowedFormats:
                 pad.Print(folder + '/' + filename + '.' + i)
@@ -320,21 +318,13 @@ legend.getOption('sizeY'))
             legend.Draw("same")
         if not "TH2F" in hist.__str__():
             pad.RedrawAxis();
-#            if Drawer.summary:
-#            Drawer.addToSummary(pad, listi, legend)
-#            pad.Draw()
-#            Drawer.summary.NewPage()
-#            pad.Draw()
-#            TPostScript("/playground/ThesisPlots/MVATraining/inspect3.ps", 111)
-#            gROOT.cd()
-#            pad.Draw()
-#            p = TPad()
-#            pad.Copy(p)
-#            print p.Clone()
-#            Drawer.summaryList.append(p)
-#            if Drawer.makeSummary:
-#                gROOT.cd()
-            Drawer.summaryList.append((listi,legend))#.Clone(filename))
+
+#            if Drawer.summaryFile:
+#                if Drawer.summaryBegin:
+#                    pad.Print(Drawer.summaryFile +"[")
+#                else:
+#                    pad.Print(Drawer.summaryFile +"]")
+            Drawer.printSummary(pad)
             for i in printAs:
                 if i in Drawer.allowedFormats:
                     pad.Print(folder + '/' + filename + '.' + i)
@@ -523,44 +513,49 @@ legend.getOption('sizeY'))
         return []
     doSpecial = staticmethod(doSpecial)
     
-    def drawSummary(folder, filename):
-        if True:
-            print "sum", Drawer.summaryList
-            folder = folder.rstrip("/")
-            #documentation: http://root.cern.ch/root/html/TPostScript.html
-            if filename.endswith(".ps"):
-                ps = TPostScript("%s/%s"%(folder, filename), 111)
-#                ps.Range(16,24);
-                for hist in Drawer.summaryList:
-                    ps.NewPage()
-                    for x in range(0,len(hist[0])):
-                        if x ==0:
-                            hist[0][x].Draw()
-                        else:
-                            hist[0][x].Draw("same")
-                    if hist[1]:#legend
-                        hist[1].Draw()
-                ps.Close()
-    drawSummary = staticmethod(drawSummary)
-    
-    def createSummary(folder, filename):
-        folder = folder.rstrip("/")
-#        print "%s/%s"%(folder, filename)
-        #documentation: http://root.cern.ch/root/html/TPostScript.html
-        if filename.endswith(".ps"):
-            Drawer.summary = TPostScript("%s/%s"%(folder, filename), 111)
-    createSummary = staticmethod(createSummary)
-    
-    def addToSummary(pad, histi, legend):
-        if Drawer.summary:
-            pad.cd()
-            for hist in histi:
-                hist.Draw()
-            if legend:
-                legend.Draw()
-            #Drawer.summary.NewPage()
-            pad.RedrawAxis();
-            pad.Draw()
-            gROOT.cd()
-    addToSummary = staticmethod(addToSummary)
-    
+#    def drawSummary(folder, filename):
+#        if True:
+#            folder = folder.rstrip("/")
+#            #documentation: http://root.cern.ch/root/html/TPostScript.html
+#            if filename.endswith(".ps"):
+#                ps = TPostScript("%s/%s"%(folder, filename), 111)
+##                ps.Range(16,24);
+#                for hist in Drawer.summaryList:
+#                    ps.NewPage()
+#                    for x in range(0,len(hist[0])):
+#                        if x ==0:
+#                            hist[0][x].Draw()
+#                        else:
+#                            hist[0][x].Draw("same")
+#                    if hist[1]:#legend
+#                        hist[1].Draw()
+#                ps.Close()
+#    drawSummary = staticmethod(drawSummary)
+#    
+#    def createSummary(folder, filename):
+#        folder = folder.rstrip("/")
+##        print "%s/%s"%(folder, filename)
+#        #documentation: http://root.cern.ch/root/html/TPostScript.html
+#        if filename.endswith(".ps"):
+#            Drawer.summary = TPostScript("%s/%s"%(folder, filename), 111)
+#    createSummary = staticmethod(createSummary)
+#    
+#    def addToSummary(pad, histi, legend):
+#        if Drawer.summary:
+#            pad.cd()
+#            for hist in histi:
+#                hist.Draw()
+#            if legend:
+#                legend.Draw()
+#            #Drawer.summary.NewPage()
+#            pad.RedrawAxis();
+#            pad.Draw()
+#            gROOT.cd()
+#    addToSummary = staticmethod(addToSummary)
+    def printSummary(pad):
+        if Drawer.summaryFile:
+                if Drawer.summaryBegin:
+                    pad.Print(Drawer.summaryFile +"[")
+                else:
+                    pad.Print(Drawer.summaryFile +"]")
+    printSummary = staticmethod(printSummary)

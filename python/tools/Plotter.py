@@ -1,6 +1,6 @@
 from XMLConfigParser import *
 import os
-from ROOT import gROOT, TPostScript
+from ROOT import gROOT, TFile
 from Drawer import Drawer
 
 
@@ -20,6 +20,8 @@ class Plotter:
         for hist in histlist:
             list = {}
             h = None
+            if hist == histlist[-1]:
+                Drawer.summaryBegin = False
             for var in hist.subobjects["var"]:
 
                 source = var.getOption("source")
@@ -82,6 +84,7 @@ class Plotter:
         plots = cfg.getPlots()
         writeAs = plots.getOption("create").split(",")
         summaryFile = plots.getOption("summaryFile")
+        Drawer.summaryFile = savedir + "/" + summaryFile
 #        if summaryFile != "":
 #            Drawer.createSummary(savedir, summaryFile)
         histlist = plots.subobjects["hist"]
@@ -89,7 +92,7 @@ class Plotter:
         for list in plots.subobjects["histlist"]:
             histlist.extend(list.subobjects["hist"])
         self.doHistList(histlist, savedir, writeAs)
-        Drawer.drawSummary(savedir, "Oo.ps")#
+        #Drawer.drawSummary(savedir, "Oo.ps")#
         
 if __name__ == "__main__":
     Drawer.setDefaultLayout()
