@@ -7,6 +7,8 @@ import XMLConfigParser
 from XMLConfigParser import * 
 
 XMLConfigParser.verbose = True
+XMLConfigParser.pathToDir = ""
+print XMLConfigParser.pathToDir
 ##an how-it-should-be config
 ##both config types should be supported
 testxml = 'test/NewConfig.xml'
@@ -120,7 +122,6 @@ class TestConfiguration(unittest.TestCase):
         obj.loadConfiguration(testxml)
         self.assertEqual(obj.getFilenameByID("top"), "test/signal.root")
         self.assertEqual(obj.getInputByName("allMuonPt").subobjects["folder"][0].getOption("name"), "analyzeAllMuon")
-        self.assertEqual(obj.getPlots().getOption("makeSummary"), "true")
         self.assertEqual(obj.getPlots().getOption("summaryFile"), "inspect.pdf")
         self.assertEqual(obj.getPlots().subobjects["hist"][0].getOption("name"), "mvadisc")
         self.assertEqual(obj.getPlots().subobjects["hist"][0].getVariable("qcd").getOption("type"), "line")

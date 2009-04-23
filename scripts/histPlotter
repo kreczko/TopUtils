@@ -1,0 +1,7 @@
+#! /afs/desy.de/products/python/2.5/bin/python
+from TopAnalysis.TopUtils.tools.Plotter import Plotter
+from TopAnalysis.TopUtils.tools.Drawer import Drawer
+
+Drawer.setDefaultLayout()
+pl = Plotter("TopAnalysis/TopUtils/python/tools/test/NewConfig.xml")
+pl.savePlots("plots")

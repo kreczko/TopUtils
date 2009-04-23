@@ -15,11 +15,13 @@ classmap["plots"] = "Plots"
 classmap["histlist"] = "HistogramList"
 classmap["var"] = "Variable"
 ##default configurations for various ConfigObjects
-defaults = {"plots" : "test/DefaultPlotConfig.xml",
-                    "hist" : "test/DefaultHistConfig.xml", 
-                    "legend" : "test/DefaultLegConfig.xml",
-                    "var" : "test/DefaultVarConfig.xml"
+pathToDir = "TopAnalysis/TopUtils/python/tools/"
+defaults = {"plots"  : "test/DefaultPlotConfig.xml",
+            "hist"   : "test/DefaultHistConfig.xml",
+            "legend" : "test/DefaultLegConfig.xml",
+            "var"    : "test/DefaultVarConfig.xml"
                 }
+
 verbose = False
 #===============================================================================
 #    prints a message if the verbose option was used
@@ -313,7 +315,7 @@ class ConfigObject:
             raise ConfigError, "Cannot parse an empty node"
         root = node.localName 
         if defaults.has_key(root):
-            self.readDefaults(defaults[root])
+            self.readDefaults(pathToDir + defaults[root])
         atts = Parser.getListOfAttributes(node)
         children = Parser.getAllChildNodes(node)
         for i in atts:
@@ -645,7 +647,7 @@ class HistogramList(ConfigObject):
             raise ConfigError, "Cannot parse an empty node"
         root = node.localName 
         if defaults.has_key(root):
-            self.readDefaults(defaults[root])
+            self.readDefaults(pathToDir + defaults[root])
         atts = Parser.getListOfAttributes(node)
         children = Parser.getAllChildNodes(node)
         for i in atts:
@@ -694,7 +696,7 @@ class HistogramList(ConfigObject):
         content = input.getFilteredContent()
         for i in range(0, len(content)):
             hist = Histogram()
-            hist.readDefaults(defaults["hist"])
+            hist.readDefaults(pathToDir + defaults["hist"])
 #            hist.setOption("input", i)
             #TODO: set savefolder
             nameAndFolder = self.getNameAndFolder(content[i])
