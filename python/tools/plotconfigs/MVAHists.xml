@@ -11,7 +11,7 @@
 		<file id="train14V_All3" name="/playground/rootfiles/train_monitoring_all3.root" />
 	</sources>
 
-	<plots create='png' summaryFile='inspect.ps'>
+	<plots create='png'>
 		<!-- Macro plots -->
 		<hist name='var_dphiMuJ12' input=''>
 			<var name='background' source='file:train' input="input_norm/input_dphiMuJ1J2_bkg"
