@@ -1,8 +1,8 @@
 #include "PhysicsTools/JetMCUtils/interface/combination.h"
 
-#include "TopAnalysis/TopFilter/plugins/TtSemiLepSignalSelectorMVAComputer.h"
+#include "TopAnalysis/TopUtils/plugins/TtSemiLepSignalSelectorMVAComputer.h"
 #include "TopQuarkAnalysis/TopTools/interface/TtSemiLepEvtPartons.h"
-#include "TopAnalysis/TopUtils/interface/TtSemiLepSignalSelectorEval.h"
+#include "TopAnalysis/TopUtils/interface/QCDBkgEstimateEval.h"
 
 #include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
@@ -70,9 +70,9 @@ void TtSemiLepSignalSelectorMVAComputer::produce(edm::Event& evt, const edm::Eve
 	if (leptons->size() != 1 && seljets.size() < 4)
 		discrim = -1.;
 	else {
-		TtSemiLepSignalSelector selection(seljets, lepton, MET);
+		QCDBkgEstimateSelector selection(seljets, lepton, MET);
 
-		discrim = evaluateTtSemiLepSignalSelector(mvaComputer, selection, weight);
+		discrim = evaluateQCDBkgEstimateSelector(mvaComputer, selection, weight);
 	}
 
 	*pOutDisc = discrim;

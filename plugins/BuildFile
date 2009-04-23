@@ -7,6 +7,9 @@
 <use name=FWCore/Framework>
 <use name=FWCore/Utilities>
 <use name=root>
+<use name=PhysicsTools/MVAComputer>
+<use name=PhysicsTools/MVATrainer>
+<use name=CondCore/PluginSystem>
 
 <library file=*.cc name=TopAnalysisTopUtilsPlugins>
   <flags EDM_PLUGIN=1>
