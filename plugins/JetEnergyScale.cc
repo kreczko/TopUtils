@@ -13,12 +13,6 @@ JetEnergyScale::JetEnergyScale(const edm::ParameterSet& cfg):
   // use label of input to create label for output
   outputJets_ = inputJets_.label();
   outputMETs_ = inputMETs_.label();
-  //convert first letter to upper case
-  outputJets_.replace(0, 1, 1, (char)toupper(outputJets_[0]));
-  outputMETs_.replace(0, 1, 1, (char)toupper(outputMETs_[0]));
-  // put "scaled" at the beginning of the label
-  outputJets_.insert(0, "scaled");
-  outputMETs_.insert(0, "scaled");
   // register products
   produces<std::vector<pat::Jet> >(outputJets_);
   produces<std::vector<pat::MET> >(outputMETs_);

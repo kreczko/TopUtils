@@ -71,9 +71,9 @@ process.patLayer1_selectedObjects = cms.Sequence(selectedLayer1Muons * countLaye
 
 ## configure JetEnergyScale tool
 process.load("TopAnalysis.TopUtils.JetEnergyScale_cfi")
-process.scaleJetEnergy.scaleFactor = 1.1
-process.selectedLayer1Jets.src = "scaleJetEnergy:scaledAllLayer1Jets"
-process.selectedLayer1METs.src = "scaleJetEnergy:scaledAllLayer1METs"
+process.scaledJetEnergy.scaleFactor = 1.1
+process.selectedLayer1Jets.src = "scaledJetEnergy:allLayer1Jets"
+process.selectedLayer1METs.src = "scaledJetEnergy:allLayer1METs"
 
 ## necessary fixes to run 2.2.X on 2.1.X data
 ## comment this when running on samples produced with 22X
@@ -86,5 +86,5 @@ run22XonSummer08AODSIM(process)
 
 process.p = cms.Path(process.patLayer0_patTuple *
                      process.patLayer1_allObjects *
-                     process.scaleJetEnergy *
+                     process.scaledJetEnergy *
                      process.patLayer1_selectedObjects)
