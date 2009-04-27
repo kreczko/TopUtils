@@ -7,18 +7,18 @@
 <!--	Not needed, since default file is defined in code-->
 <!--	<include file='defaultHist.xml' />-->
 	<sources>
-		<!-- gets input from 1 histogram -->
+		<!-- gets input from 1 canvogram -->
 		<input name="SemiLepAnalysis">
 			<folder name='trackmafter'>
-			<!-- only histogram which name is 'mbg_nVSdisc' -->
+			<!-- only canvogram which name is 'mbg_nVSdisc' -->
 				<filter type='exact' value='mbg_nVSdisc' />
 <!--				Will be replaced by 'exact' filters in the parser-->
-<!--				<filter type='histfile' value='Muon.hist' />-->
+<!--				<filter type='canvfile' value='Muon.canv' />-->
 			</folder>
 		</input>
 		<input name='allMuonPt'>
 			<folder name='analyzeAllMuon'>
-				<!-- histograms containing 'pt' but also do not have electron in their name-->
+				<!-- canvograms containing 'pt' but also do not have electron in their name-->
 				<!-- no case sensitivity -->
 				<filter type='contains' value='pt' />
 				<!--  without resolution plot -->
@@ -41,38 +41,38 @@
 		<file id='kin' name='test/analyzeMuon.root' />
 	</sources>
 	<!--
-		makes the canvas, mixes the histogramms defined in the histSetup
+		makes the canvas, mixes the canvogramms defined in the canvSetup
 		summaryFile = ps oder pdf
 	-->
 	<plots create='eps,pdf' makeSummaryFile='true' summaryFile='inspect.pdf'>
-		<hist name='NeventsVSmvadisc' setup='effplot' input='i:SemiLepAnalysis'>
+		<canv name='NeventsVSmvadisc' setup='effplot' input='i:SemiLepAnalysis'>
 		<!-- name is also used for legend -->
-			<var name='qcd' source='file:qcd'  type='line' style='22' color='23' />
-			<var name='signal' source='file:top'  type='marker' style='23' color='blue' />
-<!--			<var name='combined' source='var:signal,var:qcd' operation='add'-->
+			<hist name='qcd' source='file:qcd'  type='line' style='22' color='23' />
+			<hist name='signal' source='file:top'  type='marker' style='23' color='blue' />
+<!--			<hist name='combined' source='hist:signal,hist:qcd' operation='add'-->
 <!--				style='24' />-->
 			<legend name='plotname' posx='20' posy='0' fonsize='12' />
-		</hist>
+		</canv>
 		
-		<hist name='mvadisc' setup='effplot' input='trackmafter/mbg_nVSdisc'>
+		<canv name='mvadisc' setup='effplot' input='trackmafter/mbg_nVSdisc'>
 		<!-- name is also used for legend -->
 			<titleX v='mva disc.' />
 			<titleY v='events' />
-			<var name='qcd' source='file:qcd'  type='line' style='22' color='23' />
-			<var name='signal' source='file:top'  type='marker' style='23' color='blue' />
-<!--			<var name='combined' source='var:signal,var:qcd' operation='add'-->
+			<hist name='qcd' source='file:qcd'  type='line' style='22' color='23' />
+			<hist name='signal' source='file:top'  type='marker' style='23' color='blue' />
+<!--			<hist name='combined' source='hist:signal,hist:qcd' operation='add'-->
 <!--				style='24' />-->
 			<legend name='plotname' posx='20' posy='0' fonsize='12' />
-		</hist>
+		</canv>
 		
-<!--		<histlist name='electronKinematic' input='kinematicPlots'>-->
-<!--			<var name='qcd' source='file:qcd'  type='line' style='22' color='23' />-->
-<!--			<var name='signal' source='file:top'  type='marker' style='23' color='blue' />-->
-<!--		</histlist>-->
+<!--		<canvlist name='electronKinematic' input='kinematicPlots'>-->
+<!--			<hist name='qcd' source='file:qcd'  type='line' style='22' color='23' />-->
+<!--			<hist name='signal' source='file:top'  type='marker' style='23' color='blue' />-->
+<!--		</canvlist>-->
 		
-		<histlist name='AllHistos'>
-			<var name='qcd' source='file:qcd' type='marker' style='22' color='23' />
-			<var name='signal' source='file:top'   type='marker'  style='23' color='blue' />
-		</histlist>
+		<canvlist name='AllHistos'>
+			<hist name='qcd' source='file:qcd' type='marker' style='22' color='23' />
+			<hist name='signal' source='file:top'   type='marker'  style='23' color='blue' />
+		</canvlist>
 	</plots>
 </HistPlotter>

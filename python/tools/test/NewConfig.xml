@@ -29,66 +29,66 @@
 		<file id='kin' name='TopAnalysis/TopUtils/python/tools/test/analyzeMuon.root' />
 	</sources>
 	<plots summaryFile='inspect.pdf'>
-		<hist name='mvadisc' setup='effplot' input='trackmafter/mbg_nVSdisc'>
+		<canv name='mvadisc' setup='effplot' input='trackmafter/mbg_nVSdisc'>
 			<titleX v="mva disc." />
-			<var name='qcd' source='file:qcd' color='2' />
-			<var name='signal' source='file:top' color='4' />
+			<hist name='qcd' source='file:qcd' color='2' />
+			<hist name='signal' source='file:top' color='4' />
 			<legend name='plotname' posx='20' posy='0' />
-		</hist>
+		</canv>
 
 <!--				if input endswith "/" its considered as a folder-->
-		<hist name='mvadisc2' setup='effplot' input='f:trackmafter/'>
+		<canv name='mvadisc2' setup='effplot' input='f:trackmafter/'>
 			<titleX v="mva disc." />
-			<var name='qcd' source='file:qcd' input="mbg_nVSdisc" color='2' />
-			<var name='signal' source='file:top' input="mbg_nVSdisc" color='4' />
+			<hist name='qcd' source='file:qcd' input="mbg_nVSdisc" color='2' />
+			<hist name='signal' source='file:top' input="mbg_nVSdisc" color='4' />
 			<legend name='plotname' posx='20' posy='0' />
-		</hist>
+		</canv>
 
-		<hist setup='effplot'>
+		<canv setup='effplot'>
 			<name>effplot</name>
 			<titleX>mva disc.</titleX>
-			<var name="after">
+			<hist name="after">
 				<source>file:qcd</source>
 				<input>trackmafter/mbg_nVSdisc</input>
 				<draw>0</draw>
-			</var>
-			<var name="before">
+			</hist>
+			<hist name="before">
 				<source>file:qcd</source>
 				<input>trackmbefore/mbg_nVSdisc</input>
 				<draw>0</draw>
-			</var>
+			</hist>
 			<legend name='plotname' posx='20' posy='0' />
-			<var name="eff">
-				<source>var:before, var:after</source>
+			<hist name="eff">
+				<source>hist:before, hist:after</source>
 				<color>2</color>
 				<operation>div</operation>
-			</var>
-		</hist>
+			</hist>
+		</canv>
 
-		<histlist input="i:allMuonPt">
-			<var name="var" source="file:kin" />
+		<canvlist input="i:allMuonPt">
+			<hist name="hist" source="file:kin" />
 			<titleX for="kin_pt">#mu p_{T}</titleX>
 			<titleX for="iso_ptVsCalIso">caliso</titleX>
 			<legend for="kin_pt" />
 			<savefolder>kin</savefolder>
-		</histlist>
+		</canvlist>
 		
-		<histlist>
-			<var name="var" source="file:kin" />
+		<canvlist>
+			<hist name="hist" source="file:kin" />
 			<titleX for="kin_pt">#mu p_{T}</titleX>
 			<titleX for="iso_ptVsCalIso">caliso</titleX>
 			<legend for="kin_pt" />
 			<savefolder>all</savefolder>
-		</histlist>
+		</canvlist>
 
-		<histlist>
-			<var name="selected" source="file:kin" input="i:SelectedMuons" color="2"/>
-			<var name="all" source="file:kin" input="i:AllMuons" color="4"/>
+		<canvlist>
+			<hist name="selected" source="file:kin" input="i:SelectedMuons" color="2"/>
+			<hist name="all" source="file:kin" input="i:AllMuons" color="4"/>
 			<titleX for="kin_pt">#mu p_{T}</titleX>
 			<titleX for="iso_ptVsCalIso">caliso</titleX>
 			<legend for="kin_pt" />
 			<savefolder>compare</savefolder>
-		</histlist>
+		</canvlist>
 
 	</plots>
 </Plotter>

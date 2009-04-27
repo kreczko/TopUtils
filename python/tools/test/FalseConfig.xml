@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <HistPlotter>
-	<include name='setup1' value='test/hist.xml' />
-	<include name='setup2' value='test/hist1.xml' />
-	<include name='setup2' value='test/hist3.xml' />
+	<include name='setup1' value='test/canv.xml' />
+	<include name='setup2' value='test/canv1.xml' />
+	<include name='setup2' value='test/canv3.xml' />
 	<source>
 		<input name="SemiLepAnalysis">
 			<folder name='analysis'>
@@ -23,25 +23,25 @@
 
 	</source>
 	<!--
-		makes the canvas, mixes the histogramms defined in the histSetup
+		makes the canvas, mixes the canvogramms defined in the canvSetup
 		summaryFile = ps oder pdf
 	-->
 	<plots create='eps,pdf' makeSummaryFile='true' summaryFile="inspect.pdf">
-		<hist name='muonPt' defaults='HistSetupName'>
+		<canv name='muonPt' defaults='HistSetupName'>
 		<!-- name is also used for legend -->
-			<var name='qcd' from='file:qcd' markerStyle='22' color='23' />
-			<var name='signal' from='file:top' markerStyle='23' color='blue' />
-			<var name='combined' from='var:signal,var:qcd' compute='add'
+			<hist name='qcd' from='file:qcd' markerStyle='22' color='23' />
+			<hist name='signal' from='file:top' markerStyle='23' color='blue' />
+			<hist name='combined' from='hist:signal,hist:qcd' compute='add'
 				markerStyle='24' />
 			<legend name="plotname" posx="20" posy="0" fonsize="12"/>
-		</hist>
-		<histlist name='electronKinematic' input='kinematicPlots'>
-			<var name='qcd' from='file:qcd' markerStyle='22' color='23' />
-			<var name='signal' from='file:top' markerStyle='23' color='blue' />
-		</histlist>
-		<histlist name='AllHistos'>
-			<var name='qcd' from='file:qcd' markerStyle='22' color='23' />
-			<var name='signal' from='file:top' markerStyle='23' color='blue' />
-		</histlist>
+		</canv>
+		<canvlist name='electronKinematic' input='kinematicPlots'>
+			<hist name='qcd' from='file:qcd' markerStyle='22' color='23' />
+			<hist name='signal' from='file:top' markerStyle='23' color='blue' />
+		</canvlist>
+		<canvlist name='AllHistos'>
+			<hist name='qcd' from='file:qcd' markerStyle='22' color='23' />
+			<hist name='signal' from='file:top' markerStyle='23' color='blue' />
+		</canvlist>
 	</plots>
 </HistPlotter>

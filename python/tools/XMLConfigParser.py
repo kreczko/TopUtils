@@ -6,20 +6,20 @@ from sets import Set
 
 # xmlTag => Python class
 classmap = {}
-classmap["hist"] = "Histogram"
+classmap["canv"] = "Histogram"
 classmap["input"] = "Input"
 #classmap["legend"] = "Legend"
 classmap["filter"] = "Filter"
 classmap["folder"] = "Folder"
 classmap["plots"] = "Plots"
-classmap["histlist"] = "HistogramList"
-classmap["var"] = "Variable"
+classmap["canvlist"] = "HistogramList"
+classmap["hist"] = "Variable"
 ##default configurations for various ConfigObjects
 pathToDir = "TopAnalysis/TopUtils/python/tools/"
 defaults = {"plots"  : "test/DefaultPlotConfig.xml",
-            "hist"   : "test/DefaultHistConfig.xml",
+            "canv"   : "test/DefaultHistConfig.xml",
             "legend" : "test/DefaultLegConfig.xml",
-            "var"    : "test/DefaultVarConfig.xml"
+            "hist"    : "test/DefaultVarConfig.xml"
                 }
 
 verbose = False
@@ -75,15 +75,14 @@ class Configuration:
             raise ConfigError, "Error: the configuration file is not valid for the given config type"
         
     def resolveInputs(self):
-        for hist in self.getPlots().subobjects["hist"]:
+        for hist in self.getPlots().subobjects["canv"]:
             hist.resolveInputs(self.getInputFiles(), self.getInputs())
-        for list in self.getPlots().subobjects["histlist"]:
+        for list in self.getPlots().subobjects["canvlist"]:
             list.resolveInputs(self.getInputFiles(), self.getInputs())
             
         
     def readPlots(self, node):
         self.plots = Plots()
-#        plots.readDefaults(self.defaults["plots"])
         self.plots.parseFromNode(node)
     
     def getPlots(self):
@@ -283,6 +282,8 @@ class ConfigObject:
         self.mandatoryOptions = mandatoryOptions
         self.subobjects = {}
         for i in self.doNotParse:
+            self.subobjects[i] = []
+        for i in self.mandatoryObjects:
             self.subobjects[i] = []
     
     def setOption(self, option, value):
@@ -543,14 +544,14 @@ class FileService:
     
 class Plots(ConfigObject):
     rootNodeName = "plots"
-    doNotParse = ["hist", "histlist"]
+    doNotParse = ["canv", "canvlist"]
     
     def __init__(self):
         ConfigObject.__init__(self, self.rootNodeName, self.doNotParse)
   
 class Histogram(ConfigObject):
-    rootNodeName = "hist"
-    doNotParse = ["var", "legend", "statbox"]      
+    rootNodeName = "canv"
+    doNotParse = ["hist", "legend", "statbox"]      
     
     def __init__(self):
         ConfigObject.__init__(self, self.rootNodeName, self.doNotParse)
@@ -559,14 +560,14 @@ class Histogram(ConfigObject):
     
     def getVariable(self, name):
         ret = None
-        for i in self.subobjects["var"]:
+        for i in self.subobjects["hist"]:
             if i.getOption("name") == name:
                 ret = i
         return ret
         
     def resolveInputs(self, files, inputs):
 #        histinput = self.getOption("input")
-        for var in self.subobjects["var"]:
+        for var in self.subobjects["hist"]:
             varinput = var.getOption("source")
             varsource = self.getVarSourceFile(var)
             if isinstance(varsource, unicode) and varsource:
@@ -625,15 +626,16 @@ class Histogram(ConfigObject):
     
         
 class HistogramList(ConfigObject):
-    rootNodeName = "histlist"
-    doNotParse = ["var", "hist"]
+    rootNodeName = "canvlist"
+    doNotParse = ["hist"]
     mandatoryOptions = ["name", "input"]      
-    mandatoryObjects = ["var"]
+    mandatoryObjects = ["hist"]
     
     def __init__(self):
         ConfigObject.__init__(self, self.rootNodeName, self.doNotParse, 
                               mandatoryObjects = self.mandatoryObjects, 
                               mandatoryOptions= self.mandatoryOptions)
+        self.subobjects["canv"] = []
         Print("Creating HistogramList Object")
         #TODO: only vars with file input!
         #additional parameter "for"
@@ -681,7 +683,7 @@ class HistogramList(ConfigObject):
         input = None
 #        if self.hasOption("input") and "i%s"%Input.separator in self.getOption("input"):
 #            input = self.getOption("input").replace("i" + Input.separator, "")
-        var0 = self.subobjects["var"][0]
+        var0 = self.subobjects["hist"][0]
         input = self.getVarInput(var0, inputs, self.getOption("input"))
         if not input:
             input = Input.createInput()
@@ -696,7 +698,7 @@ class HistogramList(ConfigObject):
         content = input.getFilteredContent()
         for i in range(0, len(content)):
             hist = Histogram()
-            hist.readDefaults(pathToDir + defaults["hist"])
+            hist.readDefaults(pathToDir + defaults["canv"])
 #            hist.setOption("input", i)
             #TODO: set savefolder
             nameAndFolder = self.getNameAndFolder(content[i])
@@ -704,7 +706,7 @@ class HistogramList(ConfigObject):
             hist.setOption("name", nameAndFolder[0])
             hist.setOption("savefolder", self.getOption("savefolder") + "/" + nameAndFolder[1])
 
-            for var in self.subobjects["var"]:
+            for var in self.subobjects["hist"]:
                 if i ==0:
                     inputtmp = self.getVarInput(var, inputs, self.getOption("input"))
                     varsource = self.getVarSourceFile(var)
@@ -715,9 +717,9 @@ class HistogramList(ConfigObject):
                     contenttmp = inputtmp.getFilteredContent()
                     nameAndFoldertmp = self.getNameAndFolder(contenttmp[i])
                     var.setOption("input","f%s%s" %(Input.separator, nameAndFoldertmp[1]))
-                hist.subobjects["var"].append(var.Copy())
+                hist.subobjects["hist"].append(var.Copy())
             hist.resolveInputs(files, inputs)
-            self.subobjects["hist"].append(hist)
+            self.subobjects["canv"].append(hist)
             
     def getNameAndFolder(self, input):
         dirs = input.split("/")
@@ -777,12 +779,12 @@ class HistogramList(ConfigObject):
         
 class Variable(ConfigObject):
     ksourceFile = 'file'
-    ksourceVar = 'var'
+    ksourceVar = 'hist'
     typeDelimiter = ':'
     entryDelimiter = ','
     
     def __init__(self):
-        ConfigObject.__init__(self, "var", [])
+        ConfigObject.__init__(self, "hist", [])
         
 class Filter(ConfigObject):
     rootNodeName = "filter"

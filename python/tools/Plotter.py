@@ -87,10 +87,10 @@ class Plotter:
         Drawer.summaryFile = savedir + "/" + summaryFile
 #        if summaryFile != "":
 #            Drawer.createSummary(savedir, summaryFile)
-        histlist = plots.subobjects["hist"]
+        histlist = plots.subobjects["canv"]
 #        histlists = plots.subobjects["histlist"]
-        for list in plots.subobjects["histlist"]:
-            histlist.extend(list.subobjects["hist"])
+        for list in plots.subobjects["canvlist"]:
+            histlist.extend(list.subobjects["canv"])
         self.doHistList(histlist, savedir, writeAs)
         #Drawer.drawSummary(savedir, "Oo.ps")#
         

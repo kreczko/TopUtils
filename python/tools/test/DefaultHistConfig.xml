@@ -4,8 +4,8 @@
 	<!-- ConfigParser.Histogram input, do not change these lines -->
 	<input v='' />
 	<setup v='' />
-	<!-- root histogramm input, custom section -->
-	<!--histogram min and max usually from the histvalues -->
+	<!-- root canvogramm input, custom section -->
+	<!--canvogram min and max usually from the canvvalues -->
 	<max v='' />
 	<min v='' />
 	<logX v='0' />
@@ -24,14 +24,14 @@
 	<minY v='' />
 	<smooth v="0" />
 	<!--
-		hist titles come from histograms. Only if they are empty the config
+		canv titles come from canvograms. Only if they are empty the config
 	-->
 	<!--
 		values are used. You can also set overwriteTitles to true in order to
 		overwrite the titles even if
 	-->
 	<!--	they're not empty-->
-	<titleX v='var' />
+	<titleX v='' />
 	<titleY v='events' />
 	<overwriteTitles v='false' />
 </HistSetup>

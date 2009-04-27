@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<Plotter>
+	<!-- define sources -->
+    <sources>
+    	<!-- makes signal.root available as the alias "sig" -->
+        <file id="sig" name="TopAnalysis/TopUtils/python/tools/test/signal.root" />
+    </sources>
+    <!-- define plots -->
+    <plots>
+    	<!-- define a list of canvas' -->
+        <canvlist>
+        	<!-- defines a histogram source with the name "test". -->
+            <hist name="test" source="file:sig" />
+        </canvlist>
+    </plots>
+</Plotter>

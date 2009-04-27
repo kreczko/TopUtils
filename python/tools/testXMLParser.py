@@ -11,7 +11,7 @@ XMLConfigParser.pathToDir = ""
 print XMLConfigParser.pathToDir
 ##an how-it-should-be config
 ##both config types should be supported
-testxml = 'test/NewConfig.xml'
+testxml = 'test/LocalTestConfig.xml'
 testxml2 = 'test/TestConfig.xml'
 #---------------------------------------------------------------- a false config
 falsexml = 'test/FalseConfig.xml'
@@ -36,8 +36,8 @@ class TestConfigObject(unittest.TestCase):
 #    sets variables for every test
 #===============================================================================
     def setUp(self):
-        self.object = ConfigObject("hist", ["var", "legend"])
-        self.nodelist = Parser.getNodeList(testxml, "hist")
+        self.object = ConfigObject("canv", ["hist", "legend"])
+        self.nodelist = Parser.getNodeList(testxml, "canv")
         self.object.parseFromNode(self.nodelist[0])
         
         
@@ -48,7 +48,8 @@ class TestConfigObject(unittest.TestCase):
         #and options should contain all childNodes, if they are no special objects themselves
         self.assertEqual(self.object.getOption("titleX"), "mva disc.")
         self.assertRaises(ConfigError, self.object.getOption, "Xsjfssdhfwhshdf")
-        self.assertEqual(self.object.subobjects["var"][0].getOption("name"), "qcd")
+        print self.object.getOption("name")
+        self.assertEqual(self.object.subobjects["hist"][0].getOption("name"), "qcd")
         self.assertEqual(self.object.subobjects["legend"][0].getOption("name"), "plotname")
         
     def testDefaults(self):
@@ -123,9 +124,9 @@ class TestConfiguration(unittest.TestCase):
         self.assertEqual(obj.getFilenameByID("top"), "test/signal.root")
         self.assertEqual(obj.getInputByName("allMuonPt").subobjects["folder"][0].getOption("name"), "analyzeAllMuon")
         self.assertEqual(obj.getPlots().getOption("summaryFile"), "inspect.pdf")
-        self.assertEqual(obj.getPlots().subobjects["hist"][0].getOption("name"), "mvadisc")
-        self.assertEqual(obj.getPlots().subobjects["hist"][0].getVariable("qcd").getOption("type"), "line")
-        self.assertEqual(obj.getPlots().subobjects["hist"][0].getVariable("qcd").getOption("source"), ["test/background.root", "trackmafter/mbg_nVSdisc"])
+        self.assertEqual(obj.getPlots().subobjects["canv"][0].getOption("name"), "mvadisc")
+        self.assertEqual(obj.getPlots().subobjects["canv"][0].getVariable("qcd").getOption("type"), "line")
+        self.assertEqual(obj.getPlots().subobjects["canv"][0].getVariable("qcd").getOption("source"), ["test/background.root", "trackmafter/mbg_nVSdisc"])
         
 class TestFileService(unittest.TestCase):
     
@@ -190,9 +191,9 @@ class TestHistogramList(unittest.TestCase):
     def setUp(self):
         obj = Configuration()
         obj.loadConfiguration(testxml)
-        self.histlistnode = Parser.getNodeList(testxml, "histlist")[0]
-        self.histlist = obj.getPlots().subobjects["histlist"][0]
-        self.histlist2 = obj.getPlots().subobjects["histlist"][1]
+        self.histlistnode = Parser.getNodeList(testxml, "canvlist")[0]
+        self.histlist = obj.getPlots().subobjects["canvlist"][0]
+        self.histlist2 = obj.getPlots().subobjects["canvlist"][1]
         self.inputs = obj.inputs
         
     def testOptions(self):
@@ -200,9 +201,9 @@ class TestHistogramList(unittest.TestCase):
         self.assertEqual(self.histlist.getOption("name"), "")
     
     def testHists(self):
-        hists = self.histlist.subobjects["hist"]
+        hists = self.histlist.subobjects["canv"]
         self.assertEqual(len(hists), 6)
-        self.assertEqual(len(self.histlist2.subobjects["hist"]), len(FileService.getFileContent("test/analyzeMuon.root")))
+        self.assertEqual(len(self.histlist2.subobjects["canv"]), len(FileService.getFileContent("test/analyzeMuon.root")))
         for i in hists:
             self.assertNotEqual(i.getOption("name"), "DEFAULT")
             self.assertNotEqual(i.getOption("savefolder"), "")

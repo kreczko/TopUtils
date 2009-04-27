@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <HistSetup>
-	<hist name="effplot">
+	<canv name="effplot">
 		<max v="1" />
 		<min v="0" />
-	</hist>
+	</canv>
 
-	<hist name="eventplot">
+	<canv name="eventplot">
 		<logY v='0' />
-	</hist>		
+	</canv>		
 </HistSetup>
