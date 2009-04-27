@@ -4,7 +4,7 @@
 	<!-- final steering file -->
 <HistPlotter>
 	<sources>
-		<!-- gets input from 1 histogram -->
+		<!-- gets input from 1 canvogram -->
 		<input name='qcd20'>
 			<folder name="qcd/jetcut_20" />
 		</input>
@@ -21,406 +21,406 @@
 		<file id="qcdMETMuSIG" name="/playground/rootfiles/FINAL/shapes/qcdMu_METMuSIG.root" />
 		<file id="qcdMETMuBG" name="/playground/rootfiles/FINAL/shapes/qcdMu_METMuBG.root" />
 
-		<file id="macro" name="/playground/rootfiles/FINAL/complete_hists_MM.root" />
+		<file id="macro" name="/playground/rootfiles/FINAL/complete_canvs_MM.root" />
 	</sources>
 	<plots create='png' makeSummaryFile='true' summaryFile='inspect.pdf'>
 		<!-- Macro plots -->
-		<hist name='weights'>
-			<var name='down-weighted' source='file:macro' input="shapes/circSIG" color='4' />
-			<var name='up-weighted' source='file:macro' input="shapes/circBG" color='2' />
+		<canv name='weights'>
+			<hist name='down-weighted' source='file:macro' input="shapes/circSIG" color='4' />
+			<hist name='up-weighted' source='file:macro' input="shapes/circBG" color='2' />
 			<titleX v='circularity' />
 			<titleY v='weigth factor' />
 			<savefolder v="shapes/circ" />
 			<legend posX="55" posY="40"/>
-		</hist>
-		<hist name='eff_MC' >
-			<var name='qcd' source="file:macro" input="qcd/jetcut_20/all/efficiency" />
-			<var name='qcdBG' source="file:macro" input="shapes/circularityBG/all/bkg/efficiency" color="2" />
-			<var name='qcdSIG' source="file:macro" input="shapes/circularitySIG/all/bkg/efficiency" color="4" />
+		</canv>
+		<canv name='eff_MC' >
+			<hist name='qcd' source="file:macro" input="qcd/jetcut_20/all/efficiency" />
+			<hist name='qcdBG' source="file:macro" input="shapes/circularityBG/all/bkg/efficiency" color="2" />
+			<hist name='qcdSIG' source="file:macro" input="shapes/circularitySIG/all/bkg/efficiency" color="4" />
 			<titleX v='d_{MVA}' />
 			<titleY v='N_{est}/N_{true}' />
 			<savefolder v="shapes/circ" />
-		</hist>
+		</canv>
 		
-		<hist name='eff_MC_cut' >
-			<var name='qcd' source="file:macro" input="applied/jetcut_20/all/bkg/effMC_vs_MVAcut" />
-			<var name='qcdBG' source="file:macro" input="shapes/circularityBG/all/bkg/effMC_vs_MVAcut" color="2" />
-			<var name='qcdSIG' source="file:macro" input="shapes/circularitySIG/all/bkg/effMC_vs_MVAcut" color="4" />
+		<canv name='eff_MC_cut' >
+			<hist name='qcd' source="file:macro" input="applied/jetcut_20/all/bkg/effMC_vs_MVAcut" />
+			<hist name='qcdBG' source="file:macro" input="shapes/circularityBG/all/bkg/effMC_vs_MVAcut" color="2" />
+			<hist name='qcdSIG' source="file:macro" input="shapes/circularitySIG/all/bkg/effMC_vs_MVAcut" color="4" />
 			<titleX v='d^{thresh.}_{MVA}'/>
 			<titleY v='true #epsilon_{QCD}' />
 			<savefolder v="shapes/circ" />
-		</hist>
-		<hist name='quality_tight' >
-			<var name='qcd' source='file:macro' input="applied/jetcut_20/all/bkg/quality_tight" size="3"/>
-			<var name='qcdBG' source='file:macro' input="shapes/circularityBG/all/bkg/quality_tight" color='2' drawOption="e4" type="filled" style="3005"/>
-			<var name='qcdSIG' source='file:macro' input="shapes/circularitySIG/all/bkg/quality_tight" color='4' drawOption="e4" type="filled" style="3004"/>
+		</canv>
+		<canv name='quality_tight' >
+			<hist name='qcd' source='file:macro' input="applied/jetcut_20/all/bkg/quality_tight" size="3"/>
+			<hist name='qcdBG' source='file:macro' input="shapes/circularityBG/all/bkg/quality_tight" color='2' drawOption="e4" type="filled" style="3005"/>
+			<hist name='qcdSIG' source='file:macro' input="shapes/circularitySIG/all/bkg/quality_tight" color='4' drawOption="e4" type="filled" style="3004"/>
 			<titleX v='d^{thresh.}_{MVA}'/>
 			<titleY v='N_{est}/N_{true}' />
 			<savefolder v="shapes/circ" />
 			<maxY v="1.55" />
 			<minY v="0.55" />
-		</hist>
+		</canv>
 		
-		<hist name='bbs_QCD_tight' >
-			<var name='qcd' source='file:macro' input="applied/jetcut_20/all/bkg/bgOverbgs_tight" size="3"/>
-			<var name='qcdBG' source='file:macro' input="shapes/circularityBG/all/bkg/bgOverbgs_tight" color='2' />
-			<var name='qcdSIG' source='file:macro' input="shapes/circularitySIG/all/bkg/bgOverbgs_tight" color='4'/>
+		<canv name='bbs_QCD_tight' >
+			<hist name='qcd' source='file:macro' input="applied/jetcut_20/all/bkg/bgOverbgs_tight" size="3"/>
+			<hist name='qcdBG' source='file:macro' input="shapes/circularityBG/all/bkg/bgOverbgs_tight" color='2' />
+			<hist name='qcdSIG' source='file:macro' input="shapes/circularitySIG/all/bkg/bgOverbgs_tight" color='4'/>
 			<titleX v='d_{MVA}' />
 			<titleY v='B/(B+S)' />
 			<savefolder v="shapes/circ" />
-		</hist>
+		</canv>
 		
-		<hist name='quality_loose' >
-			<var name='qcd' source='file:macro' input="applied/jetcut_20/all/bkg/quality_loose" size="3"/>
-			<var name='qcdBG' source='file:macro' input="shapes/circularityBG/all/bkg/quality_loose" color='2' drawOption="e4" type="filled" style="3005"/>
-			<var name='qcdSIG' source='file:macro' input="shapes/circularitySIG/all/bkg/quality_loose" color='4' drawOption="e4" type="filled" style="3004"/>
+		<canv name='quality_loose' >
+			<hist name='qcd' source='file:macro' input="applied/jetcut_20/all/bkg/quality_loose" size="3"/>
+			<hist name='qcdBG' source='file:macro' input="shapes/circularityBG/all/bkg/quality_loose" color='2' drawOption="e4" type="filled" style="3005"/>
+			<hist name='qcdSIG' source='file:macro' input="shapes/circularitySIG/all/bkg/quality_loose" color='4' drawOption="e4" type="filled" style="3004"/>
 			<titleX v='d^{thresh.}_{MVA}'/>
 			<titleY v='N_{est}/N_{true}' />
 			<savefolder v="shapes/circ" />
 			<maxY v="1.016" />
 			<minY v="0.992" />
-		</hist>
+		</canv>
 
-		<hist name='norm_circ' input='analyzeisolationMET/var_norm_circularity'>
-			<var name='qcd' source='file:qcd' />
-			<var name='qcdBG' source='file:qcdCircBG' color='2' />
-			<var name='qcdSIG' source='file:qcdCircSIG' color='4' />
+		<canv name='norm_circ' input='analyzeisolationMET/hist_norm_circularity'>
+			<hist name='qcd' source='file:qcd' />
+			<hist name='qcdBG' source='file:qcdCircBG' color='2' />
+			<hist name='qcdSIG' source='file:qcdCircSIG' color='4' />
 			<titleX v='circularity' />
 			<titleY v='normalized to unit area' />
 			<savefolder v="shapes/circ" />
-		</hist>
+		</canv>
 		
-		<hist name='norm_dPhiMuJ12' input='analyzeisolationMET/var_norm_DeltaPhiMuonJet12'>
-			<var name='qcd' source='file:qcd' />
-			<var name='qcdBG' source='file:qcdCircBG' color='2' />
-			<var name='qcdSIG' source='file:qcdCircSIG' color='4' />
+		<canv name='norm_dPhiMuJ12' input='analyzeisolationMET/hist_norm_DeltaPhiMuonJet12'>
+			<hist name='qcd' source='file:qcd' />
+			<hist name='qcdBG' source='file:qcdCircBG' color='2' />
+			<hist name='qcdSIG' source='file:qcdCircSIG' color='4' />
 			<titleX v='\Delta\phi(\mu, jet 1) + \Delta\phi(\mu, jet 2)' />
 			<titleY v='normalized to unit area' />
 			<savefolder v="shapes/circ" />
-		</hist>
+		</canv>
 
-		<hist name='norm_dPhiMETMu' input='analyzeisolationMET/var_norm_deltaPhiMetleadingMuon'>
-			<var name='qcd' source='file:qcd' />
-			<var name='qcdBG' source='file:qcdCircBG' color='2' />
-			<var name='qcdSIG' source='file:qcdCircSIG' color='4' />
+		<canv name='norm_dPhiMETMu' input='analyzeisolationMET/hist_norm_deltaPhiMetleadingMuon'>
+			<hist name='qcd' source='file:qcd' />
+			<hist name='qcdBG' source='file:qcdCircBG' color='2' />
+			<hist name='qcdSIG' source='file:qcdCircSIG' color='4' />
 			<titleX v='\Delta\Phi(MET,\mu)' />
 			<titleY v='normalized to unit area' />
 			<savefolder v="shapes/circ" />
-		</hist>
+		</canv>
 
-		<hist name='norm_muon_pt' input='analyzeisolationMET/var_norm_muon_pt'>
-			<var name='qcd' source='file:qcd' norm='Integral' />
-			<var name='qcdBG' source='file:qcdCircBG' color='2' norm='Integral' />
-			<var name='qcdSIG' source='file:qcdCircSIG' color='4' norm='Integral' />
+		<canv name='norm_muon_pt' input='analyzeisolationMET/hist_norm_muon_pt'>
+			<hist name='qcd' source='file:qcd' norm='Integral' />
+			<hist name='qcdBG' source='file:qcdCircBG' color='2' norm='Integral' />
+			<hist name='qcdSIG' source='file:qcdCircSIG' color='4' norm='Integral' />
 			<titleX v='p_t(\mu) [GeV]' />
 			<titleY v='normalized to unit area' />
 			<savefolder v="shapes/circ" />
-		</hist>
+		</canv>
 
-		<hist name='norm_MVA' >
-			<var name='central' source='file:qcd' input="allmbefore/mbg_nVSdisc" norm='Integral' />
-			<var name='up-weighted' source='file:qcdCircBG' input="analyzeisolationMET/var_MVAdisc" color='2' norm='Integral' />
-			<var name='down-weighted' source='file:qcdCircSIG' input="analyzeisolationMET/var_MVAdisc" color='4' norm='Integral' />
+		<canv name='norm_MVA' >
+			<hist name='central' source='file:qcd' input="allmbefore/mbg_nVSdisc" norm='Integral' />
+			<hist name='up-weighted' source='file:qcdCircBG' input="analyzeisolationMET/hist_MVAdisc" color='2' norm='Integral' />
+			<hist name='down-weighted' source='file:qcdCircSIG' input="analyzeisolationMET/hist_MVAdisc" color='4' norm='Integral' />
 			<titleX v='d_{MVA}' />
 			<titleY v='normalized to unit area' />
 			<legend sizeX="40" posY="40"/>
 			<savefolder v="shapes/circ" />
-		</hist>
+		</canv>
 
 		<!--		PT-->
-		<hist name='weights'>
-			<var name='up-weighted' source='file:macro' input="shapes/ptBG" color='2' />
-			<var name='down-weighted' source='file:macro' input="shapes/ptSIG" color='4' />
+		<canv name='weights'>
+			<hist name='up-weighted' source='file:macro' input="shapes/ptBG" color='2' />
+			<hist name='down-weighted' source='file:macro' input="shapes/ptSIG" color='4' />
 			<titleX v='p_{T}(#mu) [GeV]' />
 			<titleY v='weight factor' />
 			<savefolder v="shapes/pt" />
 			<legend></legend>
-		</hist>
+		</canv>
 		
-		<hist name='eff_MC' >
-			<var name='qcd' source="file:macro" input="qcd/jetcut_20/all/efficiency" />
-			<var name='qcdBG' source="file:macro" input="shapes/MuPtBG/all/bkg/efficiency" color="2" />
-			<var name='qcdSIG' source="file:macro" input="shapes/MuPtSIG/all/bkg/efficiency" color="4" />
+		<canv name='eff_MC' >
+			<hist name='qcd' source="file:macro" input="qcd/jetcut_20/all/efficiency" />
+			<hist name='qcdBG' source="file:macro" input="shapes/MuPtBG/all/bkg/efficiency" color="2" />
+			<hist name='qcdSIG' source="file:macro" input="shapes/MuPtSIG/all/bkg/efficiency" color="4" />
 			<titleX v='d_{MVA}' />
 			<titleY v='N_{est}/N_{true}' />
 			<savefolder v="shapes/pt" />
-		</hist>
+		</canv>
 		
-		<hist name='eff_MC_cut' >
-			<var name='qcd' source="file:macro" input="applied/jetcut_20/all/bkg/effMC_vs_MVAcut" />
-			<var name='qcdBG' source="file:macro" input="shapes/MuPtBG/all/bkg/effMC_vs_MVAcut" color="2" />
-			<var name='qcdSIG' source="file:macro" input="shapes/MuPtSIG/all/bkg/effMC_vs_MVAcut" color="4" />
+		<canv name='eff_MC_cut' >
+			<hist name='qcd' source="file:macro" input="applied/jetcut_20/all/bkg/effMC_vs_MVAcut" />
+			<hist name='qcdBG' source="file:macro" input="shapes/MuPtBG/all/bkg/effMC_vs_MVAcut" color="2" />
+			<hist name='qcdSIG' source="file:macro" input="shapes/MuPtSIG/all/bkg/effMC_vs_MVAcut" color="4" />
 			<titleX v='d^{thresh.}_{MVA}'/>
 			<titleY v='true #epsilon_{QCD}' />
 			<savefolder v="shapes/pt" />
-		</hist>
+		</canv>
 		
-		<hist name='quality_tight' >
-			<var name='qcd' source='file:macro' input="applied/jetcut_20/all/bkg/quality_tight" size="3"/>
-			<var name='qcdBG' source='file:macro' input="shapes/MuPtBG/all/bkg/quality_tight" color='2' drawOption="e4" type="filled" style="3005"/>
-			<var name='qcdSIG' source='file:macro' input="shapes/MuPtSIG/all/bkg/quality_tight" color='4' drawOption="e4" type="filled" style="3004"/>
+		<canv name='quality_tight' >
+			<hist name='qcd' source='file:macro' input="applied/jetcut_20/all/bkg/quality_tight" size="3"/>
+			<hist name='qcdBG' source='file:macro' input="shapes/MuPtBG/all/bkg/quality_tight" color='2' drawOption="e4" type="filled" style="3005"/>
+			<hist name='qcdSIG' source='file:macro' input="shapes/MuPtSIG/all/bkg/quality_tight" color='4' drawOption="e4" type="filled" style="3004"/>
 			<titleX v='d^{thresh.}_{MVA}'/>
 			<titleY v='N_{est}/N_{true}' />
 			<maxY v="1.55" />
 			<minY v="0.55" />
 			<savefolder v="shapes/pt" />
-		</hist>
+		</canv>
 		
-		<hist name='quality_loose' >
-			<var name='qcd' source='file:macro' input="applied/jetcut_20/all/bkg/quality_loose" size="3"/>
-			<var name='qcdBG' source='file:macro' input="shapes/MuPtBG/all/bkg/quality_loose" color='2' drawOption="e4" type="filled" style="3005"/>
-			<var name='qcdSIG' source='file:macro' input="shapes/MuPtSIG/all/bkg/quality_loose" color='4' drawOption="e4" type="filled" style="3004"/>
+		<canv name='quality_loose' >
+			<hist name='qcd' source='file:macro' input="applied/jetcut_20/all/bkg/quality_loose" size="3"/>
+			<hist name='qcdBG' source='file:macro' input="shapes/MuPtBG/all/bkg/quality_loose" color='2' drawOption="e4" type="filled" style="3005"/>
+			<hist name='qcdSIG' source='file:macro' input="shapes/MuPtSIG/all/bkg/quality_loose" color='4' drawOption="e4" type="filled" style="3004"/>
 			<titleX v='d^{thresh.}_{MVA}'/>
 			<titleY v='N_{est}/N_{true}' />
 			<maxY v="1.015" />
 			<minY v="0.985" />
 			<savefolder v="shapes/pt" />
-		</hist>
+		</canv>
 
-		<hist name='norm_circ' input='analyzeisolationMET/var_norm_circularity'>
-			<var name='qcd' source='file:qcd' />
-			<var name='qcdBG' source='file:qcdPtBG' color='2' />
-			<var name='qcdSIG' source='file:qcdPtSIG' color='4' />
+		<canv name='norm_circ' input='analyzeisolationMET/hist_norm_circularity'>
+			<hist name='qcd' source='file:qcd' />
+			<hist name='qcdBG' source='file:qcdPtBG' color='2' />
+			<hist name='qcdSIG' source='file:qcdPtSIG' color='4' />
 			<titleX v='circularity' />
 			<titleY v='normalized to unit area' />
 			<savefolder v="shapes/pt" />
-		</hist>
+		</canv>
 
-		<hist name='norm_dPhiMuJ12' input='analyzeisolationMET/var_norm_DeltaPhiMuonJet12'>
-			<var name='qcd' source='file:qcd' />
-			<var name='qcdBG' source='file:qcdPtBG' color='2' />
-			<var name='qcdSIG' source='file:qcdPtSIG' color='4' />
+		<canv name='norm_dPhiMuJ12' input='analyzeisolationMET/hist_norm_DeltaPhiMuonJet12'>
+			<hist name='qcd' source='file:qcd' />
+			<hist name='qcdBG' source='file:qcdPtBG' color='2' />
+			<hist name='qcdSIG' source='file:qcdPtSIG' color='4' />
 			<titleX v='\Delta\phi(\mu, jet 1) + \Delta\phi(\mu, jet 2)' />
 			<titleY v='normalized to unit area' />
 			<savefolder v="shapes/pt" />
-		</hist>
+		</canv>
 
-		<hist name='norm_dPhiMETMu' input='analyzeisolationMET/var_norm_deltaPhiMetleadingMuon'>
-			<var name='qcd' source='file:qcd' />
-			<var name='qcdBG' source='file:qcdPtBG' color='2' />
-			<var name='qcdSIG' source='file:qcdPtSIG' color='4' />
+		<canv name='norm_dPhiMETMu' input='analyzeisolationMET/hist_norm_deltaPhiMetleadingMuon'>
+			<hist name='qcd' source='file:qcd' />
+			<hist name='qcdBG' source='file:qcdPtBG' color='2' />
+			<hist name='qcdSIG' source='file:qcdPtSIG' color='4' />
 			<titleX v='\Delta\Phi(MET,\mu)' />
 			<titleY v='normalized to unit area' />
 			<savefolder v="shapes/pt" />
-		</hist>
+		</canv>
 
-		<hist name='norm_muon_pt' input='analyzeisolationMET/var_norm_muon_pt'>
-			<var name='qcd' source='file:qcd' norm='Integral' />
-			<var name='qcdBG' source='file:qcdPtBG' color='2' norm='Integral' />
-			<var name='qcdSIG' source='file:qcdPtSIG' color='4' norm='Integral' />
+		<canv name='norm_muon_pt' input='analyzeisolationMET/hist_norm_muon_pt'>
+			<hist name='qcd' source='file:qcd' norm='Integral' />
+			<hist name='qcdBG' source='file:qcdPtBG' color='2' norm='Integral' />
+			<hist name='qcdSIG' source='file:qcdPtSIG' color='4' norm='Integral' />
 			<titleX v='p_{T}(\mu) [GeV]' />
 			<titleY v='normalized to unit area' />
 			<savefolder v="shapes/pt" />
-		</hist>
+		</canv>
 
-		<hist name='norm_MVA' >
-		<var name='central' source='file:qcd' input="allmbefore/mbg_nVSdisc" norm='Integral' />
-			<var name='up-weighted' source='file:qcdPtBG' input="analyzeisolationMET/var_MVAdisc" color='2' norm='Integral' />
-			<var name='down-weighted' source='file:qcdPtSIG' input="analyzeisolationMET/var_MVAdisc" color='4' norm='Integral' />
+		<canv name='norm_MVA' >
+		<hist name='central' source='file:qcd' input="allmbefore/mbg_nVSdisc" norm='Integral' />
+			<hist name='up-weighted' source='file:qcdPtBG' input="analyzeisolationMET/hist_MVAdisc" color='2' norm='Integral' />
+			<hist name='down-weighted' source='file:qcdPtSIG' input="analyzeisolationMET/hist_MVAdisc" color='4' norm='Integral' />
 			<legend sizeX="40" posY="40"/>
-<!--			<var name='qcd' source='file:qcd' norm='Integral' />-->
-<!--			<var name='qcdBG' source='file:qcdPtBG' color='2' norm='Integral' />-->
-<!--			<var name='qcdSIG' source='file:qcdPtSIG' color='4' norm='Integral' />-->
+<!--			<hist name='qcd' source='file:qcd' norm='Integral' />-->
+<!--			<hist name='qcdBG' source='file:qcdPtBG' color='2' norm='Integral' />-->
+<!--			<hist name='qcdSIG' source='file:qcdPtSIG' color='4' norm='Integral' />-->
 			<titleX v='d_{MVA}' />
 			<titleY v='normalized to unit area' />
 			
 			<savefolder v="shapes/pt" />
-		</hist>
+		</canv>
 
 		<!--		MJ12-->
-		<hist name='weights'>
-			<var name='up-weighted' source='file:macro' input="shapes/MJ12BG" color='2' />
-			<var name='sig.like' source='file:macro' input="shapes/MJ12SIG" color='4' />
+		<canv name='weights'>
+			<hist name='up-weighted' source='file:macro' input="shapes/MJ12BG" color='2' />
+			<hist name='sig.like' source='file:macro' input="shapes/MJ12SIG" color='4' />
 			<titleX v='\Delta\phi(\mu, jet 1) + \Delta\phi(\mu, jet 2)' />
 			<titleY v='weight factor' />
 			<savefolder v="shapes/MJ12" />
-		</hist>
+		</canv>
 		
-		<hist name='eff_MC' >
-			<var name='qcd' source="file:macro" input="qcd/jetcut_20/all/efficiency" />
-			<var name='qcdBG' source="file:macro" input="shapes/dPhiMJ12BG/all/bkg/efficiency" color="2" />
-			<var name='qcdSIG' source="file:macro" input="shapes/dPhiMJ12SIG/all/bkg/efficiency" color="4" />
+		<canv name='eff_MC' >
+			<hist name='qcd' source="file:macro" input="qcd/jetcut_20/all/efficiency" />
+			<hist name='qcdBG' source="file:macro" input="shapes/dPhiMJ12BG/all/bkg/efficiency" color="2" />
+			<hist name='qcdSIG' source="file:macro" input="shapes/dPhiMJ12SIG/all/bkg/efficiency" color="4" />
 			<titleX v='d_{MVA}' />
 			<titleY v='N_{est}/N_{true}' />
 			<savefolder v="shapes/MJ12" />
-		</hist>
-		<hist name='eff_MC_cut' >
-			<var name='qcd' source="file:macro" input="applied/jetcut_20/all/bkg/effMC_vs_MVAcut" />
-			<var name='qcdBG' source="file:macro" input="shapes/dPhiMJ12BG/all/bkg/effMC_vs_MVAcut" color="2" />
-			<var name='qcdSIG' source="file:macro" input="shapes/dPhiMJ12SIG/all/bkg/effMC_vs_MVAcut" color="4" />
+		</canv>
+		<canv name='eff_MC_cut' >
+			<hist name='qcd' source="file:macro" input="applied/jetcut_20/all/bkg/effMC_vs_MVAcut" />
+			<hist name='qcdBG' source="file:macro" input="shapes/dPhiMJ12BG/all/bkg/effMC_vs_MVAcut" color="2" />
+			<hist name='qcdSIG' source="file:macro" input="shapes/dPhiMJ12SIG/all/bkg/effMC_vs_MVAcut" color="4" />
 			<titleX v='d^{thresh.}_{MVA}'/>
 			<titleY v='true #epsilon_{QCD}' />
 			<savefolder v="shapes/MJ12" />
-		</hist>
+		</canv>
 		
-		<hist name='quality_tight' >
-			<var name='qcd' source='file:macro' input="applied/jetcut_20/all/bkg/quality_tight" size="3"/>
-			<var name='qcdBG' source='file:macro' input="shapes/dPhiMJ12BG/all/bkg/quality_tight" color='2' drawOption="e4" type="filled" style="3005"/>
-			<var name='qcdSIG' source='file:macro' input="shapes/dPhiMJ12SIG/all/bkg/quality_tight" color='4' drawOption="e4" type="filled" style="3004"/>
+		<canv name='quality_tight' >
+			<hist name='qcd' source='file:macro' input="applied/jetcut_20/all/bkg/quality_tight" size="3"/>
+			<hist name='qcdBG' source='file:macro' input="shapes/dPhiMJ12BG/all/bkg/quality_tight" color='2' drawOption="e4" type="filled" style="3005"/>
+			<hist name='qcdSIG' source='file:macro' input="shapes/dPhiMJ12SIG/all/bkg/quality_tight" color='4' drawOption="e4" type="filled" style="3004"/>
 			<titleX v='d^{thresh.}_{MVA}'/>
 			<titleY v='N_{est}/N_{true}' />
 			<maxY v="1.55" />
 			<minY v="0.55" />
 			<savefolder v="shapes/MJ12" />
-		</hist>
+		</canv>
 		
-		<hist name='quality_loose' >
-			<var name='qcd' source='file:macro' input="applied/jetcut_20/all/bkg/quality_loose" size="3"/>
-			<var name='qcdBG' source='file:macro' input="shapes/dPhiMJ12BG/all/bkg/quality_loose" color='2' drawOption="e4" type="filled" style="3005"/>
-			<var name='qcdSIG' source='file:macro' input="shapes/dPhiMJ12SIG/all/bkg/quality_loose" color='4' drawOption="e4" type="filled" style="3004"/>
+		<canv name='quality_loose' >
+			<hist name='qcd' source='file:macro' input="applied/jetcut_20/all/bkg/quality_loose" size="3"/>
+			<hist name='qcdBG' source='file:macro' input="shapes/dPhiMJ12BG/all/bkg/quality_loose" color='2' drawOption="e4" type="filled" style="3005"/>
+			<hist name='qcdSIG' source='file:macro' input="shapes/dPhiMJ12SIG/all/bkg/quality_loose" color='4' drawOption="e4" type="filled" style="3004"/>
 			<titleX v='d^{thresh.}_{MVA}'/>
 			<titleY v='N_{est}/N_{true}' />
 			<maxY v="1.015" />
 			<minY v="0.985" />
 			<savefolder v="shapes/MJ12" />
-		</hist>
+		</canv>
 		
-		<hist name='norm_circ' input='analyzeisolationMET/var_norm_circularity'>
-			<var name='qcd' source='file:qcd' />
-			<var name='qcdSIG' source='file:qcdMJ12BG' color='2' />
-			<var name='qcdBG' source='file:qcdMJ12SIG' color='4' />
+		<canv name='norm_circ' input='analyzeisolationMET/hist_norm_circularity'>
+			<hist name='qcd' source='file:qcd' />
+			<hist name='qcdSIG' source='file:qcdMJ12BG' color='2' />
+			<hist name='qcdBG' source='file:qcdMJ12SIG' color='4' />
 			<titleX v='circularity' />
 			<titleY v='normalized to unit area' />
 			<savefolder v="shapes/MJ12" />
-		</hist>
+		</canv>
 
-		<hist name='norm_dPhiMuJ12' input='analyzeisolationMET/var_norm_DeltaPhiMuonJet12'>
-			<var name='qcd' source='file:qcd' />
-			<var name='qcdUp' source='file:qcdMJ12BG' color='2' />
-			<var name='qcdDown' source='file:qcdMJ12SIG' color='4' />
+		<canv name='norm_dPhiMuJ12' input='analyzeisolationMET/hist_norm_DeltaPhiMuonJet12'>
+			<hist name='qcd' source='file:qcd' />
+			<hist name='qcdUp' source='file:qcdMJ12BG' color='2' />
+			<hist name='qcdDown' source='file:qcdMJ12SIG' color='4' />
 			<titleX v='\Delta\phi(\mu, jet 1) + \Delta\phi(\mu, jet 2)' />
 			<titleY v='normalized to unit area' />
 			<savefolder v="shapes/MJ12" />
-		</hist>
+		</canv>
 
-		<hist name='norm_dPhiMETMu' input='analyzeisolationMET/var_norm_deltaPhiMetleadingMuon'>
-			<var name='qcd' source='file:qcd' />
-			<var name='qcdUp' source='file:qcdMJ12BG' color='2' />
-			<var name='qcdDown' source='file:qcdMJ12SIG' color='4' />
+		<canv name='norm_dPhiMETMu' input='analyzeisolationMET/hist_norm_deltaPhiMetleadingMuon'>
+			<hist name='qcd' source='file:qcd' />
+			<hist name='qcdUp' source='file:qcdMJ12BG' color='2' />
+			<hist name='qcdDown' source='file:qcdMJ12SIG' color='4' />
 			<titleX v='\Delta\Phi(MET,\mu)' />
 			<titleY v='normalized to unit area' />
 			<savefolder v="shapes/MJ12" />
-		</hist>
+		</canv>
 
-		<hist name='norm_muon_pt' input='analyzeisolationMET/var_norm_muon_pt'>
-			<var name='qcd' source='file:qcd' norm='Integral' />
-			<var name='qcdUp' source='file:qcdMJ12BG' color='2' norm='Integral' />
-			<var name='qcdDown' source='file:qcdMJ12SIG' color='4' norm='Integral' />
+		<canv name='norm_muon_pt' input='analyzeisolationMET/hist_norm_muon_pt'>
+			<hist name='qcd' source='file:qcd' norm='Integral' />
+			<hist name='qcdUp' source='file:qcdMJ12BG' color='2' norm='Integral' />
+			<hist name='qcdDown' source='file:qcdMJ12SIG' color='4' norm='Integral' />
 			<titleX v='p_{T}(\mu) [GeV]' />
 			<titleY v='normalized to unit area' />
 			<savefolder v="shapes/MJ12" />
-		</hist>
+		</canv>
 
-		<hist name='norm_MVA' >
-		<var name='central' source='file:qcd' input="allmbefore/mbg_nVSdisc" norm='Integral' />
-			<var name='up-weighted' source='file:qcdMJ12BG' input="analyzeisolationMET/var_MVAdisc" color='2' norm='Integral' />
-			<var name='down-weighted' source='file:qcdMJ12SIG' input="analyzeisolationMET/var_MVAdisc" color='4' norm='Integral' />
+		<canv name='norm_MVA' >
+		<hist name='central' source='file:qcd' input="allmbefore/mbg_nVSdisc" norm='Integral' />
+			<hist name='up-weighted' source='file:qcdMJ12BG' input="analyzeisolationMET/hist_MVAdisc" color='2' norm='Integral' />
+			<hist name='down-weighted' source='file:qcdMJ12SIG' input="analyzeisolationMET/hist_MVAdisc" color='4' norm='Integral' />
 			<legend sizeX="40" posY="40"/>
-<!--			<var name='qcd' source='file:qcd' norm='Integral' />-->
-<!--			<var name='qcdUp' source='file:qcdMJ12BG' color='2' norm='Integral' />-->
-<!--			<var name='qcdDown' source='file:qcdMJ12SIG' color='4' norm='Integral' />-->
+<!--			<hist name='qcd' source='file:qcd' norm='Integral' />-->
+<!--			<hist name='qcdUp' source='file:qcdMJ12BG' color='2' norm='Integral' />-->
+<!--			<hist name='qcdDown' source='file:qcdMJ12SIG' color='4' norm='Integral' />-->
 			<titleX v='d_{MVA}' />
 			<titleY v='normalized to unit area' />
 			<savefolder v="shapes/MJ12" />
-		</hist>
+		</canv>
 
 		<!--		MET MU-->
-		<hist name='weights'>
-			<var name='up-weighted' source='file:macro' input="shapes/METMuBG" color='2' />
-			<var name='down-weighted' source='file:macro' input="shapes/METMuSIG" color='4' />
+		<canv name='weights'>
+			<hist name='up-weighted' source='file:macro' input="shapes/METMuBG" color='2' />
+			<hist name='down-weighted' source='file:macro' input="shapes/METMuSIG" color='4' />
 			<titleX v='\Delta\Phi(MET,\mu)' />
 			<titleY v='weight factor' />
 			<legend posX="28" posY="68"/>
 			<savefolder v="shapes/METMu" />
-		</hist>
+		</canv>
 		
-		<hist name='eff_MC' >
-			<var name='qcd' source="file:macro" input="qcd/jetcut_20/all/efficiency" />
-			<var name='qcdBG' source="file:macro" input="shapes/dPhiMETMuBG/all/bkg/efficiency" color="2" />
-			<var name='qcdSIG' source="file:macro" input="shapes/dPhiMETMuSIG/all/bkg/efficiency" color="4" />
+		<canv name='eff_MC' >
+			<hist name='qcd' source="file:macro" input="qcd/jetcut_20/all/efficiency" />
+			<hist name='qcdBG' source="file:macro" input="shapes/dPhiMETMuBG/all/bkg/efficiency" color="2" />
+			<hist name='qcdSIG' source="file:macro" input="shapes/dPhiMETMuSIG/all/bkg/efficiency" color="4" />
 			<titleX v='d_{MVA}' />
 			<titleY v='N_{est}/N_{true}' />
 			<savefolder v="shapes/METMu" />
-		</hist>
+		</canv>
 		
-		<hist name='eff_MC_cut' >
-			<var name='qcd' source="file:macro" input="applied/jetcut_20/all/bkg/effMC_vs_MVAcut" />
-			<var name='qcdBG' source="file:macro" input="shapes/dPhiMETMuBG/all/bkg/effMC_vs_MVAcut" color="2" />
-			<var name='qcdSIG' source="file:macro" input="shapes/dPhiMETMuSIG/all/bkg/effMC_vs_MVAcut" color="4" />
+		<canv name='eff_MC_cut' >
+			<hist name='qcd' source="file:macro" input="applied/jetcut_20/all/bkg/effMC_vs_MVAcut" />
+			<hist name='qcdBG' source="file:macro" input="shapes/dPhiMETMuBG/all/bkg/effMC_vs_MVAcut" color="2" />
+			<hist name='qcdSIG' source="file:macro" input="shapes/dPhiMETMuSIG/all/bkg/effMC_vs_MVAcut" color="4" />
 			<titleX v='d^{thresh.}_{MVA}'/>
 			<titleY v='true #epsilon_{QCD}' />
 			<savefolder v="shapes/METMu" />
-		</hist>
+		</canv>
 		
-		<hist name='quality_tight' >
-			<var name='qcd' source='file:macro' input="applied/jetcut_20/all/bkg/quality_tight" size="3"/>
-			<var name='qcdBG' source='file:macro' input="shapes/dPhiMETMuBG/all/bkg/quality_tight" color='2' drawOption="e4" type="filled" style="3005"/>
-			<var name='qcdSIG' source='file:macro' input="shapes/dPhiMETMuSIG/all/bkg/quality_tight" color='4' drawOption="e4" type="filled" style="3004"/>
+		<canv name='quality_tight' >
+			<hist name='qcd' source='file:macro' input="applied/jetcut_20/all/bkg/quality_tight" size="3"/>
+			<hist name='qcdBG' source='file:macro' input="shapes/dPhiMETMuBG/all/bkg/quality_tight" color='2' drawOption="e4" type="filled" style="3005"/>
+			<hist name='qcdSIG' source='file:macro' input="shapes/dPhiMETMuSIG/all/bkg/quality_tight" color='4' drawOption="e4" type="filled" style="3004"/>
 			<titleX v='d^{thresh.}_{MVA}'/>
 			<titleY v='N_{est}/N_{true}' />
 			<maxY v="1.55" />
 			<minY v="0.55" />
 			<savefolder v="shapes/METMu" />
-		</hist>
+		</canv>
 		
-		<hist name='quality_loose' >
-			<var name='qcd' source='file:macro' input="applied/jetcut_20/all/bkg/quality_loose" size="3"/>
-			<var name='qcdBG' source='file:macro' input="shapes/dPhiMETMuBG/all/bkg/quality_loose" color='2' drawOption="e4" type="filled" style="3005"/>
-			<var name='qcdSIG' source='file:macro' input="shapes/dPhiMETMuSIG/all/bkg/quality_loose" color='4' drawOption="e4" type="filled" style="3004"/>
+		<canv name='quality_loose' >
+			<hist name='qcd' source='file:macro' input="applied/jetcut_20/all/bkg/quality_loose" size="3"/>
+			<hist name='qcdBG' source='file:macro' input="shapes/dPhiMETMuBG/all/bkg/quality_loose" color='2' drawOption="e4" type="filled" style="3005"/>
+			<hist name='qcdSIG' source='file:macro' input="shapes/dPhiMETMuSIG/all/bkg/quality_loose" color='4' drawOption="e4" type="filled" style="3004"/>
 			<titleX v='d^{thresh.}_{MVA}'/>
 			<titleY v='N_{est}/N_{true}' />
 			<maxY v="1.015" />
 			<minY v="0.985" />
 			<savefolder v="shapes/METMu" />
-		</hist>
+		</canv>
 		
-		<hist name='norm_circ' input='analyzeisolationMET/var_norm_circularity'>
-			<var name='qcd' source='file:qcd' />
-			<var name='qcdUp' source='file:qcdMETMuBG' color='2' />
-			<var name='qcdDown' source='file:qcdMETMuSIG' color='4' />
+		<canv name='norm_circ' input='analyzeisolationMET/hist_norm_circularity'>
+			<hist name='qcd' source='file:qcd' />
+			<hist name='qcdUp' source='file:qcdMETMuBG' color='2' />
+			<hist name='qcdDown' source='file:qcdMETMuSIG' color='4' />
 			<titleX v='circularity' />
 			<titleY v='normalized to unit area' />
 			<savefolder v="shapes/METMu" />
-		</hist>
+		</canv>
 
-		<hist name='norm_dPhiMuJ12' input='analyzeisolationMET/var_norm_DeltaPhiMuonJet12'>
-			<var name='qcd' source='file:qcd' />
-			<var name='qcdUp' source='file:qcdMETMuBG' color='2' />
-			<var name='qcdDown' source='file:qcdMETMuSIG' color='4' />
+		<canv name='norm_dPhiMuJ12' input='analyzeisolationMET/hist_norm_DeltaPhiMuonJet12'>
+			<hist name='qcd' source='file:qcd' />
+			<hist name='qcdUp' source='file:qcdMETMuBG' color='2' />
+			<hist name='qcdDown' source='file:qcdMETMuSIG' color='4' />
 			<titleX v='\Delta\phi(\mu, jet 1) + \Delta\phi(\mu, jet 2)' />
 			<titleY v='normalized to unit area' />
 			<savefolder v="shapes/METMu" />
-		</hist>
+		</canv>
 
-		<hist name='norm_dPhiMETMu' input='analyzeisolationMET/var_norm_deltaPhiMetleadingMuon'>
-			<var name='qcd' source='file:qcd' />
-			<var name='qcdUp' source='file:qcdMETMuBG' color='2' />
-			<var name='qcdDown' source='file:qcdMETMuSIG' color='4' />
+		<canv name='norm_dPhiMETMu' input='analyzeisolationMET/hist_norm_deltaPhiMetleadingMuon'>
+			<hist name='qcd' source='file:qcd' />
+			<hist name='qcdUp' source='file:qcdMETMuBG' color='2' />
+			<hist name='qcdDown' source='file:qcdMETMuSIG' color='4' />
 			<titleX v='\Delta\Phi(MET,\mu)' />
 			<titleY v='normalized to unit area' />
 			<savefolder v="shapes/METMu" />
-		</hist>
+		</canv>
 
-		<hist name='norm_muon_pt' input='analyzeisolationMET/var_norm_muon_pt'>
-			<var name='qcd' source='file:qcd' norm='Integral' />
-			<var name='qcdUp' source='file:qcdMETMuBG' color='2' norm='Integral' />
-			<var name='qcdDown' source='file:qcdMETMuSIG' color='4' norm='Integral' />
+		<canv name='norm_muon_pt' input='analyzeisolationMET/hist_norm_muon_pt'>
+			<hist name='qcd' source='file:qcd' norm='Integral' />
+			<hist name='qcdUp' source='file:qcdMETMuBG' color='2' norm='Integral' />
+			<hist name='qcdDown' source='file:qcdMETMuSIG' color='4' norm='Integral' />
 			<titleX v='p_{T}(\mu) [GeV]' />
 			<titleY v='normalized to unit area' />
 			<savefolder v="shapes/METMu" />
-		</hist>
+		</canv>
 
-		<hist name='norm_MVA'>
-		<var name='central' source='file:qcd' input="allmbefore/mbg_nVSdisc" norm='Integral' />
-			<var name='up-weighted' source='file:qcdMETMuBG' input="analyzeisolationMET/var_MVAdisc" color='2' norm='Integral' />
-			<var name='down-weighted' source='file:qcdMETMuSIG' input="analyzeisolationMET/var_MVAdisc" color='4' norm='Integral' />
+		<canv name='norm_MVA'>
+		<hist name='central' source='file:qcd' input="allmbefore/mbg_nVSdisc" norm='Integral' />
+			<hist name='up-weighted' source='file:qcdMETMuBG' input="analyzeisolationMET/hist_MVAdisc" color='2' norm='Integral' />
+			<hist name='down-weighted' source='file:qcdMETMuSIG' input="analyzeisolationMET/hist_MVAdisc" color='4' norm='Integral' />
 			<legend sizeX="45" posY="70" posX="30"/>
-<!--			<var name='qcd' source='file:qcd' norm='Integral' />-->
-<!--			<var name='qcdUp' source='file:qcdMETMuBG' color='2' norm='Integral' />-->
-<!--			<var name='qcdDown' source='file:qcdMETMuSIG' color='4' norm='Integral' />-->
+<!--			<hist name='qcd' source='file:qcd' norm='Integral' />-->
+<!--			<hist name='qcdUp' source='file:qcdMETMuBG' color='2' norm='Integral' />-->
+<!--			<hist name='qcdDown' source='file:qcdMETMuSIG' color='4' norm='Integral' />-->
 			<titleX v='d_{MVA}' />
 			<titleY v='normalized to unit area' />
 			<savefolder v="shapes/METMu" />
-		</hist>
+		</canv>
 	</plots>
 </HistPlotter>

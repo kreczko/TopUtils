@@ -7,7 +7,7 @@
 	<include file='plotconfigs/IsolationAnalyzerPlots.xml' />
 	<include file='plotconfigs/JetAnalyzerPlots.xml' />
 	<sources>
-		<!-- gets input from 1 histogram -->
+		<!-- gets input from 1 canvogram -->
 		<input name="ecalIsoPt">
 			<folder name='analyzeSelMuons'>
 				<filter type='exact' value='iso_dREcalPt' />
@@ -31,90 +31,90 @@
 
 	</sources>
 	<!--
-		makes the canvas, mixes the histogramms defined in the histSetup summaryFile
+		makes the canvas, mixes the canvogramms defined in the canvSetup summaryFile
 		= ps oder pdf
 	-->
 	<plots create='png' makeSummaryFile='true' summaryFile='inspect.pdf'>
 		<!-- IsolationAnalyzer Plots -->
-		<hist setup='MVAdisc_signal' />
-		<hist setup='MVAdisc_qcd' />
-		<hist setup="deltaPhiJet1Jet2" />
+		<canv setup='MVAdisc_signal' />
+		<canv setup='MVAdisc_qcd' />
+		<canv setup="deltaPhiJet1Jet2" />
 		
-		<hist setup='norm_MVAdisc' />
-		<hist setup='norm_MVAdisc_OL' />
-		<hist setup='corr_MVAdiscVScalo_qcd' />
-		<hist setup='corr_MVAdiscVSjetIso_qcd' />
-		<hist setup='corr_MVAdiscVStrack_qcd' />
+		<canv setup='norm_MVAdisc' />
+		<canv setup='norm_MVAdisc_OL' />
+		<canv setup='corr_MVAdiscVScalo_qcd' />
+		<canv setup='corr_MVAdiscVSjetIso_qcd' />
+		<canv setup='corr_MVAdiscVStrack_qcd' />
 <!--				-->
-		<hist setup="norm_MET" />
-		<hist setup="corr_METVStrack_qcd" />
-		<hist setup="corr_METVScalo_qcd" />
-		<hist setup="corr_METVSjetiso_qcd" />
-		<hist setup="MET_reso" />
-		<hist setup="MET_reso_Top" />
-		<hist setup="MET_reso_Wjets" />
-		<hist setup="MET_reso_normed" />
+		<canv setup="norm_MET" />
+		<canv setup="corr_METVStrack_qcd" />
+		<canv setup="corr_METVScalo_qcd" />
+		<canv setup="corr_METVSjetiso_qcd" />
+		<canv setup="MET_reso" />
+		<canv setup="MET_reso_Top" />
+		<canv setup="MET_reso_Wjets" />
+		<canv setup="MET_reso_normed" />
 		
-		<hist setup='var_norm_dPhiMuJ12' />
-		<hist setup='corr_DphiMuJ1J2VScalo_qcd' />
-		<hist setup='corr_DphiMuJ1J2VStrack_qcd' />
-		<hist setup='corr_DphiMuJ1J2VSjetIso_qcd' />		
-		<hist setup='sumPhiMuJ1J2vsDphiJ1J2_qcd' />
-		<hist setup='sumPhiMuJ1J2vsDphiJ1J2_top' />
-		<hist setup='sumPhiMuJ1J2vsDphiJ1J2_wjets' />
+		<canv setup='hist_norm_dPhiMuJ12' />
+		<canv setup='corr_DphiMuJ1J2VScalo_qcd' />
+		<canv setup='corr_DphiMuJ1J2VStrack_qcd' />
+		<canv setup='corr_DphiMuJ1J2VSjetIso_qcd' />		
+		<canv setup='sumPhiMuJ1J2vsDphiJ1J2_qcd' />
+		<canv setup='sumPhiMuJ1J2vsDphiJ1J2_top' />
+		<canv setup='sumPhiMuJ1J2vsDphiJ1J2_wjets' />
 <!--		-->
-		<hist setup='var_norm_dPhiMETMu' />
-		<hist setup='corr_dPhiMETMuVScalo_qcd' />
-		<hist setup='corr_dPhiMETMuVStrack_qcd' />
-		<hist setup='corr_dPhiMETMuVSjetIso_qcd' />
+		<canv setup='hist_norm_dPhiMETMu' />
+		<canv setup='corr_dPhiMETMuVScalo_qcd' />
+		<canv setup='corr_dPhiMETMuVStrack_qcd' />
+		<canv setup='corr_dPhiMETMuVSjetIso_qcd' />
 <!--		-->
-		<hist setup='var_norm_Circ' />
-		<hist setup='corr_circVScalo_qcd' />
-		<hist setup='corr_circVStrack_qcd' />
-		<hist setup='corr_circVSjetiso_qcd' />
+		<canv setup='hist_norm_Circ' />
+		<canv setup='corr_circVScalo_qcd' />
+		<canv setup='corr_circVStrack_qcd' />
+		<canv setup='corr_circVSjetiso_qcd' />
 <!--		-->
-		<hist setup='corr_muonPtVScalo_qcd' />
-		<hist setup='corr_muonPtVStrack_qcd' />
-		<hist setup='corr_muonPtVSjetiso_qcd' />
-<!--		10 not used vars-->
-<!--	<hist setup='norm_sumEtJet3Jet4' />-->
-<!--	<hist setup='norm_MET_3sep' />-->
-<!--	<hist setup='norm_METtimesJet1' />-->
-<!--	<hist setup='norm_SumJet1Et2timesMuEt' />-->
-<!--	<hist setup='norm_Sum4JetsMuEt'/>-->
-<!--	<hist setup='norm_VecSumJetsMu' />-->
-<!--	<hist setup='norm_dPhiMETJet2' />-->
-<!--	<hist setup='norm_sphericity' />-->
-<!--	<hist setup='norm_aplanarity' />-->
-<!--	<hist setup='norm_isotropy' />-->
-<!--	other not used vars-->
+		<canv setup='corr_muonPtVScalo_qcd' />
+		<canv setup='corr_muonPtVStrack_qcd' />
+		<canv setup='corr_muonPtVSjetiso_qcd' />
+<!--		10 not used hists-->
+<!--	<canv setup='norm_sumEtJet3Jet4' />-->
+<!--	<canv setup='norm_MET_3sep' />-->
+<!--	<canv setup='norm_METtimesJet1' />-->
+<!--	<canv setup='norm_SumJet1Et2timesMuEt' />-->
+<!--	<canv setup='norm_Sum4JetsMuEt'/>-->
+<!--	<canv setup='norm_VecSumJetsMu' />-->
+<!--	<canv setup='norm_dPhiMETJet2' />-->
+<!--	<canv setup='norm_sphericity' />-->
+<!--	<canv setup='norm_aplanarity' />-->
+<!--	<canv setup='norm_isotropy' />-->
+<!--	other not used hists-->
 		
 
 		<!-- MuonAnalyzer Plots -->
-		<hist setup='muon_pt' />
-		<hist setup='muon_pt2' />
-		<hist setup='muon_calIso' />
-		<hist setup='muon_PtTracksVSdR' />
-		<hist setup='muon_NTracksVSdR' />
-		<hist setup='muon_isoJet05' />
-		<hist setup='muon_isoJet10' />
-		<hist setup='muon_isoJet15' />
-		<hist setup='muon_isoJet20' />
-		<hist setup='muon_isoJet30' />
-		<hist setup='muon_isoJet35' />
-		<hist setup='muon_isoJet40' />
-		<hist setup='muon_eta' />
-		<hist setup='muon_calomix' />
-		<hist setup='muon_trackIso' />
+		<canv setup='muon_pt' />
+		<canv setup='muon_pt2' />
+		<canv setup='muon_calIso' />
+		<canv setup='muon_PtTracksVSdR' />
+		<canv setup='muon_NTracksVSdR' />
+		<canv setup='muon_isoJet05' />
+		<canv setup='muon_isoJet10' />
+		<canv setup='muon_isoJet15' />
+		<canv setup='muon_isoJet20' />
+		<canv setup='muon_isoJet30' />
+		<canv setup='muon_isoJet35' />
+		<canv setup='muon_isoJet40' />
+		<canv setup='muon_eta' />
+		<canv setup='muon_calomix' />
+		<canv setup='muon_trackIso' />
 		
 
 		<!-- JetAnalyzer plots -->
-<!--		<hist setup='jet1_et' />-->
-<!--		<hist setup='jet2_et' />-->
-<!--		<hist setup='jet3_et' />-->
-<!--		<hist setup='jet4_et' />-->
-<!--		<hist setup='nJets20' />-->
-<!--<hist setup='nJets20_leg' />-->
+<!--		<canv setup='jet1_et' />-->
+<!--		<canv setup='jet2_et' />-->
+<!--		<canv setup='jet3_et' />-->
+<!--		<canv setup='jet4_et' />-->
+<!--		<canv setup='nJets20' />-->
+<!--<canv setup='nJets20_leg' />-->
 		
 	</plots>
 </HistPlotter>

@@ -1,68 +1,68 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 	<!-- Works with LKThesis.xml -->
 <HistSetup>
-	<hist name='jet1_et' input='analyzeSelJets/kin_e_0'>
-		<var name='QCD(#mu enriched)' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
-		<var name='Top(signal)' source='file:top' type='line' style='1' color='4' norm='Integral' />
-		<var name='W + jets' source='file:wjets' type='line' style='1' color='8'
+	<canv name='jet1_et' input='analyzeSelJets/kin_e_0'>
+		<hist name='QCD(#mu enriched)' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
+		<hist name='Top(signal)' source='file:top' type='line' style='1' color='4' norm='Integral' />
+		<hist name='W + jets' source='file:wjets' type='line' style='1' color='8'
 			norm='Integral' />
 		<titleX v='E_{T}(jet 1) [GeV]' />
 		<titleY v='normalized to unit area' />
 		<savefolder v='kin' />
 		<legend posX="45" sizeX="50" sizeY="40" posY="45"/>
-	</hist>
-	<hist name='jet2_et' input='analyzeSelJets/kin_e_1'>
-		<var name='qcd' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
-		<var name='top' source='file:top' type='line' style='1' color='4' norm='Integral' />
-		<var name='wjets' source='file:wjets' type='line' style='1' color='8'
+	</canv>
+	<canv name='jet2_et' input='analyzeSelJets/kin_e_1'>
+		<hist name='qcd' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
+		<hist name='top' source='file:top' type='line' style='1' color='4' norm='Integral' />
+		<hist name='wjets' source='file:wjets' type='line' style='1' color='8'
 			norm='Integral' />
 		<titleX v='E_{T}(jet 2) [GeV]' />
 		<titleY v='normalized to unit area' />
 		<savefolder v='kin' />
 <!--		<legend />-->
-	</hist>
-	<hist name='jet3_et' input='analyzeSelJets/kin_e_2'>
-		<var name='qcd' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
-		<var name='top' source='file:top' type='line' style='1' color='4' norm='Integral' />
-		<var name='wjets' source='file:wjets' type='line' style='1' color='8'
+	</canv>
+	<canv name='jet3_et' input='analyzeSelJets/kin_e_2'>
+		<hist name='qcd' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
+		<hist name='top' source='file:top' type='line' style='1' color='4' norm='Integral' />
+		<hist name='wjets' source='file:wjets' type='line' style='1' color='8'
 			norm='Integral' />
 		<titleX v='E_{T}(jet 3) [GeV]' />
 		<titleY v='normalized to unit area' />
 		<savefolder v='kin' />
 <!--		<legend />-->
-	</hist>
-	<hist name='jet4_et' input='analyzeSelJets/kin_e_3'>
-		<var name='qcd' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
-		<var name='top' source='file:top' type='line' style='1' color='4' norm='Integral' />
-		<var name='wjets' source='file:wjets' type='line' style='1' color='8'
+	</canv>
+	<canv name='jet4_et' input='analyzeSelJets/kin_e_3'>
+		<hist name='qcd' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
+		<hist name='top' source='file:top' type='line' style='1' color='4' norm='Integral' />
+		<hist name='wjets' source='file:wjets' type='line' style='1' color='8'
 			norm='Integral' />
 		<titleX v='E_{T}(jet 4) [GeV]' />
 		<titleY v='normalized to unit area' />
 		<savefolder v='kin' />
 <!--		<legend />-->
-	</hist>
+	</canv>
 
-	<hist name='nJets20' input='analyzeSelJets/kin_n20'>
+	<canv name='nJets20' input='analyzeSelJets/kin_n20'>
 		<!-- name is also used for legend -->
-		<var name='qcd' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
-		<var name='top' source='file:top' type='line' style='1' color='4' norm='Integral' />
-		<var name='wjets' source='file:wjets' type='line' style='1' color='8'
+		<hist name='qcd' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
+		<hist name='top' source='file:top' type='line' style='1' color='4' norm='Integral' />
+		<hist name='wjets' source='file:wjets' type='line' style='1' color='8'
 			norm='Integral' />
 		<titleX v='N_{jets} (E_{T} > 20GeV)' />
 		<titleY v='normalized to unit area' />
 		<savefolder v='kin' />
 <!--		<legend />-->
-	</hist>
+	</canv>
 	
-	<hist name='nJets20_leg' input='analyzeSelJets/kin_n20'>
+	<canv name='nJets20_leg' input='analyzeSelJets/kin_n20'>
 		<!-- name is also used for legend -->
-		<var name='QCD(#mu enriched)' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
-		<var name='Top(signal)' source='file:top' type='line' style='1' color='4' norm='Integral' />
-		<var name='W+jets' source='file:wjets' type='line' style='1' color='8'
+		<hist name='QCD(#mu enriched)' source='file:qcd' type='line' style='1' color='2' norm='Integral' />
+		<hist name='Top(signal)' source='file:top' type='line' style='1' color='4' norm='Integral' />
+		<hist name='W+jets' source='file:wjets' type='line' style='1' color='8'
 			norm='Integral' />
 		<titleX v='N_{jets} (E_{T} > 20GeV)' />
 		<titleY v='normalized to unit area' />
 		<savefolder v='kin' />
 		<legend sizeX= "50" posX="45"/>
-	</hist>
+	</canv>
 </HistSetup>

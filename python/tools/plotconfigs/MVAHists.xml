@@ -13,112 +13,112 @@
 
 	<plots create='png'>
 		<!-- Macro plots -->
-		<hist name='var_dphiMuJ12' input=''>
-			<var name='background' source='file:train' input="input_norm/input_dphiMuJ1J2_bkg"
+		<canv name='hist_dphiMuJ12' input=''>
+			<hist name='background' source='file:train' input="input_norm/input_dphiMuJ1J2_bkg"
 				type='filled' color='2' style='3005' norm='Integral' />
-			<var name='signal' source='file:train' input="input_norm/input_dphiMuJ1J2_sig"
+			<hist name='signal' source='file:train' input="input_norm/input_dphiMuJ1J2_sig"
 				color='4' norm='Integral' />
 			<titleX v='|\Delta\phi(\mu, jet 1) + \Delta\phi(\mu, jet 2)|' />
 			<titleY v='normalized to unit area' />
-		</hist>
+		</canv>
 
-		<hist name='var_dphiMETmu' input=''>
-			<var name='background' source='file:train' input="input_norm/input_dphiMETLepton_bkg"
+		<canv name='hist_dphiMETmu' input=''>
+			<hist name='background' source='file:train' input="input_norm/input_dphiMETLepton_bkg"
 				type='filled' color='2' style='3005' norm='Integral' />
-			<var name='signal' source='file:train' input="input_norm/input_dphiMETLepton_sig"
+			<hist name='signal' source='file:train' input="input_norm/input_dphiMETLepton_sig"
 				color='4' norm='Integral' />
 			<titleX v='|\Delta\phi(missing E_{T}, \mu) |' />
 			<titleY v='normalized to unit area' />
-		</hist>
+		</canv>
 <!---->
-		<hist name='var_circ'>
-			<var name='background' source='file:train' input="input_norm/input_circularity_bkg"
+		<canv name='hist_circ'>
+			<hist name='background' source='file:train' input="input_norm/input_circularity_bkg"
 				type='filled' color='2' style='3005' norm='Integral' />
-			<var name='signal' source='file:train' input="input_norm/input_circularity_sig"
+			<hist name='signal' source='file:train' input="input_norm/input_circularity_sig"
 				color='4' norm='Integral' />
 			<titleX v="circularity" />
 			<titleY v='normalized to unit area' />
-		</hist>
+		</canv>
 
-		<hist name='var_muPt' input=''>
-			<var name='background' source='file:train' input="input_norm/input_leptonPt_bkg"
+		<canv name='hist_muPt' input=''>
+			<hist name='background' source='file:train' input="input_norm/input_leptonPt_bkg"
 				type='filled' color='2' style='3005' norm='Integral' />
-			<var name='signal' source='file:train' input="input_norm/input_leptonPt_sig"
+			<hist name='signal' source='file:train' input="input_norm/input_leptonPt_sig"
 				color='4' norm='Integral' />
 			<titleX v='p_{T}(\mu)' />
 			<titleY v='normalized to unit area' />
 			<maxX v= "200" />
 			<legend posX='35' sizeX="55" posY="30"/>
-		</hist>
+		</canv>
 
-		<hist name='norm_MVAdisc'>
-			<var name='background' source='file:train' input="output/likelihood_discriminator_bkg"
+		<canv name='norm_MVAdisc'>
+			<hist name='background' source='file:train' input="output/likelihood_discriminator_bkg"
 				type='filled' color='2' style='3005' norm='Integral'/>
-			<var name='signal' source='file:train' input="output/likelihood_discriminator_sig"
+			<hist name='signal' source='file:train' input="output/likelihood_discriminator_sig"
 				color='4' norm='Integral' />
 			<titleX v='d_{MVA}' />
 			<titleY v='normalized to unit area' />
 			<legend posX="20" sizeX="50"/>
 			 <smooth v="200"/> 
-		</hist>
+		</canv>
 		
-		<hist name='norm_ProcMatrix'>
-			<var name='background' source='file:train' input="ProcMatrix_rot/CorrMatrix" />
+		<canv name='norm_ProcMatrix'>
+			<hist name='background' source='file:train' input="ProcMatrix_rot/CorrMatrix" />
 			<titleX v='' />
 			<titleY v='' />
 			 <drawOption v="COLZ" /> 
-		</hist>
+		</canv>
 		
-		<hist name='norm_ProcMatrix_14V'>
-			<var name='background' source='file:train14V_All3' input="ProcMatrix_rot/CorrMatrix" />
+		<canv name='norm_ProcMatrix_14V'>
+			<hist name='background' source='file:train14V_All3' input="ProcMatrix_rot/CorrMatrix" />
 			<titleX v='' />
 			<titleY v='' />
 			 <drawOption v="COLZ" /> 
-		</hist>
+		</canv>
 		
-		<hist name='norm_MVAdisc_All3'>
-			<var name='background' source='file:train14V_All3' input="output/likelihood_discriminator_bkg"
+		<canv name='norm_MVAdisc_All3'>
+			<hist name='background' source='file:train14V_All3' input="output/likelihood_discriminator_bkg"
 				type='filled' color='2' style='3005' norm='Integral'/>
-			<var name='signal' source='file:train14V_All3' input="output/likelihood_discriminator_sig"
+			<hist name='signal' source='file:train14V_All3' input="output/likelihood_discriminator_sig"
 				color='4' norm='Integral' />
 			<titleX v='d_{MVA}' />
 			<titleY v='normalized to unit area' />
 			<legend posX="20"/>
 			 <smooth v="200"/> 
-		</hist>
+		</canv>
 		
-		<hist name='norm_MVAdisc_QCDWJET'>
-			<var name='W+jets' source='file:train14V_QCDWJET' input="output/likelihood_discriminator_bkg"
+		<canv name='norm_MVAdisc_QCDWJET'>
+			<hist name='W+jets' source='file:train14V_QCDWJET' input="output/likelihood_discriminator_bkg"
 				type='filled' color='2' style='3005' norm='Integral'/>
-			<var name='QCD(#mu enriched)' source='file:train14V_QCDWJET' input="output/likelihood_discriminator_sig"
+			<hist name='QCD(#mu enriched)' source='file:train14V_QCDWJET' input="output/likelihood_discriminator_sig"
 				color='4' norm='Integral' />
 			<titleX v='d_{MVA}' />
 			<titleY v='normalized to unit area' />
 			<legend posX="20"/>
 			 <smooth v="200"/> 
-		</hist>
+		</canv>
 		
-		<hist name='norm_MVAdisc_QCDTop'>
-			<var name='QCD(#mu enriched)' source='file:train14V_QCDTop' input="output/likelihood_discriminator_bkg"
+		<canv name='norm_MVAdisc_QCDTop'>
+			<hist name='QCD(#mu enriched)' source='file:train14V_QCDTop' input="output/likelihood_discriminator_bkg"
 				type='filled' color='2' style='3005' norm='Integral'/>
-			<var name='top-signal' source='file:train14V_QCDTop' input="output/likelihood_discriminator_sig"
+			<hist name='top-signal' source='file:train14V_QCDTop' input="output/likelihood_discriminator_sig"
 				color='4' norm='Integral' />
 			<titleX v='d_{MVA}' />
 			<titleY v='normalized to unit area' />
 			<legend posX="20"/>
 			 <smooth v="200"/> 
-		</hist>
+		</canv>
 		
-		<hist name='norm_MVAdisc_TopWjets'>
-			<var name='W+jets' source='file:train14V_TopWJET' input="output/likelihood_discriminator_bkg"
+		<canv name='norm_MVAdisc_TopWjets'>
+			<hist name='W+jets' source='file:train14V_TopWJET' input="output/likelihood_discriminator_bkg"
 				type='filled' color='2' style='3005' norm='Integral'/>
-			<var name='top-signal' source='file:train14V_TopWJET' input="output/likelihood_discriminator_sig"
+			<hist name='top-signal' source='file:train14V_TopWJET' input="output/likelihood_discriminator_sig"
 				color='4' norm='Integral' />
 			<titleX v='d_{MVA}' />
 			<titleY v='normalized to unit area' />
 			<legend posX="20"/>
 			 <smooth v="200"/> 
-		</hist>
+		</canv>
 		
 		
 	</plots>

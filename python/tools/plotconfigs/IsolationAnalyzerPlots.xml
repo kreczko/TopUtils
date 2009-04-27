@@ -1,287 +1,287 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 	<!-- Works with LKThesis.xml -->
 <HistSetup>
-	<hist name='MVAdisc_signal' input='analyzeisolationMET/var_MVAdisc'>
-		<var name="QCD(#mu enriched)" source='file:qcd' color='2' draw='0' />
-		<var name='top' source='file:top' color='4' />
-		<var name='wjets' source='file:wjets' color='8' />
+	<canv name='MVAdisc_signal' input='analyzeisolationMET/hist_MVAdisc'>
+		<hist name="QCD(#mu enriched)" source='file:qcd' color='2' draw='0' />
+		<hist name='top' source='file:top' color='4' />
+		<hist name='wjets' source='file:wjets' color='8' />
 		<titleX v='d_{MVA}' />
 		<savefolder v='analysis' />
 		<legend posX='40' />
-	</hist>
-	<hist name='MVAdisc_qcd' input='analyzeisolationMET/var_MVAdisc'>
-		<var name="QCD(#mu enriched)" source='file:qcd' color='2' />
-		<var name='top' source='file:top' color='4' />
-		<var name='wjets' source='file:wjets' color='8' />
+	</canv>
+	<canv name='MVAdisc_qcd' input='analyzeisolationMET/hist_MVAdisc'>
+		<hist name="QCD(#mu enriched)" source='file:qcd' color='2' />
+		<hist name='top' source='file:top' color='4' />
+		<hist name='wjets' source='file:wjets' color='8' />
 		<titleX v='d_{MVA}' />
 		<savefolder v='analysis' />
 		<legend posX='40' />
-	</hist>
+	</canv>
 	
-	<hist name='deltaPhiJet1Jet2' input='analyzeisolationMET/var_deltaPhiJet1Jet2'>
-		<var name='QCD(#mu enriched)' source='file:qcd' color='2' norm='Integral' />
-		<var name='Top(signal)' source='file:top' color='4' norm='Integral' />
-		<var name='W+jets' source='file:wjets' color='8' norm='Integral' />
+	<canv name='deltaPhiJet1Jet2' input='analyzeisolationMET/hist_deltaPhiJet1Jet2'>
+		<hist name='QCD(#mu enriched)' source='file:qcd' color='2' norm='Integral' />
+		<hist name='Top(signal)' source='file:top' color='4' norm='Integral' />
+		<hist name='W+jets' source='file:wjets' color='8' norm='Integral' />
 		<titleX v='#Delta#phi(jet 1, jet 2)' />
 		<titleY v="normalized to unit area"/>
 		<savefolder v='analysis' />
 		<legend posX='35' sizeX="45" posY="50" />
-	</hist>
+	</canv>
 
-	<hist name='norm_MVAdisc' input='analyzeisolationMET/var_MVAdisc'>
-		<var name='QCD(#mu enriched)' source='file:qcd' color='2' norm='Integral' />
-		<var name='Top(signal)' source='file:top' color='4' norm='Integral' />
-		<var name='W+jets' source='file:wjets' color='8' norm='Integral' />
+	<canv name='norm_MVAdisc' input='analyzeisolationMET/hist_MVAdisc'>
+		<hist name='QCD(#mu enriched)' source='file:qcd' color='2' norm='Integral' />
+		<hist name='Top(signal)' source='file:top' color='4' norm='Integral' />
+		<hist name='W+jets' source='file:wjets' color='8' norm='Integral' />
 		<titleX v='d_{MVA}' />
 		<titleY v='normalized to unit area' />
 		<!--			<logY v='1' />-->
 		<savefolder v='analysis' />
 		<legend posX='25' sizeX="55" />
-	</hist>
+	</canv>
 
-	<hist name='norm_MVAdisc_OL' input='analyzeisolationMET/var_MVAdisc'>
-		<var name='QCD(#mu enriched)' source='file:qcd' color='2' norm='Integral' />
-		<var name='top' source='file:top' color='4' norm='Integral' />
-		<var name='wjets' source='file:wjets' color='8' norm='Integral' />
+	<canv name='norm_MVAdisc_OL' input='analyzeisolationMET/hist_MVAdisc'>
+		<hist name='QCD(#mu enriched)' source='file:qcd' color='2' norm='Integral' />
+		<hist name='top' source='file:top' color='4' norm='Integral' />
+		<hist name='wjets' source='file:wjets' color='8' norm='Integral' />
 		<titleX v='d_{MVA}' />
 		<titleY v='normalized to unit area' />
 		<!--			<logY v='1' />-->
 		<savefolder v='analysis' />
-	</hist>
+	</canv>
 
-	<hist name='MET_reso' input='analyzeisolationMET/var_recoMETGenMET'>
-		<var name="QCD(#mu enriched)" source='file:qcd' color='2' norm='Integral' />
+	<canv name='MET_reso' input='analyzeisolationMET/hist_recoMETGenMET'>
+		<hist name="QCD(#mu enriched)" source='file:qcd' color='2' norm='Integral' />
 		<titleX v='MET_{reco} - MET_{gen} [GeV]' />
 		<titleY v='normalized to unit area' />
 		<savefolder v='analysis' />
-	</hist>
+	</canv>
 	
-	<hist name='MET_reso_Top' input='analyzeisolationMET/var_recoMETGenMET'>
-		<var name="Top(Signal)" source='file:top' norm='Integral' />
+	<canv name='MET_reso_Top' input='analyzeisolationMET/hist_recoMETGenMET'>
+		<hist name="Top(Signal)" source='file:top' norm='Integral' />
 		<titleX v='MET_{reco} - MET_{gen} [GeV]' />
 		<titleY v='normalized to unit area' />
 		<savefolder v='analysis' />
-	</hist>
+	</canv>
 	
-	<hist name='MET_reso_Wjets' input='analyzeisolationMET/var_recoMETGenMET'>
-		<var name="W+jets" source='file:wjets' norm='Integral' />
+	<canv name='MET_reso_Wjets' input='analyzeisolationMET/hist_recoMETGenMET'>
+		<hist name="W+jets" source='file:wjets' norm='Integral' />
 		<titleX v='MET_{reco} - MET_{gen} [GeV]' />
 		<titleY v='normalized to unit area' />
 		<savefolder v='analysis' />
-	</hist>
+	</canv>
 	
-	<hist name='MET_reso_normed' input='analyzeisolationMET/var_normed_recoMETGenMET'>
-		<var name="QCD(#mu enriched)" source='file:qcdMET' color='2' norm='Integral' />
+	<canv name='MET_reso_normed' input='analyzeisolationMET/hist_normed_recoMETGenMET'>
+		<hist name="QCD(#mu enriched)" source='file:qcdMET' color='2' norm='Integral' />
 		<titleX v='(MET_{reco} - MET_{gen})/MET_{gen}' />
 		<titleY v='normalized to unit area' />
 		<savefolder v='analysis' />
 		<maxX v="6"/>
 		<minX v="-1.05" />
-	</hist>
+	</canv>
 
-	<hist name='var_norm_dPhiMuJ12' input='analyzeisolationMET/var_norm_DeltaPhiMuonJet12'>
-		<var name="QCD(#mu enriched)" source='file:qcd' color='2' />
-		<var name='top' source='file:top' color='4' />
-		<var name='wjets' source='file:wjets' color='8' />
+	<canv name='hist_norm_dPhiMuJ12' input='analyzeisolationMET/hist_norm_DeltaPhiMuonJet12'>
+		<hist name="QCD(#mu enriched)" source='file:qcd' color='2' />
+		<hist name='top' source='file:top' color='4' />
+		<hist name='wjets' source='file:wjets' color='8' />
 		<titleX v='\Delta\phi(\mu, jet 1) + \Delta\phi(\mu, jet 2)' />
 		<titleY v='normalized to unit area' />
 		<!--			<logY v='1' />-->
 		<savefolder v='analysis' />
 		<!--		<legend posX='40' />-->
-	</hist>
+	</canv>
 
-	<hist name='corr_DphiMuJ1J2VScalo_qcd' input='analyzeisolationMET/corr_DeltaPhiMuonJet12VScalo'>
+	<canv name='corr_DphiMuJ1J2VScalo_qcd' input='analyzeisolationMET/corr_DeltaPhiMuonJet12VScalo'>
 		<!-- name is also used for legend -->
-		<var name='wjets' source='file:qcd' color='2' />
+		<hist name='wjets' source='file:qcd' color='2' />
 		<titleY v='E_{T}^{weighted} [GeV]' />
 		<titleX v='\Delta\phi(\mu, jet 1) + \Delta\phi(\mu, jet 2)' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
 		<legend />
-	</hist>
+	</canv>
 
-	<hist name='corr_DphiMuJ1J2VStrack_qcd' input='analyzeisolationMET/corr_DeltaPhiMuonJet12VStrack'>
+	<canv name='corr_DphiMuJ1J2VStrack_qcd' input='analyzeisolationMET/corr_DeltaPhiMuonJet12VStrack'>
 		<!-- name is also used for legend -->
-		<var name='wjets' source='file:qcd' color='2' />
+		<hist name='wjets' source='file:qcd' color='2' />
 		<titleY v='#Sigma_{\Delta R 0.3} p_{T}(track)[GeV]' />
 		<titleX v='\Delta\phi(\mu, jet 1) + \Delta\phi(\mu, jet 2)' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
 		<legend />
-	</hist>
+	</canv>
 
-	<hist name='corr_DphiMuJ1J2VSjetIso_qcd' input='analyzeisolationMET/corr_DeltaPhiMuonJet12VSjetiso'>
+	<canv name='corr_DphiMuJ1J2VSjetIso_qcd' input='analyzeisolationMET/corr_DeltaPhiMuonJet12VSjetiso'>
 		<!-- name is also used for legend -->
-		<var name='wjets' source='file:qcd' color='2' />
+		<hist name='wjets' source='file:qcd' color='2' />
 		<titleY v='distance to closest jet' />
 		<titleX v='\Delta\phi(\mu, jet 1) + \Delta\phi(\mu, jet 2)' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
 		<maxY v="1"/>
 		<legend />
-	</hist>
+	</canv>
 
-	<hist name='var_norm_dPhiMETMu' input='analyzeisolationMET/var_norm_deltaPhiMetleadingMuon'>
-		<var name="QCD(#mu enriched)" source='file:qcd' color='2' />
-		<var name='top' source='file:top' color='4' />
-		<var name='wjets' source='file:wjets' color='8' />
+	<canv name='hist_norm_dPhiMETMu' input='analyzeisolationMET/hist_norm_deltaPhiMetleadingMuon'>
+		<hist name="QCD(#mu enriched)" source='file:qcd' color='2' />
+		<hist name='top' source='file:top' color='4' />
+		<hist name='wjets' source='file:wjets' color='8' />
 		<titleX v='\Delta\phi(MET, \mu)' />
 		<titleY v='normalized to unit area' />
 		<!--			<logY v='1' />-->
 		<savefolder v='analysis' />
 		<!--		<legend posX='40' />-->
-	</hist>
+	</canv>
 
-	<hist name='corr_dPhiMETMuVScalo_qcd' input='analyzeisolationMET/corr_deltaPhiMetleadingMuonVScalo'>
+	<canv name='corr_dPhiMETMuVScalo_qcd' input='analyzeisolationMET/corr_deltaPhiMetleadingMuonVScalo'>
 		<!-- name is also used for legend -->
-		<var name='wjets' source='file:qcd' color='2' />
+		<hist name='wjets' source='file:qcd' color='2' />
 		<titleY v='E_{T}^{weighted} [GeV]' />
 		<titleX v='\Delta\phi(missing E_T, muon)' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
 		<legend />
-	</hist>
+	</canv>
 
-	<hist name='corr_dPhiMETMuVStrack_qcd' input='analyzeisolationMET/corr_deltaPhiMetleadingMuonVStrack'>
+	<canv name='corr_dPhiMETMuVStrack_qcd' input='analyzeisolationMET/corr_deltaPhiMetleadingMuonVStrack'>
 		<!-- name is also used for legend -->
-		<var name='wjets' source='file:qcd' color='2' />
+		<hist name='wjets' source='file:qcd' color='2' />
 		<titleY v='#Sigma_{\Delta R 0.3} p_{T}(track)[GeV]' />
 		<titleX v='\Delta\phi(missing E_T, muon)' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
 		<legend />
-	</hist>
+	</canv>
 
-	<hist name='corr_dPhiMETMuVSjetIso_qcd' input='analyzeisolationMET/corr_deltaPhiMetleadingMuonVSjetiso'>
+	<canv name='corr_dPhiMETMuVSjetIso_qcd' input='analyzeisolationMET/corr_deltaPhiMetleadingMuonVSjetiso'>
 		<!-- name is also used for legend -->
-		<var name='wjets' source='file:qcd' color='2' />
+		<hist name='wjets' source='file:qcd' color='2' />
 		<titleY v='distance to closest jet' />
 		<titleX v='\Delta\phi(MET, \mu)' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
 		<maxY v="1"/>
 		<legend />
-	</hist>
+	</canv>
 
 
 
-	<hist name='norm_MET' input='analyzeisolationMET/var_norm_MET'>
+	<canv name='norm_MET' input='analyzeisolationMET/hist_norm_MET'>
 		<!-- name is also used for legend -->
-		<var name='QCD(#mu enriched)' source='file:qcd' color='2' />
-		<var name='top' source='file:top' color='4' draw='0' />
-		<var name='wjets' source='file:wjets' color='8' draw='0' />
-		<var name='signal' source='var:top,var:wjets' operation='add' color='4'
+		<hist name='QCD(#mu enriched)' source='file:qcd' color='2' />
+		<hist name='top' source='file:top' color='4' draw='0' />
+		<hist name='wjets' source='file:wjets' color='8' draw='0' />
+		<hist name='signal' source='hist:top,hist:wjets' operation='add' color='4'
 			norm='Integral' size="3" />
 		<titleX v='MET [GeV]' />
 		<titleY v='normalized to unit area' />
 		<savefolder v='analysis' />
 		<legend posX="35" sizeX="50" sizeY="20" />
-	</hist>
+	</canv>
 
-	<hist name='corr_METVStrack_qcd' input='analyzeisolationMET/corr_METVStrack'>
-		<var name='wjets' source='file:qcd' color='2' />
+	<canv name='corr_METVStrack_qcd' input='analyzeisolationMET/corr_METVStrack'>
+		<hist name='wjets' source='file:qcd' color='2' />
 		<titleY v='#Sigma_{\Delta R 0.3} p_{T}(track) [GeV]' />
 		<titleX v='\Delta\phi(MET, \mu)' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
 		<legend />
-	</hist>
+	</canv>
 
-	<hist name='corr_METVScalo_qcd' input='analyzeisolationMET/corr_METVScalo'>
-		<var name='wjets' source='file:qcd' color='2' />
+	<canv name='corr_METVScalo_qcd' input='analyzeisolationMET/corr_METVScalo'>
+		<hist name='wjets' source='file:qcd' color='2' />
 		<titleY v='E_{T}^{weighted} GeV]' />
 		<titleX v='\Delta\phi(missing E_T, muon)' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
 		<legend />
-	</hist>
+	</canv>
 
-	<hist name='corr_METVSjetiso_qcd' input='analyzeisolationMET/corr_METVSjetiso'>
+	<canv name='corr_METVSjetiso_qcd' input='analyzeisolationMET/corr_METVSjetiso'>
 		<!-- name is also used for legend -->
-		<var name='wjets' source='file:qcd' color='2' />
+		<hist name='wjets' source='file:qcd' color='2' />
 		<titleY v='distance to closest jet' />
 		<titleX v='\Delta\phi(missing E_T, muon)' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
 		<maxY v="1"/>
 		<legend />
-	</hist>
+	</canv>
 
-	<hist name='var_norm_Circ' input='analyzeEventShapeMuon/shp_cir'>
-		<var name="QCD(#mu enriched)" source='file:qcd' color='2' norm='Integral' />
-		<var name='top' source='file:top' color='4' norm='Integral' />
-		<var name='wjets' source='file:wjets' color='8' norm='Integral' />
+	<canv name='hist_norm_Circ' input='analyzeEventShapeMuon/shp_cir'>
+		<hist name="QCD(#mu enriched)" source='file:qcd' color='2' norm='Integral' />
+		<hist name='top' source='file:top' color='4' norm='Integral' />
+		<hist name='wjets' source='file:wjets' color='8' norm='Integral' />
 		<titleX v='circularity' />
 		<titleY v='normalized to unit area' />
 		<savefolder v='analysis' />
 		<!--		<legend posX='20' />-->
-	</hist>
+	</canv>
 
-	<hist name='corr_circVScalo_qcd' input='analyzeisolationMET/corr_circularityVScalo'>
+	<canv name='corr_circVScalo_qcd' input='analyzeisolationMET/corr_circularityVScalo'>
 		<!-- name is also used for legend -->
-		<var name="QCD(#mu enriched)" source='file:qcd20' color='2' />
+		<hist name="QCD(#mu enriched)" source='file:qcd20' color='2' />
 		<titleY v='E_{T}^{weighted} [GeV]' />
 		<titleX v='circularity' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
 		<legend />
-	</hist>
+	</canv>
 
-	<hist name='corr_circVStrack_qcd' input='analyzeisolationMET/corr_circularityVStrack'>
+	<canv name='corr_circVStrack_qcd' input='analyzeisolationMET/corr_circularityVStrack'>
 		<!-- name is also used for legend -->
-		<var name="QCD(#mu enriched)" source='file:qcd20' color='2' />
+		<hist name="QCD(#mu enriched)" source='file:qcd20' color='2' />
 		<titleY v='#Sigma_{\Delta R 0.3} p_{T}(track)[GeV]' />
 		<titleX v='circularity' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
 		<legend />
-	</hist>
+	</canv>
 
-	<hist name='corr_circVSjetiso_qcd' input='analyzeisolationMET/corr_circularityVSjetiso'>
+	<canv name='corr_circVSjetiso_qcd' input='analyzeisolationMET/corr_circularityVSjetiso'>
 		<!-- name is also used for legend -->
-		<var name="QCD(#mu enriched)" source='file:qcd20' color='2' />
+		<hist name="QCD(#mu enriched)" source='file:qcd20' color='2' />
 		<titleY v='distance to closest jet' />
 		<titleX v='circularity' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
 <!--		<maxY v="1"/>-->
 		<legend />
-	</hist>
+	</canv>
 
-	<hist name='corr_muonPtVScalo_qcd' input='analyzeisolationMET/corr_muon_ptVScalo'>
+	<canv name='corr_muonPtVScalo_qcd' input='analyzeisolationMET/corr_muon_ptVScalo'>
 		<!-- name is also used for legend -->
-		<var name="QCD(#mu enriched)" source='file:qcd20' color='2' />
+		<hist name="QCD(#mu enriched)" source='file:qcd20' color='2' />
 		<titleY v='E_{T}^{weighted}  [GeV]' />
 		<titleX v='p_{T}(#mu) [GeV]' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
 		<legend />
-	</hist>
+	</canv>
 
-	<hist name='corr_muonPtVStrack_qcd' input='analyzeisolationMET/corr_muon_ptVStrack'>
+	<canv name='corr_muonPtVStrack_qcd' input='analyzeisolationMET/corr_muon_ptVStrack'>
 		<!-- name is also used for legend -->
-		<var name="QCD(#mu enriched)" source='file:qcd20' color='2' />
+		<hist name="QCD(#mu enriched)" source='file:qcd20' color='2' />
 		<titleY v='#Sigma_{\Delta R 0.3} p_{T}(track) [GeV]' />
 		<titleX v='p_{T}(#mu) [GeV]' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
 		<legend />
-	</hist>
+	</canv>
 
-	<hist name='corr_muonPtVSjetiso_qcd' input='analyzeisolationMET/corr_muon_ptVSjetiso'>
+	<canv name='corr_muonPtVSjetiso_qcd' input='analyzeisolationMET/corr_muon_ptVSjetiso'>
 		<!-- name is also used for legend -->
-		<var name="QCD(#mu enriched)" source='file:qcd20' color='2' />
+		<hist name="QCD(#mu enriched)" source='file:qcd20' color='2' />
 		<titleY v='distance to closest jet' />
 		<titleX v='p_{T}(#mu) [GeV]' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
 		<maxY v="1"/>
 		<legend />
-	</hist>
+	</canv>
 	<!-- CorrelationPlots QCD -->
-	<hist name='sumPhiMuJ1J2vsDphiJ1J2_qcd' input='analyzeisolationMET/var_dPhiSumMuTwoJestvsdPhij1j2'>
+	<canv name='sumPhiMuJ1J2vsDphiJ1J2_qcd' input='analyzeisolationMET/hist_dPhiSumMuTwoJestvsdPhij1j2'>
 		<!-- name is also used for legend -->
-		<var name="QCD(#mu enriched)" source='file:qcd20' color='2' />
+		<hist name="QCD(#mu enriched)" source='file:qcd20' color='2' />
 		<titleY v='\Delta\phi(jet 1, jet 2) ' />
 		<titleX v='\Delta\phi(\mu, jet 1) + \Delta\phi(\mu, jet 2)' />
 		<drawOption v="COLZ" />
@@ -291,43 +291,43 @@
 		<maxY v='3.2' />
 		<minY v='-3.2' />
 		<legend />
-	</hist>
+	</canv>
 
-	<hist name='corr_MVAdiscVScalo_qcd' input='analyzeisolationMET/corr_MVAdiscVScalo'>
+	<canv name='corr_MVAdiscVScalo_qcd' input='analyzeisolationMET/corr_MVAdiscVScalo'>
 		<!-- name is also used for legend -->
-		<var name="QCD(#mu enriched)" source='file:qcd' color='2' />
+		<hist name="QCD(#mu enriched)" source='file:qcd' color='2' />
 		<titleY v='E_{T}^{weighted}  [GeV]' />
 		<titleX v='d_{MVA}' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
 		<legend />
-	</hist>
+	</canv>
 
-	<hist name='corr_MVAdiscVSjetIso_qcd' input='analyzeisolationMET/corr_MVAdiscVSjetiso'>
+	<canv name='corr_MVAdiscVSjetIso_qcd' input='analyzeisolationMET/corr_MVAdiscVSjetiso'>
 		<!-- name is also used for legend -->
-		<var name="QCD(#mu enriched)" source='file:qcd' color='2' />
+		<hist name="QCD(#mu enriched)" source='file:qcd' color='2' />
 		<titleY v='\Delta R to closest jet' />
 		<titleX v='d_{MVA}' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
 		<maxY v="1"/>
 		<legend />
-	</hist>
+	</canv>
 
-	<hist name='corr_MVAdiscVStrack_qcd' input='analyzeisolationMET/corr_MVAdiscVStrack'>
+	<canv name='corr_MVAdiscVStrack_qcd' input='analyzeisolationMET/corr_MVAdiscVStrack'>
 		<!-- name is also used for legend -->
-		<var name="QCD(#mu enriched)" source='file:qcd' color='2' />
+		<hist name="QCD(#mu enriched)" source='file:qcd' color='2' />
 		<titleY v='#Sigma_{\Delta R 0.3} p_{T}(track) [GeV]' />
 		<titleX v='d_{MVA}' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
 		<legend />
-	</hist>
+	</canv>
 
 	<!-- CorrelationPlots top -->
-	<hist name='sumPhiMuJ1J2vsDphiJ1J2_top' input='analyzeisolationMET/var_dPhiSumMuTwoJestvsdPhij1j2'>
+	<canv name='sumPhiMuJ1J2vsDphiJ1J2_top' input='analyzeisolationMET/hist_dPhiSumMuTwoJestvsdPhij1j2'>
 		<!-- name is also used for legend -->
-		<var name='top' source='file:top20' color='2' />
+		<hist name='top' source='file:top20' color='2' />
 		<titleY v='\Delta\phi(jet 1, jet 2) ' />
 		<titleX v='\Delta\phi(\mu, jet 1) + \Delta\phi(\mu, jet 2)' />
 		<drawOption v="COLZ" />
@@ -337,43 +337,43 @@
 		<maxY v='3.2' />
 		<minY v='-3.2' />
 		<legend />
-	</hist>
+	</canv>
 
-	<hist name='corr_MVAdiscVScalo_top' input='analyzeisolationMET/corr_MVAdiscVScalo'>
+	<canv name='corr_MVAdiscVScalo_top' input='analyzeisolationMET/corr_MVAdiscVScalo'>
 		<!-- name is also used for legend -->
-		<var name='top' source='file:top' color='2' />
+		<hist name='top' source='file:top' color='2' />
 		<titleY v='E_{T}^{weighted}  [GeV]' />
 		<titleX v='d_{MVA}' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
 		<legend />
-	</hist>
+	</canv>
 
-	<hist name='corr_MVAdiscVSjetIso_top' input='analyzeisolationMET/corr_MVAdiscVSjetiso'>
+	<canv name='corr_MVAdiscVSjetIso_top' input='analyzeisolationMET/corr_MVAdiscVSjetiso'>
 		<!-- name is also used for legend -->
-		<var name='top' source='file:top' color='2' />
+		<hist name='top' source='file:top' color='2' />
 		<titleY v='\Delta R to closest jet' />
 		<titleX v='d_{MVA}' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
 		<maxY v="1"/>
 		<legend />
-	</hist>
+	</canv>
 
-	<hist name='corr_MVAdiscVStrack_top' input='analyzeisolationMET/corr_MVAdiscVStrack'>
+	<canv name='corr_MVAdiscVStrack_top' input='analyzeisolationMET/corr_MVAdiscVStrack'>
 		<!-- name is also used for legend -->
-		<var name='top' source='file:top' color='2' />
+		<hist name='top' source='file:top' color='2' />
 		<titleY v='#Sigma_{\Delta R 0.3} p_{T}(track) [GeV]' />
 		<titleX v='d_{MVA}' />
 		<drawOption v="COLZ" />
 		<savefolder v='corr' />
 		<legend />
-	</hist>
+	</canv>
 
 	<!-- CorrelationPlots wjets -->
-	<hist name='sumPhiMuJ1J2vsDphiJ1J2_wjets' input='analyzeisolationMET/var_dPhiSumMuTwoJestvsdPhij1j2'>
+	<canv name='sumPhiMuJ1J2vsDphiJ1J2_wjets' input='analyzeisolationMET/hist_dPhiSumMuTwoJestvsdPhij1j2'>
 		<!-- name is also used for legend -->
-		<var name='wjets' source='file:wjets20' color='2' />
+		<hist name='wjets' source='file:wjets20' color='2' />
 		<titleY v='\Delta\phi(jet 1, jet 2) ' />
 		<titleX v='\Delta\phi(\mu, jet 1) + \Delta\phi(\mu, jet 2)' />
 		<drawOption v="COLZ" />
@@ -383,99 +383,99 @@
 		<maxY v='3.2' />
 		<minY v='-3.2' />
 		<legend />
-	</hist>
+	</canv>
 
-	<!--	10 other vars-->
-	<hist name='norm_sumEtJet3Jet4' input='analyzeisolationMET/var_norm_JetEtSum34'>
-		<var name='QCD(#mu enriched)' source='file:qcd' color='2' />
-		<var name='top' source='file:top' color='4' />
-		<var name='wjets' source='file:wjets' color='8' />
+	<!--	10 other hists-->
+	<canv name='norm_sumEtJet3Jet4' input='analyzeisolationMET/hist_norm_JetEtSum34'>
+		<hist name='QCD(#mu enriched)' source='file:qcd' color='2' />
+		<hist name='top' source='file:top' color='4' />
+		<hist name='wjets' source='file:wjets' color='8' />
 		<titleX v='E_{T}(jet3) + E_{T}(jet4) [GeV]' />
 		<titleY v='normalized to unit area' />
 		<savefolder v='notusedMVA' />
-	</hist>
+	</canv>
 	
-	<hist name='norm_MET_3sep' input='analyzeisolationMET/var_norm_MET'>
-		<var name='QCD(#mu enriched)' source='file:qcd' color='2' />
-		<var name='Top(signal)' source='file:top' color='4' />
-		<var name='W+ jets' source='file:wjets' color='8' />
+	<canv name='norm_MET_3sep' input='analyzeisolationMET/hist_norm_MET'>
+		<hist name='QCD(#mu enriched)' source='file:qcd' color='2' />
+		<hist name='Top(signal)' source='file:top' color='4' />
+		<hist name='W+ jets' source='file:wjets' color='8' />
 		<titleX v='MET [GeV]'  />
 		<titleY v='normalized to unit area' />
 		<savefolder v='notusedMVA' />
 		<legend posX="35" sizeX="55" posY="40"></legend>
-	</hist>
+	</canv>
 	
-	<hist name='norm_METtimesJet1' input='analyzeisolationMET/var_norm_METTimesleadingJetEt'>
-		<var name='QCD(#mu enriched)' source='file:qcd' color='2' />
-		<var name='top' source='file:top' color='4' />
-		<var name='wjets' source='file:wjets' color='8' />
+	<canv name='norm_METtimesJet1' input='analyzeisolationMET/hist_norm_METTimesleadingJetEt'>
+		<hist name='QCD(#mu enriched)' source='file:qcd' color='2' />
+		<hist name='top' source='file:top' color='4' />
+		<hist name='wjets' source='file:wjets' color='8' />
 		<titleX v='MET * E_{T}(jet1) [TeV^{~2}]' />
 		<titleY v='normalized to unit area' />
 		<savefolder v='notusedMVA' />
-	</hist>
+	</canv>
 	
-	<hist name='norm_SumJet1Et2timesMuEt' input='analyzeisolationMET/var_norm_SumJet1ET2TimesMuEt'>
-		<var name='QCD(#mu enriched)' source='file:qcd' color='2' />
-		<var name='top' source='file:top' color='4' />
-		<var name='wjets' source='file:wjets' color='8' />
+	<canv name='norm_SumJet1Et2timesMuEt' input='analyzeisolationMET/hist_norm_SumJet1ET2TimesMuEt'>
+		<hist name='QCD(#mu enriched)' source='file:qcd' color='2' />
+		<hist name='top' source='file:top' color='4' />
+		<hist name='wjets' source='file:wjets' color='8' />
 		<titleX v='E_{T}(jet1) + 2*E_{T}(#mu)[GeV]' />
 		<titleY v='normalized to unit area' />
 		<savefolder v='notusedMVA' />
-	</hist>
+	</canv>
 	
-	<hist name='norm_Sum4JetsMuEt' input='analyzeisolationMET/var_norm_Sum4JetsMuEt'>
-		<var name='QCD(#mu enriched)' source='file:qcd' color='2' />
-		<var name='top' source='file:top' color='4' />
-		<var name='wjets' source='file:wjets' color='8' />
+	<canv name='norm_Sum4JetsMuEt' input='analyzeisolationMET/hist_norm_Sum4JetsMuEt'>
+		<hist name='QCD(#mu enriched)' source='file:qcd' color='2' />
+		<hist name='top' source='file:top' color='4' />
+		<hist name='wjets' source='file:wjets' color='8' />
 		<titleX v='#Sigma_{(i &lt; 5)}E_{T}(jet_{i}) + E_{T}(#mu)[GeV]' />
 		<titleY v='normalized to unit area' />
 		<savefolder v='notusedMVA' />
-	</hist>
+	</canv>
 	
-	<hist name='norm_VecSumJetsMu' input='analyzeisolationMET/var_norm_VectorSumJetsMu'>
-		<var name='QCD(#mu enriched)' source='file:qcd' color='2' />
-		<var name='top' source='file:top' color='4' />
-		<var name='wjets' source='file:wjets' color='8' />
+	<canv name='norm_VecSumJetsMu' input='analyzeisolationMET/hist_norm_VectorSumJetsMu'>
+		<hist name='QCD(#mu enriched)' source='file:qcd' color='2' />
+		<hist name='top' source='file:top' color='4' />
+		<hist name='wjets' source='file:wjets' color='8' />
 		<titleX v='|#Sigma \vec{p_{T}}(jets, #mu)| [GeV]' />
 		<titleY v='normalized to unit area' />
 		<savefolder v='notusedMVA' />
-	</hist>
+	</canv>
 	
-	<hist name='norm_dPhiMETJet2' input='analyzeisolationMET/var_norm_deltaPhiMetJet2'>
-		<var name='QCD(#mu enriched)' source='file:qcd' color='2' />
-		<var name='top' source='file:top' color='4' />
-		<var name='wjets' source='file:wjets' color='8' />
+	<canv name='norm_dPhiMETJet2' input='analyzeisolationMET/hist_norm_deltaPhiMetJet2'>
+		<hist name='QCD(#mu enriched)' source='file:qcd' color='2' />
+		<hist name='top' source='file:top' color='4' />
+		<hist name='wjets' source='file:wjets' color='8' />
 		<titleX v='#Delta#phi(MET, jet2)' />
 		<titleY v='normalized to unit area' />
 		<savefolder v='notusedMVA' />
-	</hist>
-	<hist name='norm_sphericity' input='analyzeEventShapeMuon/shp_sph'>
-		<var name='QCD(#mu enriched)' source='file:qcd' color='2' norm="Integral"/>
-		<var name='top' source='file:top' color='4' norm="Integral"/>
-		<var name='wjets' source='file:wjets' color='8' norm="Integral"/>
+	</canv>
+	<canv name='norm_sphericity' input='analyzeEventShapeMuon/shp_sph'>
+		<hist name='QCD(#mu enriched)' source='file:qcd' color='2' norm="Integral"/>
+		<hist name='top' source='file:top' color='4' norm="Integral"/>
+		<hist name='wjets' source='file:wjets' color='8' norm="Integral"/>
 		<titleX v='sphericity' />
 		<titleY v='normalized to unit area' />
 		<savefolder v='notusedMVA' />
-	</hist>
+	</canv>
 	
-	<hist name='norm_aplanarity' input='analyzeEventShapeMuon/shp_apl'>
-		<var name='QCD(#mu enriched)' source='file:qcd' color='2' norm="Integral"/>
-		<var name='Top(signal)' source='file:top' color='4' norm="Integral"/>
-		<var name='W+jets' source='file:wjets' color='8' norm="Integral"/>
+	<canv name='norm_aplanarity' input='analyzeEventShapeMuon/shp_apl'>
+		<hist name='QCD(#mu enriched)' source='file:qcd' color='2' norm="Integral"/>
+		<hist name='Top(signal)' source='file:top' color='4' norm="Integral"/>
+		<hist name='W+jets' source='file:wjets' color='8' norm="Integral"/>
 		<titleX v='aplanarity' />
 		<titleY v='normalized to unit area' />
 		<savefolder v='notusedMVA' />
 		<legend posX="30" posY="30" sizeX="55"></legend>
-	</hist>
+	</canv>
 	
-	<hist name='norm_isotropy' input='analyzeEventShapeMuon/shp_iso'>
-		<var name='QCD(#mu enriched)' source='file:qcd' color='2' norm="Integral"/>
-		<var name='top' source='file:top' color='4' norm="Integral"/>
-		<var name='wjets' source='file:wjets' color='8' norm="Integral"/>
+	<canv name='norm_isotropy' input='analyzeEventShapeMuon/shp_iso'>
+		<hist name='QCD(#mu enriched)' source='file:qcd' color='2' norm="Integral"/>
+		<hist name='top' source='file:top' color='4' norm="Integral"/>
+		<hist name='wjets' source='file:wjets' color='8' norm="Integral"/>
 		<titleX v='isotropy' />
 		<titleY v='normalized to unit area' />
 		<savefolder v='notusedMVA' />
-	</hist>
+	</canv>
 <!--	other not used-->
 
 </HistSetup>

@@ -4,7 +4,7 @@
 	<!-- final steering file -->
 <HistPlotter>
 	<sources>
-		<!-- gets input from 1 histogram -->
+		<!-- gets input from 1 canvogram -->
 		<input name='qcdAll'>
 			<folder name="qcd/jetcut_20/all" />
 		</input>
@@ -70,112 +70,112 @@
 		<file id="macro" name="{$macro}" />
 	</sources>
 	<!--
-		makes the canvas, mixes the histogramms defined in the histSetup summaryFile
+		makes the canvas, mixes the canvogramms defined in the canvSetup summaryFile
 		= ps oder pdf
 	-->
 	<plots create='png' makeSummaryFile='true' summaryFile='inspect.pdf'>
 	<!-- Macro plots -->
-	<hist name='bbs_QCD_MET'>
-			<var name='loose' source='file:macro' input="applied/jetcut_20/all/bkg/bgOverbgs_looseMET" color='2' />
-			<var name='tight' source='file:macro' input ="applied/jetcut_20/all/bkg/bgOverbgs_tightMET" color='4' />
+	<canv name='bbs_QCD_MET'>
+			<hist name='loose' source='file:macro' input="applied/jetcut_20/all/bkg/bgOverbgs_looseMET" color='2' />
+			<hist name='tight' source='file:macro' input ="applied/jetcut_20/all/bkg/bgOverbgs_tightMET" color='4' />
 			<legend posY="40"/>
 			<titleX v='MET [GeV]' />
 			<titleY v='B/(B+S)' />
 			<minY v="0" />
 			<maxY v="1" />
-		</hist>
+		</canv>
 		
-<!--	<hist name='bbs_QCDTight_MET' input='bkg/bgOverbgs_tightMET'>-->
-<!--			<var name='qcd' source='file:macro, input:app20' color='2' />-->
+<!--	<canv name='bbs_QCDTight_MET' input='bkg/bgOverbgs_tightMET'>-->
+<!--			<hist name='qcd' source='file:macro, input:app20' color='2' />-->
 <!--			<titleX v='MET [GeV]' />-->
 <!--			<titleY v='B/(B+S)' />-->
-<!--		</hist>-->
-	<hist name='quality_QCDLoose' input='quality_loose' >
-		<var name='QCD(#mu enriched)' source='file:macro, input:appQCD'  color='2' />
+<!--		</canv>-->
+	<canv name='quality_QCDLoose' input='quality_loose' >
+		<hist name='QCD(#mu enriched)' source='file:macro, input:appQCD'  color='2' />
 		<titleX v='Cut on MET [GeV]' />
 		<titleY v='N_{est}/N_{true}' />
 		<legend posX='20'  posY="0" sizeX="55"/>
 		<maxY v='1.012' />
 		<minY v='1.008' />	
-	</hist>
-	<hist name='quality_SIGLoose' input='quality_loose' >
-		<var name='signal' source='file:macro, input:appSIG'  color='4' />
+	</canv>
+	<canv name='quality_SIGLoose' input='quality_loose' >
+		<hist name='signal' source='file:macro, input:appSIG'  color='4' />
 		<titleX v='Cut on MET [GeV]' />
 		<titleY v='N_{est}/N_{true}' />
 		<legend  posY="70"/>
 		<maxY v='0.2' />
 		<minY v='-0.1' />		
-	</hist>
-	<hist name='quality_QCDTight' input='quality_tight' >
-		<var name='qcd' source='file:macro, input:appQCD'  color='2' />
+	</canv>
+	<canv name='quality_QCDTight' input='quality_tight' >
+		<hist name='qcd' source='file:macro, input:appQCD'  color='2' />
 		<titleX v='Cut on MET [GeV]' />
 		<titleY v='N^{est}_{QCD} /N^{true}_{QCD}' />
 <!--		<legend  posX='50' />-->
 		<maxY v='1.43' />
 		<minY v='0' />		
-	</hist>
-	<hist name='quality_SIGTight' input='quality_tight' >
+	</canv>
+	<canv name='quality_SIGTight' input='quality_tight' >
 		<!-- name is also used for legend -->
-		<var name='signal' source='file:macro, input:appSIG'  color='4' />
+		<hist name='signal' source='file:macro, input:appSIG'  color='4' />
 		<titleX v='Cut on MET [GeV]' />
 		<titleY v='N^{est}_{sig} /N^{true}_{sig}' />
 <!--		<legend  />-->
 		<maxY v='0.2' />
 		<minY v='-0.1' />		
-	</hist>
-	<hist name='masterPlotAll' input='efficiency' >
-		<var name='QCD(#mu enriched)' source='file:macro, input:qcdAll'  color='2' />
-		<var name='Top(signal)' source='file:macro, input:topAll'  color='4' />
-		<var name='W + jets' source='file:macro, input:wjetsAll'  color='8' />
-		<var name='combined' source='file:macro, input:mixedAll'  color='1' />
+	</canv>
+	<canv name='masterPlotAll' input='efficiency' >
+		<hist name='QCD(#mu enriched)' source='file:macro, input:qcdAll'  color='2' />
+		<hist name='Top(signal)' source='file:macro, input:topAll'  color='4' />
+		<hist name='W + jets' source='file:macro, input:wjetsAll'  color='8' />
+		<hist name='combined' source='file:macro, input:mixedAll'  color='1' />
 		<titleX v='MET [GeV]' />
 		<titleY v='isolation efficiency' />
 		<legend posY="25" posX="20" sizeX="50"/>
-	</hist>
+	</canv>
 	
-	<hist name='masterPlotTrk' input='efficiency' >
-		<var name='qcd' source='file:macro, input:qcdTrk'  color='2' />
-		<var name='top' source='file:macro, input:topTrk'  color='4' />
-		<var name='wjets' source='file:macro, input:wjetsTrk'  color='8' />
-		<var name='combined' source='file:macro, input:mixedTrk'  color='3' />
+	<canv name='masterPlotTrk' input='efficiency' >
+		<hist name='qcd' source='file:macro, input:qcdTrk'  color='2' />
+		<hist name='top' source='file:macro, input:topTrk'  color='4' />
+		<hist name='wjets' source='file:macro, input:wjetsTrk'  color='8' />
+		<hist name='combined' source='file:macro, input:mixedTrk'  color='3' />
 		<titleX v='MET [GeV]' />
 		<titleY v='isolation efficiency' />
 		<legend posY="60"/>
-	</hist>
+	</canv>
 	
-	<hist name='eff_MC_qcd' input='efficiency' >
-		<var name='qcd' source='file:macro, input:qcdAll'  color='2' />
+	<canv name='eff_MC_qcd' input='efficiency' >
+		<hist name='qcd' source='file:macro, input:qcdAll'  color='2' />
 		<titleX v='MET [GeV]' />
 		<titleY v='#epsilon_{QCD}^{true}' />
 <!--		<legend posX='50' />-->
-	</hist>
-	<hist name='eff_qcd' input='effvsDiscCut_BG' >
-		<var name='qcd' source='file:macro, input:appQCD'  color='2' />
+	</canv>
+	<canv name='eff_qcd' input='effvsDiscCut_BG' >
+		<hist name='qcd' source='file:macro, input:appQCD'  color='2' />
 		<titleX v='Cut on MET [GeV]' />
 		<titleY v='iso. efficiency' />
 		<max v='0.026' />
 		<min v='0.024' />		
 		<legend  posX='50' />
-	</hist>
+	</canv>
 	
-	<histlist name='quality_cuts_loose' input='test' >
-		<var name='qcd loose' source='file:macro'  color='2' />
+	<canvlist name='quality_cuts_loose' input='test' >
+		<hist name='qcd loose' source='file:macro'  color='2' />
 		<titleX v='jet E_{T} cut [GeV]' />
 		<titleY v='N_{est}/N_{true}' />
 <!--		<max v='1.008' />-->
 <!--		<min v='0.997' />-->
 		<legend  posX='50' />
-	</histlist>
+	</canvlist>
 	<!-- Cut plots -->
-	<hist name='quality_QCDLoose_cuts' input='quality_loose' >
-		<var name='jetCut 20' source='file:macro, input:appQCD' type='marker' color='2' style='20'/>
-		<var name='jetCut 25' source='file:macro, input:appQCD25' type='marker' color='4' style='21' />
-		<var name='jetCut 30' source='file:macro, input:appQCD30' type='marker' color='6' style='22' />
-		<var name='jetCut 35' source='file:macro, input:appQCD35' type='marker' color='8' style='23'/>
-		<var name='jetCut 40' source='file:macro, input:appQCD40' type='marker' style='27' />
+	<canv name='quality_QCDLoose_cuts' input='quality_loose' >
+		<hist name='jetCut 20' source='file:macro, input:appQCD' type='marker' color='2' style='20'/>
+		<hist name='jetCut 25' source='file:macro, input:appQCD25' type='marker' color='4' style='21' />
+		<hist name='jetCut 30' source='file:macro, input:appQCD30' type='marker' color='6' style='22' />
+		<hist name='jetCut 35' source='file:macro, input:appQCD35' type='marker' color='8' style='23'/>
+		<hist name='jetCut 40' source='file:macro, input:appQCD40' type='marker' style='27' />
 		<titleX v='Cut on MET [GeV]' />
 		<titleY v='N_{est}/N_{true}' />
 		<legend posY='70'/>
-	</hist>
+	</canv>
 	</plots>
 </HistPlotter>

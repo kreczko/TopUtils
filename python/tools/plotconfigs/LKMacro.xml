@@ -4,7 +4,7 @@
 	<!-- final steering file -->
 <HistPlotter>
 	<sources>
-		<!-- gets input from 1 histogram -->
+		<!-- gets input from 1 canvogram -->
 		<input name='qcd20'>
 			<folder name="qcd/jetcut_20" />
 		</input>
@@ -57,201 +57,201 @@
 		</input>
 
 		<file id="macro" name="{$macro}" />
-		<file id="QCD2" name="/playground/rootfiles/FINAL/complete_hists_MM_2QCD.root" />
-		<file id="wjets2" name="/playground/rootfiles/FINAL/complete_hists_MM_2wjet.root" />
-		<file id="top2" name="/playground/rootfiles/FINAL/complete_hists_MM_2wjet.root" />
-		<file id="sig2" name="/playground/rootfiles/FINAL/complete_hists_MM_2sig.root" />
-		<file id="QCD5" name="/playground/rootfiles/FINAL/complete_hists_MM_5QCD.root" />
+		<file id="QCD2" name="/playground/rootfiles/FINAL/complete_canvs_MM_2QCD.root" />
+		<file id="wjets2" name="/playground/rootfiles/FINAL/complete_canvs_MM_2wjet.root" />
+		<file id="top2" name="/playground/rootfiles/FINAL/complete_canvs_MM_2wjet.root" />
+		<file id="sig2" name="/playground/rootfiles/FINAL/complete_canvs_MM_2sig.root" />
+		<file id="QCD5" name="/playground/rootfiles/FINAL/complete_canvs_MM_5QCD.root" />
 	</sources>
 	<plots create='png' makeSummaryFile='true' summaryFile='inspect.pdf'>
 		<!-- Macro plots -->
-		<hist name='NfractionVSMVACut'>
-			<var name='loose' source='file:macro' input="applied/muoncut_20/all/bkg/NvsCutloose"
+		<canv name='NfractionVSMVACut'>
+			<hist name='loose' source='file:macro' input="applied/muoncut_20/all/bkg/NvsCutloose"
 				color='2' />
-			<var name='tight' source='file:macro' input="applied/muoncut_20/all/bkg/NvsCuttight"
+			<hist name='tight' source='file:macro' input="applied/muoncut_20/all/bkg/NvsCuttight"
 				color='4' />
 			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v="N_{QCD}(d_{MVA} &lt; d_{MVA}^{thresh.})/N_{QCD}" />
 			<legend posX="40" posY="30" />
 			<minY v="0" />
-		</hist>
+		</canv>
 
-		<hist name='NfractionVSMVACut_M30'>
-			<var name='loose' source='file:macro' input="applied/muoncut_30/all/bkg/NvsCutloose"
+		<canv name='NfractionVSMVACut_M30'>
+			<hist name='loose' source='file:macro' input="applied/muoncut_30/all/bkg/NvsCutloose"
 				color='2' />
-			<var name='tight' source='file:macro' input="applied/muoncut_30/all/bkg/NvsCuttight"
+			<hist name='tight' source='file:macro' input="applied/muoncut_30/all/bkg/NvsCuttight"
 				color='4' />
 			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v="N_{QCD}(d_{MVA}^{thresh.})/N_{QCD}" />
 			<legend posX="20" posY="60" />
-		</hist>
+		</canv>
 
-		<hist name='NfractionVSMVACut_J40'>
-			<var name='loose' source='file:macro' input="applied/jetcut_40/all/bkg/NvsCutloose"
+		<canv name='NfractionVSMVACut_J40'>
+			<hist name='loose' source='file:macro' input="applied/jetcut_40/all/bkg/NvsCutloose"
 				color='2' />
-			<var name='tight' source='file:macro' input="applied/jetcut_40/all/bkg/NvsCuttight"
+			<hist name='tight' source='file:macro' input="applied/jetcut_40/all/bkg/NvsCuttight"
 				color='4' />
 			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v="N(d_{MVA}^{thresh.})/N_{QCD}" />
 			<legend posX="40" posY="30" />
-		</hist>
+		</canv>
 
-		<hist name='bbs_QCD'>
-			<var name='loose' source='file:macro' input="applied/muoncut_20/all/bkg/bgOverbgs_loose"
+		<canv name='bbs_QCD'>
+			<hist name='loose' source='file:macro' input="applied/muoncut_20/all/bkg/bgOverbgs_loose"
 				color="2" />
-			<var name='tight' source='file:macro' input="applied/muoncut_20/all/bkg/bgOverbgs_tight"
+			<hist name='tight' source='file:macro' input="applied/muoncut_20/all/bkg/bgOverbgs_tight"
 				color="4" />
 			<titleX v='d_{MVA}' />
 			<titleY v='B/(B+S)' />
 			<legend posX="20" posY="30" />
 			<minY v="0" />
-		</hist>
+		</canv>
 
-		<hist name='bbs_QCD5'>
-			<var name='QCD(#mu enriched)' source='file:macro' input="applied/muoncut_20/all/bkg/bgOverbgs_tight"
+		<canv name='bbs_QCD5'>
+			<hist name='QCD(#mu enriched)' source='file:macro' input="applied/muoncut_20/all/bkg/bgOverbgs_tight"
 				 />
 			<!--
-				<var name='tight' source='file:QCD5'
+				<hist name='tight' source='file:QCD5'
 				input="applied/muoncut_20/all/bkg/bgOverbgs_tight"
 			-->
 			<!--				color="2" />-->
-			<var name='tmp1' source='file:QCD5' input="qcd/muoncut_20/all/nVSdiscTight"
+			<hist name='tmp1' source='file:QCD5' input="qcd/muoncut_20/all/nVSdiscTight"
 				draw="0" />
-			<var name='tmp2' source='file:QCD5' input="mixed/muoncut_20/all/nVSdiscTight"
+			<hist name='tmp2' source='file:QCD5' input="mixed/muoncut_20/all/nVSdiscTight"
 				draw="0" />
-			<var name='QCD(#mu enriched) x 5' source='var:tmp1, var:tmp2' operation="div" color="2" />
+			<hist name='QCD(#mu enriched) x 5' source='hist:tmp1, hist:tmp2' operation="div" color="2" />
 			<titleX v='d_{MVA}' />
 			<titleY v='B/(B+S)' />
 			<legend posX="20" posY="10" sizeX="50"/>
 			<minY v="0" />
-		</hist>
+		</canv>
 
-		<hist name='bbs_QCD_J40'>
-			<var name='loose' source='file:macro' input="applied/jetcut_40/all/bkg/bgOverbgs_loose"
+		<canv name='bbs_QCD_J40'>
+			<hist name='loose' source='file:macro' input="applied/jetcut_40/all/bkg/bgOverbgs_loose"
 				color="2" />
-			<var name='tight' source='file:macro' input="applied/jetcut_40/all/bkg/bgOverbgs_tight"
+			<hist name='tight' source='file:macro' input="applied/jetcut_40/all/bkg/bgOverbgs_tight"
 				color="4" />
 			<titleX v='d_{MVA}' />
 			<titleY v='B/(B+S)' />
 			<minY v="0" />
-		</hist>
+		</canv>
 
-		<hist name='bbs_QCD_M30'>
-			<var name='loose' source='file:macro' input="applied/muoncut_30/all/bkg/bgOverbgs_loose"
+		<canv name='bbs_QCD_M30'>
+			<hist name='loose' source='file:macro' input="applied/muoncut_30/all/bkg/bgOverbgs_loose"
 				color="2" />
-			<var name='tight' source='file:macro' input="applied/muoncut_30/all/bkg/bgOverbgs_tight"
+			<hist name='tight' source='file:macro' input="applied/muoncut_30/all/bkg/bgOverbgs_tight"
 				color="4" />
 			<titleX v='d_{MVA}' />
 			<titleY v='B/(B+S)' />
 			<minY v="0" />
-		</hist>
+		</canv>
 		
-		<hist name='quality_QCDLoose' input='bkg/quality_loose'>
-			<var name='QCD(#mu enriched)' source='file:macro, input:app20' color='2' />
+		<canv name='quality_QCDLoose' input='bkg/quality_loose'>
+			<hist name='QCD(#mu enriched)' source='file:macro, input:app20' color='2' />
 			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='N_{est}/N_{true}' />
 			<legend posX='20' sizeX="50" posY="50"/>
 					<maxY v='1.4' />	
 					<minY v='0.9' />		
 			<showErrors v='true' />
-		</hist>
+		</canv>
 		
-		<hist name='quality_QCDTight' input='bkg/quality_tight'>
-			<var name='QCD(#mu enriched)' source='file:macro, input:app20' color='2' />
+		<canv name='quality_QCDTight' input='bkg/quality_tight'>
+			<hist name='QCD(#mu enriched)' source='file:macro, input:app20' color='2' />
 			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='N_{est}/N_{true}' />
 			<legend posX='20' sizeX="50"  posY="74"/>
 			<!--		<maxY v='1.01' />-->
 			<!--		<minY v='1.006' />	-->
 			<showErrors v='true' />
-		</hist>
-		<hist name='quality_QCDLoose_5' input='bkg/quality_loose'>
-			<var name='qcd' source='file:QCD5, input:app20' color='2' />
+		</canv>
+		<canv name='quality_QCDLoose_5' input='bkg/quality_loose'>
+			<hist name='qcd' source='file:QCD5, input:app20' color='2' />
 			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='N_{est}/N_{true}' />
 			<!--		<maxY v='1.01' />-->
 			<!--		<minY v='1.006' />	-->
 			<showErrors v='true' />
-		</hist>
-		<hist name='quality_SIGLoose' input='sig/quality_loose'>
-			<var name='signal' source='file:macro, input:app20' color='4' />
+		</canv>
+		<canv name='quality_SIGLoose' input='sig/quality_loose'>
+			<hist name='signal' source='file:macro, input:app20' color='4' />
 			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='N_{est}/N_{true}' />
 			<legend posX='50' sizeX="30" />
 			<!--		<maxY v='0.2' />-->
 			<!--		<minY v='-0.2' />		-->
 			<showErrors v='true' />
-		</hist>
+		</canv>
 		
-		<hist name='eff_MC_cut' input="applied/jetcut_20/all/bkg/effMC_vs_MVAcut" >
-			<var name='qcd' source="file:macro" color="2"/>
+		<canv name='eff_MC_cut' input="applied/jetcut_20/all/bkg/effMC_vs_MVAcut" >
+			<hist name='qcd' source="file:macro" color="2"/>
 			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='true #epsilon_{QCD}' />
-		</hist>
+		</canv>
 		
-		<hist name='quality_SIGTight' input='sig/quality_tight'>
-			<var name='signal' source='file:macro, input:app20' color='4' />
+		<canv name='quality_SIGTight' input='sig/quality_tight'>
+			<hist name='signal' source='file:macro, input:app20' color='4' />
 			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='N_{est}/N_{true}' />
 			<legend posX='50' sizeX="30" />
 			<!--		<maxY v='0.2' />-->
 			<!--		<minY v='-0.2' />		-->
 			<showErrors v='true' />
-		</hist>
+		</canv>
 
-		<hist name='quality_qcd_eff_5' input='bkg/quality_eff_BG'>
-			<var name='QCD(#mu enriched) x 5'  source='file:QCD5, input:app20' color='2' />
-			<var name='QCD(#mu enriched)' source='file:macro, input:app20' />
+		<canv name='quality_qcd_eff_5' input='bkg/quality_eff_BG'>
+			<hist name='QCD(#mu enriched) x 5'  source='file:QCD5, input:app20' color='2' />
+			<hist name='QCD(#mu enriched)' source='file:macro, input:app20' />
 			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='#epsilon_{QCD, data} / #epsilon_{QCD, true}' />
 			<showErrors v='true' /><legend posX="25" posY="50" sizeX="50"></legend>
-		</hist>
+		</canv>
 		
-		<hist name='quality_qcd_eff_both'>
-		<var name='from data' source='file:macro'
+		<canv name='quality_qcd_eff_both'>
+		<hist name='from data' source='file:macro'
 				input='applied/muoncut_20/all/bkg/effvsDiscCut_BG' />
-			<var name='from simulation' source='file:macro'
+			<hist name='from simulation' source='file:macro'
 				input='applied/muoncut_20/all/bkg/effMC_vs_MVAcut' color='2' />
 			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='#epsilon_{QCD}' />
 			<showErrors v='true' />
 			<legend posX="30" sizeX="60" posY="20" sizeY="30"/>
-		</hist>
-		<hist name='masterPlotAll' input='all/efficiency'>
-			<var name='QCD(#mu enriched)' source='file:macro, input:qcd20' color='2' />
-			<var name='Top(signal)' source='file:macro, input:top20' color='4' />
-			<var name='W+jets' source='file:macro, input:wjets20' color='8' />
-			<var name='combined' source='file:macro, input:mixed20' />
+		</canv>
+		<canv name='masterPlotAll' input='all/efficiency'>
+			<hist name='QCD(#mu enriched)' source='file:macro, input:qcd20' color='2' />
+			<hist name='Top(signal)' source='file:macro, input:top20' color='4' />
+			<hist name='W+jets' source='file:macro, input:wjets20' color='8' />
+			<hist name='combined' source='file:macro, input:mixed20' />
 			<titleX v='d_{MVA}' />
 			<titleY v='isolation efficiency' />
 			<legend  posY="45" posX="50"/>
 			<showErrors v='true' />
-		</hist>
+		</canv>
 
-		<hist name='masterPlotTrk' input='track/efficiency'>
-			<var name='qcd' source='file:macro, input:qcd20' color='2' />
-			<var name='top' source='file:macro, input:top20' color='4' />
-			<var name='wjets' source='file:macro, input:wjets20' color='8' />
-			<var name='combined' source='file:macro, input:mixed20'
+		<canv name='masterPlotTrk' input='track/efficiency'>
+			<hist name='qcd' source='file:macro, input:qcd20' color='2' />
+			<hist name='top' source='file:macro, input:top20' color='4' />
+			<hist name='wjets' source='file:macro, input:wjets20' color='8' />
+			<hist name='combined' source='file:macro, input:mixed20'
 				color='24' />
 			<titleX v='d_{MVA}' />
 			<titleY v='isolation efficiency' />
 			<legend posY="60" />
 			<showErrors v='true' />
-		</hist>
+		</canv>
 
-		<hist name='eff_MC_qcd' input='all/efficiency'>
-			<var name='qcd' source='file:macro, input:qcd20' color='2' />
+		<canv name='eff_MC_qcd' input='all/efficiency'>
+			<hist name='qcd' source='file:macro, input:qcd20' color='2' />
 			<titleX v='d_{MVA}' />
 			<titleY v='#epsilon_{QCD}^{true}' />
 			<showErrors v='true' />
 			<maxY v="0.026" />
-		</hist>
+		</canv>
 
-		<hist name='eff_MC_qcd_M30'>
-			<var name='from data' source='file:macro'
+		<canv name='eff_MC_qcd_M30'>
+			<hist name='from data' source='file:macro'
 				input='applied/muoncut_30/all/bkg/effvsDiscCut_BG' />
-			<var name='from simulation' source='file:macro'
+			<hist name='from simulation' source='file:macro'
 				input='applied/muoncut_30/all/bkg/effMC_vs_MVAcut' color='2' />
 			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='#epsilon_{QCD}' />
@@ -259,55 +259,55 @@
 			<!--			<maxY v="0.018" />-->
 			<maxY v="0.032" />
 			<legend posX="20" sizeX="60" posY="50"></legend>
-		</hist>
+		</canv>
 
-		<hist name='eff_qcd' input='bkg/effvsDiscCut_BG'>
-			<var name='QCD(#mu enriched)' source='file:macro, input:app20' color='2' />
+		<canv name='eff_qcd' input='bkg/effvsDiscCut_BG'>
+			<hist name='QCD(#mu enriched)' source='file:macro, input:app20' color='2' />
 			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='#epsilon_{QCD}^{est.}' />
 			<!--			<legend posX='50' />-->
 			<showErrors v='true' />
-		</hist>
+		</canv>
 
-		<hist name='eff_qcd5' input='bkg/effvsDiscCut_BG'>
-			<var name='qcd' source='file:QCD5, input:app20' color='2' />
+		<canv name='eff_qcd5' input='bkg/effvsDiscCut_BG'>
+			<hist name='qcd' source='file:QCD5, input:app20' color='2' />
 			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='#epsilon_{QCD}^{est.}' />
 			<!--			<legend posX='50' />-->
 			<showErrors v='true' />
-		</hist>
+		</canv>
 
-				<histlist name='QCD' input='jcuts'>
-					<var name='QCD(#mu enriched)' source='file:macro' color='2' />
+				<canvlist name='QCD' input='jcuts'>
+					<hist name='QCD(#mu enriched)' source='file:macro' color='2' />
 					<titleX v='E_{T}(jet) cut [GeV]' />
 					<titleY v='N_{est}/N_{true}' />
 							<maxY v='1.4' />
 							<minY v='0' />
 					<showErrors v='true' />
 					<legend posX='20' posY="30" />
-				</histlist>
+				</canvlist>
 
-				<histlist name='QCD' input='mcuts'>
-					<var name='QCD(#mu enriched)' source='file:macro' color='2' />
+				<canvlist name='QCD' input='mcuts'>
+					<hist name='QCD(#mu enriched)' source='file:macro' color='2' />
 					<titleX v='p_{T}(#mu) cut [GeV]' />
 					<titleY v='N_{est}/N_{true}' />
 <!--							<maxY v='1.008' />-->
 <!--							<minY v='0.997' />-->
 					<showErrors v='true' />
 					<legend posX='20' />
-				</histlist>
+				</canvlist>
 
 		<!-- Cut plots -->
-		<hist name='quality_QCDLoose_Jcuts' input='bkg/quality_loose'>
-			<var name='E_{T}(jet 1-4) &gt; 20' source='file:macro, input:app20'
+		<canv name='quality_QCDLoose_Jcuts' input='bkg/quality_loose'>
+			<hist name='E_{T}(jet 1-4) &gt; 20' source='file:macro, input:app20'
 				type='marker' color='2' style='20' />
-			<var name='E_{T}(jet 1-4) &gt; 25' source='file:macro, input:app25'
+			<hist name='E_{T}(jet 1-4) &gt; 25' source='file:macro, input:app25'
 				type='marker' color='4' style='21' />
-			<var name='E_{T}(jet 1-4) &gt; 30' source='file:macro, input:app30'
+			<hist name='E_{T}(jet 1-4) &gt; 30' source='file:macro, input:app30'
 				type='marker' color='6' style='22' />
-			<var name='E_{T}(jet 1-4) &gt; 35' source='file:macro, input:app35'
+			<hist name='E_{T}(jet 1-4) &gt; 35' source='file:macro, input:app35'
 				type='marker' color='8' style='23' />
-			<var name='E_{T}(jet 1-4) &gt; 40' source='file:macro, input:app40'
+			<hist name='E_{T}(jet 1-4) &gt; 40' source='file:macro, input:app40'
 				type='marker' style='27' />
 			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='N_{est}/N_{true}' />
@@ -315,70 +315,70 @@
 			<maxY v="2.3" />
 			<!--			<legend posX='20' />-->
 			<legend posX='20' sizeX="40" posY="55" sizeY="40" />
-		</hist>
+		</canv>
 
-		<hist name='bbs_QCDLoose_Jcuts' input='bkg/bgOverbgs_loose'>
-			<var name='E_{T}(jet 1-4) &gt; 20' source='file:macro, input:app20'
+		<canv name='bbs_QCDLoose_Jcuts' input='bkg/bgOverbgs_loose'>
+			<hist name='E_{T}(jet 1-4) &gt; 20' source='file:macro, input:app20'
 				type='marker' color='2' style='20' />
-			<var name='E_{T}(jet 1-4) &gt; 25' source='file:macro, input:app25'
+			<hist name='E_{T}(jet 1-4) &gt; 25' source='file:macro, input:app25'
 				type='marker' color='4' style='21' />
-			<var name='E_{T}(jet 1-4) &gt; 30' source='file:macro, input:app30'
+			<hist name='E_{T}(jet 1-4) &gt; 30' source='file:macro, input:app30'
 				type='marker' color='6' style='22' />
-			<var name='E_{T}(jet 1-4) &gt; 35' source='file:macro, input:app35'
+			<hist name='E_{T}(jet 1-4) &gt; 35' source='file:macro, input:app35'
 				type='marker' color='8' style='23' />
-			<var name='E_{T}(jet 1-4) &gt; 40' source='file:macro, input:app40'
+			<hist name='E_{T}(jet 1-4) &gt; 40' source='file:macro, input:app40'
 				type='marker' style='27' />
 			<titleX v='d_{MVA}' />
 			<titleY v='B/(B+S)' />
 			<!--			<legend posX='20' posY='40' />-->
-		</hist>
+		</canv>
 
-		<hist name='bbs_QCDTight_Jcuts' input='bkg/bgOverbgs_tight'>
-			<var name='E_{T}(jet 1-4) &gt; 20' source='file:macro, input:app20'
+		<canv name='bbs_QCDTight_Jcuts' input='bkg/bgOverbgs_tight'>
+			<hist name='E_{T}(jet 1-4) &gt; 20' source='file:macro, input:app20'
 				type='marker' color='2' style='20' />
-			<var name='E_{T}(jet 1-4) &gt; 25' source='file:macro, input:app25'
+			<hist name='E_{T}(jet 1-4) &gt; 25' source='file:macro, input:app25'
 				type='marker' color='4' style='21' />
-			<var name='E_{T}(jet 1-4) &gt; 30' source='file:macro, input:app30'
+			<hist name='E_{T}(jet 1-4) &gt; 30' source='file:macro, input:app30'
 				type='marker' color='6' style='22' />
-			<var name='E_{T}(jet 1-4) &gt; 35' source='file:macro, input:app35'
+			<hist name='E_{T}(jet 1-4) &gt; 35' source='file:macro, input:app35'
 				type='marker' color='8' style='23' />
-			<var name='E_{T}(jet 1-4) &gt; 40' source='file:macro, input:app40'
+			<hist name='E_{T}(jet 1-4) &gt; 40' source='file:macro, input:app40'
 				type='marker' style='27' />
 			<titleX v='d_{MVA}' />
 			<titleY v='B/(B+S)' />
 <!--			<minY v="0.9" />-->
 <!--			<maxY v="2.3" />-->
 			<!--			<legend posX='70' />-->
-		</hist>
+		</canv>
 
-		<hist name='quality_QCDTight_Jcuts' input='bkg/quality_tight'>
-			<var name='E_{T}(jet 1-4) &gt; 20' source='file:macro, input:app20'
+		<canv name='quality_QCDTight_Jcuts' input='bkg/quality_tight'>
+			<hist name='E_{T}(jet 1-4) &gt; 20' source='file:macro, input:app20'
 				type='marker' color='2' style='20' />
-			<var name='E_{T}(jet 1-4) &gt; 25' source='file:macro, input:app25'
+			<hist name='E_{T}(jet 1-4) &gt; 25' source='file:macro, input:app25'
 				type='marker' color='4' style='21' />
-			<var name='E_{T}(jet 1-4) &gt; 30' source='file:macro, input:app30'
+			<hist name='E_{T}(jet 1-4) &gt; 30' source='file:macro, input:app30'
 				type='marker' color='6' style='22' />
-			<var name='E_{T}(jet 1-4) &gt; 35' source='file:macro, input:app35'
+			<hist name='E_{T}(jet 1-4) &gt; 35' source='file:macro, input:app35'
 				type='marker' color='8' style='23' />
-			<var name='E_{T}(jet 1-4) &gt; 40' source='file:macro, input:app40'
+			<hist name='E_{T}(jet 1-4) &gt; 40' source='file:macro, input:app40'
 				type='marker' style='27' />
 			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='N_{est}/N_{true}' />
 			<minY v="0.9" />
 			<maxY v="2.3" />
 			<legend posX='20' sizeX="40" posY="55" sizeY="40" />
-		</hist>
+		</canv>
 
-		<hist name='quality_QCDLoose_Mcuts' input='bkg/quality_loose'>
-			<var name='p_{T}(#mu) > 20' source='file:macro, input:app20m' type='marker'
+		<canv name='quality_QCDLoose_Mcuts' input='bkg/quality_loose'>
+			<hist name='p_{T}(#mu) > 20' source='file:macro, input:app20m' type='marker'
 				color='2' style='20' />
-			<var name='p_{T}(#mu) > 22.5' source='file:macro, input:app22.5m' type='marker'
+			<hist name='p_{T}(#mu) > 22.5' source='file:macro, input:app22.5m' type='marker'
 				color='4' style='21' />
-			<var name='p_{T}(#mu) > 25' source='file:macro, input:app25m' type='marker'
+			<hist name='p_{T}(#mu) > 25' source='file:macro, input:app25m' type='marker'
 				color='6' style='22' />
-			<var name='p_{T}(#mu) > 27.5' source='file:macro, input:app27.5m' type='marker'
+			<hist name='p_{T}(#mu) > 27.5' source='file:macro, input:app27.5m' type='marker'
 				color='8' style='23' />
-			<var name='p_{T}(#mu) > 30' source='file:macro, input:app30m' type='marker'
+			<hist name='p_{T}(#mu) > 30' source='file:macro, input:app30m' type='marker'
 				style='27' />
 			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='N_{est}/N_{true}' />
@@ -387,18 +387,18 @@
 			<maxY v="3.8" />
 			<legend posX='20' sizeX="40" posY="50" sizeY="40" />
 			<!--			<legend posX='20' sizeX="40" posY="50" />-->
-		</hist>
+		</canv>
 
-		<hist name='quality_QCDTight_Mcuts' input='bkg/quality_tight'>
-			<var name='p_{T}(#mu) > 20' source='file:macro, input:app20m' type='marker'
+		<canv name='quality_QCDTight_Mcuts' input='bkg/quality_tight'>
+			<hist name='p_{T}(#mu) > 20' source='file:macro, input:app20m' type='marker'
 				color='2' style='20' />
-			<var name='p_{T}(#mu) > 22.5' source='file:macro, input:app22.5m' type='marker'
+			<hist name='p_{T}(#mu) > 22.5' source='file:macro, input:app22.5m' type='marker'
 				color='4' style='21' />
-			<var name='p_{T}(#mu) > 25' source='file:macro, input:app25m' type='marker'
+			<hist name='p_{T}(#mu) > 25' source='file:macro, input:app25m' type='marker'
 				color='6' style='22' />
-			<var name='p_{T}(#mu) > 27.5' source='file:macro, input:app27.5m' type='marker'
+			<hist name='p_{T}(#mu) > 27.5' source='file:macro, input:app27.5m' type='marker'
 				color='8' style='23' />
-			<var name='p_{T}(#mu) > 30' source='file:macro, input:app30m' type='marker'
+			<hist name='p_{T}(#mu) > 30' source='file:macro, input:app30m' type='marker'
 				style='27' />
 			<titleX v='d_{MVA}^{thresh.}' />
 			<titleY v='N_{est}/N_{true}' />
@@ -407,55 +407,55 @@
 			<legend posX='20' sizeX="40" posY="50" sizeY="40" />
 			<showErrors v="1" />
 			
-		</hist>
+		</canv>
 
-		<hist name='bbs_QCDLoose_Mcuts' input='bkg/bgOverbgs_loose'>
-			<var name='p_{T}(#mu) > 20' source='file:macro, input:app20m' type='marker'
+		<canv name='bbs_QCDLoose_Mcuts' input='bkg/bgOverbgs_loose'>
+			<hist name='p_{T}(#mu) > 20' source='file:macro, input:app20m' type='marker'
 				color='2' style='20' />
-			<var name='p_{T}(#mu) > 22.5' source='file:macro, input:app22.5m' type='marker'
+			<hist name='p_{T}(#mu) > 22.5' source='file:macro, input:app22.5m' type='marker'
 				color='4' style='21' />
-			<var name='p_{T}(#mu) > 25' source='file:macro, input:app25m' type='marker'
+			<hist name='p_{T}(#mu) > 25' source='file:macro, input:app25m' type='marker'
 				color='6' style='22' />
-			<var name='p_{T}(#mu) > 27.5' source='file:macro, input:app27.5m' type='marker'
+			<hist name='p_{T}(#mu) > 27.5' source='file:macro, input:app27.5m' type='marker'
 				color='8' style='23' />
-			<var name='p_{T}(#mu) > 30' source='file:macro, input:app30m' type='marker'
+			<hist name='p_{T}(#mu) > 30' source='file:macro, input:app30m' type='marker'
 				style='27' />
 			<titleX v='d_{MVA}' />
 			<titleY v='B/(B+S)' />
 			<minY v="0" />
 			<legend posX='20' posY='40'  sizeY="30"/>
-		</hist>
+		</canv>
 
-		<hist name='bbs_QCDTight_Mcuts' input='bkg/bgOverbgs_tight'>
-			<var name='p_{T}(#mu) > 20' source='file:macro, input:app20m' type='marker'
+		<canv name='bbs_QCDTight_Mcuts' input='bkg/bgOverbgs_tight'>
+			<hist name='p_{T}(#mu) > 20' source='file:macro, input:app20m' type='marker'
 				color='2' style='20' />
-			<var name='p_{T}(#mu) > 22.5' source='file:macro, input:app22.5m' type='marker'
+			<hist name='p_{T}(#mu) > 22.5' source='file:macro, input:app22.5m' type='marker'
 				color='4' style='21' />
-			<var name='p_{T}(#mu) > 25' source='file:macro, input:app25m' type='marker'
+			<hist name='p_{T}(#mu) > 25' source='file:macro, input:app25m' type='marker'
 				color='6' style='22' />
-			<var name='p_{T}(#mu) > 27.5' source='file:macro, input:app27.5m' type='marker'
+			<hist name='p_{T}(#mu) > 27.5' source='file:macro, input:app27.5m' type='marker'
 				color='8' style='23' />
-			<var name='p_{T}(#mu) > 30' source='file:macro, input:app30m' type='marker'
+			<hist name='p_{T}(#mu) > 30' source='file:macro, input:app30m' type='marker'
 				style='27' />
 			<titleX v='d_{MVA}' />
 			<titleY v='B/(B+S)' />
 			<legend posX='70'  sizeY="30"/>
-		</hist>
+		</canv>
 		
-<!--		<hist name='QCDTight_McutPerformance' input='bkg/bgOverbgs_tight'>-->
-<!--			<var name='p_{T}(#mu) > 20' source='file:macro, input:app20m' type='marker'-->
+<!--		<canv name='QCDTight_McutPerformance' input='bkg/bgOverbgs_tight'>-->
+<!--			<hist name='p_{T}(#mu) > 20' source='file:macro, input:app20m' type='marker'-->
 <!--				color='2' style='20' />-->
-<!--			<var name='p_{T}(#mu) > 22.5' source='file:macro, input:app22.5m' type='marker'-->
+<!--			<hist name='p_{T}(#mu) > 22.5' source='file:macro, input:app22.5m' type='marker'-->
 <!--				color='4' style='21' />-->
-<!--			<var name='p_{T}(#mu) > 25' source='file:macro, input:app25m' type='marker'-->
+<!--			<hist name='p_{T}(#mu) > 25' source='file:macro, input:app25m' type='marker'-->
 <!--				color='6' style='22' />-->
-<!--			<var name='p_{T}(#mu) > 27.5' source='file:macro, input:app27.5m' type='marker'-->
+<!--			<hist name='p_{T}(#mu) > 27.5' source='file:macro, input:app27.5m' type='marker'-->
 <!--				color='8' style='23' />-->
-<!--			<var name='p_{T}(#mu) > 30' source='file:macro, input:app30m' type='marker'-->
+<!--			<hist name='p_{T}(#mu) > 30' source='file:macro, input:app30m' type='marker'-->
 <!--				style='27' />-->
 <!--			<titleX v='d_{MVA}' />-->
 <!--			<titleY v='B/(B+S)' />-->
 <!--			<legend posX='70'  sizeY="30"/>-->
-<!--		</hist>-->
+<!--		</canv>-->
 	</plots>
 </HistPlotter>
