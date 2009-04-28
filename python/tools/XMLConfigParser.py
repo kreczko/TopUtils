@@ -628,7 +628,7 @@ class Histogram(ConfigObject):
 class HistogramList(ConfigObject):
     rootNodeName = "canvlist"
     doNotParse = ["hist"]
-    mandatoryOptions = ["name", "input"]      
+    mandatoryOptions = ["name", "input", "savefolder"]      
     mandatoryObjects = ["hist"]
     
     def __init__(self):
