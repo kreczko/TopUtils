@@ -3,7 +3,7 @@ import PadService as ps
 import os
 from math import log
 from array import array
-
+import sys
 
 
 class Drawer:
@@ -554,8 +554,13 @@ legend.getOption('sizeY'))
 #    addToSummary = staticmethod(addToSummary)
     def printSummary(pad):
         if Drawer.summaryFile:
-                if Drawer.summaryBegin:
-                    pad.Print(Drawer.summaryFile +"[")
-                else:
-                    pad.Print(Drawer.summaryFile +"]")
+            if Drawer.summaryBegin:
+                pad.Print(Drawer.summaryFile +"[")
+            else:
+                pad.Print(Drawer.summaryFile +"]")
+        if Drawer.summaryFile:
+            print "Summary file '%s' has been created" % Drawer.summaryFile
+                
+            
+                
     printSummary = staticmethod(printSummary)

@@ -22,7 +22,7 @@ class Plotter:
             h = None
             if hist == histlist[-1]:
                 Drawer.summaryBegin = False
-            for var in hist.subobjects["var"]:
+            for var in hist.subobjects["hist"]:
 
                 source = var.getOption("source")
                 if var.getOption('operation') == 'none':

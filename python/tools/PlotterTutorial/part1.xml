@@ -11,6 +11,7 @@
         <canvlist>
         	<!-- defines a histogram source with the name "test". -->
             <hist name="test" source="file:sig" />
+            <savefolder>test</savefolder>
         </canvlist>
     </plots>
 </Plotter>
