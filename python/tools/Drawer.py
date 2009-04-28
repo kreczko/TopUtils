@@ -319,12 +319,8 @@ legend.getOption('sizeY'))
         if not "TH2F" in hist.__str__():
             pad.RedrawAxis();
 
-#            if Drawer.summaryFile:
-#                if Drawer.summaryBegin:
-#                    pad.Print(Drawer.summaryFile +"[")
-#                else:
-#                    pad.Print(Drawer.summaryFile +"]")
             Drawer.printSummary(pad)
+            
             for i in printAs:
                 if i in Drawer.allowedFormats:
                     pad.Print(folder + '/' + filename + '.' + i)
@@ -554,12 +550,11 @@ legend.getOption('sizeY'))
 #    addToSummary = staticmethod(addToSummary)
     def printSummary(pad):
         if Drawer.summaryFile:
-            if Drawer.summaryBegin:
-                pad.Print(Drawer.summaryFile +"[")
-            else:
-                pad.Print(Drawer.summaryFile +"]")
-        if Drawer.summaryFile:
-            print "Summary file '%s' has been created" % Drawer.summaryFile
+                if Drawer.summaryBegin:
+                    pad.Print(Drawer.summaryFile +"[", "Portrait")
+                else:
+                    pad.Print(Drawer.summaryFile +"]")
+        
                 
             
                 
