@@ -1,7 +1,75 @@
-#! /afs/desy.de/products/python/2.5/bin/python
+#! /usr/bin/python2.5
+# /afs/desy.de/products/python/2.5/bin/python
 from TopAnalysis.TopUtils.tools.Plotter import Plotter
 from TopAnalysis.TopUtils.tools.Drawer import Drawer
+#from Plotter import Plotter
+#from Drawer import Drawer
+import os
+import sys
+import getopt
 
-Drawer.setDefaultLayout()
-pl = Plotter("TopAnalysis/TopUtils/python/tools/test/NewConfig.xml")
-pl.savePlots("plots")
+class histPlotter:
+    def __init__(self):
+        self.__files = []
+        self.__cfg = ""
+    
+    def __helpMsg(self):
+        print "\n"
+        print " Synopsis   : histPlotter configfile [file1.root, file2.root, ...]"
+        print " Description: script to draw histograms from a root file  "
+        print "              with customization in a configuration file"
+        print "\n"
+    ##-----------------------------------------------------------------------------------
+##  * Parse command line options
+##  * Do basic check whether the options make sense or not
+##  * Depending on the options execute 'doAll' or 'doJob'
+    def main(self):
+        try:
+            opts, args = getopt.getopt(sys.argv[1:], "h", ["help"])
+        except getopt.error, msg:
+            print msg
+            print "for help use --help"
+            sys.exit(2)
+
+        #for now just one option
+        if opts and opts[0][0] in ("-h", "--help"):
+            self.__helpMsg()
+            sys.exit(0)
+        if args and args[0] and args[0].endswith(".xml"):
+            self.__cfg = args[0]
+        else:
+            #print "First argument has to be a valid XML configuration file."
+            sys.exit("First argument has to be a valid XML configuration file. Exiting script")
+        if len(args) > 1:
+            for i in range(1, len(args)):
+                file = args[i]
+                if file.endswith(".root"):
+                    self.__files.append(file)
+                else:
+                    sys.exit("2nd and following arguments have to be root files. Exiting script")
+                    
+        if not self.__files:
+            p = Plotter(self.__cfg)
+            Drawer.setDefaultLayout()
+#            file = open("plotoutput")
+#            sys.stdout = file
+#            sys.stderr = file
+            p.savePlots("plots")
+#            sys.stdout = sys.__stdout_
+#            sys.stderr = sys.__stderr__
+            print "Thank you and Goodbye"
+#        for o, a in opts:
+#            ################################################
+#            ## get help
+#            ################################################                
+           
+#        else:
+#            print "oO"
+#Drawer.setDefaultLayout()
+#pl = Plotter("TopAnalysis/TopUtils/python/tools/test/NewConfig.xml")
+#pl.savePlots("plots")
+
+
+if __name__ == '__main__':
+    h = histPlotter()
+    h.main()
