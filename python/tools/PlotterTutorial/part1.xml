@@ -11,6 +11,7 @@
         <canvlist>
         	<!-- defines a histogram source with the name "test". -->
             <hist name="test" source="file:sig" />
+            <!-- this will save all histograms in the subfolder "test" -->
             <savefolder>test</savefolder>
         </canvlist>
     </plots>
