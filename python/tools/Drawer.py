@@ -3,7 +3,6 @@ import PadService as ps
 import os
 from math import log
 from array import array
-import sys
 
 
 class Drawer:
@@ -17,6 +16,7 @@ class Drawer:
     summaryBegin = True
     summaryList = []
     summary = None
+    first  = True
     
     def setDefaultLayout():
         gROOT.Reset()
@@ -27,6 +27,8 @@ class Drawer:
         # for white background
         gROOT.SetStyle("Plain")
         gROOT.SetBatch(True)
+        #remove Info in <TPad::Print> (makes the script event faster)
+        gROOT.ProcessLine("gErrorIgnoreLevel = 1001;") 
     setDefaultLayout = staticmethod(setDefaultLayout)
     
     def makePlainLegend(x, y, sizeX, sizeY):
@@ -229,6 +231,7 @@ class Drawer:
 #================================================================================
         
     def saveHistsInOne(histlist, histCfg, savedir, printAs=['eps', 'png']):
+        
         filename = histCfg.getOption('name')        
         folder = savedir +"/" + histCfg.getOption('savefolder')
         logH = [histCfg.getOption('logX'), histCfg.getOption('logY')]
@@ -287,11 +290,6 @@ legend.getOption('sizeY'))
                 elif err and Drawer.drawOption == "":
                     hist.Draw('e')
                 else:
-#                    hist.SetError(array('d', noerr))
-#                    if filename in ['quality_QCDLoose_Jcuts', 'quality_QCDLoose_Mcuts', 'quality_QCDTight_Jcuts', 'quality_QCDTight_Mcuts', 
-#                                    'bbs_QCDLoose_Jcuts', 'bbs_QCDTight_Jcuts', 'bbs_QCDLoose_Mcuts', 'bbs_QCDTight_Mcuts']:
-#                        hist.Draw('HISTP')
-#                    else:
                     hist.Draw()
                 
                 for ds in draws:
@@ -305,11 +303,6 @@ legend.getOption('sizeY'))
                 elif err and histCfg.getOption("drawOption") == "":
                     hist.Draw('samee')
                 else:
-#                    hist.SetError(array('d',noerr))
-#                    if filename in ['quality_QCDLoose_Jcuts', 'quality_QCDLoose_Mcuts', 'quality_QCDTight_Jcuts', 'quality_QCDTight_Mcuts', 
-#                                    'bbs_QCDLoose_Jcuts', 'bbs_QCDTight_Jcuts', 'bbs_QCDLoose_Mcuts', 'bbs_QCDTight_Mcuts']:
-#                        hist.Draw('HISTPsame')
-#                    else:
                     hist.Draw("same")
             gROOT.cd()
             listi.append(hist.Clone())
@@ -320,7 +313,6 @@ legend.getOption('sizeY'))
             pad.RedrawAxis();
 
             Drawer.printSummary(pad)
-            
             for i in printAs:
                 if i in Drawer.allowedFormats:
                     pad.Print(folder + '/' + filename + '.' + i)
@@ -509,53 +501,13 @@ legend.getOption('sizeY'))
         return []
     doSpecial = staticmethod(doSpecial)
     
-#    def drawSummary(folder, filename):
-#        if True:
-#            folder = folder.rstrip("/")
-#            #documentation: http://root.cern.ch/root/html/TPostScript.html
-#            if filename.endswith(".ps"):
-#                ps = TPostScript("%s/%s"%(folder, filename), 111)
-##                ps.Range(16,24);
-#                for hist in Drawer.summaryList:
-#                    ps.NewPage()
-#                    for x in range(0,len(hist[0])):
-#                        if x ==0:
-#                            hist[0][x].Draw()
-#                        else:
-#                            hist[0][x].Draw("same")
-#                    if hist[1]:#legend
-#                        hist[1].Draw()
-#                ps.Close()
-#    drawSummary = staticmethod(drawSummary)
-#    
-#    def createSummary(folder, filename):
-#        folder = folder.rstrip("/")
-##        print "%s/%s"%(folder, filename)
-#        #documentation: http://root.cern.ch/root/html/TPostScript.html
-#        if filename.endswith(".ps"):
-#            Drawer.summary = TPostScript("%s/%s"%(folder, filename), 111)
-#    createSummary = staticmethod(createSummary)
-#    
-#    def addToSummary(pad, histi, legend):
-#        if Drawer.summary:
-#            pad.cd()
-#            for hist in histi:
-#                hist.Draw()
-#            if legend:
-#                legend.Draw()
-#            #Drawer.summary.NewPage()
-#            pad.RedrawAxis();
-#            pad.Draw()
-#            gROOT.cd()
-#    addToSummary = staticmethod(addToSummary)
     def printSummary(pad):
         if Drawer.summaryFile:
-                if Drawer.summaryBegin:
+                if Drawer.summaryBegin and Drawer.first:
                     pad.Print(Drawer.summaryFile +"[", "Portrait")
+                    Drawer.first = False
+                elif Drawer.summaryBegin and not Drawer.first:
+                    pad.Print(Drawer.summaryFile)
                 else:
                     pad.Print(Drawer.summaryFile +"]")
-        
-                
-            
-                
     printSummary = staticmethod(printSummary)
