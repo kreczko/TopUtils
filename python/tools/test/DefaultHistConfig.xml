@@ -33,5 +33,4 @@
 	<!--	they're not empty-->
 	<titleX v='' />
 	<titleY v='events' />
-	<overwriteTitles v='false' />
 </HistSetup>

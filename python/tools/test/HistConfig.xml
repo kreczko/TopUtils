@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <HistSetup>
 	<canv name="effplot">
-		<max v="1" />
-		<min v="0" />
+		<maxY v="1" />
+		<minY v="0" />
 	</canv>
-
-	<canv name="eventplot">
-		<logY v='0' />
-	</canv>		
 </HistSetup>

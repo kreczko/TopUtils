@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <Plotter>
-	<include file='TopAnalysis/TopUtils/python/tools/plotconfigs/HistConfig.xml' />
+	<include file='TopAnalysis/TopUtils/python/tools/test/HistConfig.xml' />
 	<sources>
 		<input name='allMuonPt'>
 			<folder name='analyzeAllMuon'>
