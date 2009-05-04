@@ -22,16 +22,18 @@ defaults = {"plots"  : "test/DefaultPlotConfig.xml",
             "hist"    : "test/DefaultVarConfig.xml"
                 }
 
+## 1= Info, 2 = Warning, 3 = Error. outputlevel = 2 will only display warnings and errors
+outputlevel = 2
 verbose = False
 #===============================================================================
 #    prints a message if the verbose option was used
 #===============================================================================
-def Print(msg):
+def Print(msg, lvl=1):
         """
         prints a message if the verbose option was used
         @param msg: the message to be printed 
         """
-        if verbose:
+        if verbose and outputlevel <= lvl:
             print "======== " + msg + " ========="
             
 class Configuration:
@@ -48,6 +50,7 @@ class Configuration:
         self.inputs = {}
         self.includes = []
         self.plots = None
+        self.setups = {}
         
 #===============================================================================
 #    loads all the data from the XML configuration file
@@ -66,27 +69,53 @@ class Configuration:
             files = Parser.getChildNodes(sources, "file")
             inputs = Parser.getChildNodes(sources, "input")
             plots = Parser.getChildNodes(rootnode, "plots")[0]#only the first <plots> is read
-            includes = Parser.getChildNodes(rootnode, "includes")
+            includes = Parser.getChildNodes(rootnode, "include")
             self.readFiles(files)
             self.readInputs(inputs)
             self.readPlots(plots)
+            self.readIncludes(includes)
+            self.applySetups()
             self.resolveInputs()
         else:
             raise ConfigError, "Error: the configuration file is not valid for the given config type"
-        
+    
+    def applySetups(self):
+        for i in self.getAllCanvas():
+            i = self.applySetup(i)
+            
+    def applySetup(self, canv):
+        setup = canv.getOption("setup")
+        if self.setups.has_key(setup):
+             canv.Merge(self.setups[setup])
+        return canv
+            
+    def mergeSetups(self):
+        for s in self.includes:
+            setups = s.getListOfSetups()
+            #alternative: use self.setups.update()
+            for i in setups.keys():
+                if self.setups.has_key(i):
+                    Print("Warning: Setup %s is defined more than one time." %i, lvl = 2)
+                self.setups[i] = setups[i]
+                
     def resolveInputs(self):
         for hist in self.getPlots().subobjects["canv"]:
             hist.resolveInputs(self.getInputFiles(), self.getInputs())
         for list in self.getPlots().subobjects["canvlist"]:
             list.resolveInputs(self.getInputFiles(), self.getInputs())
             
-        
     def readPlots(self, node):
         self.plots = Plots()
         self.plots.parseFromNode(node)
     
     def getPlots(self):
         return self.plots
+    
+    def getAllCanvas(self):
+        histlist = self.plots.subobjects["canv"]
+        for list in self.plots.subobjects["canvlist"]:
+            histlist.extend(list.subobjects["canv"])
+        return histlist
     
     def readFiles(self, nodelist):
         Print("Reading files...")
@@ -117,11 +146,14 @@ class Configuration:
             include = Include()
             include.parseFromNode(node)
             self.includes.append(include)
+            Print("Including setup file %s" %include.getOption("file"))
+        self.mergeSetups()
     
-    def readSetups(self):
-        if self.includes:
-            for inc in self.includes:
-                pass
+#    def readSetups(self):
+#        if self.includes:
+#            for inc in self.includes:
+#                Print("Including setup file %s" %inc)
+#                self.setups.update(inc.getListOfSetups())
             
     def getInputByName(self, name):
         return self.getInputs()[name]
@@ -206,7 +238,20 @@ class OptionSet:
             """
             for i in options.keys():
                 self.addOption(i, options[i])
+    
+    def getOptions(self):
+        return self.options
+    
+    def Merge(self, opt):
+        if opt:
+            opts = opt.getOptions()
+            for i in opts.keys():
+                if not self.options.has_key(i): #if the option allready exists; no overwriting!
+                    self.addOption(i, opts[i])
+                elif self.options[i] == "" and not self.defaults[i] == opts[i]:
+                    self.setOption(i, opts[i])
                 
+        
     def Copy(self):
         newset = OptionSet()
         newop = {}
@@ -237,10 +282,10 @@ class OptionSet:
             """
             if self.hasOption(option):
                 if self.defaults[option] == value:
-                    print "Warning: given value for '%s' is default value." % option
+                      Print( "Warning: given value for '%s' is default value (%s)." % (option, value), 2)
                 self.options[option] = value
                 if not self.options[option] == self.defaults[option]:
-                    print "Warning: multiple definition of '%s'. Overwriting last value" % option
+                   Print("Warning: multiple definition of '%s'. Overwriting last value" % option, 2)
             else:
                 raise ConfigError, "Error: option %s is not known" % option
 
@@ -286,9 +331,14 @@ class ConfigObject:
         for i in self.mandatoryObjects:
             self.subobjects[i] = []
     
+    def setOptions(self, optionset):
+        self.options.setOptions(optionset.getOptions())
+    
     def setOption(self, option, value):
         self.options.setOption(option, value)
         
+    def getOptions(self):
+        return self.options
     def hasOption(self, option):
         return self.options.hasOption(option)
 
@@ -349,6 +399,9 @@ class ConfigObject:
         obj = ConfigObject(self.rootName)
         obj.options = self.options.Copy()
         return obj
+    
+    def Merge(self, obj):
+        self.options.Merge(obj.getOptions())
                 
     
     
@@ -443,7 +496,7 @@ class Parser:
 #            multiple attributes are already covered by the minidom parser, raising an excpetion
 #===============================================================================
             if name in list.keys():
-                print "Warning: multiple definitions of %s" %name
+                Print("Warning: multiple definitions of %s" %name, 2)
             list[name] = value
         return list
     getListOfAttributes = staticmethod(getListOfAttributes)
@@ -487,8 +540,7 @@ class FileService:
     def exists(filename):
         ret = os.path.exists(filename)
         if not ret:
-            msg = "Error: file %s does not exist." % filename
-            raise IOError, msg
+            raise IOError, "Error: file %s does not exist." % filename
         return ret
     exists = staticmethod(exists)
     
@@ -627,15 +679,17 @@ class Histogram(ConfigObject):
         
 class HistogramList(ConfigObject):
     rootNodeName = "canvlist"
-    doNotParse = ["hist"]
+    doNotParse = ["hist", "legend"]
     mandatoryOptions = ["name", "input", "savefolder"]      
     mandatoryObjects = ["hist"]
+    ALL = "ALL" #keyword for the "for" attribute
     
     def __init__(self):
         ConfigObject.__init__(self, self.rootNodeName, self.doNotParse, 
                               mandatoryObjects = self.mandatoryObjects, 
                               mandatoryOptions= self.mandatoryOptions)
         self.subobjects["canv"] = []
+        self.attributelist = {}
         Print("Creating HistogramList Object")
         #TODO: only vars with file input!
         #additional parameter "for"
@@ -648,18 +702,23 @@ class HistogramList(ConfigObject):
         if not node:
             raise ConfigError, "Cannot parse an empty node"
         root = node.localName 
-        if defaults.has_key(root):
+        if defaults.has_key(root):#if default configuration ist defined
             self.readDefaults(pathToDir + defaults[root])
         atts = Parser.getListOfAttributes(node)
         children = Parser.getAllChildNodes(node)
         for i in atts:
             self.options.addOption(i, atts[i])
         for i in children:
-            if i.localName not in self.doNotParse:
+            if i.localName not in self.doNotParse:#attribute
+                fatt = HistogramList.ALL
+                if Parser.hasAttribute(i, "for"):
+                    fatt = Parser.getAttributeValue(i, "for")
+                if not self.attributelist.has_key(fatt):
+                    self.attributelist[fatt] = OptionSet()
                 if Parser.hasAttribute(i, "v"):#get value from <tag v="value" />
-                    self.options.addOption(i.localName, Parser.getAttributeValue(i, "v"))
+                    self.attributelist[fatt].addOption(i.localName, Parser.getAttributeValue(i, "v"))
                 else:#get value from <tag>value</tag>
-                    self.options.addOption(i.localName, Parser.getText(i))
+                    self.attributelist[fatt].addOption(i.localName, Parser.getText(i))
             else:
                 obj = None
                 if classmap.has_key(i.localName):
@@ -677,7 +736,29 @@ class HistogramList(ConfigObject):
             for obj in self.mandatoryObjects:
                 if not self.subobjects[obj]:
                     raise ConfigError, "Mandatory object '%s' not found" % obj
-
+    
+    def getOptionFor(self, option, fatt):
+        ret = ""
+        if self.attributelist.has_key(fatt) and self.attributelist[fatt].hasOption(option):
+            ret = self.attributelist[fatt].getOption(option)
+        elif self.attributelist.has_key(HistogramList.ALL) and self.attributelist[HistogramList.ALL].hasOption(option):
+            ret = self.attributelist[HistogramList.ALL].getOption(option)
+        return ret
+    
+    def getOptionSetFor(self, name):
+        ret = OptionSet()
+        allOptions = None
+        ownOptions = None
+        if self.attributelist.has_key(HistogramList.ALL):
+            allOptions = self.attributelist[HistogramList.ALL].Copy()
+        if self.attributelist.has_key(name):
+            ownOptions = self.attributelist[name].Copy()
+        #own options have priority over all options
+        ret.Merge(ownOptions)
+        ret.Merge(allOptions)
+        return ret
+        
+        
     def resolveInputs(self, files, inputs):
         Print("Resolving HistogramList inputs")
         input = None
@@ -698,14 +779,22 @@ class HistogramList(ConfigObject):
         content = input.getFilteredContent()
         for i in range(0, len(content)):
             hist = Histogram()
-            hist.readDefaults(pathToDir + defaults["canv"])
+            hist.readDefaults(pathToDir + defaults["canv"])#read only once and use copy() then!
 #            hist.setOption("input", i)
             #TODO: set savefolder
             nameAndFolder = self.getNameAndFolder(content[i])
             hist.setOption("input", nameAndFolder[0])#same hist for all vars
             hist.setOption("name", nameAndFolder[0])
-            hist.setOption("savefolder", self.getOption("savefolder") + "/" + nameAndFolder[1])
-
+            hist = self.applyAttributes(hist)
+            sf = self.getOptionFor("savefolder", nameAndFolder[0]) #savefolder
+#            if self.attributelist.has_key(nameAndFolder[0]) and self.attributelist[nameAndFolder[0]].hasOption("savefolder"):
+#                sf = self.attributelist[nameAndFolder[0]].getOption("savefolder")
+#            elif self.attributelist.has_key(HistogramList.ALL):
+#                sf = self.attributelist[HistogramList.ALL].getOption("savefolder")
+            
+            hist.setOption("savefolder", sf + "/" + nameAndFolder[1])
+            if self.subobjects.has_key("legend"):
+                hist.subobjects["legend"] = self.subobjects["legend"]
             for var in self.subobjects["hist"]:
                 if i ==0:
                     inputtmp = self.getVarInput(var, inputs, self.getOption("input"))
@@ -718,8 +807,16 @@ class HistogramList(ConfigObject):
                     nameAndFoldertmp = self.getNameAndFolder(contenttmp[i])
                     var.setOption("input","f%s%s" %(Input.separator, nameAndFoldertmp[1]))
                 hist.subobjects["hist"].append(var.Copy())
+            
             hist.resolveInputs(files, inputs)
             self.subobjects["canv"].append(hist)
+            
+    def applyAttributes(self, hist):
+            name = hist.getOption("name")
+            opts = self.getOptionSetFor(name)
+            hist.setOptions(opts)
+            return hist
+            
             
     def getNameAndFolder(self, input):
         dirs = input.split("/")
@@ -911,8 +1008,10 @@ class Input(ConfigObject):
     createInput = staticmethod(createInput)
     
 class Include(ConfigObject):
+
     def __init__(self):
         ConfigObject.__init__(self, rootNodeName= "include", doNotParse = [], mandatoryObjects = [], mandatoryOptions = [])
+        self.setups = {}
     
     def parseFromNode(self, node):
         file = ""
@@ -922,3 +1021,16 @@ class Include(ConfigObject):
             file = Parser.getText(node)
         FileService.exists(file)
         self.options.addOption("file", file)
+        
+    def getListOfSetups(self):
+        setups = {}
+        file = self.getOption("file")
+        hists = Parser.getChildNodes(Parser.getDocumentRoot(file), "canv")
+        if not hists:
+            Print('Warning: empty setup file', 2)
+        for i in hists:
+            hist = Histogram()
+            hist.parseFromNode(i)
+            setups[hist.getOption("name")] = hist
+        return setups
+    

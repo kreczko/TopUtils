@@ -11,7 +11,7 @@ XMLConfigParser.pathToDir = ""
 print XMLConfigParser.pathToDir
 ##an how-it-should-be config
 ##both config types should be supported
-testxml = 'test/LocalTestConfig.xml'
+testxml = 'test/NewConfig.xml'
 testxml2 = 'test/TestConfig.xml'
 #---------------------------------------------------------------- a false config
 falsexml = 'test/FalseConfig.xml'
@@ -48,7 +48,6 @@ class TestConfigObject(unittest.TestCase):
         #and options should contain all childNodes, if they are no special objects themselves
         self.assertEqual(self.object.getOption("titleX"), "mva disc.")
         self.assertRaises(ConfigError, self.object.getOption, "Xsjfssdhfwhshdf")
-        print self.object.getOption("name")
         self.assertEqual(self.object.subobjects["hist"][0].getOption("name"), "qcd")
         self.assertEqual(self.object.subobjects["legend"][0].getOption("name"), "plotname")
         
@@ -127,6 +126,12 @@ class TestConfiguration(unittest.TestCase):
         self.assertEqual(obj.getPlots().subobjects["canv"][0].getOption("name"), "mvadisc")
         self.assertEqual(obj.getPlots().subobjects["canv"][0].getVariable("qcd").getOption("type"), "line")
         self.assertEqual(obj.getPlots().subobjects["canv"][0].getVariable("qcd").getOption("source"), ["test/background.root", "trackmafter/mbg_nVSdisc"])
+        self.assertEqual(obj.getPlots().subobjects["canvlist"][0].subobjects['canv'][0].getOption('savefolder'), 'kin/analyzeAllMuon/')
+        for canv in obj.getPlots().subobjects["canvlist"][0].subobjects['canv']:
+            if canv.getOption("name") == "kin_pt":
+                self.assertEqual(canv.getOption("titleX"), "#mu p_{T}")
+        hist0 = obj.getPlots().subobjects['canv'][0]
+        self.assertEqual(hist0.getOption("maxY"), "1")
         
 class TestFileService(unittest.TestCase):
     
@@ -197,7 +202,7 @@ class TestHistogramList(unittest.TestCase):
         self.inputs = obj.inputs
         
     def testOptions(self):
-        self.assertEqual(self.histlist.getOption("savefolder"), "kin")
+        self.assertEqual(self.histlist.getOptionFor("savefolder", "ALL"), "kin")
         self.assertEqual(self.histlist.getOption("name"), "")
     
     def testHists(self):
