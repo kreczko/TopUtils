@@ -54,7 +54,10 @@ class Drawer:
     setLegendStyle = staticmethod(setLegendStyle)
     
     def setHistLabels(hist, titleX, titleY, rotate=False):
+        if not titleX:
+            titleX = hist.GetTitle()
         hist.SetTitle("")
+        
 #        if not  ["TF1", "TGraph"] in hist.__str__() :
         if not 1 in [c in hist.__str__() for c in ["TF1", "TGraph"] ]:
             hist.SetStats(0);
