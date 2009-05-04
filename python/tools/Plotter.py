@@ -1,4 +1,5 @@
 from XMLConfigParser import *
+import XMLConfigParser
 import os
 from ROOT import gROOT, TFile
 from Drawer import Drawer
@@ -87,14 +88,14 @@ class Plotter:
         Drawer.summaryFile = savedir + "/" + summaryFile
 #        if summaryFile != "":
 #            Drawer.createSummary(savedir, summaryFile)
-        histlist = plots.subobjects["canv"]
-#        histlists = plots.subobjects["histlist"]
-        for list in plots.subobjects["canvlist"]:
-            histlist.extend(list.subobjects["canv"])
+        histlist = cfg.getAllCanvas()
         self.doHistList(histlist, savedir, writeAs)
         #Drawer.drawSummary(savedir, "Oo.ps")#
         
 if __name__ == "__main__":
+    XMLConfigParser.pathToDir = ""
     Drawer.setDefaultLayout()
     pl = Plotter("test/NewConfig.xml")
+    print "Saving test configuration"
     pl.savePlots("plots")
+    print "Thanks and GoodBye."
