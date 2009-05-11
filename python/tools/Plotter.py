@@ -44,7 +44,7 @@ class Plotter:
                     if tmp:
                         h = tmp.Clone()
                     else:
-                        sys.exit("Histogram %s not found" % h1)
+                        sys.exit("Histogram %s in file %s not found" % (h1, file))
                     perf[ts[2]].stop()
                 else: #combine histograms with operations
                     integ = 0
@@ -65,7 +65,7 @@ class Plotter:
                         if tmp:
                             h = tmp.Clone()
                         else:
-                            sys.exit("Histogram %s not found" % h1)
+                            sys.exit("Histogram %s in file %s not found" % (h1,varroots[xxx]))
                         if xxx == 0:#load first variable
                             h = tmp.Clone()
                         else:#add or divide by the 2nd variable
