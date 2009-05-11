@@ -1,0 +1,278 @@
+#! /usr/bin/env python
+
+## system imports
+import os
+import sys
+import glob
+import getopt
+
+## configuration
+import TopAnalysis.Configuration.processes as input
+
+##-----------------------------------------------------------------------------------
+## 
+## 
+class topSubmit:
+    ##
+    ## configurables
+    ##
+
+    ## verbose mode
+    __verbose   = False
+    ## path to the config
+    __config     = ''
+    ## list of processes
+    __processes  = ''
+    ## number of events
+    __events     = 'all'
+    ## file service output name     
+    __outputName = ''
+    ## file service subset name
+    __subsetName = ''
+    ## target lumi for event weight (pb)
+    __targetLumi = 0
+    
+    ##
+    ## internal variables
+    ##
+
+    ## version
+    __version   = 'V00-01-00'
+    ## name of the object
+    __name      = 'none'
+
+##-----------------------------------------------------------------------------------    
+##  Constructor
+    def __init__(self):
+        self.__name  = 'topSubmit'
+
+##-----------------------------------------------------------------------------------        
+##  * start sequence
+    def beginJob(self):
+        versionLine = "*                                      "
+        versionLine+= self.__version + " *"              
+        print "**************************************************"
+        print "* starting job submission...                     *"
+        print "*                                                *"
+        print versionLine
+        print "**************************************************"
+ 
+##-----------------------------------------------------------------------------------        
+##  * end sequence
+##  * this may contain the execution of histPlotter or something similar                
+    def endJob(self):
+        print "**************************************************"
+        print "* leaving job submission...                      *"
+        print "*                                                *"
+        print "*                                      Good Bye! *"
+        print "**************************************************"          
+        
+##-----------------------------------------------------------------------------------
+##  * parse command line options
+##  * do basic check whether the options make sense or not
+##  * depending on the options execute ...
+    def main(self):
+        try:
+            opts, args = getopt.getopt(sys.argv[1:],
+                                       'hvp:c:e:o:z:l:',
+                                       ['help','verbose','proc=','cfg=','evts=','out=','sub=','lumi=']
+                                       )
+        except getopt.error, msg:
+            print msg
+            print "for help use --help"
+            sys.exit(2)
+
+        for o, a in opts:
+            ################################################
+            ## get help
+            ################################################                
+            if o in ("-h", "--help"):
+                self.__helpMsg()
+                self.endJob()
+                sys.exit(0)
+            ################################################
+            ## run verbose mode
+            ################################################
+            elif o in ("-v", "--verbose"):
+                self.__verbose = True
+            ################################################                
+            ## list of processes
+            ################################################                
+            elif o in ("-p", "--proc"):
+                self.__processes = a
+            ################################################                
+            ## process configuration file
+            ################################################                
+            elif o in ("-c", "--cfg"):
+                self.__config = a
+            ################################################                
+            ## number of events to be processed
+            ################################################
+            elif o in ("-e", "--evts"):
+                self.__events = a
+            ################################################                
+            ## define output file with process suffix
+            ################################################
+            elif o in ("-o", "--out"):
+                if (not (a == '')):
+                    self.__outputName = a
+            ################################################                
+            ## define subset file with process suffix
+            ################################################
+            elif o in ("-z", "--sub"):
+                if (not (a == '')):
+                    self.__subsetName = a
+            ################################################                
+            ## target lumi for event weight configuration
+            ################################################                                
+            elif o in ("-l", "--lumi"):
+                self.__targetLumi = a                    
+            else:
+                self.__errorMsg()
+                print '* * argument(s) not recognized. See --help for usage'
+                print "**************************************************"
+        ## perform basic checks of the input
+        ## self.__checkOptions()
+        ## run and perform basic monitoring
+        self.__createJobs()
+
+##-----------------------------------------------------------------------------------
+##  * print help message for the use of the ConfigRunner
+    def __helpMsg(self):
+        print "\n"
+        print " Synopsis   : topSubmit [Option] --cfg '...' -p PROC -e EVTS -o OUTPUT     \n"
+        print " Description: wrapper script to run a given job via the NAF batch system on  "
+        print "              a number of prosesses. PROC should be given as comma seperated "
+        print "              list. The script applies the submit script and the confgRunner "
+        print "              script. Specific event numbers may be chosen (the default is   "
+        print "              'all'). Event weights may be applied or not, according to the  "
+        print "              specified lumi, depending on the given options [-l].         \n"
+        print " Options    : -h | --help         [ ]   print this message                   "
+        print "              -v | --verbose      [ ]   run in verbose mode                  "
+        print "              -c | --cfg   ...    [x]   path to config file                  "
+        print "              -p | --proc  ...    [x]   specify process names                "
+        print "              -e | --evts  ...    [x]   specify number of events             "
+        print "              -o | --out   ...    [x]   specify name of output file          "
+        print "              -z | --sub   ...    [ ]   specify name of subset file          "
+        print "              -l | --lumi ...     [ ]   specify target lumi for evt wghts    "           
+        print " [ ] optional                                                                "
+        print " [x] mandatory                                                               "
+        print "\n"
+
+##-----------------------------------------------------------------------------------            
+##  * writes a string to a file (overwriting existing files)
+    def __createJobs(self):
+        ## convert string to vector
+        procList = self.__vectorFromList(self.__processes, ',')
+        ## create a submission script for each process
+        submissionScript = open('tmp_topSubmit.sh', 'w')
+        submissionString = ''
+        ## loop processes
+        for i in range(len(procList)):
+            ## check the availability of the process
+            if (procList[i] in input.source.keys()):
+                ## create submissionString
+                submissionString+= 'submit --cmd \'configRunner --cfg '
+                submissionString+= self.__config
+                submissionString+= ' -p '
+                submissionString+= procList[i]
+                submissionString+= ' -e '
+                if(self.__events == 'all'):
+                    submissionString+= self.__numberOfAllEvents(procList[i]).__str__()
+                else:
+                    submissionString+= self.__events                    
+                submissionString+= ' -o '
+                submissionString+= self.__outputName
+                if(self.__subsetName != ''):
+                    submissionString+= ' -z '
+                    submissionString+= self.__subsetName
+                if(self.__targetLumi != 0 ):
+                    submissionString+= ' -l '
+                    submissionString+= self.__targetLumi                              
+                submissionString+= '\''
+                submissionString+= ' -n '
+                submissionString+= self.__numberOfSubmissionJobs(procList[i]).__str__()
+                submissionString+= ' --name '
+                submissionString+= procList[i]
+                submissionString+= ' -q short'
+                submissionString+= '\n'            
+        ## create submissionScript
+        submissionScript.write(submissionString)
+        submissionScript.close()
+        os.system('chmod a+x tmp_topSubmit.sh')
+
+##-----------------------------------------------------------------------------------            
+##  * writes a string to a file (overwriting existing files)
+    def __writeToFile(self, str, option='a'):
+        name = self.__output+'.py'
+        file = open(name, option)
+        file.write(str)
+        file.close()
+
+##-----------------------------------------------------------------------------------
+##  * return number of all events independend of whether sizes in processes.py 
+##    is switched to blocks or not
+    def __numberOfAllEvents(self, proc):
+        allEvents=0;
+        if (input.sizes[proc]=='blocks'):
+            ## if sizes holds the keyword 'blocks' assume that the block
+            ## names are contained in sources instead of the files names
+            blocks=self.__vectorFromList(input.source[proc], ',')
+            for i in blocks:
+                ## loop all input blocks and add up the events contained
+                ## in there
+                allEvents+=input.sizes[i]
+        else:
+            allEvents+=input.sizes[proc]
+        return allEvents
+
+##-----------------------------------------------------------------------------------
+##  * determine number of jobs for all
+    def __numberOfSubmissionJobs(self, proc):
+        ## maximally allowed number of events per
+        ## submission job
+        evtLimits = [10000, 40000, 100000]
+        ## maximal number of jobs
+        jobLimits = [10, 20]
+        ## get maximal number of events for proc
+        maxEvents = self.__numberOfAllEvents(proc)
+        ## determine the number of jobs
+        numOfJobs = 1
+        for i in range(len(evtLimits)):
+            for j in range(len(jobLimits)):            
+                if((maxEvents-(maxEvents%evtLimits[i]))/evtLimits[i] < jobLimits[j]):
+                    numOfJobs = jobLimits[j]
+                    break
+            if(numOfJobs == jobLimits[j]):
+                break
+        ## for more then 2 Mevts increase the number
+        ## of jobs by 10 successively for 100kevts 
+        ## per job untill the maximal number is met
+        if(maxEvents>(evtLimits[2]*jobLimits[1])):
+            while ( (maxEvents-(maxEvents%evtLimits[2]))/evtLimits[2] > numOfJobs):
+                numOfJobs=numOfJobs+10
+        ## return result
+        return numOfJobs
+
+##-----------------------------------------------------------------------------------
+##  * create a vector from a list of objects in a string separated by an arbitary
+##    deliminator
+    def __vectorFromList(self, list, delim):
+        myBuffer = []
+        myVector = []
+        if delim in list:
+            myBuffer = list.split(delim)
+        else:
+            myBuffer = [list]
+        
+        for a in myBuffer:
+            myVector.append(a)
+            
+        return myVector
+
+##-----------------------------------------------------------------------------------
+if __name__ == '__main__':
+    topsub = topSubmit()
+    topsub.beginJob()
+    topsub.main()
+    topsub.endJob()

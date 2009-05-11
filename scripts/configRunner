@@ -42,6 +42,8 @@ class configRunner:
     __numberOfEvents  = 0
     ## event of events to skip    
     __numberOfSkips   = 0
+    ## target lumi for event weight (pb)
+    __targetLumi      = 0
     ## verbose mode
     __verbose         = False
     ## interactive mode
@@ -52,7 +54,7 @@ class configRunner:
     ##
 
     ## version
-    __version         = 'V00-02-00'
+    __version         = 'V00-03-01'
     ## time in seconds to wait
     __sleeptime       = 10
     ## internal farm parameters
@@ -100,8 +102,8 @@ class configRunner:
     def main(self):
         try:
             opts, args = getopt.getopt(sys.argv[1:],
-                                       'hvic:p:s:e:o:z:d:f:u:',
-                                       ['help','verbose','interactive','cfg=','proc=','skip=','evts=','out=','sub=','dir=','farm=','user=']
+                                       'hvic:p:s:e:l:o:z:d:f:u:',
+                                       ['help','verbose','interactive','cfg=','proc=','skip=','evts=','lumi=','out=','sub=','dir=','farm=','user=']
                                        )
         except getopt.error, msg:
             print msg
@@ -141,11 +143,16 @@ class configRunner:
             ################################################                                
             elif o in ("-e", "--evts"):
                 self.__numberOfEvents = a
+            ################################################
+            ## target lumi for event weight configuration                
+            ################################################                                
+            elif o in ("-l", "--lumi"):
+                self.__targetLumi = a
             ################################################                
             ## number of events to be skipped
             ################################################                                
             elif o in ("-s", "--skip"):
-                self.__numberOfSkips  = int(a)                
+                self.__numberOfSkips  = int(a)                                
             ################################################                
             ## define output file with process suffix
             ################################################
@@ -204,14 +211,21 @@ class configRunner:
         print "              './TopAnalysis/Configuration/python/processes.py';             "
         print "              also user defined replacements are supported. The otuput [-o]  "
         print "              can be specified as \'none\'. When specifying the number of    "
-        print "              events to be processed with -1 all events will be processed  \n"
+        print "              events to be processed with 'all' all events will be processed "
+        print "              The option [-l] allows to re-configure the calculation of event"
+        print "              weights for a specified target lumi. The weights of the given  "
+        print "              process will be calculated automatically. This option needs the"
+        print "              '.TopAnalysis/TopUtils/python/EventWeightPlain_cfi.py' module  "
+        print "              to be present in the process. Per default the re-configuration "
+        print "              of event weights is switched off.                            \n"
         print " Options    : -h | --help         [ ]   print this message                   "
         print "              -v | --verbose      [ ]   run in verbose mode                  "
         print "              -i | --interactive  [ ]   run in interactive mode              "
         print "              -c | --cfg  ...     [x]   specify config file                  "
         print "              -p | --proc ...     [x]   specify physics process              "
         print "              -s | --skip ...     [ ]   specify no of evts to be skipped     "
-        print "              -e | --evts ...     [x]   specify no of evts to be processed   "        
+        print "              -e | --evts ...     [x]   specify no of evts to be processed   "
+        print "              -l | --lumi ...     [ ]   specify target lumi for evt wghts    "                
         print "              -o | --out  ...     [x]   specify name of output file          "
         print "              -z | --sub  ...     [ ]   specify name of subset file          "        
         print "              -d | --dir  ...     [ ]   specify job directory                "
@@ -473,7 +487,6 @@ class configRunner:
         tmp+= "_cfg.py"
         process = cms.ConfigWrapper(self.__config, tmp, proc)
         ## modify source
-        ## process.modifyOption('source', input.source[self.__process])
         process.modifyOption('source', self.__modifiedInput())
         ## modify events
         if (self.__numberOfEvents=='all'):
@@ -507,7 +520,10 @@ class configRunner:
             output+= '_' + proc
             output+= '.root'
             process.modifyOption('output',output)
-
+        ## modify weight option
+        if (not self.__targetLumi == 0):
+            process.modifyOption('lumi', self.__targetLumi)
+        
         ## setup outputLogs
         self.__outputLog = output.__str__().replace('.root', '.out')
         self.__outputErr = output.__str__().replace('.root', '.err')

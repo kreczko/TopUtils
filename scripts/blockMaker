@@ -207,7 +207,7 @@ class blockMaker:
         submissionScript = open(self.__output+'.sh', 'w')
         for i in range(len(blockVector)):
             ## create submissionString
-            submissionString = 'submit --cmd \'ConfigRunner --cfg \'TopAnalysis/TopUtils/test/addEventWeightPlain_cfg.py\' -p '
+            submissionString = 'submit --cmd \'configRunner --cfg \'TopAnalysis/TopUtils/test/addEventWeightPlain_cfg.py\' -p '
             submissionString+= blockVector[i]
             submissionString+= ' -e 9999999 -o None\' -n 1 --name '
             submissionString+= blockVector[i]

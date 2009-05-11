@@ -5,6 +5,9 @@ import sys
 ## timer
 from Timer import Timer
 
+## configuration
+import TopAnalysis.Configuration.processes as input
+
 
 ##-----------------------------------------------------------------------------------
 ## wrapper class for a cfg to python transition
@@ -14,7 +17,8 @@ class ConfigWrapper:
     ## configurables
     ##
     __config       = ''   ## input  config
-    __outputConfig = ''   ## output config
+    __output       = ''   ## output config
+    __process      = ''   ## physics process
     __pathcounter  = 1000 ## counts the number of paths to be changed/added in
                           ## the predefined config file; 1000 leaves room for 
                           ## user defined process paths in the predefined cfg
@@ -23,11 +27,13 @@ class ConfigWrapper:
 ##-----------------------------------------------------------------------------------
 ##  Constructor; options are source, output, event, paths
 ##  these can be changed within a predefined config file
-    def __init__(self, cfg, output, type):
+    def __init__(self, cfg, outputFile, proc):
         ## read input config from source file 
         self.__config = self.readFromFile(cfg)
         ## create output config filename            
-        self.__outputConfig = output
+        self.__output = outputFile
+        ## physics process
+        self.__process= proc
         ## define options
         self._options = {}
         self._options['source'] = ""  ## change source
@@ -36,6 +42,7 @@ class ConfigWrapper:
         self._options['events'] = ""  ## change number of events
         self._options['skips' ] = ""  ## change number of skipped events
         self._options['paths' ] = ""  ## add paths if specified
+        self._options['lumi'  ] = ""  ## configure weights for given lumi
 
 ##-----------------------------------------------------------------------------------        
 ##  * modifies an option
@@ -81,39 +88,78 @@ class ConfigWrapper:
         self.__config += '## automatic parameter replacement \n'
         self.__config += '## \n'
         self.__config += '####################################################### \n'
+        ## the loop over the option keys is repeated to get the replacements in fixed order
         for a in self._options.keys():
-            if a in ('source'):
-                ## modify input files                
+            if (a=='source'):
+            ## modify input files                
                 self.__config += 'process.source.fileNames  = ['
                 self.__config += self._options[a] + ']'
-                self.__config += '\n'                
-            if a in ('events'):
-                ## modify event numbers
+                self.__config += '\n'
+        for a in self._options.keys():                
+            if (a=='events'):
+            ## modify event numbers
                 self.__config += 'process.maxEvents.input   = '
                 self.__config += self._options[a].__str__()
                 self.__config += '\n'
-            if a in ('skips' ):
-                ## modify skip numbers
+        for a in self._options.keys():                                
+            if (a=='skips' ):
+            ## modify skip numbers
                 self.__config += 'process.source.skipEvents = cms.untracked.uint32('
                 self.__config += self._options[a].__str__() + ')'
-                self.__config += '\n'                
-            if a in ('output'):
-                ## modify output file
+                self.__config += '\n'
+        for a in self._options.keys():                                
+            if (a=='output'):
+            ## modify output file
                 if(not self._options[a].lower() == 'none'):
                     self.__config += 'process.TFileService.fileName = \''
                     self.__config += self._options[a] + '\''
                     self.__config += '\n'
-            if a in ('subset'):
-                ## modify subset file
+        for a in self._options.keys():                                    
+            if (a=='subset'):
+            ## modify subset file
                 if(not self._options[a].lower() == ''):
                     self.__config += 'process.out.fileName = \''
                     self.__config += self._options[a] + '\''
-                    self.__config += '\n'                      
-            if a in ('paths' ):
-                ## modify process paths
+                    self.__config += '\n'
+        for a in self._options.keys():                                    
+            if (a=='paths' ):
+            ## modify process paths
                 self.__config += self._options[a]
-                self.__config += '\n'                    
-                
+                self.__config += '\n'
+        for a in self._options.keys():                                
+            if (a=='lumi'  ):
+            ## check according to which module the
+            ## event weights should be re-configured
+                if(not self._options[a] == ''):
+                    self._configureEventWeightPlain(self._options[a])
+
+##-----------------------------------------------------------------------------------
+##  * returns the name of the temporary config file
+    def _configureEventWeightPlain(self, lumi):
+        if(self.__config.find("eventWeight")):
+            self.__config += '\n'
+            self.__config += '####################################################### \n'
+            self.__config += '## \n'
+            self.__config += '## configuration of evt wght (module: EventWeightPlain) \n'
+            self.__config += '## \n'
+            self.__config += '####################################################### \n'
+            ## number of events
+            self.__config += 'process.eventWeight.nevts = '
+            self.__config += input.evts[self.__process].__str__()
+            self.__config += '\n'
+            ## recommended production cross section 
+            self.__config += 'process.eventWeight.xsec  = '
+            self.__config += input.xsec[self.__process].__str__()
+            self.__config += '\n'
+            ## proposed target lumi
+            self.__config += 'process.eventWeight.lumi  = '
+            self.__config += lumi
+            self.__config += '\n'
+            ## potential generator efficiency
+            self.__config += 'process.eventWeight.eff   = '
+            self.__config += input.eff [self.__process].__str__()
+            self.__config += '\n'                        
+
 ##-----------------------------------------------------------------------------------
 ##  * returns the name of the temporary config file
     def returnTempCfg(self, path='.'):
@@ -125,12 +171,12 @@ class ConfigWrapper:
         if (not os.path.exists(path)):
             os.system('mkdir ' + path)
         ## define output path
-        outpath = path + '/' + self.__outputConfig
+        outpath = path + '/' + self.__output
         self.writeToFile(outpath, self.__config)
         return outpath
 
 ##-----------------------------------------------------------------------------------    
-    def endJob(self, type):
-        print 'nothing defined for: ', type
+    def endJob(self, proc):
+        print 'nothing defined for: ', proc
         
     endJob = staticmethod(endJob)
