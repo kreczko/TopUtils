@@ -6,9 +6,8 @@ import unittest
 import XMLConfigParser
 from XMLConfigParser import * 
 
-currentdir = "../../../../"
 XMLConfigParser.verbose = True
-XMLConfigParser.pathToDir = currentdir
+XMLConfigParser.pathToDir = "../../../../"
 print XMLConfigParser.pathToDir
 ##an how-it-should-be config
 ##both config types should be supported
@@ -121,12 +120,12 @@ class TestConfiguration(unittest.TestCase):
     def testloadConfiguration(self):
         obj = Configuration()
         obj.loadConfiguration(testxml)
-        self.assertEqual(obj.getFilenameByID("top"), currentdir + "TopAnalysis/TopUtils/test/signal.root")
+        self.assertEqual(obj.getFilenameByID("top"), XMLConfigParser.pathToDir + "TopAnalysis/TopUtils/test/signal.root")
         self.assertEqual(obj.getInputByName("allMuonPt").subobjects["folder"][0].getOption("name"), "analyzeAllMuon")
         self.assertEqual(obj.getPlots().getOption("summaryFile"), "inspect.pdf")
         self.assertEqual(obj.getPlots().subobjects["canv"][0].getOption("name"), "mvadisc")
         self.assertEqual(obj.getPlots().subobjects["canv"][0].getVariable("qcd").getOption("type"), "line")
-        self.assertEqual(obj.getPlots().subobjects["canv"][0].getVariable("qcd").getOption("source"), [currentdir + "TopAnalysis/TopUtils/test/background.root", "trackmafter/mbg_nVSdisc"])
+        self.assertEqual(obj.getPlots().subobjects["canv"][0].getVariable("qcd").getOption("source"), [XMLConfigParser.pathToDir + "TopAnalysis/TopUtils/test/background.root", "trackmafter/mbg_nVSdisc"])
         self.assertEqual(obj.getPlots().subobjects["canvlist"][0].subobjects['canv'][0].getOption('savefolder'), 'kin/analyzeAllMuon/')
         for canv in obj.getPlots().subobjects["canvlist"][0].subobjects['canv']:
             if canv.getOption("name") == "kin_pt":
@@ -137,7 +136,7 @@ class TestConfiguration(unittest.TestCase):
 class TestFileService(unittest.TestCase):
     
     def testGetFileContent(self):
-        c = FileService.getFileContent(currentdir + "TopAnalysis/TopUtils/test/analyzeMuon.root")
+        c = FileService.getFileContent(XMLConfigParser.pathToDir + "TopAnalysis/TopUtils/test/analyzeMuon.root")
         content = ['analyzeAllMuon/id_muComp', 'analyzeAllMuon/id_muEm',
                    'analyzeAllMuon/id_muEmS9', 'analyzeAllMuon/id_muHad',
                    'analyzeAllMuon/id_muHadS9', 'analyzeAllMuon/id_muHo',
@@ -209,7 +208,7 @@ class TestHistogramList(unittest.TestCase):
     def testHists(self):
         hists = self.histlist.subobjects["canv"]
         self.assertEqual(len(hists), 6)
-        self.assertEqual(len(self.histlist2.subobjects["canv"]), len(FileService.getFileContent(currentdir + "TopAnalysis/TopUtils/test/analyzeMuon.root")))
+        self.assertEqual(len(self.histlist2.subobjects["canv"]), len(FileService.getFileContent(XMLConfigParser.pathToDir + "TopAnalysis/TopUtils/test/analyzeMuon.root")))
         for i in hists:
             self.assertNotEqual(i.getOption("name"), "DEFAULT")
             self.assertNotEqual(i.getOption("savefolder"), "")
@@ -226,6 +225,9 @@ def suite():
     suite.addTest(unittest.makeSuite(TestHistogramList))
     return suite
 
+
+def setCurrentDir(cwd):
+    XMLConfigParser.pathToDir = cwd
 if __name__ == "__main__":
     unittest.TextTestRunner(verbosity=2).run(suite())
 #    obj = ConfigObject("hist", ["var", "legend"])
