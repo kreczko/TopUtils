@@ -3,10 +3,10 @@ import datetime
 import os
 
 class Timer:
-    __name  = 'nothing'
+    __name = 'nothing'
     __start = 0.0
-    __stop  = 0.0
-    
+    __stop = 0.0
+    __secondspassed = 0.0
     def __init__(self):
        self.__name = 'timer'
         
@@ -27,9 +27,11 @@ class Timer:
         #print 'stop'
         t0 = os.times()
         self.__stop = t0[3] + t0[4]
+        self.__secondspassed += self.__stop - self.__start
         
+    "returns a formated time string: h m s"
     def getMeasuredTime(self):
-        t = self.__stop - self.__start
+        t = self.__secondspassed
         h = 0
         m = 0
         s = 0
@@ -49,6 +51,9 @@ class Timer:
         ft =  ft + round(s,2).__str__() + "s"  
         return ft
     
+    def getMeasuredSeconds(self):
+        return self.__secondspassed
+    
     def timePassed(self, osTime):
         t = osTime[3] + osTime[4]
         p = t - self.__start
@@ -56,8 +61,39 @@ class Timer:
     
     def sleep(sleeptime):
         time.sleep(sleeptime)
+        
+    def formatSFnumber(num, upto=100):
+        out = 0
+        tens = 0
+        for i in range(1,100):
+            
+            if (num > 1 and num > 0) or  tens >= upto:
+                out = num
+                break
+            else:
+                num = num *10
+                tens += 1
+        str = '%1.3fd%d' % (out, -tens)
+        return str, tens
     
+    def formatNumPair(num1, num2):
+        out = Timer.formatSFnumber(num1)
+        out1 = out[0]
+        out2 = Timer.formatSFnumber(num2, out[1])[0]
+        return out1, out2
+    
+    def formatErrorPair(num1, num2):
+        out = Timer.formatNumPair(num1, num2)
+        num1 = out[0].split('d')[0]
+        num2 = out[1].split('d')[0]
+        exp = out[0].split('d')[1]
+        str = '($%s \\pm %s$)\\num{d%s}' % (num1, num2, exp)
+        return str
+    
+    formatErrorPair = staticmethod(formatErrorPair)
+    formatNumPair = staticmethod(formatNumPair)
+    formatSFnumber = staticmethod(formatSFnumber)
     getDate = staticmethod(getDate)
     getTime = staticmethod(getTime)
-    sleep   = staticmethod(sleep)
+    sleep = staticmethod(sleep)
     

@@ -1,8 +1,16 @@
 from XMLConfigParser import *
 import XMLConfigParser
-import os
+import os, sys
 from ROOT import gROOT, TFile
 from Drawer import Drawer
+from Timer import Timer
+
+ts = ["readConfig", "drawHists", "readhists", "total"]
+perf = {}
+perf[ts[0]] = Timer()
+perf[ts[1]] = Timer()
+perf[ts[2]] = Timer()
+perf[ts[3]] = Timer()
 
 
 class Plotter:
@@ -29,9 +37,15 @@ class Plotter:
                 if var.getOption('operation') == 'none':
                     file = source[0]
                     h1 = source[1]
+                    perf[ts[2]].start()
                     f = TFile(file)
                     gROOT.cd()
-                    h = f.Get(h1).Clone()
+                    tmp = f.Get(h1)
+                    if tmp:
+                        h = tmp.Clone()
+                    else:
+                        sys.exit("Histogram %s not found" % h1)
+                    perf[ts[2]].stop()
                 else: #combine histograms with operations
                     integ = 0
                     varhists = []
@@ -43,27 +57,33 @@ class Plotter:
                         varhists.append(h1)
                         varroots.append(file)
                     for xxx in range(0, len(varroots)):
+                        perf[ts[2]].start()
                         f = TFile(varroots[xxx])
                         h1 = varhists[xxx]
                         gROOT.cd()
+                        tmp = f.Get(h1)
+                        if tmp:
+                            h = tmp.Clone()
+                        else:
+                            sys.exit("Histogram %s not found" % h1)
                         if xxx == 0:#load first variable
-                            h = f.Get(h1).Clone()
+                            h = tmp.Clone()
                         else:#add or divide by the 2nd variable
                             #TODO: in order to make real math, all variables need to be saved temporaly
                             if var.getOption('operation') == 'add':
-                                h.Add(f.Get(h1))
+                                h.Add(tmp)
                             elif var.getOption('operation') == 'div':
 #                                print h1
 #                                print var.hist
 #                                print h.GetName()
                                 if hist.getOption("showErrors").upper() == "TRUE":
                                     h.Sumw2()
-                                h.Divide(f.Get(h1))
+                                h.Divide(tmp)
 #                                if hist.opt["showErrors"]:
 #                                    h.Sumw2()
                             else:
                                 print 'unknown operation'
-
+                        perf[ts[2]].stop()
 #===============================================================================
 #                once you have the histogram, apply the configuration to it.
 #===============================================================================
@@ -77,9 +97,13 @@ class Plotter:
 #===============================================================================
 #                save all histograms in one file
 #===============================================================================
+            perf[ts[1]].start()
             Drawer.saveHistsInOne(list, hist, savedir, writeAs) 
+            perf[ts[1]].stop()
             
     def savePlots(self,savedir, cfg = "Plotter"):
+        perf[ts[3]].start()
+        perf[ts[0]].start()
         cfg = Configuration(cfg)
         cfg.loadConfiguration(self.config)
         plots = cfg.getPlots()
@@ -89,7 +113,14 @@ class Plotter:
 #        if summaryFile != "":
 #            Drawer.createSummary(savedir, summaryFile)
         histlist = cfg.getAllCanvas()
+        perf[ts[0]].stop()
+        print "Config read in %s" % perf[ts[0]].getMeasuredTime()
         self.doHistList(histlist, savedir, writeAs)
+        perf[ts[3]].stop()
+        noh = len(histlist)
+        print "%d istograms read in %s (%f per hist)" % (noh, perf[ts[2]].getMeasuredTime(), perf[ts[2]].getMeasuredSeconds()/noh)
+        print "%d histograms printed in %s (%f per hist)" % (noh, perf[ts[1]].getMeasuredTime(), perf[ts[1]].getMeasuredSeconds()/noh)
+        print "total time elapsed: %s" % perf[ts[3]].getMeasuredTime()
         #Drawer.drawSummary(savedir, "Oo.ps")#
         
 if __name__ == "__main__":
