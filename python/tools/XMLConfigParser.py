@@ -16,10 +16,10 @@ classmap["canvlist"] = "HistogramList"
 classmap["hist"] = "Variable"
 ##default configurations for various ConfigObjects
 pathToDir = "TopAnalysis/TopUtils/python/tools/"
-defaults = {"plots"  : "test/DefaultPlotConfig.xml",
-            "canv"   : "test/DefaultHistConfig.xml",
-            "legend" : "test/DefaultLegConfig.xml",
-            "hist"    : "test/DefaultVarConfig.xml"
+defaults = {"plots"  : "TopAnalysis/TopUtils/data/defaults/PlotConfig.xml",
+            "canv"   : "TopAnalysis/TopUtils/data/defaults/CanvasConfig.xml",
+            "legend" : "TopAnalysis/TopUtils/data/defaults/LegendConfig.xml",
+            "hist"    : "TopAnalysis/TopUtils/data/defaults/HistogramConfig.xml"
                 }
 
 ## 1= Info, 2 = Warning, 3 = Error. outputlevel = 2 will only display warnings and errors
@@ -59,6 +59,7 @@ class Configuration:
         """ loads all the data from the XML configuration file
         \param xmlfile the XML configuration file
         """
+        xmlfile = pathToDir + xmlfile
         if not os.path.exists(xmlfile):
             raise IOError, "Configuration file '%s' does not exist" %xmlfile
         Print("Loading configuration file %s" % xmlfile)
@@ -124,6 +125,7 @@ class Configuration:
             file.parseFromNode(i)
             id = file.getOption("id")
             name = file.getOption("name")
+            name = pathToDir + name
             if self.files.has_key(id):
                 raise ConfigError, "multiple entries for file id %s" %id
             else:
@@ -456,7 +458,7 @@ class Parser:
 #    @return a list of nodes from a XML file
 #===============================================================================
     def getNodeList(xmlFile, nodename):
-        return Parser.getDocument(xmlFile).getElementsByTagName(nodename)
+        return Parser.getDocument(pathToDir + xmlFile).getElementsByTagName(nodename)
     getNodeList = staticmethod(getNodeList)
     
     def getDocument(xmlfile):
@@ -1019,6 +1021,7 @@ class Include(ConfigObject):
             file = Parser.getAttributeValue(node, "file")
         else:#try to read as TextNode
             file = Parser.getText(node)
+        file = pathToDir + file
         FileService.exists(file)
         self.options.addOption("file", file)
         

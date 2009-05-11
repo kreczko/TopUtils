@@ -1,0 +1,3 @@
+#! /usr/bin/env python
+import TopAnalysis.TopUtils.tools.testXMLParser as test
+test.__main__()

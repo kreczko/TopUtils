@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <Plotter>
-	<include file='TopAnalysis/TopUtils/python/tools/test/HistConfig.xml' />
+	<include file='TopAnalysis/TopUtils/data/HistConfig.xml' />
 	<sources>
 		<input name='allMuonPt'>
 			<folder name='analyzeAllMuon'>
@@ -24,9 +24,9 @@
 			<folder name='analyzeAllMuon' />
 		</input>
 
-		<file id='qcd' name='TopAnalysis/TopUtils/python/tools/test/background.root' />
-		<file id='top' name='TopAnalysis/TopUtils/python/tools/test/signal.root' />
-		<file id='kin' name='TopAnalysis/TopUtils/python/tools/test/analyzeMuon.root' />
+		<file id='qcd' name='TopAnalysis/TopUtils/test/background.root' />
+		<file id='top' name='TopAnalysis/TopUtils/test/signal.root' />
+		<file id='kin' name='TopAnalysis/TopUtils/test/analyzeMuon.root' />
 	</sources>
 	<plots summaryFile='inspect.pdf'>
 		<canv name='mvadisc' setup='effplot' input='trackmafter/mbg_nVSdisc'>

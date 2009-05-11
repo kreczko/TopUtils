@@ -11,7 +11,7 @@ perf[ts[0]] = Timer()
 perf[ts[1]] = Timer()
 perf[ts[2]] = Timer()
 perf[ts[3]] = Timer()
-
+currentdir = ""
 
 class Plotter:
     
@@ -19,8 +19,7 @@ class Plotter:
         self.config = ""
         if configfile == "":
             raise ConfigError, "Configuration file is empty"
-    
-        elif not os.path.exists(configfile):
+        elif not os.path.exists(currentdir + configfile):
             raise IOError, "Configuration file '%s' does not exist" %configfile
         else:
             self.config = configfile
@@ -124,9 +123,10 @@ class Plotter:
         #Drawer.drawSummary(savedir, "Oo.ps")#
         
 if __name__ == "__main__":
-    XMLConfigParser.pathToDir = ""
+    XMLConfigParser.pathToDir = "../../../../"
     Drawer.setDefaultLayout()
-    pl = Plotter("test/NewConfig.xml")
+    currentdir = "../../../../"
+    pl = Plotter("TopAnalysis/TopUtils/data/NewConfig.xml")
     print "Saving test configuration"
     pl.savePlots("plots")
     print "Thanks and GoodBye."
