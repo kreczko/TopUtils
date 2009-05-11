@@ -200,6 +200,7 @@ class topSubmit:
         submissionScript.write(submissionString)
         submissionScript.close()
         os.system('chmod a+x tmp_topSubmit.sh')
+        os.system('./tmp_topSubmit.sh')        
 
 ##-----------------------------------------------------------------------------------            
 ##  * writes a string to a file (overwriting existing files)
