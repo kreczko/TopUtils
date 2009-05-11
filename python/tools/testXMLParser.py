@@ -15,8 +15,6 @@ testxml = 'TopAnalysis/TopUtils/data/NewConfig.xml'
 testxml2 = 'test/TestConfig.xml'
 #---------------------------------------------------------------- a false config
 falsexml = 'test/FalseConfig.xml'
-##default plot config
-plotdefaults = XMLConfigParser.pathToDir + XMLConfigParser.defaults["plots"]
 #===============================================================================
 # TestCase for testing the XMLConfigParser
 #===============================================================================
@@ -53,7 +51,7 @@ class TestConfigObject(unittest.TestCase):
         
     def testDefaults(self):
         obj = ConfigObject("nothing")
-        obj.readDefaults(plotdefaults)
+        obj.readDefaults(XMLConfigParser.pathToDir + XMLConfigParser.defaults["plots"])
         self.assertEqual(obj.getOption("create"), "png")
                          
     def testParse(self):
@@ -228,6 +226,7 @@ def suite():
 
 def setCurrentDir(cwd):
     XMLConfigParser.pathToDir = cwd
+    
 if __name__ == "__main__":
     unittest.TextTestRunner(verbosity=2).run(suite())
 #    obj = ConfigObject("hist", ["var", "legend"])
