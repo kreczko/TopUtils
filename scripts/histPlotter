@@ -1,9 +1,7 @@
-#! /usr/bin/python2.5
-# /afs/desy.de/products/python/2.5/bin/python
+#! /usr/bin/env python
+import pyexpat 
 from TopAnalysis.TopUtils.tools.Plotter import Plotter
 from TopAnalysis.TopUtils.tools.Drawer import Drawer
-#from Plotter import Plotter
-#from Drawer import Drawer
 import os
 import sys
 import getopt
