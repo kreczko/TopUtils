@@ -260,8 +260,7 @@ class jobSplitter:
       ################################################
       ## correct choice of farm queue?
       ################################################            
-      if (not (self.__farmQueue=='xshort' or self.__farmQueue=='short'
-           or  self.__farmQueue=='medium' or self.__farmQueue=='long')
+      if (not (self.__farmQueue in ["xshort", 'short', 'medium' , 'long'])
           ):
          self.__errorMsg()
          print '*   unknown queue; choose between:                '
@@ -518,7 +517,7 @@ class jobSplitter:
       print '\n'
       os.system('qstat -u `whoami`')
       print '-----------------------------------------------------------------------------'
-      print ' you can check the status of your jobs with: \'qstat -u user\' '
+      print ' you can check the status of your jobs with: \'qstat -u $USER\' '
       print ' you can kill specific jobs with           : \'qdel  jobid\' '      
       print ' you can combine root-files later on with  : \'hadd output.root input_?.root'
       print ' in case of problems mail to               : naf-cms-support(at)desy(dot)de'
