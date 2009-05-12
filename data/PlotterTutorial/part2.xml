@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<!-- Tutorial part 2 == comparing two files  -->
+<Plotter>
+	<!-- define sources -->
+    <sources>
+    	<!-- makes signal.root available as the alias "sig" -->
+        <file id="sig" name="TopAnalysis/TopUtils/test/signal.root" />
+        <file id="bkg" name="TopAnalysis/TopUtils/test/background.root" />
+    </sources>
+    <!-- define plots -->
+    <plots>
+    	<!-- define a list of canvas' -->
+        <canvlist>
+        	<!-- defines a histogram source with the name "signal". -->
+            <hist name="signal" source="file:sig" />
+            <!-- defines a histogram source with the name "background". -->
+             <hist name="background" source="file:bkg" />
+             <!-- this will create a simple legend for all histograms-->
+             <legend for="ALL"/>
+            <!-- this will save all histograms in the subfolder "test" -->
+            <savefolder>test</savefolder>
+        </canvlist>
+    </plots>
+</Plotter>
