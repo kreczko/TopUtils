@@ -1,4 +1,4 @@
-from ROOT import *
+from ROOT import gROOT, TColor, gStyle, TGaxis, TLegend, TPaveText
 import PadService as ps
 import os
 from math import log
@@ -14,9 +14,8 @@ class Drawer:
     allowedFormats = ['eps', 'ps', 'pdf', 'png', 'jpg']
     summaryFile = ""
     summaryBegin = True
-    summaryList = []
-    summary = None
     first  = True
+    NoHpP = 1
     
     def setDefaultLayout():
         gROOT.Reset()

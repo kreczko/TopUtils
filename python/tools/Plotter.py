@@ -1,9 +1,13 @@
+from Timer import Timer
+imp = Timer()
+imp.start()
 from XMLConfigParser import *
 import XMLConfigParser
 import os, sys
 from ROOT import gROOT, TFile
 from Drawer import Drawer
-from Timer import Timer
+imp.stop()
+print "time passed for importing modules: %s" %imp.getMeasuredTime()
 
 ts = ["readConfig", "drawHists", "readhists", "total"]
 perf = {}
@@ -105,11 +109,15 @@ class Plotter:
         cfg = Configuration(cfg)
         cfg.loadConfiguration(self.config)
         plots = cfg.getPlots()
+        nohpp = int(plots.getOption("HistsPerPage"))
+        if nohpp >6:
+            nohpp = 6
+        elif nohpp < 1:
+            nohpp = 1
+        Drawer.NoHpP = nohpp
         writeAs = plots.getOption("create").split(",")
         summaryFile = plots.getOption("summaryFile")
         Drawer.summaryFile = savedir + "/" + summaryFile
-#        if summaryFile != "":
-#            Drawer.createSummary(savedir, summaryFile)
         histlist = cfg.getAllCanvas()
         perf[ts[0]].stop()
         print "Config read in %s" % perf[ts[0]].getMeasuredTime()
