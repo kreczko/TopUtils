@@ -5,6 +5,8 @@ from TopAnalysis.TopUtils.tools.Drawer import Drawer
 import os
 import sys
 import getopt
+import TopAnalysis.TopUtils.tools.XMLConfigParser
+TopAnalysis.TopUtils.tools.XMLConfigParser.pathToDir = ""
 
 class histPlotter:
     """

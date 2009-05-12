@@ -23,7 +23,7 @@ class Plotter:
         if configfile == "":
             raise ConfigError, "Configuration file is empty"
         elif not os.path.exists(XMLConfigParser.pathToDir + configfile):
-            raise IOError, "Configuration file '%s' does not exist" %configfile
+            raise IOError, "Configuration file '%s' does not exist" % XMLConfigParser.pathToDir + configfile
         else:
             self.config = configfile
             
