@@ -3,7 +3,7 @@
 	<!-- define sources -->
     <sources>
     	<!-- makes signal.root available as the alias "sig" -->
-        <file id="sig" name="TopAnalysis/TopUtils/python/tools/test/signal.root" />
+        <file id="sig" name="TopAnalysis/TopUtils/test/signal.root" />
     </sources>
     <!-- define plots -->
     <plots>
