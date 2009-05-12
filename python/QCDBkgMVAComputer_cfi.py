@@ -6,6 +6,6 @@ import FWCore.ParameterSet.Config as cms
 findQCDBkgMVA = cms.EDProducer("TtSemiLepSignalSelectorMVAComputer",
     jets     = cms.InputTag("selectedLayer1Jets"),
     muons  = cms.InputTag("selectedLayer1Muons"),
-    METs     = cms.InputTag("selectedLayer1METs"),
+    METs     = cms.InputTag("layer1METs"),
     electrons  = cms.InputTag("selectedLayer1Electrons")
 )
