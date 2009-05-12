@@ -3,4 +3,5 @@
 	<create>png</create>
 	<summaryFile>plotSummary.pdf</summaryFile>
 	<writeToFolder>plots</writeToFolder>
+	<numberOfHistPerPage>1</numberOfHistPerPage>
 </PlotSetup>
