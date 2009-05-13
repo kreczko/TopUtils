@@ -1,12 +1,14 @@
 #! /usr/bin/env python
 import pyexpat 
 from TopAnalysis.TopUtils.tools.Plotter import Plotter
+import TopAnalysis.TopUtils.tools.Plotter
 from TopAnalysis.TopUtils.tools.Drawer import Drawer
 import os
 import sys
 import getopt
 import TopAnalysis.TopUtils.tools.XMLConfigParser
 TopAnalysis.TopUtils.tools.XMLConfigParser.pathToDir = ""
+TopAnalysis.TopUtils.tools.Plotter.showPerformance = False
 
 class histPlotter:
     """
@@ -27,16 +29,18 @@ class histPlotter:
 ##  * Do basic check whether the options make sense or not
     def main(self):
         try:
-            opts, args = getopt.getopt(sys.argv[1:], "h", ["help"])
+            opts, args = getopt.getopt(sys.argv[1:], "hp", ["help", "perf"])
         except getopt.error, msg:
             print msg
             print "for help use --help"
             sys.exit(2)
 
-        #for now just help option
-        if opts and opts[0][0] in ("-h", "--help"):
-            self.__helpMsg()
-            sys.exit(0)
+        for o, a in opts:
+            if o in ("-h", "--help"):
+                self.__helpMsg()
+                sys.exit(0)
+            elif o in ("-p", "--perf"):
+                TopAnalysis.TopUtils.tools.Plotter.showPerformance = True
         #first argument has to be the XML configuration file
         if args and args[0] and args[0].endswith(".xml"):
             self.__cfg = args[0]
