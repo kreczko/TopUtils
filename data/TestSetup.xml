@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<HistSetup>
+<Setup>
 	<canv name="effplot">
 		<maxY v="1" />
 		<minY v="0" />
 	</canv>
-</HistSetup>
+</Setup>

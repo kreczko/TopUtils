@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+	<!-- Tutorial part 2 == comparing two files  -->
+<Plotter>
+	<!-- define sources -->
+	<sources>
+		<!-- uses only histograms in the "analyzeSelMuon" folder -->
+		<input name='SelectedMuonsPt'>
+			<folder name='analyzeSelMuon'>
+				<filter type='contains' value='pt' />
+				<filter type='!contains' value='res' />
+			</folder>
+		</input>
+		<!-- makes signal.root available as the alias "muons" -->
+		<file id="muons" name="TopAnalysis/TopUtils/test/analyzeMuon.root" />
+	</sources>
+	<!-- define plots -->
+	<plots>
+		<!-- define a list of canvas' -->
+		<canvlist input="i:SelectedMuonsPt">
+			<!-- defines a histogram source with the name "SelectedMuons". -->
+			<hist name="SelectedMuons" source="file:muons" />
+			<legend for="ALL" />
+			<!-- this will save all histograms in the subfolder "SelectedMuons" -->
+			<savefolder>SelectedMuons_pt</savefolder>
+		</canvlist>
+	</plots>
+</Plotter>
