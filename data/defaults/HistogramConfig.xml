@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<VarSetup>
+<!-- Full list of the attributes: 
+https://twiki.cern.ch/twiki/bin/view/CMS/Plotter#List_of_implemented_attributes -->
+<default>
 	<name v='DEFAULT' />
 	<type v='line' />
 	<style v='1' />
 	<size v='2' />
 	<color v='1' />
-	<source v='' />
-	<input v='' />
 	<operation v='none' />
-	<norm v='' />
 	<draw v='1' />
-	<drawOption v="" />
-</VarSetup>
+</default>

@@ -1,26 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <!-- Full list of the attributes: 
 https://twiki.cern.ch/twiki/bin/view/CMS/Plotter#List_of_implemented_attributes -->
-<HistSetup>
+<default>
 	<name v="DEFAULT" />
-	<!-- ConfigParser.Histogram input, do not change these lines -->
-	<input v='' />
-	<setup v='' />
 	<logX v='0' />
 	<logY v='0' />
 	<showErrors v='false' />
 	<rotate v='False' />
-	<savefolder v='' />
-	<drawOption v='' />
-	<maxX v='' />
-	<minX v='' />
-	<maxY v='' />
-	<minY v='' />
 	<smooth v="0" />
-	<!--
-		canv titles come from histograms. If titleX is empty, the 
-	-->
-	<!--	they're not empty-->
-	<titleX v='' />
-	<titleY v='events' />
-</HistSetup>
+	<titleY v='# of events' />
+</default>

@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<!-- Full list of the attributes: 
+https://twiki.cern.ch/twiki/bin/view/CMS/Plotter#List_of_implemented_attributes -->
 <PlotSetup>
 	<create>png</create>
 	<summaryFile>plotSummary.pdf</summaryFile>
