@@ -1,20 +1,28 @@
 from Timer import Timer
 imp = Timer()
+ts = ["readConfig", "drawHists", "readhists", "total", "drawfirst", "readfirst"]
+perf = {}
+perf[ts[0]] = Timer()
+perf[ts[1]] = Timer()
+perf[ts[2]] = Timer()
+perf[ts[3]] = Timer()
+perf[ts[4]] = Timer()
+perf[ts[5]] = Timer()
 imp.start()
+perf[ts[3]].start()
 from XMLConfigParser import *
 import XMLConfigParser
 import os, sys
 from ROOT import gROOT, TFile
 from Drawer import Drawer
 imp.stop()
-print "time passed for importing modules: %s" %imp.getMeasuredTime()
 
-ts = ["readConfig", "drawHists", "readhists", "total"]
-perf = {}
-perf[ts[0]] = Timer()
-perf[ts[1]] = Timer()
-perf[ts[2]] = Timer()
-perf[ts[3]] = Timer()
+showPerformance = True
+
+if showPerformance:
+    print "time passed for importing modules: %s" %imp.getMeasuredTime()
+
+
 
 class Plotter:
     
@@ -28,11 +36,15 @@ class Plotter:
             self.config = configfile
             
     def doHistList(self, histlist, savedir, writeAs):
+        x = 0
+        gcd = gROOT.cd
         for hist in histlist:
+            x = x+1
             list = {}
             h = None
             if hist == histlist[-1]:
                 Drawer.summaryBegin = False
+            
             for var in hist.subobjects["hist"]:
 
                 source = var.getOption("source")
@@ -40,14 +52,18 @@ class Plotter:
                     file = source[0]
                     h1 = source[1]
                     perf[ts[2]].start()
+                    if hist == histlist[0]:
+                         perf[ts[5]].start()
                     f = TFile(file)
-                    gROOT.cd()
+                    gcd()
                     tmp = f.Get(h1)
                     if tmp:
                         h = tmp.Clone()
                     else:
                         sys.exit("Histogram %s in file %s not found" % (h1, file))
                     perf[ts[2]].stop()
+                    if hist == histlist[0]:
+                         perf[ts[5]].stop()
                 else: #combine histograms with operations
                     integ = 0
                     varhists = []
@@ -60,9 +76,11 @@ class Plotter:
                         varroots.append(file)
                     for xxx in range(0, len(varroots)):
                         perf[ts[2]].start()
+                        if hist == histlist[0]:
+                            perf[ts[5]].start()
                         f = TFile(varroots[xxx])
                         h1 = varhists[xxx]
-                        gROOT.cd()
+                        gcd()
                         tmp = f.Get(h1)
                         if tmp:
                             h = tmp.Clone()
@@ -86,6 +104,8 @@ class Plotter:
                             else:
                                 print 'unknown operation'
                         perf[ts[2]].stop()
+                        if hist == histlist[0]:
+                            perf[ts[5]].stop()
 #===============================================================================
 #                once you have the histogram, apply the configuration to it.
 #===============================================================================
@@ -100,11 +120,17 @@ class Plotter:
 #                save all histograms in one file
 #===============================================================================
             perf[ts[1]].start()
+            if hist == histlist[0]:
+                perf[ts[4]].start()
             Drawer.saveHistsInOne(list, hist, savedir, writeAs) 
             perf[ts[1]].stop()
+            if hist == histlist[0]:
+                perf[ts[4]].stop()
+                if showPerformance:
+                    print "time elapsed to read first histogram (incl. caching): %s" % perf[ts[5]].getMeasuredTime()
+                    print "time elapsed to draw first histogram (incl. caching): %s" % perf[ts[4]].getMeasuredTime()
             
     def savePlots(self,savedir, cfg = "Plotter"):
-        perf[ts[3]].start()
         perf[ts[0]].start()
         cfg = Configuration(cfg)
         cfg.loadConfiguration(self.config)
@@ -120,19 +146,25 @@ class Plotter:
         Drawer.summaryFile = savedir + "/" + summaryFile
         histlist = cfg.getAllCanvas()
         perf[ts[0]].stop()
-        print "Config read in %s" % perf[ts[0]].getMeasuredTime()
+        if showPerformance:
+            print "Config read in %s" % perf[ts[0]].getMeasuredTime()
         self.doHistList(histlist, savedir, writeAs)
         perf[ts[3]].stop()
         noh = len(histlist)
-        print "%d istograms read in %s (%f per hist)" % (noh, perf[ts[2]].getMeasuredTime(), perf[ts[2]].getMeasuredSeconds()/noh)
-        print "%d histograms printed in %s (%f per hist)" % (noh, perf[ts[1]].getMeasuredTime(), perf[ts[1]].getMeasuredSeconds()/noh)
-        print "total time elapsed: %s" % perf[ts[3]].getMeasuredTime()
+        if showPerformance:
+            if noh > 1:
+                print "%d histograms read in %s (%f per hist)" % (noh, perf[ts[2]].getMeasuredTime(), (perf[ts[2]].getMeasuredSeconds()-perf[ts[5]].getMeasuredSeconds())/(noh-1))
+                print "%d histograms printed in %s (%f per hist)" % (noh, perf[ts[1]].getMeasuredTime(), (perf[ts[1]].getMeasuredSeconds()-perf[ts[4]].getMeasuredSeconds())/(noh-1))
+            else:
+                print "%d histograms read in %s (%f per hist without caching)" % (noh, perf[ts[2]].getMeasuredTime(), (perf[ts[2]].getMeasuredSeconds())/(noh))
+                print "%d histograms printed in %s (%f per hist without caching)" % (noh, perf[ts[1]].getMeasuredTime(), (perf[ts[1]].getMeasuredSeconds())/(noh))
+            print "total time elapsed: %s" % perf[ts[3]].getMeasuredTime()
         #Drawer.drawSummary(savedir, "Oo.ps")#
         
 if __name__ == "__main__":
     XMLConfigParser.pathToDir = "../../../../"
     Drawer.setDefaultLayout()
-    pl = Plotter("TopAnalysis/TopUtils/data/NewConfig.xml")
+    pl = Plotter("TopAnalysis/TopUtils/data/TestConfig.xml")
     print "Saving test configuration"
     pl.savePlots("plots")
     print "Thanks and GoodBye."

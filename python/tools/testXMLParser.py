@@ -11,10 +11,7 @@ XMLConfigParser.pathToDir = "../../../../"
 print XMLConfigParser.pathToDir
 ##an how-it-should-be config
 ##both config types should be supported
-testxml = 'TopAnalysis/TopUtils/data/NewConfig.xml'
-testxml2 = 'test/TestConfig.xml'
-#---------------------------------------------------------------- a false config
-falsexml = 'test/FalseConfig.xml'
+testxml = 'TopAnalysis/TopUtils/data/TestConfig.xml'
 #===============================================================================
 # TestCase for testing the XMLConfigParser
 #===============================================================================
