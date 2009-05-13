@@ -42,8 +42,8 @@ class Plotter:
             x = x+1
             list = {}
             h = None
-            if hist == histlist[-1]:
-                Drawer.summaryBegin = False
+#            if hist == histlist[-1]:
+#                Drawer.summaryBegin = False
             
             for var in hist.subobjects["hist"]:
 
@@ -136,8 +136,8 @@ class Plotter:
         cfg.loadConfiguration(self.config)
         plots = cfg.getPlots()
         nohpp = int(plots.getOption("HistsPerPage"))
-        if nohpp >6:
-            nohpp = 6
+        if nohpp >12:
+            nohpp = 12
         elif nohpp < 1:
             nohpp = 1
         Drawer.NoHpP = nohpp
@@ -145,19 +145,21 @@ class Plotter:
         summaryFile = plots.getOption("summaryFile")
         Drawer.summaryFile = savedir + "/" + summaryFile
         histlist = cfg.getAllCanvas()
+        noh = len(histlist)
         perf[ts[0]].stop()
         if showPerformance:
             print "Config read in %s" % perf[ts[0]].getMeasuredTime()
         self.doHistList(histlist, savedir, writeAs)
+        Drawer.summaryBegin = False
+        Drawer.flushStack(savedir, writeAs)
         perf[ts[3]].stop()
-        noh = len(histlist)
         if showPerformance:
             if noh > 1:
-                print "%d histograms read in %s (%f per hist)" % (noh, perf[ts[2]].getMeasuredTime(), (perf[ts[2]].getMeasuredSeconds()-perf[ts[5]].getMeasuredSeconds())/(noh-1))
-                print "%d histograms printed in %s (%f per hist)" % (noh, perf[ts[1]].getMeasuredTime(), (perf[ts[1]].getMeasuredSeconds()-perf[ts[4]].getMeasuredSeconds())/(noh-1))
+                print "%d histograms read in %s (%f per hist without caching)" % (noh, perf[ts[2]].getMeasuredTime(), (perf[ts[2]].getMeasuredSeconds()-perf[ts[5]].getMeasuredSeconds())/(noh-1))
+                print "%d histograms printed in %s (%f per hist without caching)" % (noh, perf[ts[1]].getMeasuredTime(), (perf[ts[1]].getMeasuredSeconds()-perf[ts[4]].getMeasuredSeconds())/(noh-1))
             else:
-                print "%d histograms read in %s (%f per hist without caching)" % (noh, perf[ts[2]].getMeasuredTime(), (perf[ts[2]].getMeasuredSeconds())/(noh))
-                print "%d histograms printed in %s (%f per hist without caching)" % (noh, perf[ts[1]].getMeasuredTime(), (perf[ts[1]].getMeasuredSeconds())/(noh))
+                print "%d histograms read in %s (%f per hist)" % (noh, perf[ts[2]].getMeasuredTime(), (perf[ts[2]].getMeasuredSeconds())/(noh))
+                print "%d histograms printed in %s (%f per hist)" % (noh, perf[ts[1]].getMeasuredTime(), (perf[ts[1]].getMeasuredSeconds())/(noh))
             print "total time elapsed: %s" % perf[ts[3]].getMeasuredTime()
         #Drawer.drawSummary(savedir, "Oo.ps")#
         

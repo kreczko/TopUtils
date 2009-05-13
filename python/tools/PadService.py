@@ -14,22 +14,28 @@ class PadService:
             self.nPadsX = 2
             self.nPadsY = 1
             self.width = 600
-            self.height = 0.55 * self.width;
-        elif nPlots == 3:
-            self.nPadsX = 3
-            self.nPadsY = 1
-            self.width = 900
-            self.height = 0.40 * self.width;
-        elif nPlots == 4:
+            self.height = 0.55*self.width;
+        elif nPlots > 2 and nPlots < 5:
             self.nPadsX = 2
             self.nPadsY = 2
             self.width = 600
-            self.height = 1.00 * self.width;
-        else:
+            self.height = 0.8 * self.width;
+        elif nPlots > 4 and nPlots < 7:
             self.nPadsX = 3
             self.nPadsY = 2
             self.width = 800
-            self.height = 0.55 * self.width;
+            self.height = 0.7 *  self.width;
+        elif nPlots > 6 and nPlots < 9:
+            self.nPadsX = 4
+            self.nPadsY = 2
+            self.width = 800
+            self.height = 0.6 *  self.width;
+        else:
+            self.nPadsX = 4
+            self.nPadsY = 3
+            self.width = 800
+            self.height = 0.8 *  self.width;
+            
             
         self.last = None
         self.index = 0
@@ -52,11 +58,10 @@ class PadService:
         self.last.cd(self.index);
         #prevent override
         if self.index > self.nPadsX * self.nPadsY:
-            return None
+            print "EERER"
+            self.last = None
         else:
             pad = self.last.GetPad(self.index)
-            pad.SetFillColor(0)
-            pad.GetFrame().SetFillColor(0)
             return pad
             
         

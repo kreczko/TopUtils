@@ -16,6 +16,7 @@ class Drawer:
     summaryBegin = True
     first  = True
     NoHpP = 1
+    drawStack = []
     
     def setDefaultLayout():
         gROOT.Reset()
@@ -140,84 +141,84 @@ class Drawer:
     set_palette = staticmethod(set_palette)
 
     
-    def saveTH2(hist, filename, folder, legend=None, printAs=['eps', 'png']):      
-        minX = hist.GetXaxis().GetXmin()
-        maxX = hist.GetXaxis().GetXmax()
-        dx = abs(maxX - minX)
-        midX = maxX - dx/2
-        x2 = maxX
-        x1 = x2 *0.05
-        minY = hist.GetYaxis().GetXmin()
-        maxY = hist.GetYaxis().GetXmax()
-        if Drawer.drawOption == 'COLZ':
-                
-#                print 'y',min, max
-                
-#                palette = TPaletteAxis(x2*1.005,minY,x1+x2*1.005,maxY,hist)
-                palette = TPaletteAxis(0.88,0.149,0.90,0.95,hist)
-                palette.ConvertNDCtoPad()
-#                palette.GetAxis().SetTextAlign(1)
-                palette.SetLabelColor(1)
-                palette.SetLabelFont(62)
-#                palette.SetLabelOffset(-0.1)
-                palette.SetLabelSize(0.04)
-#                palette.SetTitleOffset(-2)
-                palette.SetTitleSize(0.04)
-                palette.SetLineColor(1)
-                palette.SetFillColor(1)
-                palette.SetFillStyle(1001) 
-                hist.GetListOfFunctions().Add(palette,"br")
-        cor = hist.GetCorrelationFactor(1,2)
-        if cor < 0:
-            corr = 'CF: %1.4f' % cor
-        else:
-            corr = 'CF: +%1.4f' % cor
-#        pt = TPaveText(midX,0.92*maxY,maxX - abs(maxX*0.2),0.98*maxY, "correlation factor") 
-        pt = None
-        if not "norm_ProcMatrix" in filename:
-            pt = TPaveText(0.5,0.85,0.72,0.9, "NDC") 
-            pt.SetFillColor(0)
-            pt.SetTextSize(0.04) 
-            pt.SetTextAlign(12)
-            pt.AddText(corr.__str__())
-        else:
-            
-            hist.GetZaxis().SetTitle('correlation factor')
-            hist.GetXaxis().SetBinLabel(1, "|#Delta#Phi(MET, #mu)|")
-            hist.GetXaxis().SetBinLabel(2, "|#Sigma#Delta#Phi(#mu, jet1,2)|")
-            hist.GetXaxis().SetBinLabel(3, "p_{T}(#mu)")
-            hist.GetXaxis().SetBinLabel(4, "circularity")
-            
-            hist.GetYaxis().SetBinLabel(1, "|#Delta#Phi(MET, #mu)|")
-            hist.GetYaxis().SetBinLabel(2, "|#Sigma#Delta#Phi(#mu, jet1,2)|")
-            hist.GetYaxis().SetBinLabel(3, "p_{T}(#mu)")
-            hist.GetYaxis().SetBinLabel(4, "circularity")
-#            hist.GetYaxis().SetBit(TAxis.kLabelsDown)
-            hist.GetYaxis().SetLabelSize(0.04)
-            hist.GetYaxis().CenterTitle(True)
-           
-            
-            
-                    
-        if not os.path.exists(folder):
-            os.mkdir(folder)
-        pads = ps.PadService('testTH2', 'testingTH2', 1)
-        pad = pads.Next()
-        pad = Drawer.setPadLayout(pad)
-        if Drawer.drawOption == 'COLZ':
-            pad.SetRightMargin(0.13)
-        if "norm_ProcMatrix" in filename:
-            pad.SetLeftMargin(0.2)
-#        for i in pad.GetListOfPrimitives():
-#            i.SetFillColor(0)
-        hist.Draw(Drawer.drawOption)
-        if not "norm_ProcMatrix" in filename:
-            pt.Draw()
-        Drawer.printSummary(pad)
-        for i in printAs:
-            if i in Drawer.allowedFormats:
-                pad.Print(folder + '/' + filename + '.' + i)
-    saveTH2 = staticmethod(saveTH2)
+#    def saveTH2(hist, filename, folder, legend=None, printAs=['eps', 'png']):      
+#        minX = hist.GetXaxis().GetXmin()
+#        maxX = hist.GetXaxis().GetXmax()
+#        dx = abs(maxX - minX)
+#        midX = maxX - dx/2
+#        x2 = maxX
+#        x1 = x2 *0.05
+#        minY = hist.GetYaxis().GetXmin()
+#        maxY = hist.GetYaxis().GetXmax()
+#        if Drawer.drawOption == 'COLZ':
+#                
+##                print 'y',min, max
+#                
+##                palette = TPaletteAxis(x2*1.005,minY,x1+x2*1.005,maxY,hist)
+#                palette = TPaletteAxis(0.88,0.149,0.90,0.95,hist)
+#                palette.ConvertNDCtoPad()
+##                palette.GetAxis().SetTextAlign(1)
+#                palette.SetLabelColor(1)
+#                palette.SetLabelFont(62)
+##                palette.SetLabelOffset(-0.1)
+#                palette.SetLabelSize(0.04)
+##                palette.SetTitleOffset(-2)
+#                palette.SetTitleSize(0.04)
+#                palette.SetLineColor(1)
+#                palette.SetFillColor(1)
+#                palette.SetFillStyle(1001) 
+#                hist.GetListOfFunctions().Add(palette,"br")
+#        cor = hist.GetCorrelationFactor(1,2)
+#        if cor < 0:
+#            corr = 'CF: %1.4f' % cor
+#        else:
+#            corr = 'CF: +%1.4f' % cor
+##        pt = TPaveText(midX,0.92*maxY,maxX - abs(maxX*0.2),0.98*maxY, "correlation factor") 
+#        pt = None
+#        if not "norm_ProcMatrix" in filename:
+#            pt = TPaveText(0.5,0.85,0.72,0.9, "NDC") 
+#            pt.SetFillColor(0)
+#            pt.SetTextSize(0.04) 
+#            pt.SetTextAlign(12)
+#            pt.AddText(corr.__str__())
+#        else:
+#            
+#            hist.GetZaxis().SetTitle('correlation factor')
+#            hist.GetXaxis().SetBinLabel(1, "|#Delta#Phi(MET, #mu)|")
+#            hist.GetXaxis().SetBinLabel(2, "|#Sigma#Delta#Phi(#mu, jet1,2)|")
+#            hist.GetXaxis().SetBinLabel(3, "p_{T}(#mu)")
+#            hist.GetXaxis().SetBinLabel(4, "circularity")
+#            
+#            hist.GetYaxis().SetBinLabel(1, "|#Delta#Phi(MET, #mu)|")
+#            hist.GetYaxis().SetBinLabel(2, "|#Sigma#Delta#Phi(#mu, jet1,2)|")
+#            hist.GetYaxis().SetBinLabel(3, "p_{T}(#mu)")
+#            hist.GetYaxis().SetBinLabel(4, "circularity")
+##            hist.GetYaxis().SetBit(TAxis.kLabelsDown)
+#            hist.GetYaxis().SetLabelSize(0.04)
+#            hist.GetYaxis().CenterTitle(True)
+#           
+#            
+#            
+#                    
+#        if not os.path.exists(folder):
+#            os.mkdir(folder)
+#        pads = ps.PadService('testTH2', 'testingTH2', 1)
+#        pad = pads.Next()
+#        pad = Drawer.setPadLayout(pad)
+#        if Drawer.drawOption == 'COLZ':
+#            pad.SetRightMargin(0.13)
+#        if "norm_ProcMatrix" in filename:
+#            pad.SetLeftMargin(0.2)
+##        for i in pad.GetListOfPrimitives():
+##            i.SetFillColor(0)
+#        hist.Draw(Drawer.drawOption)
+#        if not "norm_ProcMatrix" in filename:
+#            pt.Draw()
+#        Drawer.printSummary(pad)
+#        for i in printAs:
+#            if i in Drawer.allowedFormats:
+#                pad.Print(folder + '/' + filename + '.' + i)
+#    saveTH2 = staticmethod(saveTH2)
     
     def setPadLayout(pad):
         pad.SetFillStyle(4000)
@@ -233,92 +234,105 @@ class Drawer:
 #================================================================================
         
     def saveHistsInOne(histlist, histCfg, savedir, printAs=['eps', 'png']):
-        
-        filename = histCfg.getOption('name')        
-        folder = savedir +"/" + histCfg.getOption('savefolder')
-        logH = [histCfg.getOption('logX'), histCfg.getOption('logY')]
-        err = histCfg.getOption('showErrors').upper() == 'TRUE'
-        legend = None
-        if histCfg.subobjects.has_key("legend"):
-            if histCfg.subobjects["legend"]:
-                legend = histCfg.subobjects["legend"][0]
-        if legend:
-                legend = Drawer.makePlainLegend(legend.getOption('posX'), legend.getOption('posY'), legend.getOption('sizeX'), 
+        if len(Drawer.drawStack) < Drawer.NoHpP:
+            Drawer.drawStack.append((histlist, histCfg))
+        if len(Drawer.drawStack) >= Drawer.NoHpP:
+            Drawer.flushStack(savedir, printAs)
+
+    def draw(savedir, printAs=['eps', 'png']):
+        stack = Drawer.drawStack
+        pads = ps.PadService('test', 'testing', Drawer.NoHpP)
+        for item in stack:
+            histlist = item[0]
+            histCfg = item[1]
+            filename = histCfg.getOption('name')        
+            folder = savedir +"/" + histCfg.getOption('savefolder')
+            logH = [histCfg.getOption('logX'), histCfg.getOption('logY')]
+            err = histCfg.getOption('showErrors').upper() == 'TRUE'
+            legend = None
+            if histCfg.subobjects.has_key("legend"):
+                if histCfg.subobjects["legend"]:
+                    legend = histCfg.subobjects["legend"][0]
+                if legend:
+                    legend = Drawer.makePlainLegend(legend.getOption('posX'), legend.getOption('posY'), legend.getOption('sizeX'), 
 legend.getOption('sizeY'))
                 
-        filename = filename.replace('.','')    
-        folder = folder.rstrip('/')
-        f = ''
-        for i in folder.split('/'):
-            f = f + i + '/'
-            if not os.path.exists(f):
-                os.mkdir(f)
-        pads = ps.PadService('test', 'testing', 1)
-        pad = pads.Next()
-        pad = Drawer.setPadLayout(pad)
-        if logH[0] == '1':
-            pad.SetLogx(1)
-        if logH[1] == '1':
-            pad.SetLogy(1)
-        mm = Drawer.getMM(histlist)
-        min = mm[0]
-        max = mm[1]
-        x = 0
-        histkeys = histlist.keys()
-        histkeys.sort()
-        listi = []
-        for histkey in histkeys:
-            hist = histlist[histkey]
-#        for hist in histlist.itervalues():
-            if "TH2F" in hist.__str__():
-                Drawer.saveTH2(hist, filename, folder, legend, printAs)
-#                print "TH2F"
-                break
+            filename = filename.replace('.','')    
+            folder = folder.rstrip('/')
+            f = ''
+            for i in folder.split('/'):
+                f = f + i + '/'
+                if not os.path.exists(f):
+                    os.mkdir(f)
             
-#                
-            if not logH[1] == '1':
-                hist.SetMaximum(max)
-                hist.SetMinimum(min)
-            if legend:
-                legend.AddEntry(hist, hist.GetName())
+            pad = pads.Next()
+            pad = Drawer.setPadLayout(pad)
+            if logH[0] == '1':
+                pad.SetLogx(1)
+            if logH[1] == '1':
+                pad.SetLogy(1)
+            mm = Drawer.getMM(histlist)
+            min = mm[0]
+            max = mm[1]
+            x = 0
+            histkeys = histlist.keys()
+            histkeys.sort()
+            for histkey in histkeys:
+                hist = histlist[histkey]
+                if "TH2F" in hist.__str__():
+                    if histCfg.getOption("drawOption") == "":
+                        histCfg.setOption("drawOption", "COLZ")
+#                   # Drawer.saveTH2(hist, filename, folder, legend, printAs)
+##                print "TH2F"
+#                    break
+                if not logH[1] == '1':
+                    hist.SetMaximum(max)
+                    hist.SetMinimum(min)
+                if legend:
+                    legend.AddEntry(hist, hist.GetName())
             
-            if x == 0:
-                draws = Drawer.doSpecial(hist, filename)
-                if not histCfg.getOption("drawOption") == "":
-                    hist.Draw(histCfg.getOption("drawOption"))
-                elif histCfg.getOption("drawOption") == "" and not histCfg.getVariable(histkey).getOption("drawOption") == "":
-                    hist.SetFillColor(hist.GetLineColor())
-                    hist.Draw(histCfg.getVariable(histkey).getOption("drawOption"))
-                elif err and Drawer.drawOption == "":
-                    hist.Draw('e')
-                else:
-                    hist.Draw()
+                if x == 0:
+                    draws = Drawer.doSpecial(hist, filename)
+                    if not histCfg.getOption("drawOption") == "":
+                        hist.Draw(histCfg.getOption("drawOption"))
+                    elif histCfg.getOption("drawOption") == "" and not histCfg.getVariable(histkey).getOption("drawOption") == "":
+                        hist.SetFillColor(hist.GetLineColor())
+                        hist.Draw(histCfg.getVariable(histkey).getOption("drawOption"))
+                    elif err and Drawer.drawOption == "":
+                        hist.Draw('e')
+                    else:
+                        hist.Draw()
                 
-                for ds in draws:
-                    ds.Draw("same")
-            else:
-                if not histCfg.getOption("drawOption") == "":
-                        hist.Draw("same"+histCfg.getOption("drawOption") )
-                elif histCfg.getOption("drawOption") == "" and not histCfg.getVariable(histkey).getOption("drawOption") == "":
-                    hist.SetFillColor(hist.GetLineColor())
-                    hist.Draw("same"+histCfg.getVariable(histkey).getOption("drawOption"))
-                elif err and histCfg.getOption("drawOption") == "":
-                    hist.Draw('samee')
+                    for ds in draws:
+                        ds.Draw("same")
                 else:
-                    hist.Draw("same")
-            gROOT.cd()
-            listi.append(hist.Clone())
-            x += 1
-        if legend:
-            legend.Draw("same")
-        if not "TH2F" in hist.__str__():
-            pad.RedrawAxis();
-
-            Drawer.printSummary(pad)
-            for i in printAs:
-                if i in Drawer.allowedFormats:
-                    pad.Print(folder + '/' + filename + '.' + i)
+                    if not histCfg.getOption("drawOption") == "":
+                        hist.Draw("same"+histCfg.getOption("drawOption") )
+                    elif histCfg.getOption("drawOption") == "" and not histCfg.getVariable(histkey).getOption("drawOption") == "":
+                        hist.SetFillColor(hist.GetLineColor())
+                        hist.Draw("same"+histCfg.getVariable(histkey).getOption("drawOption"))
+                    elif err and histCfg.getOption("drawOption") == "":
+                        hist.Draw('samee')
+                    else:
+                        hist.Draw("same")
+                x += 1
+                if legend:
+                    legend.Draw("same")
+                if not "TH2F" in hist.__str__():
+                    pad.RedrawAxis();
+                for i in printAs:
+                    if i in Drawer.allowedFormats:
+                        pads.last.GetPad(0).Print(folder + '/' + filename + '.' + i)
+        Drawer.printSummary(pads.last)
+        
     saveHistsInOne = staticmethod(saveHistsInOne)
+    draw = staticmethod(draw)
+    
+    def flushStack(savedir, printAs=['eps', 'png']):
+        if Drawer.drawStack:
+            Drawer.draw(savedir, printAs)
+            Drawer.drawStack = []
+    flushStack = staticmethod(flushStack)
         
     def setMarker(hist, color, size, style):
         hist.SetMarkerColor(int(color))
@@ -506,10 +520,16 @@ legend.getOption('sizeY'))
     def printSummary(pad):
         if Drawer.summaryFile:
                 if Drawer.summaryBegin and Drawer.first:
-                    pad.Print(Drawer.summaryFile +"[", "Portrait")
-                    Drawer.first = False
-                elif Drawer.summaryBegin and not Drawer.first:
+                    pad.Print(Drawer.summaryFile +"[")#, "Portrait")
                     pad.Print(Drawer.summaryFile)
+                    Drawer.first = False
                 else:
-                    pad.Print(Drawer.summaryFile +"]")
+                    pad.Print(Drawer.summaryFile)
+#                elif Drawer.summaryBegin and not Drawer.first:
+#                    pad.Print(Drawer.summaryFile)
+##                    print Drawer.summaryFile, "<<<<<<<<<<<<<<<<<<<<<<<"
+#                else:
+#                    pad.Print(Drawer.summaryFile )
+#                    pad.Print(Drawer.summaryFile + "]")
+#                    print Drawer.summaryFile +"]"
     printSummary = staticmethod(printSummary)
