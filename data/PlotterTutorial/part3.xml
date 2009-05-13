@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+	<!-- Tutorial part 2 == comparing two files  -->
+<Plotter>
+	<!-- define sources -->
+	<sources>
+	<!-- uses only histograms in the "analyzeSelMuon" folder -->
+		<input name='SelectedMuons'>
+			<folder name='analyzeSelMuon' />
+		</input>
+	<!-- uses only histograms in the "analyzeAllMuon" folder -->
+		<input name='AllMuons'>
+			<folder name='analyzeAllMuon' />
+		</input>
+		<!-- makes signal.root available as the alias "muons" -->
+		<file id="muons" name="TopAnalysis/TopUtils/test/analyzeMuon.root" />
+	</sources>
+	<!-- define plots -->
+	<plots>
+		<!-- define a list of canvas' -->
+		<canvlist input= "i:SelectedMuons">
+			<!-- defines a histogram source with the name "SelectedMuons". -->
+			<hist name="SelectedMuons" source="file:muons" />
+			<legend for="ALL" />
+			<!-- this will save all histograms in the subfolder "SelectedMuons" -->
+			<savefolder>SelectedMuons</savefolder>
+		</canvlist>
+		
+		<canvlist input= "i:AllMuons">
+			<!-- defines a histogram source with the name "AllMuons". -->
+			<hist name="AllMuons" source="file:muons" />
+			<legend for="ALL" />
+			<!-- this will save all histograms in the subfolder "AllMuons" -->
+			<savefolder>AllMuons</savefolder>
+		</canvlist>
+		
+		<canvlist>
+			<!-- defines a histogram source with the name "signal". -->
+			<hist name="SelectedMuons" source="file:muons" input="i:SelectedMuons" type="filled" style= "3004"/>
+			<!-- defines a histogram source with the name "AllMuons". -->
+			<hist name="AllMuons" source="file:muons" input="i:AllMuons"/>
+			<legend for="ALL" />
+			<!-- this will save all histograms in the subfolder "compareMuons" -->
+			<savefolder>compareMuons</savefolder>
+		</canvlist>
+	</plots>
+</Plotter>

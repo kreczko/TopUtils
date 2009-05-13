@@ -12,13 +12,13 @@
     	<!-- define a list of canvas' -->
         <canvlist>
         	<!-- defines a histogram source with the name "signal". -->
-            <hist name="signal" source="file:sig" />
+            <hist name="signal" source="file:sig"  color="4"/>
             <!-- defines a histogram source with the name "background". -->
-             <hist name="background" source="file:bkg" />
+             <hist name="background" source="file:bkg" color="2" />
              <!-- this will create a simple legend for all histograms-->
              <legend for="ALL"/>
-            <!-- this will save all histograms in the subfolder "test" -->
-            <savefolder>test</savefolder>
+            <!-- this will save all histograms in the subfolder "compareFiles" -->
+            <savefolder>compareFiles</savefolder>
         </canvlist>
     </plots>
 </Plotter>
