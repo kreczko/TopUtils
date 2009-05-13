@@ -45,7 +45,8 @@ class TestConfigObject(unittest.TestCase):
             self.assertEqual(self.object.getOption(i), Parser.getAttributeValue(self.nodelist[0], i))
         #and options should contain all childNodes, if they are no special objects themselves
         self.assertEqual(self.object.getOption("titleX"), "mva disc.")
-        self.assertRaises(ConfigError, self.object.getOption, "Xsjfssdhfwhshdf")
+        #if option is not known, return empty
+        self.assertEqual(self.object.getOption("Xsjfssdhfwhshdf"), "")
         self.assertEqual(self.object.subobjects["hist"][0].getOption("name"), "qcd")
         self.assertEqual(self.object.subobjects["legend"][0].getOption("name"), "plotname")
         

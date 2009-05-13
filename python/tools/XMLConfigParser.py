@@ -203,7 +203,8 @@ class OptionSet:
         if self.hasOption(option):
             return self.options[option]
         else:
-            raise ConfigError, "Option '%s' is not known."%option
+            #raise ConfigError, "Option '%s' is not known."%option
+            return ""
 
 #===============================================================================
 #            adds an option to the OptionSet
@@ -289,7 +290,8 @@ class OptionSet:
                 if not self.options[option] == self.defaults[option]:
                    Print("Warning: multiple definition of '%s'. Overwriting last value" % option, 2)
             else:
-                raise ConfigError, "Error: option %s is not known" % option
+                #raise ConfigError, "Error: option %s is not known" % option
+                self.addOption(option, value)
 
 #===============================================================================
 #        check if the option value is allowed.

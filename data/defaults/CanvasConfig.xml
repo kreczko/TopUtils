@@ -1,34 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<!-- Full list of the attributes: 
+https://twiki.cern.ch/twiki/bin/view/CMS/Plotter#List_of_implemented_attributes -->
 <HistSetup>
 	<name v="DEFAULT" />
 	<!-- ConfigParser.Histogram input, do not change these lines -->
 	<input v='' />
 	<setup v='' />
-	<!-- root canvogramm input, custom section -->
-	<!--canvogram min and max usually from the canvvalues -->
-	<max v='' />
-	<min v='' />
 	<logX v='0' />
 	<logY v='0' />
-	<gridX v='0' />
-	<gridY v='0' />
-	<scale v='1.0' />
 	<showErrors v='false' />
 	<rotate v='False' />
 	<savefolder v='' />
 	<drawOption v='' />
-	<!-- for TH2F -->
 	<maxX v='' />
 	<minX v='' />
 	<maxY v='' />
 	<minY v='' />
 	<smooth v="0" />
 	<!--
-		canv titles come from canvograms. Only if they are empty the config
-	-->
-	<!--
-		values are used. You can also set overwriteTitles to true in order to
-		overwrite the titles even if
+		canv titles come from histograms. If titleX is empty, the 
 	-->
 	<!--	they're not empty-->
 	<titleX v='' />
