@@ -54,21 +54,11 @@ void TtSemiLepSignalSelectorMVAComputer::produce(edm::Event& evt, const edm::Eve
 		return;
 	const TopJetCollection jets = *jet_handle;
 
-	double dRmin = 9999.;
-	TopJetCollection seljets;
-	for (std::vector<pat::Jet>::const_iterator it = jets.begin(); it != jets.end(); it++) {
-		double tmpdR = deltaR(it->eta(), it->phi(), lepton->eta(), lepton->phi());
-		if (tmpdR < dRmin)
-			dRmin = tmpdR;
-		seljets.push_back(*it);
-	}
-
-	double discrim;
+	double discrim = -1;
 
 	// skip events with no appropriate lepton candidate in
-	if (leptons->size() != 1 && seljets.size() < 4)
-		discrim = -1.;
-	else {
+	if (leptons->size() == 1 && jets.size() >= 4)
+	{
 		QCDBkgEstimateSelector selection(seljets, lepton, MET);
 
 		discrim = evaluateQCDBkgEstimateSelector(mvaComputer, selection, weight);
