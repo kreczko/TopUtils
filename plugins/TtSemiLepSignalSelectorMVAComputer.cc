@@ -59,7 +59,7 @@ void TtSemiLepSignalSelectorMVAComputer::produce(edm::Event& evt, const edm::Eve
 	// skip events with no appropriate lepton candidate in
 	if (leptons->size() == 1 && jets.size() >= 4)
 	{
-		QCDBkgEstimateSelector selection(seljets, lepton, MET);
+		QCDBkgEstimateSelector selection(jets, lepton, MET);
 
 		discrim = evaluateQCDBkgEstimateSelector(mvaComputer, selection, weight);
 	}
