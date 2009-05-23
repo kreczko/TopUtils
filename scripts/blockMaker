@@ -127,7 +127,7 @@ class blockMaker:
         print "\n"
         print " Synopsis   : blockMaker [Option] -input '...' -p PROC -o OUTPUT           \n"
         print " Description: script to create file blocks as input to the configRunner via  "
-        print "              command line options; input files are read from --path (all    "
+        print "              command line options; input files are read from --input (all   "
         print "              linux wildcarts are allowed) and directed to -o; the process   "
         print "              label is given by -p; the default block size is 10 files, but  "
         print "              may be specified by the -n option. Block sizes in events are   "
