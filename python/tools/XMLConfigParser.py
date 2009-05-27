@@ -125,7 +125,9 @@ class Configuration:
             file.parseFromNode(i)
             id = file.getOption("id")
             name = file.getOption("name")
-            name = pathToDir + name
+            if not name.startswith("/"):
+                name = pathToDir + name
+                name = os.path.abspath(name)
             if self.files.has_key(id):
                 raise ConfigError, "multiple entries for file id %s" %id
             else:
