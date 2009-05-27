@@ -320,10 +320,10 @@ legend.getOption('sizeY'))
                     legend.Draw("same")
                 if not "TH2F" in hist.__str__():
                     pad.RedrawAxis();
-                for i in printAs:
-                    if i in Drawer.allowedFormats:
-                        pads.last.GetPad(0).Print(folder + '/' + filename + '.' + i)
-        Drawer.printSummary(pads.last)
+        for i in printAs:
+            if i in Drawer.allowedFormats:
+                pads.last.GetPad(0).Print(folder + '/' + filename + '.' + i)
+        Drawer.printSummary(pads.last.GetPad(0))
         
     saveHistsInOne = staticmethod(saveHistsInOne)
     draw = staticmethod(draw)
@@ -519,17 +519,31 @@ legend.getOption('sizeY'))
     
     def printSummary(pad):
         if Drawer.summaryFile:
-                if Drawer.summaryBegin and Drawer.first:
-                    pad.Print(Drawer.summaryFile +"[")#, "Portrait")
-                    pad.Print(Drawer.summaryFile)
+            if Drawer.summaryBegin and Drawer.first:
+                    if Drawer.summaryFile.endswith(".pdf"):
+                        pad.Print(Drawer.summaryFile +"(" "Portrait")
+                    else:
+                        pad.Print(Drawer.summaryFile +"[", "Portrait")
+                        pad.Print(Drawer.summaryFile)
                     Drawer.first = False
-                else:
-                    pad.Print(Drawer.summaryFile)
-#                elif Drawer.summaryBegin and not Drawer.first:
-#                    pad.Print(Drawer.summaryFile)
-##                    print Drawer.summaryFile, "<<<<<<<<<<<<<<<<<<<<<<<"
+#                    print "first draw"
 #                else:
-#                    pad.Print(Drawer.summaryFile )
-#                    pad.Print(Drawer.summaryFile + "]")
-#                    print Drawer.summaryFile +"]"
+#                    pad.Print(Drawer.summaryFile)
+            elif Drawer.summaryBegin and not Drawer.first:
+#                    print "second draw"
+                    if Drawer.summaryFile.endswith(".pdf"):
+                        pad.Print(Drawer.summaryFile)
+                    else:
+                        pad.Print(Drawer.summaryFile)
+#                    print Drawer.summaryFile, "<<<<<<<<<<<<<<<<<<<<<<<"
+            else:
+#                    pad.Print(Drawer.summaryFile, "pdf")
+                    if Drawer.summaryFile.endswith(".pdf"):
+                        pad.Print(Drawer.summaryFile + ")")
+#                        pad.Print(Drawer.summaryFile + ")")
+                    else:
+                        pad.Print(Drawer.summaryFile)
+                        pad.Print(Drawer.summaryFile + "]")
+#                    print "last draw"
+                    
     printSummary = staticmethod(printSummary)

@@ -11,30 +11,30 @@ class PadService:
             self.width = 600
             self.height = 1.0 * self.width
         elif nPlots == 2:
-            self.nPadsX = 2
-            self.nPadsY = 1
-            self.width = 600
-            self.height = 0.55*self.width;
+            self.nPadsX = 1
+            self.nPadsY = 2
+            self.height = 600
+            self.width = 0.55*self.height;
         elif nPlots > 2 and nPlots < 5:
             self.nPadsX = 2
             self.nPadsY = 2
             self.width = 600
             self.height = 0.8 * self.width;
         elif nPlots > 4 and nPlots < 7:
-            self.nPadsX = 3
-            self.nPadsY = 2
-            self.width = 800
-            self.height = 0.7 *  self.width;
-        elif nPlots > 6 and nPlots < 9:
-            self.nPadsX = 4
-            self.nPadsY = 2
-            self.width = 800
-            self.height = 0.6 *  self.width;
-        else:
-            self.nPadsX = 4
+            self.nPadsX = 2
             self.nPadsY = 3
-            self.width = 800
-            self.height = 0.8 *  self.width;
+            self.height = 800
+            self.width = 0.7 *  self.height;
+        elif nPlots > 6 and nPlots < 9:
+            self.nPadsX = 2
+            self.nPadsY = 4
+            self.height = 800
+            self.width = 0.6 *  self.height;
+        else:
+            self.nPadsX = 3
+            self.nPadsY = 4
+            self.height = 800
+            self.width = 0.8 *  self.height;
             
             
         self.last = None
