@@ -60,7 +60,8 @@ class Plotter:
                     if tmp:
                         h = tmp.Clone()
                     else:
-                        sys.exit("Histogram %s in file %s not found" % (h1, file))
+                        print >> sys.stderr, "Histogram %s in file %s not found" % (h1, file)
+                        continue
                     perf[ts[2]].stop()
                     if hist == histlist[0]:
                          perf[ts[5]].stop()
@@ -85,7 +86,8 @@ class Plotter:
                         if tmp:
                             h = tmp.Clone()
                         else:
-                            sys.exit("Histogram %s in file %s not found" % (h1,varroots[xxx]))
+                            print >> sys.stderr, "Histogram %s in file %s not found" % (h1,varroots[xxx])
+                            continue
                         if xxx == 0:#load first variable
                             h = tmp.Clone()
                         else:#add or divide by the 2nd variable
@@ -158,8 +160,8 @@ class Plotter:
                 print "%d histograms read in %s (%f per hist without caching)" % (noh, perf[ts[2]].getMeasuredTime(), (perf[ts[2]].getMeasuredSeconds()-perf[ts[5]].getMeasuredSeconds())/(noh-1))
                 print "%d histograms printed in %s (%f per hist without caching)" % (noh, perf[ts[1]].getMeasuredTime(), (perf[ts[1]].getMeasuredSeconds()-perf[ts[4]].getMeasuredSeconds())/(noh-1))
             else:
-                print "%d histograms read in %s (%f per hist)" % (noh, perf[ts[2]].getMeasuredTime(), (perf[ts[2]].getMeasuredSeconds())/(noh))
-                print "%d histograms printed in %s (%f per hist)" % (noh, perf[ts[1]].getMeasuredTime(), (perf[ts[1]].getMeasuredSeconds())/(noh))
+                print "%d histograms read in %s (%f per hist)" % (noh, perf[ts[2]].getMeasuredTime(), (perf[ts[2]].getMeasuredSeconds()))
+                print "%d histograms printed in %s (%f per hist)" % (noh, perf[ts[1]].getMeasuredTime(), (perf[ts[1]].getMeasuredSeconds()))
             print "total time elapsed: %s" % perf[ts[3]].getMeasuredTime()
         #Drawer.drawSummary(savedir, "Oo.ps")#
         
