@@ -11,7 +11,6 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
 
-
 typedef std::vector<pat::Jet> TopJetCollection;
 
 class QCDBkgEstimateSelector {
@@ -22,6 +21,18 @@ public:
 	QCDBkgEstimateSelector(TopJetCollection, const pat::Muon*, const pat::MET*);
 	~QCDBkgEstimateSelector();
 
+	//deltaPhi(MET, jet1)
+	double dphiMETJet1() const {
+		return fabs(dphiMETJet1_);
+	}
+	//deltaPhi(MET, jet2)
+	double dphiMETJet2() const {
+		return fabs(dphiMETJet2_);
+	}
+	//deltaPhi(MET, jet3)
+	double dphiMETJet3() const {
+		return fabs(dphiMETJet3_);
+	}
 	//deltaPhi(MET, jet4)
 	double dphiMETJet4() const {
 		return fabs(dphiMETJet4_);
@@ -30,6 +41,10 @@ public:
 	double dphiMETLepton() const {
 		return fabs(dphiMETLepton_);
 	}
+
+	double dphiMuJ1J2() const {
+			return fabs(dphiMuJ1J2_);
+		}
 	//MET * Et(jet1)
 	double METTimesLeadingJet() const {
 		return METTimesLeadingJet_;
@@ -43,9 +58,9 @@ public:
 		return sumAllJetsEtAndLepton_;
 	}
 
-//	double sumAllJetsEt() const {
-//			return sumAllJetsEt_;
-//		}
+	//	double sumAllJetsEt() const {
+	//			return sumAllJetsEt_;
+	//		}
 
 	//|sumVec p(all jets, lepton)|
 	double vecSumAllJetsAndLepton() const {
@@ -56,17 +71,8 @@ public:
 		return sumEtleadingJetAnd2TimesLeptonPt_;
 	}
 
-	//deltaPhi(MET, jet2)
-	double dphiMETJet2() const {
-		return fabs(dphiMETJet2_);
-	}
-
 	double MET() const {
 		return MET_;
-	}
-
-	double dphiMuJ1J2() const {
-		return fabs(dphiMuJ1J2_);
 	}
 
 	double leptonPt() const {
@@ -77,7 +83,7 @@ public:
 		return aplanarity_;
 	}
 
-	double sphericity() const{
+	double sphericity() const {
 		return sphericity_;
 	}
 
@@ -85,17 +91,60 @@ public:
 		return circularity_;
 	}
 
-	double isotropy() const{
+	double isotropy() const {
 		return isotropy_;
 	}
+
+	double Jet3EtOverJet1EtJet3Et() const{
+		return Jet3EtOverJet1EtJet3Et_;
+	}
+
+	double Jet3EtOverJet2EtJet3Et() const{
+			return Jet3EtOverJet2EtJet3Et_;
+		}
+	double Jet4EtOverJet1EtJet4Et() const{
+			return Jet4EtOverJet1EtJet4Et_;
+		}
+	double Jet4EtOverJet2EtJet4Et() const{
+			return Jet4EtOverJet2EtJet4Et_;
+		}
+
+	double invariantMassJ3andJ4() const{
+				return invariantMassJ3andJ4_;
+			}
+	double DeltaPhiMuonJet3() const{
+				return fabs(DeltaPhiMuonJet3_);
+			}
+	double DeltaPhiMuonJet4() const{
+				return fabs(DeltaPhiMuonJet4_);
+			}
+	double deltaPhiJet1Jet2() const{
+					return fabs(deltaPhiJet1Jet2_);
+				}
+	double DeltaPhiTtbar() const{
+					return fabs(DeltaPhiTtbar_);
+				}
+	double TriJetTMass() const{
+					return TriJetTMass_;
+				}
+	double DeltaPhiTimesDeltaEta() const{
+						return fabs(DeltaPhiTimesDeltaEta_);
+					}
+	double minDeltaPhiMETJets() const{
+						return fabs(minDeltaPhiMETJets_);
+					}
+
+	pat::Jet getClosestJetInDeltaPhi(TopJetCollection, double phi);
 private:
-	double dphiMETJet4_, dphiMETLepton_;
+	double dphiMETJet1_, dphiMETJet2_, dphiMETJet3_, dphiMETJet4_, dphiMETLepton_, dphiMuJ1J2_;
 	double METTimesLeadingJet_, sumEtJet3And4_;
 	double sumAllJetsEtAndLepton_, vecSumAllJetsAndLepton_;
 	double sumEtleadingJetAnd2TimesLeptonPt_;
-	double dphiMETJet2_, MET_, dphiMuJ1J2_;
-	double leptonPt_;//, sumAllJetsEt_;
+	double MET_, leptonPt_;
 	double aplanarity_, sphericity_, circularity_, isotropy_;
+	double Jet3EtOverJet1EtJet3Et_, Jet3EtOverJet2EtJet3Et_, Jet4EtOverJet1EtJet4Et_, Jet4EtOverJet2EtJet4Et_;
+	double invariantMassJ3andJ4_, DeltaPhiMuonJet3_, DeltaPhiMuonJet4_;
+	double deltaPhiJet1Jet2_, DeltaPhiTtbar_, TriJetTMass_, DeltaPhiTimesDeltaEta_, minDeltaPhiMETJets_;
 
 };
 
