@@ -802,18 +802,16 @@ class HistogramList(ConfigObject):
             if self.subobjects.has_key("legend"):
                 hist.subobjects["legend"] = self.subobjects["legend"]
             for var in self.subobjects["hist"]:
-                if i ==0:
                     inputtmp = self.getVarInput(var, inputs, self.getOption("input"))
                     varsource = self.getVarSourceFile(var)
-                    contenttmp = FileService.getFileContent(files[varsource])
+                    contenttmp = content
                     if not inputtmp:
                         inputtmp = Input.createInput()
                     inputtmp.setContent(contenttmp)
                     contenttmp = inputtmp.getFilteredContent()
                     nameAndFoldertmp = self.getNameAndFolder(contenttmp[i])
                     var.setOption("input","f%s%s" %(Input.separator, nameAndFoldertmp[1]))
-                hist.subobjects["hist"].append(var.Copy())
-            
+                    hist.subobjects["hist"].append(var.Copy())
             hist.resolveInputs(files, inputs)
             self.subobjects["canv"].append(hist)
             
