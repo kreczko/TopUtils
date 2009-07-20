@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
     bGraph[ieta]->SetMarkerStyle(20);
     bGraph[ieta]->SetMarkerSize(0.8);
 
-    myetfunction->SetLineWidth(1.);
+    myetfunction->SetLineWidth(1);
 
     bGraph[ieta]->Fit("myetfunction","+RQ");
     bGraph[ieta]->DrawClone("pe1same");
