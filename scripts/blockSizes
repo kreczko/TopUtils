@@ -163,7 +163,7 @@ class blockSizes:
             else:
                 ## get rid of nasty endings at the same time
                 valList.append(inputList[i].rstrip('sthndr'))
-                sumList+=valList[len(valList)-1]
+                sumList+=int(valList[len(valList)-1])
 
         ## print a small summary to the screen
         summaryString = '* '
