@@ -4,7 +4,7 @@ import FWCore.ParameterSet.Config as cms
 # cfg file for the analysis of selected muon
 # quantities
 #-------------------------------------------------
-process = cms.Process("Muon")
+process = cms.Process("UserTest")
 
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
