@@ -4,23 +4,18 @@
 // Class:      JetCalibrationTreeWriter
 // 
 /**\class JetCalibrationTreeWriter JetCalibrationTreeWriter.cc TOPunbinnedFit/JetCalibrationTreeWriter/src/JetCalibrationTreeWriter.cc
-
- Description: <one line class summary>
-
- Implementation:
-     <Notes on implementation>
 */
 //
 // Original Author:  Holger Enderle,68/111,4719,
 //         Created:  Mon Jan 26 16:29:19 CET 2009
-// $Id: JetCalibrationTreeWriter.cc,v 1.1 2009/05/15 09:34:44 henderle Exp $
+// $Id: JetCalibrationTreeWriter.cc,v 1.2 2009/08/13 08:54:10 snaumann Exp $
 //
 //
 
 #include "JetCalibrationTreeWriter.h"
 
 //
-// class decleration
+// class declaration
 //
 
 class JetCalibrationTreeWriter : public edm::EDAnalyzer {
