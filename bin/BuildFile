@@ -8,19 +8,3 @@
 <environment>
  <bin file="resolhistowriter.cc"> </bin>
 </environment>
-
-<environment>
- <bin file="plot.cc"> </bin>
-</environment>
-
-<environment>
- <bin file="plot_sum.cc"> </bin>
-</environment>
-
-<environment>
- <bin file="plot_fit.cc"> </bin>
-</environment>
-
-<environment>
- <bin file="plot_ratio.cc"> </bin>
-</environment>
