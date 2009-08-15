@@ -13,11 +13,18 @@
 /*
    \class   MuonJetSelector MuonJetSelector.h "TopAnalysis/TopUtils/interface/MuonJetSelector.h"
 
-   \brief   plugin to select for the muon, which is part of the top hypothesis or the decay on gernerator level  
+   \brief   Plugin to select for the muon, which is part of the top hypothesis or best matching to the decay on generator level  
 
-   The plugin selects for the muon that is poart of the top hypothesis or for the muon that is 
-   part of the leptonic top decay on generator level. It takes the TtSemiLeptonicEvent as input 
-   and produces a std::vector<pat::Muon>, which can be further processed with standard analyzers
+   The plugin selects for the muon that is part of the top hypothesis or for the muon with the best match 
+   to the muon from the leptonic top decay on generator level. It has the TtSemiLeptonicEvent as input &
+   produces two std::vector<pat::Muon>'s, which can be further processed with standard analyzers. The output 
+   labels are: 
+
+   * selectedLayer1TopMuon:rec   :   for the muon from the ttbar hypothesis 
+   * selectedLayer1TopMuon:gen   :   for the muon that matches best to the muon from the leptonic decay 
+                                     on generator level (in deltaR)
+
+   For the kGenMatch hypothesis both muons should be the same.
 **/
 
 class TopMuonSelector : public edm::EDProducer {

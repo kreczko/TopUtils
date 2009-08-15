@@ -9,6 +9,9 @@ DEFINE_FWK_MODULE( EventWeightPlain );
 #include "TopAnalysis/TopUtils/plugins/TopMuonSelector.h"
 DEFINE_FWK_MODULE( TopMuonSelector );
 
+#include "TopAnalysis/TopUtils/plugins/TopJetsSelector.h"
+DEFINE_FWK_MODULE( TopJetsSelector );
+
 #include "TopAnalysis/TopUtils/plugins/JetEnergyScale.h"
 DEFINE_FWK_MODULE( JetEnergyScale );
 
