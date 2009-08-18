@@ -9,6 +9,6 @@ from TopAnalysis.TopUtils.TopMuonSelector_cfi import *
 
 makeSelectedLayer1TopMuons = cms.Sequence(makeGenEvt *
                                           makeTtSemiLepEvent *
-                                          selectedLayer1TopMuon
+                                          selectedLayer1TopMuons
                                           )
 
