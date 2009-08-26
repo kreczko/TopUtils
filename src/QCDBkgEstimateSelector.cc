@@ -1,18 +1,18 @@
 #include "TopAnalysis/TopUtils/interface/QCDBkgEstimateSelector.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include "TopQuarkAnalysis/TopTools/interface/EventShapeVariables.h"
-#include "TVector3.h"
+#include "DataFormats/Math/interface/Vector3D.h"
 
 using namespace std;
-std::vector<TVector3> makeVecForEventShape(TopJetCollection jets, const pat::Muon *muon, double scale = 1.) {
-	std::vector<TVector3> p;
+std::vector<math::XYZVector> makeVecForEventShape(TopJetCollection jets, const pat::Muon *muon, double scale = 1.) {
+	std::vector<math::XYZVector> p;
 	TopJetCollection::const_iterator jet = jets.begin();
 	for (int i = 0; i < 4; i++) {
-		TVector3 Vjet(jet->px() * scale, jet->py() * scale, jet->pz() * scale);
+		math::XYZVector Vjet(jet->px() * scale, jet->py() * scale, jet->pz() * scale);
 		p.push_back(Vjet);
 		jet++;
 	}
-	TVector3 mu(muon->px() * scale, muon->py() * scale, muon->pz() * scale);
+	math::XYZVector mu(muon->px() * scale, muon->py() * scale, muon->pz() * scale);
 	p.push_back(mu);
 	return p;
 }
@@ -23,7 +23,7 @@ QCDBkgEstimateSelector::QCDBkgEstimateSelector() {
 QCDBkgEstimateSelector::QCDBkgEstimateSelector(TopJetCollection jets, const pat::Muon *lepton, const pat::MET *met) {
 
 	if (jets.size() >= 4) {
-		std::vector<TVector3> p;
+		std::vector<math::XYZVector> p;
 
 		TopJetCollection::const_iterator jet = jets.begin();
 
@@ -65,7 +65,7 @@ QCDBkgEstimateSelector::QCDBkgEstimateSelector(TopJetCollection jets, const pat:
 		vec += jet->p4();
 		vec += lepton->p4();
 		p = makeVecForEventShape(jets, lepton);
-		EventShapeVariables eventshape;
+		EventShapeVariables eventshape(p);
 
 		dphiMETJet1_ = deltaPhi(met->phi(), jet1Phi);
 		dphiMETJet2_ = deltaPhi(met->phi(), jet2Phi);
@@ -81,10 +81,10 @@ QCDBkgEstimateSelector::QCDBkgEstimateSelector(TopJetCollection jets, const pat:
 		MET_ = met->et();
 
 		leptonPt_ = lepton->pt();
-		aplanarity_ = eventshape.aplanarity(p);
-		sphericity_ = eventshape.sphericity(p);
-		circularity_ = eventshape.circularity(p);
-		isotropy_ = eventshape.isotropy(p);
+		aplanarity_ = eventshape.aplanarity();
+		sphericity_ = eventshape.sphericity();
+		circularity_ = eventshape.circularity();
+		isotropy_ = eventshape.isotropy();
 		Jet3EtOverJet1EtJet3Et_ = jet3Et / (jet3Et + jet1Et);
 		Jet3EtOverJet2EtJet3Et_ = jet3Et / (jet3Et + jet2Et);
 		Jet4EtOverJet1EtJet4Et_ = jet4Et / (jet4Et + jet1Et);
