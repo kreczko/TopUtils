@@ -1,5 +1,4 @@
 <use name=TopAnalysis/TopUtils>
-<use name=Foundation/PluginManager>
 <use name=PhysicsTools/UtilAlgos>
 <use name=FWCore/ServiceRegistry>
 <use name=FWCore/MessageLogger>
