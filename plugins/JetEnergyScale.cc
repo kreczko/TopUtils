@@ -2,6 +2,7 @@
 
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
+#include "FWCore/Framework/interface/Event.h"
 
 JetEnergyScale::JetEnergyScale(const edm::ParameterSet& cfg):
   inputJets_           (cfg.getParameter<edm::InputTag>("inputJets"           )),
