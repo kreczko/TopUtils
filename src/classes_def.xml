@@ -1,3 +1,6 @@
 <lcgdict>
   <class name="JetCalibrationVariables"/>
+  <class name="edm::RefToBaseVector<pat::Jet>"/>
+  <class name="edm::Wrapper<edm::RefToBaseVector<pat::Jet> >"/>
+  <class name="edm::reftobase::BaseVectorHolder<pat::Jet>"/>
 </lcgdict>
