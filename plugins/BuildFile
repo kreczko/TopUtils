@@ -1,14 +1,15 @@
-<use name=TopAnalysis/TopUtils>
-<use name=PhysicsTools/UtilAlgos>
+<use name=CondCore/PluginSystem>
+<use name=DataFormats/PatCandidates>
 <use name=FWCore/ServiceRegistry>
 <use name=FWCore/MessageLogger>
 <use name=FWCore/ParameterSet>
 <use name=FWCore/Framework>
 <use name=FWCore/Utilities>
-<use name=root>
 <use name=PhysicsTools/MVAComputer>
 <use name=PhysicsTools/MVATrainer>
-<use name=CondCore/PluginSystem>
+<use name=PhysicsTools/UtilAlgos>
+<use name=TopAnalysis/TopUtils>
+<use name=root>
 
 <library file=*.cc name=TopAnalysisTopUtilsPlugins>
   <flags EDM_PLUGIN=1>

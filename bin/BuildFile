@@ -1,5 +1,4 @@
-<use name=TopAnalysis/TopUtils>
-<use name=root> 
+<use name=rootgpad>
 
 <environment>
  <bin file="resolutioncalculator.cc"> </bin>
