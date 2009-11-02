@@ -36,21 +36,16 @@ process.GlobalTag.globaltag = cms.string('MC_31X_V3::All')
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
 ## configure JetEnergyScale tool
-process.load("TopAnalysis.TopUtils.JetEnergyScale_cfi")
-process.scaledJetEnergy.scaleFactor = 1.1
-process.selectedLayer1Jets.src = "scaledJetEnergy:allLayer1Jets"
-## don't forget to use "scaledJetEnergy:layer1METs" as InputTag for your subsequent modules
+process.load("TopAnalysis.TopUtils.JetEnergyScale_cff")
+from TopAnalysis.TopUtils.JetEnergyScale_cff import *
+scaleAllLayer1JetsEnergy(process, 1.1)
 
 ## necessary to run with 33X on 31X AOD samples
 from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
 run33xOn31xMC(process)
 restrictInputToAOD31X(process)
 
-process.p = cms.Path(process.allLayer1Objects *      # part of the patDefaultSequence
-                     process.scaledJetEnergy *
-                     process.selectedLayer1Objects * # part of the patDefaultSequence
-                     process.cleanLayer1Objects *    # part of the patDefaultSequence
-                     process.countLayer1Objects)     # part of the patDefaultSequence
+process.p = cms.Path(process.patDefaultSequence)
 
 ## configure output module
 process.out = cms.OutputModule("PoolOutputModule",
