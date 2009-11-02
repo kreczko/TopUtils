@@ -6,7 +6,7 @@ def scaleAllLayer1JetsEnergy(process,
                              factor):
 
     print "---------------------------------------------------------------------"
-    print "Rescaling the energy of the allLayer1Jets be a factor of " + str(factor)
+    print "Rescaling the energy of the allLayer1Jets by a factor of " + str(factor)
     print "before using them to produce the selectedLayer1Objects."
     print "If you are using MET in your analysis, please change your InputTag to"
     print "'scaledJetEnergy:layer1METs' in your modules."
