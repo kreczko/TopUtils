@@ -3,6 +3,10 @@
 #include "DataFormats/JetReco/interface/CaloJetCollection.h" 
 #include "DataFormats/PatCandidates/interface/Jet.h"
 
+#include "DataFormats/Common/interface/Association.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
+
+
 #include "DataFormats/Common/interface/RefProd.h" 
 #include "DataFormats/Common/interface/RefToBase.h"
 #include "DataFormats/Common/interface/RefHolder.h"
@@ -15,6 +19,10 @@ namespace {
   struct dictionary {
     edm::RefToBaseVector<pat::Jet> jrtbv;
     edm::Wrapper<edm::RefToBaseVector<pat::Jet> > jrtbv_w;
-    edm::reftobase::BaseVectorHolder<pat::Jet> * bvhj_p;
+    edm::reftobase::BaseVectorHolder<pat::Jet>* bvhj_p;
+
+    edm::Association<edm::View<reco::Candidate> > arcv;
+    edm::Wrapper<edm::Association<edm::View<reco::Candidate> > > arcv_w;
+    edm::RefProd<edm::View<reco::Candidate> > rcv_rp;
   };
 }

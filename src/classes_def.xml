@@ -3,4 +3,8 @@
   <class name="edm::RefToBaseVector<pat::Jet>"/>
   <class name="edm::Wrapper<edm::RefToBaseVector<pat::Jet> >"/>
   <class name="edm::reftobase::BaseVectorHolder<pat::Jet>"/>
+
+  <class name="edm::Association<edm::View<reco::Candidate> >"/>
+  <class name="edm::Wrapper<edm::Association<edm::View<reco::Candidate> > >"/>
+  <class name="edm::RefProd<edm::View<reco::Candidate> >"/>
 </lcgdict>
