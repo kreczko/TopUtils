@@ -2,6 +2,7 @@
 <use name=rootgraphics>
 <use name=root>
 <use name=DataFormats/PatCandidates>
+<use name=PhysicsTools/CandUtils>
 <use name=TopQuarkAnalysis/TopTools>
 
 <export>

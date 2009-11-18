@@ -1,6 +1,6 @@
 #include "TopAnalysis/TopUtils/interface/QCDBkgEstimateSelector.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
-#include "TopQuarkAnalysis/TopTools/interface/EventShapeVariables.h"
+#include "PhysicsTools/CandUtils/interface/EventShapeVariables.h"
 #include "DataFormats/Math/interface/Vector3D.h"
 
 using namespace std;
