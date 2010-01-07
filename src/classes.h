@@ -1,6 +1,7 @@
 #include "TopAnalysis/TopUtils/interface/JetCalibrationVariables.h"
 
 #include "DataFormats/JetReco/interface/CaloJetCollection.h" 
+#include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 
 #include "DataFormats/Common/interface/Association.h"
@@ -17,6 +18,10 @@ using namespace reco;
 
 namespace {
   struct dictionary {
+    edm::RefToBaseVector<pat::Muon> murtbv;
+    edm::Wrapper<edm::RefToBaseVector<pat::Muon> > murtbv_w;
+    edm::reftobase::BaseVectorHolder<pat::Muon>* bvhmu_p;
+
     edm::RefToBaseVector<pat::Jet> jrtbv;
     edm::Wrapper<edm::RefToBaseVector<pat::Jet> > jrtbv_w;
     edm::reftobase::BaseVectorHolder<pat::Jet>* bvhj_p;
