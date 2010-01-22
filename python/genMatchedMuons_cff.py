@@ -6,7 +6,7 @@ import FWCore.ParameterSet.Config as cms
 from PhysicsTools.PatAlgos.mcMatchLayer0.muonMatch_cfi import muonMatch
 muonMatch.src = "selectedLayer1Muons"
 muonMatch.matched = "prunedGenParticles"
-muonMatch.mcStatus = [1, 2]
+muonMatch.mcStatus = [1, 2, 3]
 
 ## make gen matched muons
 from TopAnalysis.TopUtils.GenMatchedMuons_cfi import genMatchedMuons
