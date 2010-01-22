@@ -9,22 +9,22 @@
 #include "DataFormats/Common/interface/RefToBaseVector.h"
 
 
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+
+
 /**
    \class   GenMatchedCandsProducerBase GenMatchedCandsProducerBase.h "UserCode/TopMCValidation/plugins/GenMatchedCandsProducerBase.h"
 
    \brief   Plugin tenmplate to produce generator matched candidate collections
 
    Plugin template to produce generator matched reco::Candidate collections. The template 
-   has to arguments which have to be extraced: Object, specifying the objects type of the 
-   output collection (of which the following are implemented in the plugins directory: 
-   reco::Muon, reco::GsfElectron or reco::CaloJet) and Match specifying the object type to 
-   which the match is expected to be performed (of which the following are implemented in 
-   the plugins dirctory: reco::GenParticle, reco::GenJet, the latter is only reasonable 
-   for jets). 
+   has two arguments, which have to be extraced: 
+   * Object specifies the object's type of the output collection; 
+   * Match specifies the object type to which the match is expected to be performed to. 
 
    The template plugin expects a reco::Collection of objects to be matched to generator 
-   information and an edm::Association as provided by the MCMatcher tools. This has to run 
-   in advance. 
+   information and an edm::Association as provided by the MCMatcher tools. This has to 
+   be run in advance. The output is a std::vector<Object>.
 */
 
 
@@ -57,7 +57,8 @@ template <typename Object, typename Match>
   src_( cfg.getParameter<edm::InputTag>("src") ),
   match_( cfg.getParameter<edm::InputTag>("match") )
 {
-  produces<edm::RefToBaseVector<Object> >();
+  //produces<edm::RefToBaseVector<Object> >();
+  produces<std::vector<Object> >();
 }
 
 template <typename Object, typename Match>
@@ -72,7 +73,8 @@ template <typename Object, typename Match>
   evt.getByLabel(match_, match);
   
   // setup the output collection
-  std::auto_ptr<edm::RefToBaseVector<Object> > output(new edm::RefToBaseVector<Object>);
+  // std::auto_ptr<edm::RefToBaseVector<Object> > output(new edm::RefToBaseVector<Object>);
+  std::auto_ptr<std::vector<Object> > output(new std::vector<Object>);
 
   // iterate input collection 
   for (typename edm::View<Object>::const_iterator it = src->begin(); it != src->end(); ++it){
@@ -80,7 +82,7 @@ template <typename Object, typename Match>
     edm::RefToBase<Object> recRef = src->refAt(idx);
     if( match->contains(recRef.id()) ){
       if ((*match)[recRef].isNonnull() && (*match)[recRef].isAvailable()) {
-	output->push_back(recRef);
+	output->push_back(*it);
       }
     }
   }
