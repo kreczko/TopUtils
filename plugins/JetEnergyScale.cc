@@ -39,7 +39,7 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
     pat::Jet scaledJet = *jet;
     scaledJet.scaleEnergy( scaleFactor_ );
     pJets->push_back( scaledJet );
-    if(jet->originalObject()->pt() > jetPTthresholdForMET_
+    if(jet->correctedJet("raw").pt() > jetPTthresholdForMET_
        && jet->emEnergyFraction() < jetEMlimitForMET_) {
       dPx    += scaledJet.px() - jet->px();
       dPy    += scaledJet.py() - jet->py();
