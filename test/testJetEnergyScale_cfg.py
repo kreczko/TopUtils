@@ -30,7 +30,7 @@ process.options = cms.untracked.PSet(
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = cms.string('MC_3XY_V18::All')
+process.GlobalTag.globaltag = cms.string('MC_3XY_V25::All')
 
 ## pat sequences
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
@@ -38,12 +38,20 @@ process.load("PhysicsTools.PatAlgos.patSequences_cff")
 ## configure JetEnergyScale tool
 process.load("TopAnalysis.TopUtils.JetEnergyScale_cff")
 from TopAnalysis.TopUtils.JetEnergyScale_cff import *
-scaleAllLayer1JetsEnergy(process, 1.1)
+scalePatJetsEnergy(process, 1.1)
 
-## necessary to run with 33X on 31X AOD samples
-from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
-run33xOn31xMC(process)
-restrictInputToAOD31X(process)
+## necessary to run with 35X on 31X samples
+from PhysicsTools.PatAlgos.tools.jetTools import *
+switchJetCollection(process, 
+                    cms.InputTag('antikt5CaloJets'),   
+                    doJTA            = True,            
+                    doBTagging       = True,            
+                    jetCorrLabel     = ('AK5','Calo'),  
+                    doType1MET       = True,
+                    genJetCollection = cms.InputTag("antikt5GenJets"),
+                    doJetID          = False,
+                    jetIdLabel       = "antikt5"
+                    )
 
 process.p = cms.Path(process.patDefaultSequence)
 

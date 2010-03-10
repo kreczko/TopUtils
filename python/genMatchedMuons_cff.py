@@ -4,7 +4,7 @@ import FWCore.ParameterSet.Config as cms
 # generator Muons originating from prompt W or Z boson
 # decays
 from PhysicsTools.PatAlgos.mcMatchLayer0.muonMatch_cfi import muonMatch
-muonMatch.src = "selectedLayer1Muons"
+muonMatch.src = "selectedPatMuons"
 muonMatch.matched = "prunedGenParticles"
 muonMatch.mcStatus = [1, 2, 3]
 

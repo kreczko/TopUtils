@@ -95,7 +95,7 @@ process.TFileService = cms.Service("TFileService",
 )
 
 process.jetCalibrationTreeWriter = cms.EDAnalyzer('JetCalibrationTreeWriter',
-     jetTag      = cms.untracked.InputTag("allLayer1Jets")
+     jetTag      = cms.untracked.InputTag("patJets")
                                                   
 )
 

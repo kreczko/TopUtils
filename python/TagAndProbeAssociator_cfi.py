@@ -2,9 +2,9 @@ import FWCore.ParameterSet.Config as cms
 
 testMap = cms.EDFilter("TagAndProbeAssociator",
   ## target collection
-  src     =  cms.InputTag("selectedLayer1Muons"),
+  src     =  cms.InputTag("selectedPatMuons"),
   ## collcetion to be matched to the target collection
-  matched = cms.InputTag("selectedLayer1Muons"),
+  matched = cms.InputTag("selectedPatMuons"),
   ## maximal delta value for match
   maxDeltaR = cms.double(0.2),
   ## switch to determine whether match ambiguities should be resolved or not

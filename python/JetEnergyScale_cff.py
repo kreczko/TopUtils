@@ -2,20 +2,20 @@ import FWCore.ParameterSet.Config as cms
 
 from TopAnalysis.TopUtils.JetEnergyScale_cfi import *
 
-def scaleAllLayer1JetsEnergy(process,
-                             factor):
+def scalePatJetsEnergy(process,
+                       factor):
 
     print "---------------------------------------------------------------------"
-    print "Rescaling the energy of the allLayer1Jets by a factor of " + str(factor)
-    print "before using them to produce the selectedLayer1Objects."
+    print "Rescaling the energy of the patJets by a factor of " + str(factor)
+    print "before using them to produce the selectedPatJets."
     print "If you are using MET in your analysis, please change your InputTag to"
-    print "'scaledJetEnergy:layer1METs' in your modules."
+    print "'scaledJetEnergy:patMETs' in your modules."
 
     process.scaledJetEnergy.scaleFactor = factor
 
-    process.selectedLayer1Objects.replace(process.selectedLayer1Jets,
-                                          process.scaledJetEnergy * process.selectedLayer1Jets)
+    process.selectedPatCandidates.replace(process.selectedPatJets,
+                                          process.scaledJetEnergy * process.selectedPatJets)
 
-    process.selectedLayer1Jets.src = "scaledJetEnergy:allLayer1Jets"
+    process.selectedPatJets.src = "scaledJetEnergy:patJets"
 
     print "---------------------------------------------------------------------"

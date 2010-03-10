@@ -7,8 +7,8 @@ trainQCDBkg = cms.EDAnalyzer("TtSemiLepSignalSelectorMVATrainer",
     #-------------------------------------------------
     # sources
     #-------------------------------------------------
-    leptons  = cms.InputTag("selectedLayer1Muons"),
-    jets     = cms.InputTag("selectedLayer1Jets"),
+    leptons  = cms.InputTag("selectedPatMuons"),
+    jets     = cms.InputTag("selectedPatJets"),
     mets     = cms.InputTag("selectedLayer1METs"),
 #    matching = cms.InputTag("ttSemiLepJetPartonMatch"),                                       
 

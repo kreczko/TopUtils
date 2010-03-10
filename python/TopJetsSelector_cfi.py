@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 selectedLayer1TopJets = cms.EDFilter("TopJetsSelector",
   ## input collection for the selector
-  inputCollection = cms.InputTag("selectedLayer1Jets"),
+  inputCollection = cms.InputTag("selectedPatJets"),
   ## generatorMatch label
   generatorMatch = cms.InputTag("ttSemiLepJetPartonMatch"),                                     
   ## ttSemileptonicEvent
