@@ -1,4 +1,4 @@
-#include "TopAnalysis/TopUtils/interface/JetCalibrationVariables.h"
+#include "TopAnalysis/TopUtils/interface/ResolutionVariables.h"
 
 #include "DataFormats/JetReco/interface/CaloJetCollection.h" 
 #include "DataFormats/PatCandidates/interface/Muon.h"

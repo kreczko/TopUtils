@@ -14,6 +14,9 @@
 #include "FWCore/ParameterSet/interface/InputTag.h"
 
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/MET.h"
 #include "DataFormats/Common/interface/View.h"
 // user include files
 #include "TTree.h"
@@ -21,12 +24,15 @@
 #include "TRandom.h"
 #include "TRandom3.h"
 
-#include "TopAnalysis/TopUtils/interface/JetCalibrationVariables.h"
+#include "TopAnalysis/TopUtils/interface/ResolutionVariables.h"
 
 using namespace reco;
 using namespace std;
 
 edm::Service<TFileService> fs;
 TTree *tree;
-JetCalibrationVariables *treeMemPtr;
+ResolutionVariables *treeMemPtr;
 edm::InputTag jetLabel_;
+edm::InputTag electronLabel_;
+edm::InputTag muonLabel_;
+edm::InputTag METLabel_;
