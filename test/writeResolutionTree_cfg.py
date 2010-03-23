@@ -18,12 +18,8 @@ process.TFileService = cms.Service("TFileService",
     fileName = cms.string('ResolutionTree.root')
 )
 
-process.resolutionTreeWriter = cms.EDAnalyzer('ResolutionTreeWriter',
-     jetTag      = cms.untracked.InputTag("selectedPatJets"),
-     electronTag = cms.untracked.InputTag("selectedPatElectrons"),
-     muonTag     = cms.untracked.InputTag("selectedPatMuons"),
-     METTag      = cms.untracked.InputTag("patMETs")                                           
-)
+from TopAnalysis.TopUtils.ResolutionTreeWriter_cfi import writeResolutionTree
+process.resolutionTreeWriter = writeResolutionTree
 
 process.dump = cms.EDAnalyzer('EventContentAnalyzer'
 )
