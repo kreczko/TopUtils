@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
   TCanvas* justanothercanvas = new TCanvas("justanothercanvas","justanothercanvas",400,500);
   TCanvas* etetacanvas = new TCanvas("etetacanvas","etetacanvas",700,900);
   etetacanvas->Divide(1,2);
-  TCanvas* etetacanvas2 = new TCanvas("etetacanvas2","etetacanvas2",900,500);
+  //TCanvas* etetacanvas2 = new TCanvas("etetacanvas2","etetacanvas2",900,500);
   TCanvas* chi2canvas = new TCanvas("chi2canvas","chi2canvas",500,900);
   chi2canvas->Divide(1,3);
   TCanvas* chi2distributioncan = new TCanvas("chi2distributioncan","chi2distributioncan",900,500);
@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
   TCanvas* justanothercanvaseta = new TCanvas("justanothercanvaseta","justanothercanvaseta",400,500);
   TCanvas* etetacanvaseta = new TCanvas("etetacanvaseta","etetacanvaseta",700,900);
   etetacanvaseta->Divide(1,2);
-  TCanvas* etetacanvas2eta = new TCanvas("etetacanvas2eta","etetacanvas2eta",900,500);
+  //TCanvas* etetacanvas2eta = new TCanvas("etetacanvas2eta","etetacanvas2eta",900,500);
   TCanvas* chi2canvaseta = new TCanvas("chi2canvaseta","chi2canvaseta",500,900);
   chi2canvaseta->Divide(1,3);
   TCanvas* chi2distributioncaneta = new TCanvas("chi2distributioncaneta","chi2distributioncaneta",900,500);
@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
   TCanvas* justanothercanvasphi = new TCanvas("justanothercanvasphi","justanothercanvasphi",400,500);
   TCanvas* etetacanvasphi = new TCanvas("etetacanvasphi","etetacanvasphi",700,900);
   etetacanvasphi->Divide(1,2);
-  TCanvas* etetacanvas2phi = new TCanvas("etetacanvas2phi","etetacanvas2phi",900,500);
+  //TCanvas* etetacanvas2phi = new TCanvas("etetacanvas2phi","etetacanvas2phi",900,500);
   TCanvas* chi2canvasphi = new TCanvas("chi2canvasphi","chi2canvasphi",500,900);
   chi2canvasphi->Divide(1,3);
   TCanvas* chi2distributioncanphi = new TCanvas("chi2distributioncanphi","chi2distributioncanphi",900,500);
