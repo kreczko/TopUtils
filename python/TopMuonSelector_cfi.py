@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-selectedLayer1TopMuons = cms.EDFilter("TopMuonSelector",
+selectedTopMuons = cms.EDFilter("TopMuonSelector",
   ## input collection for the selector
   inputCollection = cms.InputTag("selectedPatMuons"),
   ## ttSemileptonicEvent

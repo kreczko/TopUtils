@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-selectedLayer1TopJets = cms.EDFilter("TopJetsSelector",
+selectedTopJets = cms.EDFilter("TopJetsSelector",
   ## input collection for the selector
   inputCollection = cms.InputTag("selectedPatJets"),
   ## generatorMatch label

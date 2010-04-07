@@ -7,8 +7,8 @@ from TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff import
 ##  produce selectedLayer1TopMuons
 from TopAnalysis.TopUtils.TopMuonSelector_cfi import *
 
-makeSelectedLayer1TopMuons = cms.Sequence(makeGenEvt *
-                                          makeTtSemiLepEvent *
-                                          selectedLayer1TopMuons
-                                          )
+makeSelectedTopMuons = cms.Sequence(makeGenEvt *
+                                    makeTtSemiLepEvent *
+                                    selectedTopMuons
+                                    )
 
