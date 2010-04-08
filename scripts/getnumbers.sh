@@ -1,9 +1,15 @@
 #!/bin/sh
 
 # -----------------------------------------------------------------------------------
-# Script to add numbers from a given number of .err input files from _cmsRun_; the 
-# expected file structure is expected to originate from the cmsRun Summary Report.
-# This Report is expected to contain summary lines of type:
+# Script to add numbers from a given number of .err input files from _cmsRun_. The
+# expected structure of the file names is of type: 
+#
+# filename_#_sample.err
+#
+# where 'filename' corresponds to a filename label, '#' corresponds to a file 
+# number and 'sample' corresponds to a sample label. The file numbering may start 
+# from '0' or '1'. The expected file structure is expected to originate from the 
+# cmsRun Summary Report. This Report is expected to contain summary lines of type:
 #
 # text0 d0  d1  d2  d3  d4  d5 text1
 #
