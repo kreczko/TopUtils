@@ -42,7 +42,7 @@
 # [Passed], [Failed] the module/filter and a [Error] count as provided by the 
 # cms Summary Report. Finally the buffer files are removed.
 #
-# Example use: getnumbers.sh moduleLabel test test 100
+# Example use: getnumbers.sh testModule testFolder testFilename testSampleName 100
 # -----------------------------------------------------------------------------------
 
 folder=$2
