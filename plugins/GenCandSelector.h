@@ -45,8 +45,8 @@
                      al. It does not have to present in the definition of the module.
 
    The module acts on generator particle listings of pythia. Extensions might be needed for the 
-   module to be also applicable on MC@NLO like particle listings. Further testing will be necessary 
-   here.
+   module to be also applicable on MC at NLO like particle listings. Further testing will be 
+   necessary here.
 */
 
 class GenCandSelector : public edm::EDProducer {
