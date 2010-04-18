@@ -9,3 +9,8 @@ genJetMatchedJets = cms.EDProducer('GenJetMatchedJetsProducer',
   src = cms.InputTag('selectedPatJetsAK5'),
   match = cms.InputTag('jetGenJetMatch')
 )
+
+genMatchedMuons = cms.EDProducer('GenMatchedMuonsProducer',
+  src = cms.InputTag('selectedPatMuons'),
+  match = cms.InputTag('muonMatch')
+)

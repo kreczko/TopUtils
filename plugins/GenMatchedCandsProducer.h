@@ -13,14 +13,16 @@
 
 
 /**
-   \class   GenMatchedCandsProducerBase GenMatchedCandsProducerBase.h "UserCode/TopMCValidation/plugins/GenMatchedCandsProducerBase.h"
+   \class   GenMatchedCandsProducer GenMatchedCandsProducer.h "UserCode/TopMCValidation/plugins/GenMatchedCandsProducer.h"
 
    \brief   Plugin tenmplate to produce generator matched candidate collections
 
    Plugin template to produce generator matched reco::Candidate collections. The template 
-   has two arguments, which have to be extraced: 
-   * Object specifies the object's type of the output collection; 
-   * Match specifies the object type to which the match is expected to be performed to. 
+   has two arguments, which have to be specified: 
+
+   _Object_ : specifies the object's type of the output collection. 
+
+   _Match_  : specifies the object type to which the match is expected to be performed to. 
 
    The template plugin expects a reco::Collection of objects to be matched to generator 
    information and an edm::Association as provided by the MCMatcher tools. This has to 
@@ -29,13 +31,13 @@
 
 
 template <typename Object, typename Match>
-class GenMatchedCandsProducerBase : public edm::EDProducer {
+class GenMatchedCandsProducer : public edm::EDProducer {
 
 public:
   /// constructor
-  explicit GenMatchedCandsProducerBase(const edm::ParameterSet& cfg);
+  explicit GenMatchedCandsProducer(const edm::ParameterSet& cfg);
   /// destructor
-    ~GenMatchedCandsProducerBase(){};
+    ~GenMatchedCandsProducer(){};
   
 private:
   /// all that needs to be done at the beginning of a run
@@ -53,7 +55,7 @@ private:
 };
 
 template <typename Object, typename Match>
-  GenMatchedCandsProducerBase<Object, Match>::GenMatchedCandsProducerBase(const edm::ParameterSet& cfg):
+  GenMatchedCandsProducer<Object, Match>::GenMatchedCandsProducer(const edm::ParameterSet& cfg):
   src_( cfg.getParameter<edm::InputTag>("src") ),
   match_( cfg.getParameter<edm::InputTag>("match") )
 {
@@ -62,7 +64,7 @@ template <typename Object, typename Match>
 }
 
 template <typename Object, typename Match>
-  void GenMatchedCandsProducerBase<Object, Match>::produce(edm::Event& evt, const edm::EventSetup& setup)
+  void GenMatchedCandsProducer<Object, Match>::produce(edm::Event& evt, const edm::EventSetup& setup)
 {
   // recieve the input collection
   edm::Handle<edm::View<Object> > src; 
