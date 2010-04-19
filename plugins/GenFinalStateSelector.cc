@@ -53,7 +53,7 @@ GenFinalStateSelector::filter(edm::Event& event, const edm::EventSetup& setup)
       }
     }
   }
-  bool accept=(elecs_>=0 ? iElec==elecs_:true) && (muons_>=0 ? iMuon==muons_:true);
+  bool accept=(elecs_>=0 ? iElec>=elecs_:true) && (muons_>=0 ? iMuon>=muons_:true);
   //if(( (!invert_ && accept) || (!(!invert_)&& !accept) ) ){
   //  std::cout << "iElec  = " << iElec << "(" << elecs_ << ")" << std::endl;
   //  std::cout << "iMuon  = " << iMuon << "(" << muons_ << ")" << std::endl;

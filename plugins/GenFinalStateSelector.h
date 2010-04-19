@@ -14,7 +14,7 @@
 
    The module filters top antitop events on generator level according to expected final state 
    particles in contrary to the decay channel. Considered are electrons and muons in the final 
-   state. Configuratio parameters are: 
+   state. Configuration parameters are: 
 
     * src    : input source (as edm::InputTag)
     * elecs  : number of electrons in the final state
@@ -23,7 +23,7 @@
 
    the parameters elecs, muons or invert may be omitted from the configuration file. If 
    omitted or set to -1 the corresponding lepton flavor will not be considered in the final 
-   state classification. If omitted of set to false the classification weill not be inverted.
+   state classification. If omitted of set to false the classification will not be inverted.
 */
 
 
