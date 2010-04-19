@@ -1,19 +1,21 @@
 import FWCore.ParameterSet.Config as cms
 
-isolatedGenMuons = cms.EDProducer("GenCanSelector",
+## TO BE DONE: need additional selection for lepton+jets correction:collection of muons coming from tau which has a W or Z as mother
+
+isolatedGenMuons = cms.EDProducer("GenCandSelector",
   ## input collection
   src = cms.InputTag("genParticles"),
 
   ## configuration of target particle
   target = cms.PSet(
-    pdgId  = cms.int32(13),
-    status = cms.int32( 3) 
+    pdgId  = cms.uint32(13),
+    status = cms.uint32( 3) 
   ),
 
   ## configuration of mother particle
   mother = cms.PSet(
-    pdgIds = cms.vint32(23, 24),
-    ancestor = cms.int32(6)
+    pdgIds = cms.vuint32(23, 24),
+#    ancestor = cms.int32(6)
   )
 )
 
