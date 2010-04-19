@@ -33,7 +33,7 @@ GenCandSelector::produce(edm::Event& evt, const edm::EventSetup& setup)
     if(abs(p->pdgId())==(int)pdgId_ && p->status()==(int)status_){
       // check whether pdgId of the first generation mother 
       // particle is part of the allowed pdgIds
-      if( std::find( pdgIds_.begin(), pdgIds_.end(), abs(p->begin()->pdgId()) )!=pdgIds_.end() ){
+      if( std::find( pdgIds_.begin(), pdgIds_.end(), (unsigned int)abs(p->begin()->pdgId()) )!=pdgIds_.end() ){
 	if(ancestor_==0){ 
 	  out->push_back(*p);
 	}
