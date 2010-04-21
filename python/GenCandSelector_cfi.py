@@ -15,7 +15,8 @@ isolatedGenMuons = cms.EDProducer("GenCandSelector",
   ## configuration of mother particle
   mother = cms.PSet(
     pdgIds = cms.vuint32(23, 24),
-#    ancestor = cms.int32(6)
+    # comment out if you do not want to use the ancestor-option
+    #ancestor = cms.uint32(6)
   )
 )
 

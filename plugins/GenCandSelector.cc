@@ -1,5 +1,6 @@
 #include <algorithm>
 #include "TopAnalysis/TopUtils/plugins/GenCandSelector.h"
+#include <iostream>
 
 GenCandSelector::GenCandSelector(const edm::ParameterSet& cfg): ancestor_(0),
   src_( cfg.getParameter<edm::InputTag>("src") )
@@ -33,13 +34,13 @@ GenCandSelector::produce(edm::Event& evt, const edm::EventSetup& setup)
     if(abs(p->pdgId())==(int)pdgId_ && p->status()==(int)status_){
       // check whether pdgId of the first generation mother 
       // particle is part of the allowed pdgIds
-      if( std::find( pdgIds_.begin(), pdgIds_.end(), (unsigned int)abs(p->begin()->pdgId()) )!=pdgIds_.end() ){
+      if( std::find( pdgIds_.begin(), pdgIds_.end(), (unsigned int)abs(p->mother()->pdgId()) )!=pdgIds_.end() ){
 	if(ancestor_==0){ 
 	  out->push_back(*p);
 	}
 	else{
 	  // check whether p has an ancestor of type ancestor_
-	  if( findAncestor(p->begin(), ancestor_) ){
+	  if( findAncestor(p->mother(), ancestor_) ){
 	    out->push_back(*p);
 	  }
 	}
@@ -50,19 +51,25 @@ GenCandSelector::produce(edm::Event& evt, const edm::EventSetup& setup)
   evt.put(out);
 }
 
-// find ancestor ofr given type upstream the particle chain
+// find ancestor of given type upstream the particle chain
 bool 
-GenCandSelector::findAncestor(reco::GenParticle::const_iterator part, int& type)
+GenCandSelector::findAncestor( const reco::Candidate* part, int& type)
 {
-  if(part->begin()==part->end()){
-    return false;
+  // search for type
+  if(abs(part->pdgId())==type){
+    return true;
   }
   else{
-    if(abs(part->begin()->pdgId())==type){
-      return true;
+    // no mother
+    if(part->numberOfMothers()==0){
+      return false;
     }
     else{
-      return findAncestor(part->begin(), type);
+      // loop all mothers
+      for(unsigned int i=0; i<part->numberOfMothers(); ++i){
+	if(findAncestor(part->mother(i), type)) return true;
+      }
+      return false;
     }
   }
 }

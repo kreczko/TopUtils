@@ -61,7 +61,7 @@ class GenCandSelector : public edm::EDProducer {
   /// produce function to select the 
   virtual void produce(edm::Event&, const edm::EventSetup&);
   /// find ancestor of given type upstream the particle chain
-  bool findAncestor(reco::GenParticle::const_iterator part, int& type);
+  bool findAncestor( const reco::Candidate* part, int& type);
 
  private:
   /// pdgId of mother particle of mother particles
