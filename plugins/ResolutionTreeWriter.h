@@ -21,8 +21,6 @@
 // user include files
 #include "TTree.h"
 #include "TMath.h"
-#include "TRandom.h"
-#include "TRandom3.h"
 
 #include "TopAnalysis/TopUtils/interface/ResolutionVariables.h"
 

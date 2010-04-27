@@ -8,7 +8,7 @@
 //
 // Original Author:  Holger Enderle,68/111,4719,
 //         Created:  Mon Jan 26 16:29:19 CET 2009
-// $Id: ResolutionTreeWriter.cc,v 1.2 2010/04/27 15:29:58 henderle Exp $
+// $Id: ResolutionTreeWriter.cc,v 1.3 2010/04/27 15:52:47 henderle Exp $
 //
 //
 
@@ -98,8 +98,6 @@ ResolutionTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
    iEvent.getByLabel(METLabel_, METHandle);
    edm::View<pat::MET> METs = *METHandle;
 
-   TRandom *sRandom(new TRandom3(0));
-   float toyrecenergy = 0.;
    float deltaR = 0.;
    float deltaPhi = 0.;
    float deltaEta = 0.;
@@ -110,12 +108,6 @@ ResolutionTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
    for(edm::View<pat::Jet>::const_iterator jet_iter = jets.begin(); jet_iter!=jets.end(); ++jet_iter){
      if(jet_iter->genParton())
        if(jet_iter->genParton()->et()>=10. && TMath::Abs(jet_iter->genParton()->eta())<3.0){
-	 if(TMath::Abs(jet_iter->genParton()->eta())<=1.4){
-	   toyrecenergy = sRandom->Gaus(jet_iter->genParton()->et(),0.05*jet_iter->genParton()->et()+sqrt(jet_iter->genParton()->et())+0.5*jet_iter->eta()*jet_iter->eta());
-	 }
-	 else if(TMath::Abs(jet_iter->genParton()->eta())>1.4){
-	   toyrecenergy = sRandom->Gaus(jet_iter->genParton()->et(),0.01*jet_iter->genParton()->et()+2.*sqrt(jet_iter->genParton()->et())-0.5*jet_iter->eta()*sqrt(jet_iter->genParton()->et()));
-	 }
 	 nextdeltaR = 99;
 	 for(edm::View<pat::Jet>::const_iterator jet_iter2 = jets.begin(); jet_iter2!=jets.end(); ++jet_iter2){
 	   if(jet_iter==jet_iter2)continue;
@@ -131,12 +123,12 @@ ResolutionTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 	 while (deltaPhi <= -TMath::Pi()) deltaPhi += 2*TMath::Pi();
 	 deltaEta = jet_iter->genParton()->eta() - jet_iter->eta();
 	 deltaR = sqrt(deltaPhi*deltaPhi + deltaEta*deltaEta);
-	 treeMemPtr->fillVariables(jet_iter->genParton()->energy(), jet_iter->genParton()->et(), jet_iter->genParton()->pt(), jet_iter->genParton()->eta(), jet_iter->genParton()->phi(), jet_iter->energy(), jet_iter->et(), jet_iter->pt(), jet_iter->eta(), jet_iter->phi(), jet_iter->pt()/jet_iter->genParton()->pt(), jet_iter->partonFlavour(), toyrecenergy, jet_iter->emEnergyFraction(), METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, 0, 0.);
+	 treeMemPtr->fillVariables(jet_iter->genParton()->energy(), jet_iter->genParton()->et(), jet_iter->genParton()->pt(), jet_iter->genParton()->eta(), jet_iter->genParton()->phi(), jet_iter->energy(), jet_iter->et(), jet_iter->pt(), jet_iter->eta(), jet_iter->phi(), jet_iter->pt()/jet_iter->genParton()->pt(), jet_iter->partonFlavour(), jet_iter->emEnergyFraction(), METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, 0, 0.);
 	 
 	 tree->Fill();
        }
    }
-   toyrecenergy = 0.;
+
    for(edm::View<pat::Electron>::const_iterator ele_iter = electrons.begin(); ele_iter!=electrons.end(); ++ele_iter){
      if(ele_iter->genLepton())
        if(ele_iter->genLepton()->pt()>0. && TMath::Abs(ele_iter->genLepton()->eta())<3.0 && ele_iter->electronID("eidRobustTight")){
@@ -156,11 +148,12 @@ ResolutionTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 	 deltaEta = ele_iter->genLepton()->eta() - ele_iter->eta();
 	 deltaR = sqrt(deltaPhi*deltaPhi + deltaEta*deltaEta);
 
-	 treeMemPtr->fillVariables(ele_iter->genLepton()->energy(), ele_iter->genLepton()->et(), ele_iter->genLepton()->pt(), ele_iter->genLepton()->eta(), ele_iter->genLepton()->phi(), ele_iter->energy(), ele_iter->et(), ele_iter->pt(), ele_iter->eta(), ele_iter->phi(), ele_iter->pt()/ele_iter->genLepton()->pt(), ele_iter->charge()*-11, toyrecenergy, 0., METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, 0, 0.);
+	 treeMemPtr->fillVariables(ele_iter->genLepton()->energy(), ele_iter->genLepton()->et(), ele_iter->genLepton()->pt(), ele_iter->genLepton()->eta(), ele_iter->genLepton()->phi(), ele_iter->energy(), ele_iter->et(), ele_iter->pt(), ele_iter->eta(), ele_iter->phi(), ele_iter->pt()/ele_iter->genLepton()->pt(), ele_iter->charge()*-11, 0., METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, 0, 0.);
 	 
 	 tree->Fill();
        }
    }
+
    for(edm::View<pat::Muon>::const_iterator muon_iter = muons.begin(); muon_iter!=muons.end(); ++muon_iter){
      if(muon_iter->genLepton())
        if(muon_iter->genLepton()->pt()>0. && TMath::Abs(muon_iter->genLepton()->eta())<3.0){
@@ -204,31 +197,25 @@ ResolutionTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 	     pTinnerTracker = muon_iter->innerTrack()->pt();
 	   }
 
-	 treeMemPtr->fillVariables(muon_iter->genLepton()->energy(), muon_iter->genLepton()->et(), muon_iter->genLepton()->pt(), muon_iter->genLepton()->eta(), muon_iter->genLepton()->phi(), muon_iter->energy(), muon_iter->et(), muon_iter->pt(), muon_iter->eta(), muon_iter->phi(), muon_iter->pt()/muon_iter->genLepton()->pt(), muon_iter->charge()*-13, toyrecenergy, 0., METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, whichMuon, pTinnerTracker);
+	 treeMemPtr->fillVariables(muon_iter->genLepton()->energy(), muon_iter->genLepton()->et(), muon_iter->genLepton()->pt(), muon_iter->genLepton()->eta(), muon_iter->genLepton()->phi(), muon_iter->energy(), muon_iter->et(), muon_iter->pt(), muon_iter->eta(), muon_iter->phi(), muon_iter->pt()/muon_iter->genLepton()->pt(), muon_iter->charge()*-13, 0., METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, whichMuon, pTinnerTracker);
 	 
 	 tree->Fill();
        }
    }
-//    for(edm::View<pat::MET>::const_iterator MET_iter = METs.begin(); MET_iter!=METs.end(); ++MET_iter){
-     if(METs.begin()->genMET())
-       if(METs.begin()->genMET()->pt()>0.){
-	 nextdeltaR = 99;
-	 deltaPhi = METs.begin()->genMET()->phi() - METs.begin()->phi();
-	 while (deltaPhi > TMath::Pi()) deltaPhi -= 2*TMath::Pi();
-	 while (deltaPhi <= -TMath::Pi()) deltaPhi += 2*TMath::Pi();
-	 deltaEta = METs.begin()->genMET()->eta() - METs.begin()->eta();
-	 deltaR = sqrt(deltaPhi*deltaPhi + deltaEta*deltaEta);
-	 treeMemPtr->fillVariables(METs.begin()->genMET()->energy(), METs.begin()->genMET()->et(), METs.begin()->genMET()->pt(), METs.begin()->genMET()->eta(), METs.begin()->genMET()->phi(), METs.begin()->energy(), METs.begin()->et(), METs.begin()->pt(), METs.begin()->eta(), METs.begin()->phi(), METs.begin()->pt()/METs.begin()->genMET()->pt(), -21, toyrecenergy, METs.begin()->emEtFraction(), METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, 0, 0.);
-	 
-	 tree->Fill();
-       }
-//    }
-      
-// #ifdef THIS_IS_AN_EVENT_EXAMPLE
-//    Handle<ExampleData> pIn;
-//    iEvent.getByLabel("example",pIn);
-// #endif
-   
+
+   if(METs.begin()->genMET())
+     if(METs.begin()->genMET()->pt()>0.){
+       nextdeltaR = 99;
+       deltaPhi = METs.begin()->genMET()->phi() - METs.begin()->phi();
+       while (deltaPhi > TMath::Pi()) deltaPhi -= 2*TMath::Pi();
+       while (deltaPhi <= -TMath::Pi()) deltaPhi += 2*TMath::Pi();
+       deltaEta = METs.begin()->genMET()->eta() - METs.begin()->eta();
+       deltaR = sqrt(deltaPhi*deltaPhi + deltaEta*deltaEta);
+       treeMemPtr->fillVariables(METs.begin()->genMET()->energy(), METs.begin()->genMET()->et(), METs.begin()->genMET()->pt(), METs.begin()->genMET()->eta(), METs.begin()->genMET()->phi(), METs.begin()->energy(), METs.begin()->et(), METs.begin()->pt(), METs.begin()->eta(), METs.begin()->phi(), METs.begin()->pt()/METs.begin()->genMET()->pt(), -21, METs.begin()->emEtFraction(), METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, 0, 0.);
+       
+       tree->Fill();
+     }
+  
 #ifdef THIS_IS_AN_EVENTSETUP_EXAMPLE
    ESHandle<SetupData> pSetup;
    iSetup.get<SetupRecord>().get(pSetup);
