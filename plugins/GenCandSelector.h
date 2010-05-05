@@ -18,34 +18,45 @@
    \brief   Module to select a single generator particle for cross section measurements
 
    This is a module to select generator particles as daughters of a gauge boson which again might 
-   be daughters of a top quark for cross section measurements. The output is a std::vector of 
+   be a daughter of a top quark for cross section measurements. The output is a std::vector of 
    reco::GenParticles of arbitary length. The parameters of the module are:
 
-    _src_          : input collection of generator particles. It can be the genParticle collection 
-                     or any derived (or pruned) collection of same type reco::GenParticle.
+    _src_          : input collection of generator particles. This can be the genParticle 
+                     collection or any derived (or pruned) collection of type reco::GenParticle.
 
-    _target_       : parameter set for the configuration of the target particle. This parameter set
-                     is expected to hold the parameters, _pdgId_ and _status_, for the configura-
-		     tion of the generator particle as described below.
+    _target_       : parameter set for the configuration of the target particle(s). This para-
+                     meter set is expected to hold the parameters, _pdgId_ and _status_, for the 
+		     configuration of the target particle(s) as described below.
 
-    _pdgId_        : pdgId of the target particle(s). The parameter is expected to be unsigned. 
-                     Both particle and anti-particle are selected.
+    _pdgId_        : vector of pdgIds of the target particle(s). The parameter is expected to be 
+                     of type std::vector<std::string>. The elements of the std::vector can be the 
+		     bare numbers (as strings) or of type 'part:daug', where part indicates the 
+		     pdgId of the target particle and daug the pdgId of a potential daughter par-
+		     ticle. If of type 'part:daug' only those particles will be chosen as target 
+		     particles, which have a daughter particle with pdgId daug. Both particle & 
+		     anti-particle are selected. Example: to choose both muons and muons from 
+		     tau decays at the same time the configuration has to be of type: pdgId = 
+		     ["13", "15:13"]. 
 
-    _status_       : status of the target particle(s).
+    _status_       : status of the target particle(s). Note that status acts on the particle 
+                     that is located most to the left in a given pdgId string.
 
-    _mother_       : parameter set for the configuration of the mother particle(s). This parameter
-                     set is expected to hold the parameters _pdgIds_ and _pdgIdMother_ for the con-
-		     figuration of the mother particle(s) as described below.
+    _ancestor_     : parameter set for the configuration of the ancestor particle(s). This para-
+                     meter set is expected to hold the parameter _pdgId_ for the configuration 
+		     of the ancestor particle(s) as described below.
 
-    _pdgIds_       : vector of pdgIds of the mother particle(s). E.g. this might be W's and Z's. 
-                     This parameter is expected to be unsigned, both particles and anti-particles 
-		     are allowed for the search.
+    _pdgId_        : vector of pdgIds of the ancestor particle(s). E.g. this might be W's or Z's. 
+                     The elements of the vector can be bare numbers (as strings) or of type 
+		     'ance:part', where part indicates the pdgId of the ancestor particle and 
+		     ance the pdgId of a potential further ancester particle. If of type 
+		     'ance:part' only those particles will be allowed, which have an additional 
+		     ancestor particle with pdgId ance. Both particle and anti-particle are 
+		     selected. Example: to choose inclusive W's and Z's the configuration has to 
+		     be of type: pdgId = ["23", "24"]. To choose exclusively W's, which originate 
+		     from top quarks the configuration has to be of type pdgId = ["6:23"]. 
 
-    _ancestor_     : pdgId of the mother particle of the mother particle. This parameter is option-
-                     al. It does not have to present in the definition of the module.
-
-   The module acts on generator particle listings of pythia. Extensions might be needed for the 
-   module to be also applicable on MC at NLO like particle listings. Further testing will be 
+   The module was tested on generator particle listings of pythia. Extensions might be needed for 
+   the module to be also applicable on MC at NLO like particle listings. Further testing will be 
    necessary here.
 */
 
@@ -60,20 +71,80 @@ class GenCandSelector : public edm::EDProducer {
  private:
   /// produce function to select the 
   virtual void produce(edm::Event&, const edm::EventSetup&);
-  /// find ancestor of given type upstream the particle chain
-  bool findAncestor( const reco::Candidate* part, int& type);
 
+  /// returns substring up to first appearance of ':' or full string if no ':' is found
+  std::string firstElement (const std::string& label, const char* delim=":") const { return label.substr(0, label.find(delim)); };  
+  /// returns substring from first appearance of ':' up to end of emtpy string if no ':' is found
+  std::string secondElement(const std::string& label, const char* delim=":") const { return (label.find(delim)!=std::string::npos)?label.substr(label.find(':')+1):std::string(""); };  
+  /// find p in list of allowed particles
+  int find(const std::vector<std::pair<int, int> >::const_iterator& first, const std::vector<std::pair<int, int> >::const_iterator& last, const reco::Candidate* p, bool firstList=true) const;
+  /// check whether p is contained in list of allowed particles or not
+  bool contained(const std::vector<std::pair<int, int> >::const_iterator& first, const std::vector<std::pair<int, int> >::const_iterator& last, const reco::Candidate* p, bool firstList=true) const;
+  /// find descendant which is in list of allowed particles downstream the decay chain
+  bool descendant(const std::vector<std::pair<int, int> >::const_iterator& first, const std::vector<std::pair<int, int> >::const_iterator& last, const reco::Candidate* p) const;
+  /// find ancestor which is in list of allowed particles upstream the decay chain
+  bool ancestor(const std::vector<std::pair<int, int> >::const_iterator& first, const std::vector<std::pair<int, int> >::const_iterator& last, const reco::Candidate* p) const;
+
+  void print(const reco::Candidate* p) const{
+    std::cout << ">>> found object that fits to requirements: <<<" << std::endl;
+    if(p->mother()->numberOfMothers()>0){
+      std::cout << "ancestor : " << p->mother()->mother()->pdgId();
+      if(p->mother()->mother()->numberOfMothers()>0){
+	std::cout << "," << p->mother()->mother()->mother()->pdgId();
+      }
+      std::cout << std::endl;
+    }
+    std::cout << "mother   : " << p->mother()->pdgId() << std::endl
+	      << "part     : " << p->pdgId() << " status: " << p->status() << std::endl;
+    if(p->begin()!=p->end()){
+      std::cout	<< "daugther : ";
+      for(reco::GenParticle::const_iterator d=p->begin(); d!=p->end(); ++d){
+	std::cout << d->pdgId() << ",";
+	if(abs(p->begin()->pdgId())==15){
+	  std::cout << "---> ";
+	  for(reco::GenParticle::const_iterator dd=d->begin(); dd!=d->end(); ++dd){
+	    std::cout << dd->pdgId() << ",";
+	  }
+	}
+      }
+      std::cout << std::endl;
+    }
+  }
+  
  private:
-  /// pdgId of mother particle of mother particles
-  int ancestor_;
   /// input collection
   edm::InputTag src_;
-  /// pdgId of the target particle
-  unsigned int pdgId_;
-  /// status of the target particle
+
+  /// pdgId of the target particle(s); the first element corresponds 
+  /// to the pdgId of the target particle, the second element to the 
+  /// pdgId of the daughter. If no daughter is given the second ele-
+  /// ment will be set to 0
+  std::vector<std::pair<int, int> > daughterIds_;
+  /// status of the target particle(s)
   unsigned int status_;
-  /// vector of pgdIds of the mother particle(s)
-  std::vector<unsigned int> pdgIds_;
+
+  /// pgdId of ancestor particle(s); the second element corresponds 
+  /// to the pdgId of the target particle, the first element to the 
+  /// pdgId of a potentail further ancestor particle. If no ancestor 
+  /// is given the first element will be set to 0 
+  std::vector<std::pair<int, int> > ancestorIds_;
 };
+
+/// check whether the pdgId of the given candidates is element if the std::vector of std::pair, '0' is used as wildcart
+inline int 
+GenCandSelector::find(const std::vector<std::pair<int, int> >::const_iterator& first, const std::vector<std::pair<int, int> >::const_iterator& last, const reco::Candidate* p, bool firstList) const {
+  for(std::vector<std::pair<int, int> >::const_iterator elem=first; elem!=last; ++elem){ 
+    if( firstList?elem->first==abs(p->pdgId()):elem->second==abs(p->pdgId()) ){
+      return (elem-first);
+    }
+  } 
+  return (last-first);
+}
+
+/// check whether p is contained in list of allowed particles or not
+inline bool 
+GenCandSelector::contained(const std::vector<std::pair<int, int> >::const_iterator& first, const std::vector<std::pair<int, int> >::const_iterator& last, const reco::Candidate* p, bool firstList) const {
+  return (find(first, last, p, firstList)<(last-first));
+} 
 
 #endif

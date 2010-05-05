@@ -5,18 +5,14 @@ import FWCore.ParameterSet.Config as cms
 isolatedGenMuons = cms.EDProducer("GenCandSelector",
   ## input collection
   src = cms.InputTag("genParticles"),
-
   ## configuration of target particle
   target = cms.PSet(
-    pdgId  = cms.uint32(13),
-    status = cms.uint32( 3) 
+    pdgId  = cms.vstring("13"),
+    status = cms.uint32( 1) 
   ),
-
   ## configuration of mother particle
-  mother = cms.PSet(
-    pdgIds = cms.vuint32(23, 24),
-    # comment out if you do not want to use the ancestor-option
-    #ancestor = cms.uint32(6)
+  ancestor = cms.PSet(
+    pdgId = cms.vstring("24"),
   )
 )
 

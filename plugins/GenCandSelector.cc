@@ -1,20 +1,37 @@
+#include <iostream>
 #include <algorithm>
 #include "TopAnalysis/TopUtils/plugins/GenCandSelector.h"
-#include <iostream>
 
-GenCandSelector::GenCandSelector(const edm::ParameterSet& cfg): ancestor_(0),
+GenCandSelector::GenCandSelector(const edm::ParameterSet& cfg):
   src_( cfg.getParameter<edm::InputTag>("src") )
 {
-  // configure target particle
-  edm::ParameterSet target=cfg.getParameter<edm::ParameterSet>("target");
-  pdgId_ = target.getParameter<unsigned int>("pdgId" );
-  status_= target.getParameter<unsigned int>("status");
+  // buffer for string->std::pair<int,int> conversion from target/ancestor 
+  // configuration 
+  std::vector<std::string> buffer;
 
-  edm::ParameterSet mother=cfg.getParameter<edm::ParameterSet>("mother");
-  pdgIds_ = mother.getParameter<std::vector<unsigned int> >("pdgIds" );
-  if( mother.exists("ancestor") ){
-    ancestor_= mother.getParameter<unsigned int>("ancestor");
+  // configure target particle(s); daughterIds_ is filled with pdgIds of 
+  // target particle(s) and potential daughter particle(s) if existing; if
+  // no ':' is found in the configruation string the second list element 
+  // is set to '0'; '0' is a wildcart
+  edm::ParameterSet target=cfg.getParameter<edm::ParameterSet>("target");
+  buffer = target.getParameter<std::vector<std::string> >("pdgId" );
+  for(std::vector<std::string>::const_iterator pdgId=buffer.begin(); pdgId!=buffer.end(); ++pdgId){
+    daughterIds_.push_back(std::make_pair(atoi(firstElement(*pdgId).c_str()), secondElement(*pdgId).empty()?0:atoi(secondElement(*pdgId).c_str())) );
   }
+
+  // configure status of the target particle
+  status_= target.getParameter<unsigned int>("status");
+  
+  // configure ancestor particle(s); ancestorIds_ is filled with pdgIds 
+  // of ancestor particle(s) and their further ancestor particle(s) if 
+  // existing. If no ':' is found in the configuration string the first 
+  // list element is set to '0'; '0' is a wildcart
+  edm::ParameterSet ancestor=cfg.getParameter<edm::ParameterSet>("ancestor");
+  buffer = ancestor.getParameter<std::vector<std::string> >("pdgId" );
+  for(std::vector<std::string>::const_iterator pdgId=buffer.begin(); pdgId!=buffer.end(); ++pdgId){
+    ancestorIds_.push_back(std::make_pair(secondElement(*pdgId).empty()?0:atoi(firstElement(*pdgId).c_str()), secondElement(*pdgId).empty()?atoi(firstElement(*pdgId).c_str()):atoi(secondElement(*pdgId).c_str())) );
+  }
+
   // register output
   produces<std::vector<reco::GenParticle> >();
 }
@@ -31,47 +48,89 @@ GenCandSelector::produce(edm::Event& evt, const edm::EventSetup& setup)
 
   // loop input collection
   for(reco::GenParticleCollection::const_iterator p=src->begin(); p!=src->end(); ++p){
-    if(abs(p->pdgId())==(int)pdgId_ && p->status()==(int)status_){
-      // check whether pdgId of the first generation mother 
-      // particle is part of the allowed pdgIds
-      if( std::find( pdgIds_.begin(), pdgIds_.end(), (unsigned int)abs(p->mother()->pdgId()) )!=pdgIds_.end() ){
-	if(ancestor_==0){ 
-	  out->push_back(*p);
-	}
-	else{
-	  // check whether p has an ancestor of type ancestor_
-	  if( findAncestor(p->mother(), ancestor_) ){
-	    out->push_back(*p);
+    if( contained(daughterIds_.begin(), daughterIds_.end(), &(*p)) ){
+      if(descendant(daughterIds_.begin(), daughterIds_.end(), &(*p))){
+	if(p->numberOfMothers()>0){
+	  if( ancestor( ancestorIds_.begin(), ancestorIds_.end(), p->mother()) ){
+	    if(p->status()==status_){
+	      print(&(*p));
+	      out->push_back(*p);
+	    }
 	  }
 	}
       }
-    }  
+    }
   }
   // push out vector into the event
   evt.put(out);
 }
 
-// find ancestor of given type upstream the particle chain
 bool 
-GenCandSelector::findAncestor( const reco::Candidate* part, int& type)
+GenCandSelector::descendant(const std::vector<std::pair<int, int> >::const_iterator& first, const std::vector<std::pair<int, int> >::const_iterator& last, const reco::Candidate* p) const 
 {
-  // search for type
-  if(abs(part->pdgId())==type){
-    return true;
-  }
-  else{
-    // no mother
-    if(part->numberOfMothers()==0){
-      return false;
+  int index=find(first, last, p);
+  if( index<(last-first) ){
+    if((first+index)->second == 0){ 
+      // found save element; note that here the 
+      // second elements of the list are checked
+      return true; 
+    }
+    else if( p->numberOfDaughters() ){
+      for(unsigned int i=0; i<p->numberOfDaughters(); ++i){
+	if( contained(first, last, p) && contained(first, last, p->daughter(i), false) ){ 	  
+	  // catch as part of the daughter list 
+	  return true;
+	}
+      }
     }
     else{
-      // loop all mothers
-      for(unsigned int i=0; i<part->numberOfMothers(); ++i){
-	if(findAncestor(part->mother(i), type)) return true;
+      // if element is not save (i.e. a special
+      // daughter is still required) drop down
+      for(unsigned int i=0; i<p->numberOfDaughters(); ++i){
+	if(descendant(first, last, p->daughter(i))){
+	  return true;
+	}
       }
-      return false;
     }
   }
+  // no success go home...
+  return false;
+}
+
+bool 
+GenCandSelector::ancestor(const std::vector<std::pair<int, int> >::const_iterator& first, const std::vector<std::pair<int, int> >::const_iterator& last, const reco::Candidate* p) const 
+{
+  int index=find(first, last, p, false);
+  if( abs(p->pdgId())>99 ){
+    // this is a no go; if we arrive here p is
+    // hadron or the the daughter of a hadron
+    return false;
+  }
+  if( index<(last-first) ){
+    if((first+index)->first == 0){ 
+      // found save element; note that here the 
+      // first elements of the list are checked 
+      return true; 
+    }
+    else{
+      // if element is not save (i.e. a special 
+      // ancestor is still required) bubble up
+      for(unsigned int i=0; i<p->numberOfMothers(); ++i){
+	if(p->mother(i)->pdgId() == p->pdgId())
+	  //std::cout << "mother : " << p->mother(i)->pdgId() << std::endl;
+	  if(ancestor(first, last, p->mother(i))) return true;
+      }
+    }
+  }
+  else{
+    // if p itself is not the required ancestor
+    // particle bubble up (recursion) 
+    for(unsigned int i=0; i<p->numberOfMothers(); ++i){
+      return ancestor(first, last, p->mother(i));
+    }
+  }
+  // no success go home...
+  return false;
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"
