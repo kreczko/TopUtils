@@ -52,7 +52,7 @@ GenCandSelector::produce(edm::Event& evt, const edm::EventSetup& setup)
       if(descendant(daughterIds_.begin(), daughterIds_.end(), &(*p))){
 	if(p->numberOfMothers()>0){
 	  if( ancestor( ancestorIds_.begin(), ancestorIds_.end(), p->mother()) ){
-	    if(p->status()==status_){
+	    if(p->status()==(int)status_){
 	      print(&(*p));
 	      out->push_back(*p);
 	    }
