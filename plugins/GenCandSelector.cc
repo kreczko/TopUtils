@@ -1,5 +1,6 @@
-#include <iostream>
-#include <algorithm>
+//#include <iostream>
+//#include <algorithm>
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "TopAnalysis/TopUtils/plugins/GenCandSelector.h"
 
 GenCandSelector::GenCandSelector(const edm::ParameterSet& cfg):
@@ -20,7 +21,7 @@ GenCandSelector::GenCandSelector(const edm::ParameterSet& cfg):
   }
 
   // configure status of the target particle
-  status_= target.getParameter<unsigned int>("status");
+  status_= target.getParameter<int>("status");
   
   // configure ancestor particle(s); ancestorIds_ is filled with pdgIds 
   // of ancestor particle(s) and their further ancestor particle(s) if 
@@ -52,9 +53,8 @@ GenCandSelector::produce(edm::Event& evt, const edm::EventSetup& setup)
       if(descendant(daughterIds_.begin(), daughterIds_.end(), &(*p))){
 	if(p->numberOfMothers()>0){
 	  if( ancestor( ancestorIds_.begin(), ancestorIds_.end(), p->mother()) ){
-	    if(p->status()==(int)status_){
-	      print(&(*p));
-	      out->push_back(*p);
+	    if(p->status()==status_){
+	      print(&(*p)); out->push_back(*p);
 	    }
 	  }
 	}
@@ -116,9 +116,14 @@ GenCandSelector::ancestor(const std::vector<std::pair<int, int> >::const_iterato
       // if element is not save (i.e. a special 
       // ancestor is still required) bubble up
       for(unsigned int i=0; i<p->numberOfMothers(); ++i){
-	if(p->mother(i)->pdgId() == p->pdgId())
-	  //std::cout << "mother : " << p->mother(i)->pdgId() << std::endl;
+	// does p have an adaequte mother? Other
+	// wise bubble further up
+	if(abs(p->mother(i)->pdgId()) == (first+index)->first){
+	  return true;
+	}
+	else{
 	  if(ancestor(first, last, p->mother(i))) return true;
+	}
       }
     }
   }
@@ -131,6 +136,33 @@ GenCandSelector::ancestor(const std::vector<std::pair<int, int> >::const_iterato
   }
   // no success go home...
   return false;
+}
+
+void 
+GenCandSelector::print(const reco::Candidate* p) const
+{
+  edm::LogVerbatim log("GenCandSelector");
+  log << "-----------------------------------------------------" << "\n"
+      << ">> found object that fits to requirements:         <<" << "\n"
+      << "-----------------------------------------------------" << "\n";
+  if(p->mother()->numberOfMothers()>0){
+    log << "ancestor : " << p->mother()->mother()->pdgId();
+    if(p->mother()->mother()->numberOfMothers()>0){
+      log << "," << p->mother()->mother()->mother()->pdgId();
+    } log << "\n";
+  }
+  log << "mother   : " << p->mother()->pdgId() << "\n"
+      << "part     : " << p->pdgId() << " [status " << p->status() << "]\n";
+  if(p->begin()!=p->end()){
+    log	<< "daugther : ";
+    for(reco::GenParticle::const_iterator d=p->begin(); d!=p->end(); ++d){
+      log << d->pdgId() << " [";
+      for(reco::GenParticle::const_iterator dd=d->begin(); dd!=d->end(); ++dd){
+	log << dd->pdgId() << ",";
+      }
+      log << "], ";
+    } log << "\n";
+  }
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"

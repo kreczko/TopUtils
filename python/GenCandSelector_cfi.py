@@ -8,7 +8,7 @@ isolatedGenMuons = cms.EDProducer("GenCandSelector",
   ## configuration of target particle
   target = cms.PSet(
     pdgId  = cms.vstring("13"),
-    status = cms.uint32( 1) 
+    status = cms.int32( 1) 
   ),
   ## configuration of mother particle
   ancestor = cms.PSet(

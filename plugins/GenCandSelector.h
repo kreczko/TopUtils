@@ -84,45 +84,19 @@ class GenCandSelector : public edm::EDProducer {
   bool descendant(const std::vector<std::pair<int, int> >::const_iterator& first, const std::vector<std::pair<int, int> >::const_iterator& last, const reco::Candidate* p) const;
   /// find ancestor which is in list of allowed particles upstream the decay chain
   bool ancestor(const std::vector<std::pair<int, int> >::const_iterator& first, const std::vector<std::pair<int, int> >::const_iterator& last, const reco::Candidate* p) const;
-
-  void print(const reco::Candidate* p) const{
-    std::cout << ">>> found object that fits to requirements: <<<" << std::endl;
-    if(p->mother()->numberOfMothers()>0){
-      std::cout << "ancestor : " << p->mother()->mother()->pdgId();
-      if(p->mother()->mother()->numberOfMothers()>0){
-	std::cout << "," << p->mother()->mother()->mother()->pdgId();
-      }
-      std::cout << std::endl;
-    }
-    std::cout << "mother   : " << p->mother()->pdgId() << std::endl
-	      << "part     : " << p->pdgId() << " status: " << p->status() << std::endl;
-    if(p->begin()!=p->end()){
-      std::cout	<< "daugther : ";
-      for(reco::GenParticle::const_iterator d=p->begin(); d!=p->end(); ++d){
-	std::cout << d->pdgId() << ",";
-	if(abs(p->begin()->pdgId())==15){
-	  std::cout << "---> ";
-	  for(reco::GenParticle::const_iterator dd=d->begin(); dd!=d->end(); ++dd){
-	    std::cout << dd->pdgId() << ",";
-	  }
-	}
-      }
-      std::cout << std::endl;
-    }
-  }
+  /// object loggiong for debugging purposes
+  void print(const reco::Candidate* p) const;
   
  private:
   /// input collection
   edm::InputTag src_;
-
   /// pdgId of the target particle(s); the first element corresponds 
   /// to the pdgId of the target particle, the second element to the 
   /// pdgId of the daughter. If no daughter is given the second ele-
   /// ment will be set to 0
   std::vector<std::pair<int, int> > daughterIds_;
   /// status of the target particle(s)
-  unsigned int status_;
-
+  int status_;
   /// pgdId of ancestor particle(s); the second element corresponds 
   /// to the pdgId of the target particle, the first element to the 
   /// pdgId of a potentail further ancestor particle. If no ancestor 

@@ -8,7 +8,11 @@ process = cms.Process("UserTest")
 
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
-process.MessageLogger.cerr.threshold = 'INFO'
+process.MessageLogger.categories.append('GenCandSelector')
+process.MessageLogger.cerr.GenCandSelector = cms.untracked.PSet(
+    limit = cms.untracked.int32(100)
+)
+#process.MessageLogger.cerr.threshold = 'INFO'
 #process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 #-------------------------------------------------
@@ -20,6 +24,7 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
     ## add your favourite file here
     '/store/user/henderle/7TeV/TTbar/PATtuple_1.root'
+    #'/store/user/henderle/samples/Wjets_madgraph_10TeV/PATtuple_117.root'
     )
 )
 
