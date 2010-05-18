@@ -81,8 +81,8 @@ int main(int argc, char* argv[])
     for(Int_t ibin = 0; ibin <= etbinNum; ibin++)etbinning.push_back(Muonbinning[ibin]);
   TString nonbselection = " && Particle_ID!=0 && TMath::Abs(Particle_ID)<5"; // jets from udsc quarks
   TString bselection = " && TMath::Abs(Particle_ID)==5"; // jets from b quarks
-  TString electronselection = " && TMath::Abs(Particle_ID)==11 && nextDeltaR>0.5"; // electrons well seperated from the next electron
-  TString muonselection = " && TMath::Abs(Particle_ID)==13 && nextDeltaR>0.005 && whichMuon==1"; // global muons well seperated from the next muon
+  TString electronselection = " && TMath::Abs(Particle_ID)==11 && nextDeltaR>0.4"; // electrons well seperated from the next electron
+  TString muonselection = " && TMath::Abs(Particle_ID)==13 && nextDeltaR>0.01 && whichMuon==1"; // global muons well seperated from the next muon
   TString METselection = " && Particle_ID==-21"; // MET (ID from TreeWriter)
 
   TGraphErrors* bGraph[26];
@@ -209,9 +209,14 @@ int main(int argc, char* argv[])
       for(Int_t isel = 0; isel < etbinNum; isel++){
 
 	if(ParticleID == 0){
-	  if(resobject->Particle_ID!=0 && TMath::Abs(resobject->Particle_ID)<5 && TMath::Abs(resobject->Reco_eta)>=etabinning[ieta] && TMath::Abs(resobject->Reco_eta)<etabinning[ieta+1] && resobject->Reco_et>etbinning[isel] && resobject->Reco_et<=etbinning[isel+1]){
- 	    bincenterhisto[(ieta*etbinNum)+isel]->Fill(resobject->Reco_et);
-	    reshisto[(ieta*etbinNum)+isel]->Fill(resobject->Gen_et/resobject->Reco_et-1);
+	  if(resobject->Particle_ID!=0
+	     && TMath::Abs(resobject->Particle_ID)<5
+	     && TMath::Abs(resobject->Gen_eta)>=etabinning[ieta]
+	     && TMath::Abs(resobject->Gen_eta)<etabinning[ieta+1]
+	     && resobject->Gen_et>etbinning[isel]
+	     && resobject->Gen_et<=etbinning[isel+1]){
+ 	    bincenterhisto[(ieta*etbinNum)+isel]->Fill(resobject->Gen_et);
+	    reshisto[(ieta*etbinNum)+isel]->Fill(resobject->Reco_et/resobject->Gen_et-1);
 	    if(isel>10){
 	      reshistoeta3[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta);
 	      reshistophi3[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi);
@@ -227,9 +232,13 @@ int main(int argc, char* argv[])
 	  }
 	}
 	else if(ParticleID == 1){
-	  if(resobject->Particle_ID==5 && TMath::Abs(resobject->Reco_eta)>=etabinning[ieta] && TMath::Abs(resobject->Reco_eta)<etabinning[ieta+1] && resobject->Reco_et>etbinning[isel] && resobject->Reco_et<=etbinning[isel+1]){
-	    bincenterhisto[(ieta*etbinNum)+isel]->Fill(resobject->Reco_et);
-	    reshisto[(ieta*etbinNum)+isel]->Fill(resobject->Gen_et/resobject->Reco_et-1);
+	  if(TMath::Abs(resobject->Particle_ID)==5
+	     && TMath::Abs(resobject->Gen_eta)>=etabinning[ieta]
+	     && TMath::Abs(resobject->Gen_eta)<etabinning[ieta+1]
+	     && resobject->Gen_et>etbinning[isel]
+	     && resobject->Gen_et<=etbinning[isel+1]){
+	    bincenterhisto[(ieta*etbinNum)+isel]->Fill(resobject->Gen_et);
+	    reshisto[(ieta*etbinNum)+isel]->Fill(resobject->Reco_et/resobject->Gen_et-1);
 	    if(isel>10){
 	      reshistoeta3[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta);
 	      reshistophi3[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi);
@@ -245,9 +254,14 @@ int main(int argc, char* argv[])
 	  }
 	}
 	else if(ParticleID == 2){
-	  if(resobject->Particle_ID==11 && resobject->nextDeltaR>0.5 && TMath::Abs(resobject->Reco_eta)>=etabinning[ieta] && TMath::Abs(resobject->Reco_eta)<etabinning[ieta+1] && resobject->Reco_et>etbinning[isel] && resobject->Reco_et<=etbinning[isel+1]){
-	    bincenterhisto[(ieta*etbinNum)+isel]->Fill(resobject->Reco_et);
-	    reshisto[(ieta*etbinNum)+isel]->Fill(resobject->Gen_et/resobject->Reco_et-1);
+	  if(TMath::Abs(resobject->Particle_ID)==11
+	     && resobject->nextDeltaR>0.4
+	     && TMath::Abs(resobject->Gen_eta)>=etabinning[ieta]
+	     && TMath::Abs(resobject->Gen_eta)<etabinning[ieta+1]
+	     && resobject->Gen_et>etbinning[isel]
+	     && resobject->Gen_et<=etbinning[isel+1]){
+	    bincenterhisto[(ieta*etbinNum)+isel]->Fill(resobject->Gen_et);
+	    reshisto[(ieta*etbinNum)+isel]->Fill(resobject->Reco_et/resobject->Gen_et-1);
 	    if(isel>5){
 	      reshistoeta3[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta);
 	      reshistophi3[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi);
@@ -263,9 +277,15 @@ int main(int argc, char* argv[])
 	  }
 	}
 	else if(ParticleID == 3){
-	  if(resobject->Particle_ID==13 && resobject->nextDeltaR>0.005 && resobject->whichMuon==1 && TMath::Abs(resobject->Reco_eta)>=etabinning[ieta] && TMath::Abs(resobject->Reco_eta)<etabinning[ieta+1] && resobject->Reco_et>etbinning[isel] && resobject->Reco_et<=etbinning[isel+1]){
-	    bincenterhisto[(ieta*etbinNum)+isel]->Fill(resobject->Reco_et);
-	    reshisto[(ieta*etbinNum)+isel]->Fill(resobject->Gen_pt/resobject->Reco_pt-1);
+	  if(TMath::Abs(resobject->Particle_ID)==13
+	     && resobject->nextDeltaR>0.01
+	     && resobject->whichMuon==1
+	     && TMath::Abs(resobject->Gen_eta)>=etabinning[ieta]
+	     && TMath::Abs(resobject->Gen_eta)<etabinning[ieta+1]
+	     && resobject->Gen_et>etbinning[isel]
+	     && resobject->Gen_et<=etbinning[isel+1]){
+	    bincenterhisto[(ieta*etbinNum)+isel]->Fill(resobject->Gen_et);
+	    reshisto[(ieta*etbinNum)+isel]->Fill(resobject->Reco_pt/resobject->Gen_pt-1);
 	    if(isel>5){
 	      reshistoeta3[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta);
 	      reshistophi3[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi);
@@ -281,9 +301,11 @@ int main(int argc, char* argv[])
 	  }
 	}
 	else if(ParticleID == 4){
-	  if(resobject->Particle_ID==-21 && resobject->Reco_et>etbinning[isel] && resobject->Reco_et<=etbinning[isel+1]){
-	    bincenterhisto[(ieta*etbinNum)+isel]->Fill(resobject->Reco_et);
-	    reshisto[(ieta*etbinNum)+isel]->Fill(resobject->Gen_et/resobject->Reco_et-1);
+	  if(resobject->Particle_ID==-21
+	     && resobject->Gen_et>etbinning[isel]
+	     && resobject->Gen_et<=etbinning[isel+1]){
+	    bincenterhisto[(ieta*etbinNum)+isel]->Fill(resobject->Gen_et);
+	    reshisto[(ieta*etbinNum)+isel]->Fill(resobject->Reco_et/resobject->Gen_et-1);
 	    reshistoeta[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta);
 	    reshistophi[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi);
 	  }
