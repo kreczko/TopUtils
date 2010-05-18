@@ -8,7 +8,7 @@
 //
 // Original Author:  Holger Enderle,68/111,4719,
 //         Created:  Mon Jan 26 16:29:19 CET 2009
-// $Id: ResolutionTreeWriter.cc,v 1.3 2010/04/27 15:52:47 henderle Exp $
+// $Id: ResolutionTreeWriter.cc,v 1.4 2010/05/18 13:01:43 henderle Exp $
 //
 //
 
@@ -107,7 +107,7 @@ ResolutionTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
    float tmpnextdeltaR = 0.;
    for(edm::View<pat::Jet>::const_iterator jet_iter = jets.begin(); jet_iter!=jets.end(); ++jet_iter){
      if(jet_iter->genParton())
-       if(jet_iter->genParton()->et()>=10. && TMath::Abs(jet_iter->genParton()->eta())<3.0){
+       if(jet_iter->genParton()->et()>=10. && TMath::Abs(jet_iter->genParton()->eta())<3.0 && jet_iter->genParton()->pdgId()==jet_iter->partonFlavour()){
 	 nextdeltaR = 99;
 	 for(edm::View<pat::Jet>::const_iterator jet_iter2 = jets.begin(); jet_iter2!=jets.end(); ++jet_iter2){
 	   if(jet_iter==jet_iter2)continue;
