@@ -6,39 +6,28 @@
 
 vector<double> extract_sigma(TH1* theHisto)
 {
+  double lowLim = theHisto->GetMean()-theHisto->GetRMS(); 
+  double upLim = theHisto->GetMean()+theHisto->GetRMS();  
+
   TF1 *f1 = new TF1("f1","gaus");
-  theHisto->Fit("f1","LQ");
+  f1->SetRange(lowLim,upLim);
+  theHisto->Fit("f1","RLQ");
 
   double mean =  f1->GetParameter(1);
   double deviation = f1->GetParameter(2); 
 
-  double lowLim; 
-  double upLim;  
-
-  double degrade = 0.1;
-  unsigned int iteration = 0;
-
   vector<double> output;
 
-  cout << "first fit quality is : " << f1->GetChisquare()/f1->GetNDF() << endl;
+  lowLim = mean - (2.0*deviation);
+  upLim  = mean + (2.0*deviation);
 
-  while( iteration == 0 || (f1->GetChisquare()/f1->GetNDF() > 3. && iteration <= 5) )
-    {
-      lowLim = mean - (2.0*deviation*(1-degrade*iteration));
-      upLim  = mean + (2.0*deviation*(1-degrade*iteration));
-      //      cout << "mean is " << mean << " deviation is " << deviation << endl;
-      //      cout << "lowLim/upLim = " << lowLim << "/" << upLim << endl;
-      
-      f1->SetRange(lowLim,upLim);
-      theHisto->Fit("f1","RL");
-      mean =  f1->GetParameter(1);
-      deviation = f1->GetParameter(2);
-      cout << "iteration " << iteration << endl;
-      iteration++;
-    }
-  
-  cout << "quality is Chi^2/NDF = " << f1->GetChisquare() << "/" << f1->GetNDF() << " = " <<  f1->GetChisquare()/f1->GetNDF() << endl;
-  cout << "mean value: " << mean << "+- " << deviation << endl;
+  f1->SetRange(lowLim,upLim);
+  theHisto->Fit("f1","RLQ");
+  mean =  f1->GetParameter(1);
+  deviation = f1->GetParameter(2);
+
+  //cout << "quality is Chi^2/NDF = " << f1->GetChisquare() << "/" << f1->GetNDF() << " = " <<  f1->GetChisquare()/f1->GetNDF() << endl;
+  //cout << "mean value: " << mean << "+- " << deviation << endl;
   output.push_back(f1->GetParameter(2));
   output.push_back(f1->GetParError(2));
   delete f1;
