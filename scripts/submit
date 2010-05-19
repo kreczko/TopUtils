@@ -385,7 +385,7 @@ class jobSplitter:
       lastEvent = int(self.__fromToken(self.__eventToken))
       if (not (job == (self.__numberOfJobs-1))):
          if (lastEvent%self.__numberOfJobs > 0):
-            lastEvent=(job+1) * (self.__jobLength()-1) - 1
+            lastEvent=(job+1) * (self.__jobLength()-1)
          else:
             lastEvent=(job+1) *  self.__jobLength()    - 1
       return lastEvent
@@ -445,7 +445,7 @@ class jobSplitter:
       for job in range(self.__numberOfJobs):
          msg = "...submitting job " + job.__str__() + ' to folder '
          msg+= self.__submitName
-         msg+= " first event = " + self.__firstEvent(job).__str__()
+         msg+= " first event = " + (self.__firstEvent(job)+1).__str__()
          msg+= " last event = " + self.__lastEvent(job).__str__()
          print msg
 
