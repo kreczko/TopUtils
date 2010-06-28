@@ -25,7 +25,6 @@ my $nom4   = 0;
 my $nom5   = 0;
 my $nom6   = 0;
 my $nom7   = 0;
-my $nom8   = 0;
 
 my $denom1 = 0;
 my $denom2 = 0;
@@ -34,7 +33,6 @@ my $denom4 = 0;
 my $denom5 = 0;
 my $denom6 = 0;
 my $denom7 = 0;
-my $denom8 = 0;
 
 # loop over each file and accumulate the event numbers
 foreach my $file (@myfiles) {
@@ -44,51 +42,82 @@ foreach my $file (@myfiles) {
 
     # get the grep output from the shell
 
-    my @semiLepMuonEta = `grep semiLepMuonEta $file | grep 'out of'`;
-    my @semiLepMuonPt  = `grep semiLepMuonPt  $file | grep 'out of'`;
-    my @semiLepJetsEta = `grep semiLepJetsEta $file | grep 'out of'`;
-    my @semiLepJetsPt  = `grep semiLepJetsPt  $file | grep 'out of'`;
-
+    my @physicsDeclared     = `grep TrigReport $file | grep 'physicsDeclared'`;
+    my @hltLevel1GTSeed     = `grep TrigReport $file | grep 'hltLevel1GTSeed'`;
+    my @primaryVertexFilter = `grep TrigReport $file | grep 'primaryVertexFilter'`;
+    my @beamScrapFilter     = `grep TrigReport $file | grep 'beamScrapFilter'`;
+    my @HBHENoiseFilter     = `grep TrigReport $file | grep 'HBHENoiseFilter'`;
+    my @oneHardMuon         = `grep TrigReport $file | grep 'oneHardMuon'`;
+    my @twoGlobalMuons      = `grep TrigReport $file | grep 'twoGlobalMuons'`;    
+    
     # check the pattern and extract the numbers, if succesful
     # accumulate else voice error message ; first occurrence
     # semi leptonic second dileptonic preselection
-    print $semiLepMuonEta[0];
 
     my $failed = 0;
-    # if($semiLepMuonEta[0] =~ /\w\s+:\s+(\d+)\s+\(\s*(\d+\.?\d*\w?\W?\d*)\)\s+\w+\s\w+\s+(\d+)\s+\(\s*(\d+\.?\d*\w?\W?\d*)\)/) {
-    if($semiLepMuonEta[0] =~ /\w\s+:\s+(\d+)\s+\w+\s\w+\s+(\d+)\s/) {
+    if($physicsDeclared[0] =~ /TrigReport\s+\d\s+\d\s+(\d+)\s+(\d+).*/) {
       $nom1   = $nom1   + $1;
       $denom1 = $denom1 + $2;
     } else {
       $failed = 1;
-      print ">> ERROR: didn't find semiLepMuonEta from $file <<\n";
-      print $semiLepMuonEta[0]
+      print ">> ERROR: didn't find physicsDeclared from $file <<\n";
+      print $physicsDeclared[0]
     };
-    # if($semiLepMuonPt[0]  =~ /\w\s+:\s+(\d+)\s+\(\s*(\d+\.?\d*\w?\W?\d*)\)\s+\w+\s\w+\s+(\d+)\s+\(\s*(\d+\.?\d*\w?\W?\d*)\)/) {
-    if($semiLepMuonPt[0]  =~ /\w\s+:\s+(\d+)\s+\w+\s\w+\s+(\d+)\s/) {
+    
+    if($hltLevel1GTSeed[0] =~ /TrigReport\s+\d\s+\d\s+(\d+)\s+(\d+).*/) {
       $nom2   = $nom2   + $1;
       $denom2 = $denom2 + $2;
     } else {
       $failed = 1;
-      print ">> ERROR: didn't find semiLepMuonPt  from $file <<\n";
-      print $semiLepMuonPt[0];
-    };
-    # if($semiLepJetsEta[0] =~ /\w\s+:\s+(\d+)\s+\(\s*(\d+\.?\d*\w?\W?\d*)\)\s+\w+\s\w+\s+(\d+)\s+\(\s*(\d+\.?\d*\w?\W?\d*)\)/) {
-    if($semiLepJetsEta[0] =~ /\w\s+:\s+(\d+)\s+\w+\s\w+\s+(\d+)\s/) {
+      print ">> ERROR: didn't find hltLevel1GTSeed from $file <<\n";
+      print $hltLevel1GTSeed[0]
+    };  
+    
+    if($primaryVertexFilter[0] =~ /TrigReport\s+\d\s+\d\s+(\d+)\s+(\d+).*/) {
       $nom3   = $nom3   + $1;
       $denom3 = $denom3 + $2;
     } else {
       $failed = 1;
-      print ">> ERROR: didn't find semiLepJetsEta from $file <<\n";
-    };
-    # if($semiLepJetsPt[0]  =~ /\w\s+:\s+(\d+)\s+\(\s*(\d+\.?\d*\w?\W?\d*)\)\s+\w+\s\w+\s+(\d+)\s+\(\s*(\d+\.?\d*\w?\W?\d*)\)/) {
-    if($semiLepJetsPt[0]  =~  /\w\s+:\s+(\d+)\s+\w+\s\w+\s+(\d+)\s/) {
+      print ">> ERROR: didn't find primaryVertexFilter from $file <<\n";
+      print $primaryVertexFilter[0]
+    };      
+      
+    if($beamScrapFilter[0] =~ /TrigReport\s+\d\s+\d\s+(\d+)\s+(\d+).*/) {
       $nom4   = $nom4   + $1;
       $denom4 = $denom4 + $2;
     } else {
       $failed = 1;
-      print ">> ERROR: didn't find semiLepJetsPt  from $file <<\n";
-    };
+      print ">> ERROR: didn't find beamScrapFilter from $file <<\n";
+      print $beamScrapFilter[0]
+    }; 
+    
+    if($HBHENoiseFilter[0] =~ /TrigReport\s+\d\s+\d\s+(\d+)\s+(\d+).*/) {
+      $nom5   = $nom5   + $1;
+      $denom5 = $denom5 + $2;
+    } else {
+      $failed = 1;
+      print ">> ERROR: didn't find HBHENoiseFilter from $file <<\n";
+      print $HBHENoiseFilter[0]
+    }; 
+            
+    if($oneHardMuon[0] =~ /TrigReport\s+\d\s+\d\s+(\d+)\s+(\d+).*/) {
+      $nom6   = $nom6   + $1;
+      $denom6 = $denom6 + $2;
+    } else {
+      $failed = 1;
+      print ">> ERROR: didn't find oneHardMuon from $file <<\n";
+      print $oneHardMuon[0]
+    };   
+    
+    if($twoGlobalMuons[0] =~ /TrigReport\s+\d\s+\d\s+(\d+)\s+(\d+).*/) {
+      $nom7  = $nom7   + $1;
+      $denom7 = $denom7 + $2;
+    } else {
+      $failed = 1;
+      print ">> ERROR: didn't find twoGlobalMuons from $file <<\n";
+      print $twoGlobalMuons[0]
+    };             
+    
     if($failed == 1){ $err1 = $err1 + 1 }
   }; # end loop over files
 
@@ -102,11 +131,14 @@ print "  N/A record: \t $err1 \n";
 print "----------------------------------------------";
 print "\n  Accumulated statistics:\n";
 print "----------------------------------------------";
-print "\n            \t before: \t after: \n";
-print "  muonEtaCut: \t $denom1 \t\t $nom1 \n";
-print "  muonPtCut : \t $denom2 \t\t $nom2 \n";
-print "  jetsEtaCut: \t $denom3 \t\t $nom3 \n";
-print "  jetsPtCut : \t $denom4 \t\t $nom4 \n";
+print "\n                 \t before: \t\t after: \n";
+print "  physicsDeclared: \t $nom1 \t\t $denom1 \n";
+print "  hltLevel1GTSeed: \t $nom2 \t\t $denom2 \n";
+print "    primVtxFilter: \t $nom3 \t\t $denom3 \n";
+print "  beamScrapFilter: \t $nom4 \t\t $denom4 \n";
+print "  HBHENoiseFilter: \t $nom5 \t\t $denom5 \n\n";
+print "      oneHardMuon: \t $nom6 \t\t $denom6 \n";
+print "   twoGlobalMuons: \t $nom7 \t\t $denom7 \n";
 print "----------------------------------------------\n";
 
 exit;
