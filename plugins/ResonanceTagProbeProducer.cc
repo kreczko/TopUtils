@@ -9,6 +9,7 @@ ResonanceTagProbeProducer::ResonanceTagProbeProducer(const edm::ParameterSet& cf
   mass_  ( cfg.getParameter< double >( "mass"   ) ),
   deltaM_( cfg.getParameter< double >( "deltaM" ) )
 {
+  // produce pat::Muon collection
   produces<std::vector<pat::Muon> >();
 }
 
@@ -25,13 +26,13 @@ ResonanceTagProbeProducer::produce(edm::Event& evt, const edm::EventSetup& setup
   // prepare vector of output vector
   std::auto_ptr<std::vector<pat::Muon> > taggedProbes(new std::vector<pat::Muon>);
 
-  // loop over muon references for the tag muon
+  // loop over tag muons
   for(edm::View<pat::Muon>::const_iterator tag=tags->begin(); tag!=tags->end(); ++tag){
-    // loop over muon references for the probe muon
+    // loop over probe muons
     for(edm::View<pat::Muon>::const_iterator probe=probes->begin(); probe!=probes->end(); ++probe){
       // check and skip overlaps
       if( probe->originalObjectRef() != tag->originalObjectRef() ){
-	if( ((tag->p4()+probe->p4()).mass()-mass_)<deltaM_){
+	if( fabs((tag->p4()+probe->p4()).mass()-mass_)<deltaM_){
 	  taggedProbes->push_back(*probe);
 	}
       }
