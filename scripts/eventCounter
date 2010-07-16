@@ -29,16 +29,12 @@ my $nom2   = 0;
 my $nom3   = 0;
 my $nom4   = 0;
 my $nom5   = 0;
-my $nom6   = 0;
-my $nom7   = 0;
 
 my $denom1 = 0;
 my $denom2 = 0;
 my $denom3 = 0;
 my $denom4 = 0;
 my $denom5 = 0;
-my $denom6 = 0;
-my $denom7 = 0;
 
 # loop over each file and accumulate the event numbers
 foreach my $file (@myfiles) {
@@ -48,8 +44,6 @@ foreach my $file (@myfiles) {
 
     # get the grep output from the shell
 
-    my @physicsDeclared     = `grep TrigReport $file | grep 'physicsDeclared'`;
-    my @hltLevel1GTSeed     = `grep TrigReport $file | grep 'hltLevel1GTSeed'`;
     my @primaryVertexFilter = `grep TrigReport $file | grep 'primaryVertexFilter'`;
     my @beamScrapFilter     = `grep TrigReport $file | grep 'beamScrapFilter'`;
     my @HBHENoiseFilter     = `grep TrigReport $file | grep 'HBHENoiseFilter'`;
@@ -61,27 +55,10 @@ foreach my $file (@myfiles) {
     # semi leptonic second dileptonic preselection
 
     my $failed = 0;
-    if($physicsDeclared[0] =~ /TrigReport\s+\d\s+\d\s+(\d+)\s+(\d+).*/) {
-      $nom1   = $nom1   + $2;
-      $denom1 = $denom1 + $1;
-    } else {
-      $failed = 1;
-      print ">> ERROR: didn't find physicsDeclared from $file <<\n";
-      print $physicsDeclared[0]
-    };
-    
-    if($hltLevel1GTSeed[0] =~ /TrigReport\s+\d\s+\d\s+(\d+)\s+(\d+).*/) {
-      $nom2   = $nom2   + $2;
-      $denom2 = $denom2 + $1;
-    } else {
-      $failed = 1;
-      print ">> ERROR: didn't find hltLevel1GTSeed from $file <<\n";
-      print $hltLevel1GTSeed[0]
-    };  
     
     if($primaryVertexFilter[0] =~ /TrigReport\s+\d\s+\d\s+(\d+)\s+(\d+).*/) {
-      $nom3   = $nom3   + $2;
-      $denom3 = $denom3 + $1;
+      $nom1   = $nom1   + $2;
+      $denom1 = $denom1 + $1;
     } else {
       $failed = 1;
       print ">> ERROR: didn't find primaryVertexFilter from $file <<\n";
@@ -89,8 +66,8 @@ foreach my $file (@myfiles) {
     };      
       
     if($beamScrapFilter[0] =~ /TrigReport\s+\d\s+\d\s+(\d+)\s+(\d+).*/) {
-      $nom4   = $nom4   + $2;
-      $denom4 = $denom4 + $1;
+      $nom2   = $nom2   + $2;
+      $denom2 = $denom2 + $1;
     } else {
       $failed = 1;
       print ">> ERROR: didn't find beamScrapFilter from $file <<\n";
@@ -98,8 +75,8 @@ foreach my $file (@myfiles) {
     }; 
     
     if($HBHENoiseFilter[0] =~ /TrigReport\s+\d\s+\d\s+(\d+)\s+(\d+).*/) {
-      $nom5   = $nom5   + $2;
-      $denom5 = $denom5 + $1;
+      $nom3   = $nom3   + $2;
+      $denom3 = $denom3 + $1;
     } else {
       $failed = 1;
       print ">> ERROR: didn't find HBHENoiseFilter from $file <<\n";
@@ -107,8 +84,8 @@ foreach my $file (@myfiles) {
     }; 
             
     if($oneHardMuon[0] =~ /TrigReport\s+\d\s+\d\s+(\d+)\s+(\d+).*/) {
-      $nom6   = $nom6   + $2;
-      $denom6 = $denom6 + $1;
+      $nom4   = $nom4   + $2;
+      $denom4 = $denom4 + $1;
     } else {
       $failed = 1;
       print ">> ERROR: didn't find oneHardMuon from $file <<\n";
@@ -116,8 +93,8 @@ foreach my $file (@myfiles) {
     };   
     
     if($twoGlobalMuons[0] =~ /TrigReport\s+\d\s+\d\s+(\d+)\s+(\d+).*/) {
-      $nom7  = $nom7   + $2;
-      $denom7 = $denom7 + $1;
+      $nom5  = $nom5   + $2;
+      $denom5 = $denom5 + $1;
     } else {
       $failed = 1;
       print ">> ERROR: didn't find twoGlobalMuons from $file <<\n";
@@ -138,13 +115,11 @@ print "----------------------------------------------";
 print "\n  Accumulated statistics:\n";
 print "----------------------------------------------";
 print "\n                 \t before: \t\t after: \n";
-print "  physicsDeclared: \t $denom1 \t\t $nom1 \n";
-print "  hltLevel1GTSeed: \t $denom2 \t\t $nom2 \n";
-print "    primVtxFilter: \t $denom3 \t\t $nom3 \n";
-print "  beamScrapFilter: \t $denom4 \t\t $nom4 \n";
-print "  HBHENoiseFilter: \t $denom5 \t\t $nom5 \n\n";
-print "      oneHardMuon: \t $denom6 \t\t $nom6 \n";
-print "   twoGlobalMuons: \t $denom7 \t\t $nom7 \n";
+print "    primVtxFilter: \t $denom1 \t\t $nom1 \n";
+print "  beamScrapFilter: \t $denom2 \t\t $nom2 \n";
+print "  HBHENoiseFilter: \t $denom3 \t\t $nom3 \n\n";
+print "      oneHardMuon: \t $denom4 \t\t $nom4 \n";
+print "   twoGlobalMuons: \t $denom5 \t\t $nom5 \n";
 print "----------------------------------------------\n";
 
 exit;
