@@ -2,6 +2,7 @@
 <use name=root>
 <use name=DataFormats/PatCandidates>
 <use name=PhysicsTools/CandUtils>
+<use name=CondFormats/JetMETObjects>
 
 <export>
    <lib name=TopAnalysisTopUtils>
