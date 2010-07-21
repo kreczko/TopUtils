@@ -407,9 +407,9 @@ class configRunner:
             ## needs runtime environment to be set first
             self.__cmsRunTimer[self.__process].start()
             if (self.__interactive):
-                os.system('cmsRun ' + configfile + " >" + self.__outputLog + " 2> " + self.__outputErr + " < /dev/null&")
+                os.system('cmsRun ' + configfile + " " + self.__userParams + " >" + self.__outputLog + " 2> " + self.__outputErr + " < /dev/null&")
             else:
-                os.system('cmsRun ' + configfile + " >" + self.__outputLog + " 2> " + self.__outputErr + " < /dev/null" )                    
+                os.system('cmsRun ' + configfile + " " + self.__userParams + " >" + self.__outputLog + " 2> " + self.__outputErr + " < /dev/null" )                    
             print '*   '
             self.__waitForFirst(self.__process)
             self.__jobStarted = True
