@@ -12,7 +12,7 @@ process.MessageLogger.cerr.threshold = 'INFO'
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-    '/store/mc/Summer09/TTbar/AODSIM/MC_31X_V3_AODSIM-v1/0026/F899CDFB-6C89-DE11-B2FD-00304894558A.root'
+    '/store/mc/Spring10/TTbarJets-madgraph/AODSIM/START3X_V26_S09-v1/0005/0210B899-9C46-DF11-A10F-003048C69294.root'
     )
 )
 
@@ -30,7 +30,7 @@ process.options = cms.untracked.PSet(
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = cms.string('MC_3XY_V25::All')
+process.GlobalTag.globaltag = cms.string('START38_V7::All')
 
 ## pat sequences
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
@@ -40,20 +40,16 @@ process.load("TopAnalysis.TopUtils.JetEnergyScale_cff")
 from TopAnalysis.TopUtils.JetEnergyScale_cff import *
 scalePatJetsEnergy(process, 1.1)
 
-## necessary to run with 35X on 31X samples
-from PhysicsTools.PatAlgos.tools.jetTools import *
-switchJetCollection(process, 
-                    cms.InputTag('antikt5CaloJets'),   
-                    doJTA            = True,            
-                    doBTagging       = True,            
-                    jetCorrLabel     = ('AK5','Calo'),  
-                    doType1MET       = True,
-                    genJetCollection = cms.InputTag("antikt5GenJets"),
-                    doJetID          = False,
-                    jetIdLabel       = "antikt5"
-                    )
+from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
+run36xOn35xInput(process)
+    
+process.load("RecoJets.Configuration.GenJetParticles_cff")
+process.load("RecoJets.Configuration.RecoGenJets_cff")
 
-process.p = cms.Path(process.patDefaultSequence)
+process.p = cms.Path(process.genJetParticles *
+                     process.ak5GenJets *
+                     process.patDefaultSequence
+                     )
 
 ## configure output module
 process.out = cms.OutputModule("PoolOutputModule",

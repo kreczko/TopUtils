@@ -8,8 +8,8 @@ JetEnergyScale::JetEnergyScale(const edm::ParameterSet& cfg):
   inputJets_           (cfg.getParameter<edm::InputTag>("inputJets"           )),
   inputMETs_           (cfg.getParameter<edm::InputTag>("inputMETs"           )),
   scaleFactor_         (cfg.getParameter<double>       ("scaleFactor"         )),
-  jetPTthresholdForMET_(cfg.getParameter<double>       ("jetPTthresholdForMET")),
-  jetEMlimitForMET_    (cfg.getParameter<double>       ("jetEMlimitForMET"    ))
+  jetPTThresholdForMET_(cfg.getParameter<double>       ("jetPTThresholdForMET")),
+  jetEMLimitForMET_    (cfg.getParameter<double>       ("jetEMLimitForMET"    ))
 {
   // use label of input to create label for output
   outputJets_ = inputJets_.label();
@@ -39,23 +39,22 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
     pat::Jet scaledJet = *jet;
     scaledJet.scaleEnergy( scaleFactor_ );
     pJets->push_back( scaledJet );
-    if(jet->correctedJet("raw").pt() > jetPTthresholdForMET_
-       && jet->emEnergyFraction() < jetEMlimitForMET_) {
+    // consider jet scale shift only if the raw jet pt and emf 
+    // is above the thresholds given in the module definition
+    if(jet->correctedJet("raw").pt() > jetPTThresholdForMET_
+       && jet->emEnergyFraction() < jetEMLimitForMET_) {
       dPx    += scaledJet.px() - jet->px();
       dPy    += scaledJet.py() - jet->py();
       dSumEt += scaledJet.et() - jet->et();
     }
   }
 
+  // scale MET accordingly
   pat::MET met = *(mets->begin());
   double scaledMETPx = met.px() - dPx;
   double scaledMETPy = met.py() - dPy;
-  pat::MET scaledMET = met;
-  scaledMET.setP4( math::XYZTLorentzVector(scaledMETPx, scaledMETPy, 0,
-					   sqrt(scaledMETPx*scaledMETPx+scaledMETPy*scaledMETPy)) );
-  // scaledMET.setSumEt( met.sumEt() + dSumEt );
+  pat::MET scaledMET(reco::MET(met.sumEt()+dSumEt, reco::MET::LorentzVector(scaledMETPx, scaledMETPy, 0, sqrt(scaledMETPx*scaledMETPx+scaledMETPy*scaledMETPy)), reco::MET::Point(0,0,0)));
   pMETs->push_back( scaledMET );
-
   event.put(pJets, outputJets_);
   event.put(pMETs, outputMETs_);
 }
