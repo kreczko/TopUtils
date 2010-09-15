@@ -5,11 +5,9 @@
 # run eg with 
 # ' triggerReport crab_0_xxxxxx_yyyyyy/res/CMSSW_*.stdout
  
-
 import re
 import sys
 import os.path
-
 
 p = re.compile(r'\W+')
 
