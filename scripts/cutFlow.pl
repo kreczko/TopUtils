@@ -1,11 +1,20 @@
 #!/usr/bin/perl -w
 
 # script to generate cutflow table in HTML format
-# from TrigReports
-
+# from TrigReports with statistical errors
+#
+# pipe output to htm file with command " cutFlow.pl > output.htm "
+#
+# You have to configure the first variables in the script to your needs:
+#  - target lumi: luminosity of the data, mc is normalized to this
+#  - textfiles containing the TrigReport cutflows, real data has to be last
+#  - weights: for MC samples -> length of list is one shorter than 
+#    file list if real data are included
+#  - modules: names of the modules which's passed evt number you want
+#    to appear in the table
 
 # integrated luminosity of data in /pb
-my $lumi = 0.7;
+my $lumi = 1.30466;
 
 # input files (last file is for data)
 my @files = ("ttbarmumu.txt",
@@ -21,7 +30,7 @@ my @files = ("ttbarmumu.txt",
 	     "zmumu.txt",
 	     "wmunu.txt",
 	     "qcd.txt",
-	     "dataAug13.txt"
+	     "data1300.txt"
 	    );
 
 # cross section over number of events	    
@@ -73,19 +82,29 @@ foreach (@modules){
 	     
 #print header for html
 print "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\"";
-print "       \"http://www.w3.org/TR/html4/strict.dtd\">\n";
+print " \"http://www.w3.org/TR/html4/strict.dtd\">\n";
 print "<html>\n";
 print "<head>\n";
 print "<title>Cutflow Table</title>\n";
+print "<meta http-equiv=\"content-type\" content=\"text/html; charset=ISO-8859-1\">\n";
+print "<style type=\"text/css\">\n";
+print "  body  { background-color:#bfbfff;}\n";
+print "  table { background-color:#dfdfff; border:1px solid #000; width:100%;text-align:right;}\n";
+print "  th    { border:1px solid #000; width:250px; white-space:nowrap; background-color:#ffff7f;}\n";
+print "  td    { border:1px solid #000; white-space:nowrap; }\n";
+print "  .mcsum{ background-color:#ffff7f;}\n";
+print "  .data { background-color:#ffff7f;}\n";
+print "</style>\n";
 print "</head>\n";
 print "<body>\n";
 print "<h1>Cutflow</h1>\n";
-print "<table border=\"1\" style=\"text-align:right;\">\n";
-print "<tr>\n  <th style=\"width:250px\";></th>";  
+print "<h3>integrated lumi = ", $lumi, " pb<sup>-1</sup></h3>\n";
+print "<table>\n";
+print "<tr>\n  <th></th>";  
 
 # print table header
 foreach my $module (@modules) {
-  print "  <th style=\"width:250px\";>$module</th>";
+  print "  <th>$module</th>";
 }; # end loop over modules    
 print "</tr>\n";
 
@@ -124,7 +143,7 @@ for( my $i=0; $i<@files-1; $i++) { #files-1 because it is not looped over datafi
 	$countSum[$j] += $passed;
 	$countSumErrorSquare[$j] += $weight*$passed;
       
-        print "  <td style=\"white-space:nowrap;\">";
+        print "  <td>";
         printf("%.3f", $passed);
         print " +- ";
         printf("%.3f", $staterror);
@@ -143,9 +162,9 @@ for( my $i=0; $i<@files-1; $i++) { #files-1 because it is not looped over datafi
 
 
 # table line for added stats
-print "<tr>\n  <td>Sum</td>";
+print "<tr>\n  <td class=\"mcsum\">Sum</td>";
 for( my $i=0; $i<@modules; $i++) {
-  print "  <td style=\"white-space:nowrap;\">";
+  print "  <td class=\"mcsum\">";
   printf("%.3f", $countSum[$i]);
   print " +- ";
   printf("%.3f", sqrt($countSumErrorSquare[$i]));
@@ -154,7 +173,7 @@ for( my $i=0; $i<@modules; $i++) {
 print "</tr>\n";
 
 # table line for real data
-print "<tr>\n  <td>Data</td>";
+print "<tr>\n  <td class=\"data\">Data</td>";
 
 if(-e $files[-1]){
   my $file = $files[-1];
@@ -169,7 +188,7 @@ if(-e $files[-1]){
       my $passed = $1;
       if($passed>0){           
         my $staterror = sqrt($passed);       
-        print "  <td style=\"white-space:nowrap;\">";
+        print "  <td class=\"data\">";
         printf("%.3f", $passed);
         print " +- ";
         printf("%.3f", $staterror);
