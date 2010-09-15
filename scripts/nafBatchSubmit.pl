@@ -21,8 +21,9 @@ This will create a directory "naf_MyAna" with all files needed to submit
 many jobs. Then it will submit all jobs to the NAF batch system.
 
 Please cd to the directory containing the config file first:
+
 DO: "cd PATH_TO_CONFIG ; PATH_TO_SUBMIT/nafBatchSubmit.pl 5 configfile.py"
-DON'T: "./nafBatchSubmit.pl 5 PATH_TO_CONFIG/configfile.py".
+DO NOT: "./nafBatchSubmit.pl 5 PATH_TO_CONFIG/configfile.py".
 
 Run "qstat -u your_username" to check if your jobs are running.
 If needed, use "qsub naf_MyAna/jobNUMBER.sh" to resubmit a certain job.
