@@ -26,7 +26,7 @@ class ResidualJetCorrector : public edm::EDProducer {
 
  private:
   edm::InputTag jets_;
-  std::string jetType_;
+  std::string corrections_;
 
   std::string JEC_PATH;
   edm::FileInPath fipRes;
