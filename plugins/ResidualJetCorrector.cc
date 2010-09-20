@@ -26,7 +26,7 @@ ResidualJetCorrector::produce(edm::Event& evt, const edm::EventSetup& setup)
   edm::Handle< std::vector<pat::Jet> > jets; 
   evt.getByLabel(jets_, jets);
 
-  std::vector<pat::Jet> * newJets = new std::vector<pat::Jet>;
+  std::auto_ptr< std::vector<pat::Jet> > myJets( new std::vector<pat::Jet>() );
   /// loop over the original jet collection
   for(std::vector<pat::Jet>::const_iterator jet = jets->begin(); jet != jets->end(); ++jet){
     JEC->setJetEta(jet->eta());
@@ -34,9 +34,8 @@ ResidualJetCorrector::produce(edm::Event& evt, const edm::EventSetup& setup)
 
     pat::Jet myJet(*jet);
     myJet.setP4(jet->p4() * JEC->getCorrection());
-    newJets->push_back(myJet);
+    myJets->push_back(myJet);
   }
-  std::auto_ptr< std::vector<pat::Jet> > myJets(newJets);
   evt.put(myJets);
 }
 
