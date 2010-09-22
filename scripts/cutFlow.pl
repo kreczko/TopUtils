@@ -14,7 +14,7 @@
 #    to appear in the table
 
 # integrated luminosity of data in /pb
-my $lumi = 1.30466;
+my $lumi = 2.92262;
 
 # input files (last file is for data)
 my @files = ("ttbarmumu.txt",
@@ -28,9 +28,10 @@ my @files = ("ttbarmumu.txt",
 	     "zz.txt",
 	     "ztautau.txt",
 	     "zmumu.txt",
+	     "dymumu.txt",
 	     "wmunu.txt",
 	     "qcd.txt",
-	     "data1300.txt"
+	     "data2900.txt"
 	    );
 
 # cross section over number of events	    
@@ -38,37 +39,29 @@ my @weights = ($lumi*165/632010.,
                $lumi*165/632010.,
 	       $lumi*165/632010.,
 	       $lumi*4.6/412055.,
-	       $lumi*63.2/528593.,
+	       $lumi*64.6/528593.,
 	       $lumi*10.6/466437.,
 	       $lumi*5.9/145000.,
 	       $lumi*18.2/118120.,
 	       $lumi*43/122980.,
-	       $lumi*1495/2160000.,
-	       $lumi*1495/2051268.,
-	       $lumi*28049/3./2047693.,
+	       $lumi*1666/2160000.,
+	       $lumi*1666/2051268.,
+	       $lumi*3457/265000.,
+	       $lumi*10438/3./2047693.,
 	       $lumi*296900*0.2684/4377187.
 	      ); #for data no weight is needed so 
 	         #weight array is 1 shorter then files array	    
 
 # modules which you want to appear in cutflow
-my @modules = ("analyzePrimaryVertex",
-               "filterTrigger",
-	       "tightMuonSelection",
-	       "globalMuonSelection",
-	       "hardMuonSelection",
-	       "goodTrackMuonSelection",
-	       "goodD0MuonSelection",
-	       "goodFitMuonSelection",
-	       "ecalMipMuonSelection",
-	       "hcalMipMuonSelection",
-	       "isolatedMuonSelection",
-	       "hardJetSelection",
-	       "tightJetSelection",
-	       "metSelection",
+my @modules = ("oneGoodMuonSelection",
+               "twoGoodMuonSelection",
+	       "twoIsolatedMuonSelection",
+	       "oneHardJetSelection",
 	       "filterDiMuonMassQCDveto",
 	       "filterDiMuonMassZveto",
-	       "filterHypoValidity",
-	       "filterBtag"
+	       "metSelection",
+	       "twoHardJetSelection",
+	       "filterHypoValidity"
               );
 	    
 # counter for summed stats	     
