@@ -4,6 +4,7 @@
 # sums summary tables of splitted jobs
 # run eg with 
 # ' triggerReport crab_0_xxxxxx_yyyyyy/res/CMSSW_*.stdout
+# modified by Wolf Behrenhoff: automatic detection of module names (2010-09-22)
  
 import re
 import sys
@@ -11,84 +12,22 @@ import os.path
 
 p = re.compile(r'\W+')
 
+def getTokens():
+    result = []
+    fh = open(sys.argv[1], 'r')
+    line = fh.next()
+    while (0 != line.find('TrigReport ---------- Modules in Path')):
+        line = fh.next()
+    line = fh.next()
+    line = fh.next()
+    while 0 == line.find('TrigReport'):
+        result.append(p.split(line)[7])
+        line = fh.next()
+    return result
+
 
 # modules in TrigReport summary tables
-tokens = ['analyzePrimaryVertex',
-	  'filterTrigger',
-	  'tightMuons',
-	  'oneTightMuonSelection',
-          'trackerMuons',
-	  'oneTrackerMuonSelection',
-	  'globalMuons',
-	  'oneGlobalMuonSelection',
-	  'hardMuons',
-	  'oneHardMuonSelection',
-	  'goodTrackMuons',
-	  'oneGoodTrackMuonSelection',
-	  'muHitMuons',
-	  'oneMuHitMuonSelection',
-	  'goodD0Muons',
-	  'oneGoodD0MuonSelection',
-	  'goodMuons',
-	  'oneGoodMuonSelection',
-	  'cleanPatMuons',
-	  'cleanPatElectrons',
-	  'cleanPatPhotons',
-	  'cleanPatTaus',
-	  'cleanPatJets',
-	  'cleanPatCandidateSummary',
-	  'tightJets',
-	  'goodJets',
-	  'hardJets',
-	  'analyzeGoodMuonsStep1',
-	  'analyzeHardJetsStep1',
-	  'analyzeMETStep1',
-	  'twoTightMuonSelection',
-	  'twoTrackerMuonSelection',
-	  'twoGlobalMuonSelection',
-	  'twoHardMuonSelection',
-	  'twoGoodTrackMuonSelection',
-	  'twoMuHitMuonSelection',
-	  'twoGoodD0MuonSelection',
-	  'twoGoodMuonSelection',
-	  'analyzeGoodMuonsStep2',
-	  'analyzeGoodMuonPairStep2',
-	  'analyzeHardJetsStep2',
-	  'analyzeMETStep2',
-	  'isolatedMuons',
-	  'twoIsolatedMuonSelection',
-	  'analyzeIsolatedMuonsStep3',
-	  'analyzeIsolatedMuonPairStep3',
-	  'analyzeHardJetsStep3',
-	  'analyzeMETStep3',
-	  'oneTightJetSelection',
-	  'oneGoodJetSelection',
-	  'oneHardJetSelection',
-	  'analyzeIsolatedMuonsStep4',
-	  'analyzeIsolatedMuonPairStep4',
-	  'analyzeHardJetsStep4',
-	  'analyzeMETStep4',
-	  'filterDiMuonMassQCDveto',
-	  'analyzeIsolatedMuonsStep5',
-	  'analyzeHardJetsStep5',
-	  'analyzeMETStep5',
-	  'filterDiMuonMassZveto',
-	  'analyzeIsolatedMuonsStep6',
-	  'analyzeHardJetsStep6',
-	  'analyzeMETStep6',
-	  'highMETs',
-	  'metSelection',
-	  'analyzeIsolatedMuonsStep7',
-	  'analyzeHardJetsStep7',
-	  'twoTightJetSelection',
-	  'twoGoodJetSelection',
-	  'twoHardJetSelection',
-	  'kinSolutionTtFullLepEventHypothesis',
-	  'ttFullLepHypKinSolution',
-	  'ttFullLepEvent',
-	  'filterHypoValidity',
-	  'analyzeKinSolution1'
-	 ]
+tokens = getTokens()
 
 print 'TrigReport ---------- Modules in Path: p ------------'
 print 'TrigReport  Trig Bit#    Visited     Passed     Failed      Error Name'
@@ -115,3 +54,4 @@ for s in tokens:
                 break
         infile.close()
     print 'TrigReport     1    0  %9d' % nvisit,'%10d' % npass,'%10d' % nfail, '%10d' % nerror, s
+
