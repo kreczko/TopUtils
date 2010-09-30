@@ -1,9 +1,6 @@
 #ifndef ResidualJetCorrector_h
 #define ResidualJetCorrector_h
 
-#include "TF1.h"
-#include "TRandom3.h"
-
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "FWCore/Framework/interface/EDProducer.h"
