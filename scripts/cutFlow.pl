@@ -14,7 +14,7 @@
 #    to appear in the table
 
 # integrated luminosity of data in /pb
-my $lumi = 2.92262;
+my $lumi = 2.98232;
 
 # input files (last file is for data)
 my @files = ("ttbarmumu.txt",
@@ -23,47 +23,46 @@ my @files = ("ttbarmumu.txt",
 	     "singletops.txt",
 	     "singletopt.txt",
 	     "singletoptw.txt",
-	     "zz.txt",
-	     "wz.txt",
-	     "zz.txt",
-	     "ztautau.txt",
-	     "zmumu.txt",
+	     "vvjets.txt",
+	     "ztautau_mad.txt",
+	     "ztautau_pyt.txt",
+	     "zmumu_mad.txt",
+	     "zmumu_pyt.txt",
 	     "dymumu.txt",
-	     "wmunu.txt",
+	     "wjets.txt",
 	     "qcd.txt",
-	     "data2900.txt"
+	     "data.txt"
 	    );
 
 # cross section over number of events	    
-my @weights = ($lumi*165/632010.,
-               $lumi*165/632010.,
-	       $lumi*165/632010.,
-	       $lumi*4.6/412055.,
-	       $lumi*64.6/528593.,
-	       $lumi*10.6/466437.,
-	       $lumi*5.9/145000.,
-	       $lumi*18.2/118120.,
-	       $lumi*43/122980.,
-	       $lumi*1666/2160000.,
-	       $lumi*1666/2051268.,
-	       $lumi*3457/265000.,
-	       $lumi*10438/3./2047693.,
+my @weights = ($lumi*157.5/1483404.,
+               $lumi*157.5/1483404.,
+	       $lumi*157.5/1483404.,	   
+	       $lumi*4.6/412055.,	   
+	       $lumi*64.6/528593.,	   
+	       $lumi*10.6/466437.,	   
+	       $lumi*4.8/102853.,	   
+	       $lumi*3048/1084921.,	   
+	       $lumi*1666/2160000.,	   
+	       $lumi*3048/1084921.,	   
+	       $lumi*1666/2051268.,	   
+	       $lumi*3457/904528.,	   
+	       $lumi*31314/10068895.,     
 	       $lumi*296900*0.2684/4377187.
 	      ); #for data no weight is needed so 
 	         #weight array is 1 shorter then files array	    
 
 # modules which you want to appear in cutflow
-my @modules = ("oneGoodMuonSelection",
-               "twoGoodMuonSelection",
-	       "twoIsolatedMuonSelection",
-	       "oneHardJetSelection",
-	       "filterDiMuonMassQCDveto",
-	       "filterDiMuonMassZveto",
-	       "metSelection",
-	       "twoHardJetSelection",
-	       "filterHypoValidity"
+my @modules = ("analyzeGoodMuonsStep1",
+               "analyzeGoodMuonsStep2",
+	       "analyzeIsolatedMuonsStep3",
+	       "analyzeIsolatedMuonsVetoRcStep4",
+	       "analyzeIsolatedMuonsVetoRcStep5",
+	       "analyzeIsolatedMuonsVetoRcStep6",
+	       "analyzeIsolatedMuonsVetoRcStep7",
+	       "analyzeKinSolutionVetoRc"
               );
-	    
+	      	      	    
 # counter for summed stats	     
 my @countSum;
 my @countSumErrorSquare;
@@ -85,8 +84,22 @@ print "  body  { background-color:#bfbfff;}\n";
 print "  table { background-color:#dfdfff; border:1px solid #000; width:100%;text-align:right;}\n";
 print "  th    { border:1px solid #000; width:250px; white-space:nowrap; background-color:#ffff7f;}\n";
 print "  td    { border:1px solid #000; white-space:nowrap; }\n";
-print "  .mcsum{ background-color:#ffff7f;}\n";
-print "  .data { background-color:#ffff7f;}\n";
+print "  #ttbarmumu  { background-color:#CC0000;}\n";
+print "  #ttbartaumu { background-color:#CC0000;}\n";
+print "  #ttbarbg    { background-color:#CC6666;}\n";
+print "  #singletops { background-color:#990099;}\n";
+print "  #singletopt { background-color:#990099;}\n";
+print "  #singletoptw{ background-color:#FF00FF;}\n";
+print "  #vvjets     { background-color:#FFFFFF;}\n";
+print "  #ztautau_mad{ background-color:#33CCFF;}\n";
+print "  #ztautau_pyt{ background-color:#33CCFF;}\n";
+print "  #zmumu_mad  { background-color:#3366FF;}\n";
+print "  #zmumu_pyt  { background-color:#3366FF;}\n";
+print "  #dymumu     { background-color:#3366FF;}\n";
+print "  #wjets      { background-color:#33CC33;}\n";
+print "  #qcd        { background-color:#FFFF00;}\n";
+print "  #mcsum      { background-color:#ffff7f;}\n";
+print "  #data       { background-color:#ffff7f;}\n";
 print "</style>\n";
 print "</head>\n";
 print "<body>\n";
@@ -114,7 +127,7 @@ for( my $i=0; $i<@files-1; $i++) { #files-1 because it is not looped over datafi
   
   # print filelabel into first column  
   my $filelabel = substr($file,0,index($file,"."));
-  print "<tr>\n  <td>$filelabel</td>";  
+  print "<tr id=\"$filelabel\">\n  <td>$filelabel</td>";  
   
   # loop over all modules  
   for( my $j=0; $j<@modules; $j++) {
@@ -124,7 +137,7 @@ for( my $i=0; $i<@files-1; $i++) { #files-1 because it is not looped over datafi
     # find lines in summary table
     my @modline = `grep TrigReport $file | grep $module`;
     # extract number from line
-    if($modline[0] =~ /TrigReport\s+\d\s+\d\s+\d+\s+(\d+).*/) {
+    if($modline[0] =~ /TrigReport\s+\d+\s+\d\s+\d+\s+(\d+).*/) {
       my $passed = $1;
       if($passed>0){    
         #statistical error is just squareroot        
@@ -137,9 +150,9 @@ for( my $i=0; $i<@files-1; $i++) { #files-1 because it is not looped over datafi
 	$countSumErrorSquare[$j] += $weight*$passed;
       
         print "  <td>";
-        printf("%.3f", $passed);
+        printf("%.2f", $passed);
         print " +- ";
-        printf("%.3f", $staterror);
+        printf("%.2f", $staterror);
         print "</td>";
       }
       else{ # if event number is zero
@@ -150,23 +163,23 @@ for( my $i=0; $i<@files-1; $i++) { #files-1 because it is not looped over datafi
     };         
   }; # end loop over modules    
   close IN;
-  print "</tr>\n";
+  print "\n</tr>\n";
 }; # end loop over files
 
 
 # table line for added stats
-print "<tr>\n  <td class=\"mcsum\">Sum</td>";
+print "<tr id=\"mcsum\">\n  <td>Sum</td>";
 for( my $i=0; $i<@modules; $i++) {
-  print "  <td class=\"mcsum\">";
-  printf("%.3f", $countSum[$i]);
+  print "  <td>";
+  printf("%.2f", $countSum[$i]);
   print " +- ";
-  printf("%.3f", sqrt($countSumErrorSquare[$i]));
+  printf("%.2f", sqrt($countSumErrorSquare[$i]));
   print "</td>";
 }; # end loop over modules    
 print "</tr>\n";
 
 # table line for real data
-print "<tr>\n  <td class=\"data\">Data</td>";
+print "<tr id=\"data\">\n  <td>Data</td>";
 
 if(-e $files[-1]){
   my $file = $files[-1];
@@ -177,14 +190,14 @@ if(-e $files[-1]){
     # find lines in summary table
     my @modline = `grep TrigReport $file | grep $module`;
     # extract number from line
-    if($modline[0] =~ /TrigReport\s+\d\s+\d\s+\d+\s+(\d+).*/) {
+    if($modline[0] =~ /TrigReport\s+\d+\s+\d\s+\d+\s+(\d+).*/) {
       my $passed = $1;
       if($passed>0){           
         my $staterror = sqrt($passed);       
-        print "  <td class=\"data\">";
-        printf("%.3f", $passed);
+        print "  <td>";
+        printf("%.2f", $passed);
         print " +- ";
-        printf("%.3f", $staterror);
+        printf("%.2f", $staterror);
         print "</td>";
       }
       else{ # if event number is zero
