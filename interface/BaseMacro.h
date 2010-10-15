@@ -32,7 +32,57 @@
    \brief   Basic macro to provide a skeleton and some base functionality for analysis macros
 
    Basic macro to provide a skeleton and some base functionality for analysis macros. Foreseen
-   functionalities are o[pen and close files and histogram handlig. 
+   functionalities are open and close files and histogram handlig. We make use of the edm::PSet
+   for configure our macros. The expected basic configuration is expected to contain the 
+   following parameters (of fwlite configuration style):
+
+   import FWCore.ParameterSet.Config as cms
+   process = cms.Process("Plots")
+
+   process.BasicMacro = cms.PSet(
+    ## luminosity in pb-1
+    lumi = cms.double(10)
+    ## vector of input samples
+    inputs = cms.VPSet(
+      ## input file
+      file  = cms.string('file:Sample1.root'),
+      ## label in legend
+      label = cms.string('legend entry'),
+      ## normalization scale (expected to be to 1pb)
+      scale = cms.double(0.123)
+    ),
+    ## histograms of interest
+    hists = cms.vstring('fullpath/tohist',)
+
+    This block may be imported from a central file and partiially replaced. In the BaseMacro class 
+    it is foreseen that histograms of interest may be written inpto a single ps file (for overview 
+    files), into single picture files (like .png -- nor validity check is applied yet) or into a
+    new root file for further processing. It is expected that the (vectors of) Canvases and histo-
+    grams are members of small derived classes with not more than 150 lines of code. They should 
+    serve simple functionalities. Examples are given below:
+
+    + plot a certain (set of) histogram(s) (comaprison of data and MC/theory).
+    + read a certain (set of) histogram(s) and print a readable output to file/shell (e.g. a table 
+      of cross sections).
+    + take a (set of) histogram(s) from different inputs divide them (to determine an efficiency) 
+      and write the result into a new file.
+    + take a (set of) histogram(s) from different inputs calculate a cross section from it and 
+      write the result into a new file.
+    + take a set of pre-evaluated systematic variations, which apply on an efficiency, combine them 
+      binwise and write the result into a new file.
+    + take a (set of) cross section histogram(s), apply bin center corrections and write the result 
+      into a new file.
+    + take a (set of) cross section histogram(s), add systematic uncertainties to it and write the 
+      result inot a new file.
+
+    It is recommended to divide each processing on the way to a cross section in as small portions as
+    possible and to make the result of this step persistent in a new output file. You may thus apply 
+    very localized changes and redo the calculations without doing everything from scratch over and 
+    over again. It is further on recommended to have a (set of) script(s) at hand to run the basic 
+    processes on a routine basis. It might be useful to keep the calculation of a central cross sec-
+    tion value separated from the full maschienery for the evaluation of systematic uncertainties.
+)
+
 */
 
 
@@ -43,7 +93,7 @@ class BaseMacro {
   /// + input file
   /// + sample description (also used for legend)
   /// + luminosity normalization for MC (for data this should be 1.)
-  typedef std::vector< std::pair< TFile*, std::pair<std::string, float> > > SampleCollection;
+  typedef std::vector< std::pair< TFile*, std::pair<std::string, float> > > InputCollection;
   /// this describes a map of histograms, corresponding to a histogram name and a std::vector 
   /// of TH1*; for each sample one TH1* is expected in the vector
   typedef std::map<std::string, std::vector<TH1*> > HistMap;
@@ -70,7 +120,7 @@ class BaseMacro {
 
  protected:
   /// collection of input files
-  SampleCollection samples_;
+  InputCollection inputs_;
   /// map for histogram management
   HistMap hists_;
   /// luminosity

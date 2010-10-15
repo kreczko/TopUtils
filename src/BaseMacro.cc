@@ -3,20 +3,20 @@
 BaseMacro::BaseMacro(const edm::ParameterSet& cfg) : lumi_(cfg.getParameter<double>("lumi"))
 {
   // load input files
-  std::vector<edm::ParameterSet> samples = cfg.getParameter<std::vector<edm::ParameterSet> >("samples");
-  for(std::vector<edm::ParameterSet>::const_iterator sample=samples.begin(); sample!=samples.end(); ++sample){
-    samples_.push_back(make_pair(new TFile(sample->getParameter<std::string>("file").c_str()), make_pair(sample->getParameter<std::string>("label"), sample->getParameter<double>("scale"))));
+  std::vector<edm::ParameterSet> inputs = cfg.getParameter<std::vector<edm::ParameterSet> >("inputs");
+  for(std::vector<edm::ParameterSet>::const_iterator input=inputs.begin(); input!=inputs.end(); ++input){
+    inputs_.push_back(make_pair(new TFile(input->getParameter<std::string>("file").c_str()), make_pair(input->getParameter<std::string>("label"), input->getParameter<double>("scale"))));
   }
 
   //load histograms of interest
   std::vector<std::string> hists = cfg.getParameter<std::vector<std::string> >("hists");
   for(std::vector<std::string>::const_iterator hist = hists.begin(); hist!=hists.end(); ++hist){
     std::vector<TH1*> buffer;
-    for(SampleCollection::const_iterator sample = samples_.begin(); sample!=samples_.end(); ++sample){
+    for(InputCollection::const_iterator input = inputs_.begin(); input!=inputs_.end(); ++input){
       // full path within the file need to be given
-      buffer.push_back((TH1*)sample->first->Get(hist->c_str()));
+      buffer.push_back((TH1*)input->first->Get(hist->c_str()));
       // apply normalization (expected to be to 1pb)
-      buffer.back()->Scale(sample->second.second);
+      buffer.back()->Scale(input->second.second);
     }
     // add to histogram map
     hists_[*hist]=buffer;
