@@ -73,6 +73,8 @@ class BaseMacro {
   SampleCollection samples_;
   /// map for histogram management
   HistMap hists_;
+  /// luminosity
+  double lumi_;
 };
 
 #endif

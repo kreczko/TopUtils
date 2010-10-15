@@ -1,6 +1,6 @@
 #include "TopAnalysis/TopUtils/interface/BaseMacro.h"
 
-BaseMacro::BaseMacro(const edm::ParameterSet& cfg)
+BaseMacro::BaseMacro(const edm::ParameterSet& cfg) : lumi_(cfg.getParameter<double>("lumi"))
 {
   // load input files
   std::vector<edm::ParameterSet> samples = cfg.getParameter<std::vector<edm::ParameterSet> >("samples");
@@ -15,10 +15,12 @@ BaseMacro::BaseMacro(const edm::ParameterSet& cfg)
     for(SampleCollection::const_iterator sample = samples_.begin(); sample!=samples_.end(); ++sample){
       // full path within the file need to be given
       buffer.push_back((TH1*)sample->first->Get(hist->c_str()));
+      // apply normalization (expected to be to 1pb)
+      buffer.back()->Scale(sample->second.second);
     }
     // add to histogram map
     hists_[*hist]=buffer;
-  } 
+  }
 }
 
 void BaseMacro::save(const std::vector<TH1*>& hists, const std::string& fileName) const
