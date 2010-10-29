@@ -41,7 +41,8 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
     pJets->push_back( scaledJet );
     // consider jet scale shift only if the raw jet pt and emf 
     // is above the thresholds given in the module definition
-    if(jet->correctedJet("raw").pt() > jetPTThresholdForMET_
+    if((jet->isCaloJet() || jet->isJPTJet())
+       && jet->correctedJet("raw").pt() > jetPTThresholdForMET_
        && jet->emEnergyFraction() < jetEMLimitForMET_) {
       dPx    += scaledJet.px() - jet->px();
       dPy    += scaledJet.py() - jet->py();
