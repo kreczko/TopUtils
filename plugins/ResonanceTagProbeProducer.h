@@ -5,6 +5,8 @@
 #include <string>
 #include <iostream>
 
+#include "TH1.h"
+
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Utilities/interface/InputTag.h"
@@ -60,6 +62,8 @@ class ResonanceTagProbeProducer : public edm::EDProducer {
   double mass_;
   /// symmetric mass window
   double deltaM_;
+  /// control histos
+  std::map<std::string,TH1F*> hists_;
 };
 
 #endif
