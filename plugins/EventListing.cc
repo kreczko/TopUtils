@@ -7,7 +7,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 /**
-   \class   EventListing EventListing.h "TopAnalysis/TopUtils/plugins/EventListing.h"
+   \class   EventListing EventListing.cc "TopAnalysis/TopUtils/plugins/EventListing.cc"
 
    \brief   EDAnalyzer which only prints a list of selected events at the end of a cmsRun job 
 
