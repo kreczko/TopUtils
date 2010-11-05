@@ -31,7 +31,8 @@ for my $filename (@files) {
     open my $fh, '<', $filename or die "Cannot open file $filename: $!\n";
     my @lines = <$fh>;
     # start of interestiong information is: TrigReport ---------- Event  Summary ------------
-    shift @lines while $lines[0] !~ /^TrigReport\s+\-+\s+Event\s+Summary/;
+    shift @lines while @lines && $lines[0] !~ /^TrigReport\s+\-+\s+Event\s+Summary/;
+    warn "Cannot find TrigReport in $filename\n";
     push @{$accu[$_]}, $lines[$_] for 0..@lines-1;
 }
 
