@@ -32,8 +32,11 @@ for my $filename (@files) {
     my @lines = <$fh>;
     # start of interestiong information is: TrigReport ---------- Event  Summary ------------
     shift @lines while @lines && $lines[0] !~ /^TrigReport\s+\-+\s+Event\s+Summary/;
-    warn "Cannot find TrigReport in $filename\n";
-    push @{$accu[$_]}, $lines[$_] for 0..@lines-1;
+    die "Cannot find TrigReport in $filename\n" unless @lines;
+    for (0..@lines-1) {
+        last if $lines[$_] =~ /TimeReport/;
+        push @{$accu[$_]}, $lines[$_];
+    }
 }
 
 #split on whitespace and also store the whitespace
