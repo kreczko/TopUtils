@@ -38,6 +38,8 @@ class JetEnergyScale : public edm::EDProducer {
   ~JetEnergyScale(){};
   
  private:
+  /// check settings
+  virtual void beginJob();
   /// rescale jet energy and recalculated MET
   virtual void produce(edm::Event&, const edm::EventSetup&);
 
@@ -52,6 +54,8 @@ class JetEnergyScale : public edm::EDProducer {
   std::string outputMETs_;
   /// scale factor for the rescaling
   double scaleFactor_;
+  /// absolute scaling or relative in eta
+  std::string scaleType_;
   /// threshold on (raw!) jet pt for Type1 MET corrections 
   double jetPTThresholdForMET_;
   /// limit on the emf of the jet for Type1 MET corrections 

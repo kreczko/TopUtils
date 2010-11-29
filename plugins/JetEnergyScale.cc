@@ -1,5 +1,6 @@
 #include "TopAnalysis/TopUtils/plugins/JetEnergyScale.h"
 
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -8,6 +9,7 @@ JetEnergyScale::JetEnergyScale(const edm::ParameterSet& cfg):
   inputJets_           (cfg.getParameter<edm::InputTag>("inputJets"           )),
   inputMETs_           (cfg.getParameter<edm::InputTag>("inputMETs"           )),
   scaleFactor_         (cfg.getParameter<double>       ("scaleFactor"         )),
+  scaleType_           (cfg.getParameter<std::string>  ("scaleType"           )),  
   jetPTThresholdForMET_(cfg.getParameter<double>       ("jetPTThresholdForMET")),
   jetEMLimitForMET_    (cfg.getParameter<double>       ("jetEMLimitForMET"    ))
 {
@@ -18,6 +20,17 @@ JetEnergyScale::JetEnergyScale(const edm::ParameterSet& cfg):
   produces<std::vector<pat::Jet> >(outputJets_);
   produces<std::vector<pat::MET> >(outputMETs_);
 }
+
+
+void
+JetEnergyScale::beginJob()
+{
+  // check if scaleType is ok
+  if(scaleType_.compare("abs")!=0 &&  scaleType_.compare("rel")!=0)
+    edm::LogError("JetEnergyScale") << "Unknown scaleType: " << scaleType_;
+	throw cms::Exception("Configuration Error");
+}
+
 
 void
 JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
@@ -37,7 +50,14 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
 
   for(std::vector<pat::Jet>::const_iterator jet = jets->begin(); jet != jets->end(); ++jet) {
     pat::Jet scaledJet = *jet;
-    scaledJet.scaleEnergy( scaleFactor_ );
+    
+    if(scaleType_.compare("abs"==0)){
+      scaledJet.scaleEnergy( scaleFactor_ );    
+    }        
+    else{
+      scaledJet.scaleEnergy( fabs(scaledJet.eta())*scaleFactor_ );    
+    }
+            
     pJets->push_back( scaledJet );
     // consider jet scale shift only if the raw jet pt and emf 
     // is above the thresholds given in the module definition
