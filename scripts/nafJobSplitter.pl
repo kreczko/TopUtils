@@ -5,6 +5,17 @@ use warnings;
 use File::Basename;
 use File::Path;
 
+
+use constant MOTD => <<MOTD;
+***
+  New: to prevent afs hangs, output is now written to the worker node first.
+       Only at the end of the job it is copied to the current directory.
+       
+  New: jobs now have names depending on the config file: njs_CONFIG_JOBNUMBER
+
+MOTD
+
+
 sub syntax {
     print <<END_USAGE_INFO;
 ****************************************************************
@@ -26,7 +37,7 @@ DO: "cd PATH_TO_CONFIG ; PATH_TO_SUBMIT/nafJobSplitter.pl 5 configfile.py"
 DO NOT: "./nafJobSplitter.pl 5 PATH_TO_CONFIG/configfile.py".
 
 Run "qstat -u your_username" to check if your jobs are running.
-If needed, use "qsub naf_MyAna/jobNUMBER.sh" to resubmit a certain job.
+If needed, use "qsub naf_MyAna/njs_MyAna_jobNUMBER.sh" to resubmit a certain job.
 
 Finally, add the histograms: hadd output.root naf_MyAna/*.root
 
@@ -35,11 +46,13 @@ use more than 10 jobs. If you run over 3 files using 2 jobs, then one job will r
 over 2 files and one job will run over 1 file (ignoring file sizes).
 
 END_USAGE_INFO
+    print MOTD;
     exit 1;
 }
 
 my ($numberOfJobs, $config) = @ARGV;
 syntax() unless $config;
+print MOTD;
 $config =~ s/\.py$//;
 
 mkpath "naf_$config";
@@ -58,11 +71,11 @@ for my $job (0..$numberOfJobs-1) {
     $cfg =~ s/OUTPUTFILE/$config-$job.root/g;
     $cfg =~ s/NUMBER/$job/g;
     $cfg =~ s/DIRECTORY/$config/g;
-    open my $BATCH, '>', "naf_$config/job$job.sh" or die $!;
+    open my $BATCH, '>', "naf_$config/njs_${config}_job$job.sh" or die $!;
     print $BATCH $cfg;
 }
 
-$_ = 5;
+$_ = 3;
 while (--$_) {
     print "Submitting in $_ seconds, press Ctrl-C to cancel\n";
     sleep 1;
@@ -70,7 +83,7 @@ while (--$_) {
 
 for my $job (0..$numberOfJobs-1) {
     print "Submitting job $job...\n";
-    system("qsub naf_$config/job$job.sh");
+    system("qsub naf_$config/njs_${config}_job$job.sh");
 }
 
 
@@ -116,7 +129,10 @@ sub getBatchsystemTemplate {
 #$ -cwd
 #$ -V
 #
-#$ -o naf_DIRECTORY/outNUMBER.txt
+#$ -o /dev/null
+###### -o naf_DIRECTORY/outNUMBER.txt
+exec > $TMPDIR/stdout.txt 2>&1
+#exec > $TMPDIR/stdout.txt 2>$TMPDIR/stderr.txt
 
 # change to scratch directory (local, not lustre in this example)
 
@@ -126,6 +142,8 @@ perl -pe 's/OUTPUTPATH/$ENV{TMPDIR}/g' < $current/naf_DIRECTORY/CONFIGFILE.py > 
 cmsRun $TMPDIR/run.py
 
 mv $TMPDIR/OUTPUTFILE $current/naf_DIRECTORY/
+mv $TMPDIR/stdout.txt $current/naf_DIRECTORY/outNUMBER.txt
+#mv $TMPDIR/stderr.txt $current/naf_DIRECTORY/
 
 END_OF_TEMPLATE
 }
