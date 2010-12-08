@@ -15,20 +15,22 @@ JetEnergyScale::JetEnergyScale(const edm::ParameterSet& cfg):
 {
   // use label of input to create label for output
   outputJets_ = inputJets_.label();
-  outputMETs_ = inputMETs_.label();
+  outputMETs_ = inputMETs_.label(); 
+  
   // register products
   produces<std::vector<pat::Jet> >(outputJets_);
-  produces<std::vector<pat::MET> >(outputMETs_);
+  produces<std::vector<pat::MET> >(outputMETs_); 
 }
 
 
 void
 JetEnergyScale::beginJob()
-{
+{ 
   // check if scaleType is ok
-  if(scaleType_.compare("abs")!=0 &&  scaleType_.compare("rel")!=0)
+  if(scaleType_.compare("abs")!=0 && scaleType_.compare("rel")!=0){
     edm::LogError("JetEnergyScale") << "Unknown scaleType: " << scaleType_;
 	throw cms::Exception("Configuration Error");
+  }		
 }
 
 
@@ -49,16 +51,18 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
   double dSumEt = 0.;
 
   for(std::vector<pat::Jet>::const_iterator jet = jets->begin(); jet != jets->end(); ++jet) {
+  
     pat::Jet scaledJet = *jet;
     
-    if(scaleType_.compare("abs"==0)){
+    if(scaleType_.compare("abs")==0){
       scaledJet.scaleEnergy( scaleFactor_ );    
     }        
     else{
       scaledJet.scaleEnergy( fabs(scaledJet.eta())*scaleFactor_ );    
-    }
-            
-    pJets->push_back( scaledJet );
+    } 
+               
+    pJets->push_back( scaledJet );   
+    
     // consider jet scale shift only if the raw jet pt and emf 
     // is above the thresholds given in the module definition
     if((jet->isCaloJet() || jet->isJPTJet())
