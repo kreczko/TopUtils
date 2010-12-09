@@ -1,7 +1,6 @@
 #include "TopAnalysis/TopUtils/plugins/JetEnergyScale.h"
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
-#include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
 #include "FWCore/Framework/interface/Event.h"
 
@@ -11,7 +10,9 @@ JetEnergyScale::JetEnergyScale(const edm::ParameterSet& cfg):
   scaleFactor_         (cfg.getParameter<double>       ("scaleFactor"         )),
   scaleType_           (cfg.getParameter<std::string>  ("scaleType"           )),  
   jetPTThresholdForMET_(cfg.getParameter<double>       ("jetPTThresholdForMET")),
-  jetEMLimitForMET_    (cfg.getParameter<double>       ("jetEMLimitForMET"    ))
+  jetEMLimitForMET_    (cfg.getParameter<double>       ("jetEMLimitForMET"    )),
+  resolutionFactor_    (cfg.getParameter<double>       ("resolutionFactor"    ))
+
 {
   // use label of input to create label for output
   outputJets_ = inputJets_.label();
@@ -55,18 +56,18 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
     pat::Jet scaledJet = *jet;
     
     if(scaleType_.compare("abs")==0){
-      scaledJet.scaleEnergy( scaleFactor_ );    
+      scaledJet.scaleEnergy( scaleFactor_ );
+      scaledJet.scaleEnergy( resolutionFactor(scaledJet) );
     }        
     else{
       scaledJet.scaleEnergy( fabs(scaledJet.eta())*scaleFactor_ );    
-    } 
-               
-    pJets->push_back( scaledJet );   
-    
+      scaledJet.scaleEnergy( resolutionFactor(scaledJet) );
+    }    pJets->push_back( scaledJet );
+
     // consider jet scale shift only if the raw jet pt and emf 
     // is above the thresholds given in the module definition
     if((jet->isCaloJet() || jet->isJPTJet())
-       && jet->correctedJet("raw").pt() > jetPTThresholdForMET_
+       && jet->correctedJet("Uncorrected").pt() > jetPTThresholdForMET_
        && jet->emEnergyFraction() < jetEMLimitForMET_) {
       dPx    += scaledJet.px() - jet->px();
       dPy    += scaledJet.py() - jet->py();
@@ -82,4 +83,15 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
   pMETs->push_back( scaledMET );
   event.put(pJets, outputJets_);
   event.put(pMETs, outputMETs_);
+}
+
+double
+JetEnergyScale::resolutionFactor(const pat::Jet& jet)
+{
+  if(!jet.genJet())
+    return 1.;
+  double factor = 1. + (resolutionFactor_-1.)*(jet.pt() - jet.genJet()->pt())/jet.pt();
+  if(factor<0.)
+    factor=0.;
+  return factor;
 }

@@ -6,5 +6,6 @@ scaledJetEnergy = cms.EDProducer("JetEnergyScale",
     scaleFactor          = cms.double(1.0),
     scaleType            = cms.string("abs"), #abs or rel
     jetPTThresholdForMET = cms.double(20.),
-    jetEMLimitForMET     = cms.double(0.9)
+    jetEMLimitForMET     = cms.double(0.9),
+    resolutionFactor     = cms.double(1.0)
 )

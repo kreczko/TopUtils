@@ -2,6 +2,7 @@
 #define JetEnergyScale_h
 
 #include "FWCore/Framework/interface/EDProducer.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
 
 /**
    \class   JetEnergyScale JetEnergyScale.h "TopAnalysis/TopUtils/plugins/JetEnergyScale.h"
@@ -42,6 +43,8 @@ class JetEnergyScale : public edm::EDProducer {
   virtual void beginJob();
   /// rescale jet energy and recalculated MET
   virtual void produce(edm::Event&, const edm::EventSetup&);
+  /// rescale the resolution of the jet
+  double resolutionFactor(const pat::Jet&);
 
  private:
   /// jet input collection 
@@ -60,6 +63,8 @@ class JetEnergyScale : public edm::EDProducer {
   double jetPTThresholdForMET_;
   /// limit on the emf of the jet for Type1 MET corrections 
   double jetEMLimitForMET_;
+  /// scale factor for the energy resolution of jets
+  double resolutionFactor_;
 };
 
 #endif
