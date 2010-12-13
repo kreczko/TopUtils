@@ -98,9 +98,16 @@ sub checkJob {
     my $dir = shift;
     my %running = getRunningJobIDs();#print Dumper \%running; 
     my %jobids = getIDtoData("$dir/jobids.txt"); #die Dumper \%jobids;
+    my $runningJobs = grep {exists $running{$_}} keys %jobids;
+    my $doneJobs = @{[glob "$dir/out*.txt"]};
+    printf " -->  %d%%  --  %d jobs, %d running, %d done.\n", 
+        100*$doneJobs / keys %jobids,
+        scalar keys %jobids, 
+        $runningJobs,
+        $doneJobs;
     for my $batchid (sort grep { !exists $running{$_} } keys %jobids) {
         if (!-e "$dir/out$jobids{$batchid}{-id}.txt") {
-            print "job $batchid --> $jobids{$batchid}{-script} seems to have died\n";
+            print "job $batchid --> $jobids{$batchid}{-script} seems to have died, resubmitting...\n";
             resubmitJob($dir, $jobids{$batchid}{-id}, $jobids{$batchid}{-script});
         }
     }
@@ -133,6 +140,7 @@ sub resubmitJob {
                 sleep 5;
             }
         } while (!$success);
+        print "Job $script --> $newJid has been resubmitted\n";
     } else {
         die "Could not resubmit";
     }
@@ -143,7 +151,9 @@ syntax() unless $config;
 if ($numberOfJobs eq 'check') {
     my $done;
     do {
-        print "Looking for jobs in $ARGV[1]...\n";
+        { local $|=1;
+          print "Looking for jobs in $ARGV[1]...";
+        }
         $done = checkJob($ARGV[1]);
         if (!$done && defined $ARGV[2]) {
             print "Waiting for next check, cancel with Ctrl-C...\n;";
