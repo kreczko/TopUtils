@@ -14,53 +14,51 @@
 #    to appear in the table
 
 # integrated luminosity of data in /pb
-my $lumi = 2.98232;
+my $lumi = 36.1450;
 
 # input files (last file is for data)
-my @files = ("ttbarmumu.txt",
-             "ttbartaumu.txt",
-	     "ttbarbg.txt",
-	     "singletops.txt",
-	     "singletopt.txt",
-	     "singletoptw.txt",
-	     "vvjets.txt",
-	     "ztautau_mad.txt",
-	     "ztautau_pyt.txt",
-	     "zmumu_mad.txt",
-	     "zmumu_pyt.txt",
-	     "dymumu.txt",
-	     "wjets.txt",
-	     "qcd.txt",
-	     "data.txt"
+my @files = ("trigReport_ttbarmumu.txt",
+             "trigReport_ttbartaumu.txt",
+	     "trigReport_ttbarbg.txt",
+	     "trigReport_singletop.txt",
+	     "trigReport_ww.txt",
+	     "trigReport_wz.txt",
+	     "trigReport_zz.txt",
+	     "trigReport_wmu.txt",
+	     "trigReport_wtau.txt",
+	     "trigReport_dytautau.txt",
+	     "trigReport_ztautau_pyt.txt",
+	     "trigReport_ztautau_mad.txt",
+	     "trigReport_dymumu.txt",
+	     "trigReport_zmumu_pyt.txt",
+	     "trigReport_zmumu_mad.txt",
+	     "trigReport_qcd.txt",
+	     #"trigReport_data.txt"
+	     "trigReport_36pb.txt"
 	    );
 
 # cross section over number of events	    
-my @weights = ($lumi*157.5/1483404.,
-               $lumi*157.5/1483404.,
-	       $lumi*157.5/1483404.,	   
-	       $lumi*4.6/412055.,	   
-	       $lumi*64.6/528593.,	   
-	       $lumi*10.6/466437.,	   
-	       $lumi*4.8/102853.,	   
-	       $lumi*3048/1084921.,	   
-	       $lumi*1666/2160000.,	   
-	       $lumi*3048/1084921.,	   
-	       $lumi*1666/2051268.,	   
-	       $lumi*3457/904528.,	   
-	       $lumi*31314/10068895.,     
-	       $lumi*296900*0.2684/4377187.
+my @weights = ($lumi*157.5/1306182.,
+               $lumi*157.5/1306182.,
+	       $lumi*157.5/1306182.,	   
+	       $lumi*10.6/494961.,	   
+	       $lumi*4.51/110000.,
+	       $lumi*0.61/110000.,
+	       $lumi*7.4/110000.,
+	       $lumi*10438./5323040.,
+	       $lumi*10438./5221750.,
+	       $lumi*3457./2142450.,
+	       $lumi*1666./2127607.,
+	       $lumi*3048./2543383.,
+	       $lumi*3457./2227840.,
+	       $lumi*1666./2289913.,
+	       $lumi*3048./2604559.,
+	       $lumi*296600.*0.2966/29504866.
 	      ); #for data no weight is needed so 
 	         #weight array is 1 shorter then files array	    
 
 # modules which you want to appear in cutflow
-my @modules = ("analyzeGoodMuonsStep1",
-               "analyzeGoodMuonsStep2",
-	       "analyzeIsolatedMuonsStep3",
-	       "analyzeIsolatedMuonsVetoRcStep4",
-	       "analyzeIsolatedMuonsVetoRcStep5",
-	       "analyzeIsolatedMuonsVetoRcStep6",
-	       "analyzeIsolatedMuonsVetoRcStep7",
-	       "analyzeKinSolutionVetoRc"
+my @modules = ("analyzeIsolatedMuonPairSelectionRcStep4"
               );
 	      	      	    
 # counter for summed stats	     
@@ -137,7 +135,7 @@ for( my $i=0; $i<@files-1; $i++) { #files-1 because it is not looped over datafi
     # find lines in summary table
     my @modline = `grep TrigReport $file | grep $module`;
     # extract number from line
-    if($modline[0] =~ /TrigReport\s+\d+\s+\d\s+\d+\s+(\d+).*/) {
+    if($modline[0] =~ /TrigReport\s+\d+\s+\d+\s+\d+\s+(\d+).*/) {
       my $passed = $1;
       if($passed>0){    
         #statistical error is just squareroot        
@@ -190,7 +188,7 @@ if(-e $files[-1]){
     # find lines in summary table
     my @modline = `grep TrigReport $file | grep $module`;
     # extract number from line
-    if($modline[0] =~ /TrigReport\s+\d+\s+\d\s+\d+\s+(\d+).*/) {
+    if($modline[0] =~ /TrigReport\s+\d+\s+\d+\s+\d+\s+(\d+).*/) {
       my $passed = $1;
       if($passed>0){           
         my $staterror = sqrt($passed);       
