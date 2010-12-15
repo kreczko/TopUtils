@@ -48,17 +48,23 @@ my @weights = ($lumi*157.5/1306182.,
 	       $lumi*10438./5323040.,
 	       $lumi*10438./5221750.,
 	       $lumi*3457./2142450.,
-	       $lumi*1666./2127607.,
+	       $lumi*1666./2007446.,
 	       $lumi*3048./2543383.,
 	       $lumi*3457./2227840.,
 	       $lumi*1666./2289913.,
 	       $lumi*3048./2604559.,
-	       $lumi*296600.*0.2966/29504866.
+	       $lumi*296600.*0.2855/29504866.
 	      ); #for data no weight is needed so 
 	         #weight array is 1 shorter then files array	    
 
 # modules which you want to appear in cutflow
-my @modules = ("analyzeIsolatedMuonPairSelectionRcStep4"
+my @modules = ("analyzeGoodMuonsStep1",
+               "analyzeGoodMuonsRcStep2",
+               "analyzeIsolatedMuonsRcStep3",
+               "analyzeIsolatedMuonsVetoRcStep4",
+               "analyzeIsolatedMuonsVetoRcStep5",
+               "analyzeIsolatedMuonsVetoRcStep6",
+               "analyzeIsolatedMuonsVetoRcStep7"
               );
 	      	      	    
 # counter for summed stats	     
@@ -149,8 +155,8 @@ for( my $i=0; $i<@files-1; $i++) { #files-1 because it is not looped over datafi
       
         print "  <td>";
         printf("%.2f", $passed);
-        print " +- ";
-        printf("%.2f", $staterror);
+#        print " +- ";
+#        printf("%.2f", $staterror);
         print "</td>";
       }
       else{ # if event number is zero
@@ -170,8 +176,8 @@ print "<tr id=\"mcsum\">\n  <td>Sum</td>";
 for( my $i=0; $i<@modules; $i++) {
   print "  <td>";
   printf("%.2f", $countSum[$i]);
-  print " +- ";
-  printf("%.2f", sqrt($countSumErrorSquare[$i]));
+#  print " +- ";
+#  printf("%.2f", sqrt($countSumErrorSquare[$i]));
   print "</td>";
 }; # end loop over modules    
 print "</tr>\n";
