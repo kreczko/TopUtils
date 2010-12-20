@@ -1,3 +1,4 @@
+<use name=JetMETCorrections/Objects>
 <use name=CondCore/PluginSystem>
 <use name=DataFormats/PatCandidates>
 <use name=FWCore/ServiceRegistry>

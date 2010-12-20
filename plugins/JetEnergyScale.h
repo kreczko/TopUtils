@@ -17,17 +17,25 @@
    rescaled sumET and the p4 are stored. The different correction levels are lost for 
    the new collection. The module has the following parameters: 
 
-  inputJets            : input collection for  MET (expecting patMET).
-  inputMETs            : input collection for jets (expecting patJets).
-  scaleFactor          : scale factor to which to shift the JES.
-  jetPTThresholdForMET : pt threshold for (uncorrected!) jets considered for Type1 MET 
-                         corrections. 
-  jetEMLimitForMET     : limit in em fraction for Type1 MET correction. 
+   inputJets            : input collection for jets (expecting patJets).
+   inputMETs            : input collection for  MET (expecting patMET).
+   scaleFactor          : scale factor to which to shift the JES.
+   scaleType            : type of scaling; you can choose between abs (normal scale 
+                          factor), rel (a scale factor relative in eta?) and jes (un-
+			  certainty UP and DOWN scaling according to the estimated JES
+			  uncertainties as derived from JetMET). 
+   resolutionFactor     : factor to rescale the jet resolution. Increasing the JER by 
+                          10% requires a resolutionFactor of 1.1
+   jetPTThresholdForMET : pt threshold for (uncorrected!) jets considered for Type1 MET 
+                          corrections. 
+   jetEMLimitForMET     : limit in em fraction for Type1 MET correction. 
 
-  For expected parameters for _jetPTThresholdForMET_ and _jetEMLimitForMET_ have a look 
-  at: JetMETCorrections/Type1MET/python/MetType1Corrections_cff.py. Two output collections 
-  are written to file with instance label corresponding to the input label of the jet 
-  and met input collections. 
+   The scaleType jes will trun the parameter scaleFactor invalid, as the scales are taken
+   from JetMET. 
+   For expected parameter values for _jetPTThresholdForMET_ and _jetEMLimitForMET_ have a 
+   look at: JetMETCorrections/Type1MET/python/MetType1Corrections_cff.py. Two output 
+   collections are written to file with instance labels corresponding to the input label 
+   of the jet and met input collections. 
 */
 
 class JetEnergyScale : public edm::EDProducer {
@@ -55,16 +63,20 @@ class JetEnergyScale : public edm::EDProducer {
   std::string outputJets_;
   /// MET output collection 
   std::string outputMETs_;
-  /// scale factor for the rescaling
-  double scaleFactor_;
+  /// payload for scaleType jes
+  std::string payload_;
   /// absolute scaling or relative in eta
   std::string scaleType_;
+  /// scale factor for the rescaling of JES
+  double scaleFactor_;
+  /// scale factor for the energy resolution of jets
+  double resolutionFactor_;
   /// threshold on (raw!) jet pt for Type1 MET corrections 
   double jetPTThresholdForMET_;
   /// limit on the emf of the jet for Type1 MET corrections 
   double jetEMLimitForMET_;
-  /// scale factor for the energy resolution of jets
-  double resolutionFactor_;
+  /// allowed scaleTypes
+  std::vector<std::string> allowedTypes_;
 };
 
 #endif

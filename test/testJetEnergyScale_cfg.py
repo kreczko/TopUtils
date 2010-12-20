@@ -30,7 +30,7 @@ process.options = cms.untracked.PSet(
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = cms.string('START38_V7::All')
+process.GlobalTag.globaltag = cms.string('START38_V14::All')
 
 ## pat sequences
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
@@ -38,7 +38,10 @@ process.load("PhysicsTools.PatAlgos.patSequences_cff")
 ## configure JetEnergyScale tool
 process.load("TopAnalysis.TopUtils.JetEnergyScale_cff")
 from TopAnalysis.TopUtils.JetEnergyScale_cff import *
-scalePatJetsEnergy(process, 1.1)
+#scalePatJetsEnergy(process, 1.1)
+scaledJetEnergy.scaleType = "jes:up"
+scaledJetEnergy.payload   = "AK5Calo"
+scaledJetEnergy.resolutionFactor = 1.1
 
 from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
 run36xOn35xInput(process)
