@@ -89,8 +89,6 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
       JetCorrectionUncertainty* deltaJEC = new JetCorrectionUncertainty(param);
       deltaJEC->setJetEta(jet->eta()); deltaJEC->setJetPt(jet->pt()); 
 
-      std::cout << scaleType_.substr(scaleType_.find(':')+1) << std::endl;
-      
       if(scaleType_.substr(scaleType_.find(':')+1)=="up"  )
 	scaledJet.scaleEnergy( 1+deltaJEC->getUncertainty(true ) );
       if(scaleType_.substr(scaleType_.find(':')+1)=="down")
