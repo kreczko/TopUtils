@@ -94,6 +94,8 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
       if(scaleType_.substr(scaleType_.find(':')+1)=="down")
 	scaledJet.scaleEnergy( 1-deltaJEC->getUncertainty(false) );
       scaledJet.scaleEnergy( resolutionFactor(scaledJet) );
+
+      delete deltaJEC;
     }
     pJets->push_back( scaledJet );
     
