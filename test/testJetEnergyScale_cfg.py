@@ -39,8 +39,9 @@ process.load("PhysicsTools.PatAlgos.patSequences_cff")
 process.load("TopAnalysis.TopUtils.JetEnergyScale_cff")
 from TopAnalysis.TopUtils.JetEnergyScale_cff import *
 #scalePatJetsEnergy(process, 1.1)
-scaledJetEnergy.scaleType = "jes:up"
-scaledJetEnergy.payload   = "AK5Calo"
+scaledJetEnergy.scaleType   = "top:up"
+scaledJetEnergy.scaleFactor = 1.053
+scaledJetEnergy.payload     = "AK5Calo"
 scaledJetEnergy.resolutionFactor = 1.1
 
 from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
@@ -51,7 +52,8 @@ process.load("RecoJets.Configuration.RecoGenJets_cff")
 
 process.p = cms.Path(process.genJetParticles *
                      process.ak5GenJets *
-                     process.patDefaultSequence
+                     process.patDefaultSequence *
+                     process.scaledJetEnergy
                      )
 
 ## configure output module
@@ -64,3 +66,4 @@ process.out.outputCommands += ['keep *_scaledJetEnergy_*_*']
 
 ## output path
 process.outpath = cms.EndPath(process.out)
+process.options.wantSummary=False

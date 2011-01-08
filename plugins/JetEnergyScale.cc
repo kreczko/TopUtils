@@ -26,6 +26,8 @@ JetEnergyScale::JetEnergyScale(const edm::ParameterSet& cfg):
   allowedTypes_.push_back(std::string("rel"));
   allowedTypes_.push_back(std::string("jes:up"));
   allowedTypes_.push_back(std::string("jes:down"));
+  allowedTypes_.push_back(std::string("top:up"));
+  allowedTypes_.push_back(std::string("top:down"));
 
   // use label of input to create label for output
   outputJets_ = inputJets_.label();
@@ -78,7 +80,8 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
       scaledJet.scaleEnergy( fabs(scaledJet.eta())*scaleFactor_ );    
       scaledJet.scaleEnergy( resolutionFactor(scaledJet) );
     }    
-    if(scaleType_.substr(0, scaleType_.find(':'))=="jes"){
+    if(scaleType_.substr(0, scaleType_.find(':'))=="jes" || 
+       scaleType_.substr(0, scaleType_.find(':'))=="top" ){
       // handle to the jet corrector parameters collection
       edm::ESHandle<JetCorrectorParametersCollection> jetCorrParameters;
       // get the jet corrector parameters collection from the global tag
@@ -89,12 +92,25 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
       JetCorrectionUncertainty* deltaJEC = new JetCorrectionUncertainty(param);
       deltaJEC->setJetEta(jet->eta()); deltaJEC->setJetPt(jet->pt()); 
 
-      if(scaleType_.substr(scaleType_.find(':')+1)=="up"  )
-	scaledJet.scaleEnergy( 1+deltaJEC->getUncertainty(true ) );
-      if(scaleType_.substr(scaleType_.find(':')+1)=="down")
-	scaledJet.scaleEnergy( 1-deltaJEC->getUncertainty(false) );
+      if(scaleType_.substr(scaleType_.find(':')+1)=="up"  ){
+	if(scaleType_.substr(0, scaleType_.find(':'))=="top" ){
+	  float shift = deltaJEC->getUncertainty(true );
+	  scaledJet.scaleEnergy( 1+sqrt(shift*shift+(1.-scaleFactor_)*(1.-scaleFactor_)) );
+	}
+	if(scaleType_.substr(0, scaleType_.find(':'))=="jes" ){
+	  scaledJet.scaleEnergy( 1+deltaJEC->getUncertainty(true ) );
+	}
+      }
+      if(scaleType_.substr(scaleType_.find(':')+1)=="down"){
+	if(scaleType_.substr(0, scaleType_.find(':'))=="top" ){
+	  float shift = deltaJEC->getUncertainty(false);
+	  scaledJet.scaleEnergy( 1-sqrt(shift*shift+(1.-scaleFactor_)*(1.-scaleFactor_)) );
+	}
+	if(scaleType_.substr(0, scaleType_.find(':'))=="jes" ){
+	  scaledJet.scaleEnergy( 1-deltaJEC->getUncertainty(false) );
+	}
+      }
       scaledJet.scaleEnergy( resolutionFactor(scaledJet) );
-
       delete deltaJEC;
     }
     pJets->push_back( scaledJet );

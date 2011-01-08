@@ -20,17 +20,18 @@
    inputJets            : input collection for jets (expecting patJets).
    inputMETs            : input collection for  MET (expecting patMET).
    scaleFactor          : scale factor to which to shift the JES.
-   scaleType            : type of scaling; you can choose between abs (normal scale 
-                          factor), rel (a scale factor relative in eta?) and jes (un-
+   scaleType            : type of scaling; you can choose between _abs_ (normal scale 
+                          factor), _rel_ (a scale factor relative in eta?), _jes_ (un-
 			  certainty UP and DOWN scaling according to the estimated JES
-			  uncertainties as derived from JetMET). 
+			  uncertainties as derived from JetMET) and _top_ (a combination 
+			  of _abs_ and _jes_, following the suggestion of the TopPAG). 
    resolutionFactor     : factor to rescale the jet resolution. Increasing the JER by 
                           10% requires a resolutionFactor of 1.1
    jetPTThresholdForMET : pt threshold for (uncorrected!) jets considered for Type1 MET 
                           corrections. 
    jetEMLimitForMET     : limit in em fraction for Type1 MET correction. 
 
-   The scaleType jes will trun the parameter scaleFactor invalid, as the scales are taken
+   The scaleType jes will turn the parameter scaleFactor invalid, as the scales are taken
    from JetMET. 
    For expected parameter values for _jetPTThresholdForMET_ and _jetEMLimitForMET_ have a 
    look at: JetMETCorrections/Type1MET/python/MetType1Corrections_cff.py. Two output 
