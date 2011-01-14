@@ -77,7 +77,7 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
       scaledJet.scaleEnergy( resolutionFactor(scaledJet) );
     }        
     if(scaleType_=="rel"){
-      scaledJet.scaleEnergy( fabs(scaledJet.eta())*scaleFactor_ );    
+      scaledJet.scaleEnergy( 1+(fabs(scaledJet.eta())*(scaleFactor_-1. )));    
       scaledJet.scaleEnergy( resolutionFactor(scaledJet) );
     }    
     if(scaleType_.substr(0, scaleType_.find(':'))=="jes" || 
