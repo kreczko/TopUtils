@@ -9,6 +9,12 @@ DEFINE_FWK_MODULE( EventWeightPlain );
 #include "TopAnalysis/TopUtils/plugins/JetEnergyScale.h"
 DEFINE_FWK_MODULE( JetEnergyScale );
 
+#include "TopAnalysis/TopUtils/plugins/JESUncertainty.h"
+DEFINE_FWK_MODULE( JESUncertainty );
+
+#include "TopAnalysis/TopUtils/plugins/UnclusteredMETScale.h"
+DEFINE_FWK_MODULE( UnclusteredMETScale );
+
 #include "TopAnalysis/TopUtils/plugins/TtSemiLepSignalSelectorMVATrainer.h"
 DEFINE_FWK_MODULE( TtSemiLepSignalSelectorMVATrainer );
 
