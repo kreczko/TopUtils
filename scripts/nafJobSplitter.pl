@@ -100,15 +100,20 @@ sub checkJob {
     my %jobids = getIDtoData("$dir/jobids.txt"); #die Dumper \%jobids;
     my $runningJobs = grep {exists $running{$_}} keys %jobids;
     my $doneJobs = @{[glob "$dir/out*.txt"]};
-    printf " -->  %d%%  --  %d jobs, %d running, %d done.\n", 
+    printf " -->  %d%%  --  %d jobs, %d queueing/running, %d done.\n", 
         100*$doneJobs / keys %jobids,
         scalar keys %jobids, 
         $runningJobs,
         $doneJobs;
     for my $batchid (sort grep { !exists $running{$_} } keys %jobids) {
         if (!-e "$dir/out$jobids{$batchid}{-id}.txt") {
-            print "job $batchid --> $jobids{$batchid}{-script} seems to have died, resubmitting...\n";
-            resubmitJob($dir, $jobids{$batchid}{-id}, $jobids{$batchid}{-script});
+            if (-e "$dir/err$jobids{$batchid}{-id}.txt") {
+                print "job $batchid --> $jobids{$batchid}{-script}: cmsRun didn't return success, see err$jobids{$batchid}{-id}.txt\n";
+                print " remove the err file and run nafJobSplitter check again to resubmit the job.\n";
+            } else {
+                print "job $batchid --> $jobids{$batchid}{-script} seems to have died, resubmitting...\n";
+                resubmitJob($dir, $jobids{$batchid}{-id}, $jobids{$batchid}{-script});
+            }
         }
     }
 #    exit;
@@ -249,7 +254,7 @@ sub getBatchsystemTemplate {
 #$ -S /bin/zsh
 #
 #(the cpu time for this job)
-#$ -l h_cpu=11:00:00
+#$ -l h_cpu=24:00:00
 #
 #(the maximum memory usage of this job)
 #$ -l h_vmem=2000M
@@ -273,9 +278,14 @@ current=`pwd`
 perl -pe 's/OUTPUTPATH/$ENV{TMPDIR}/g' < $current/naf_DIRECTORY/CONFIGFILE.py > $TMPDIR/run.py
 cmsRun $TMPDIR/run.py
 
-if [[ -e $TMPDIR/joined.txt ]] ; then mv $TMPDIR/joined.txt $current/naf_DIRECTORY/ ; fi
-mv $TMPDIR/OUTPUTFILE $current/naf_DIRECTORY/
-mv $TMPDIR/stdout.txt $current/naf_DIRECTORY/outNUMBER.txt
+if [[ $? == 0 ]] ; then
+    if [[ -e $TMPDIR/joined.txt ]] ; then mv $TMPDIR/joined.txt $current/naf_DIRECTORY/ ; fi
+    mv $TMPDIR/OUTPUTFILE $current/naf_DIRECTORY/
+    mv $TMPDIR/stdout.txt $current/naf_DIRECTORY/outNUMBER.txt
+else
+    mv $TMPDIR/stdout.txt $current/naf_DIRECTORY/errNUMBER.txt
+fi
+
 #mv $TMPDIR/stderr.txt $current/naf_DIRECTORY/
 
 END_OF_TEMPLATE
