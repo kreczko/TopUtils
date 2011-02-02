@@ -5,14 +5,20 @@ use warnings;
 use File::Basename;
 use File::Path;
 use Data::Dumper;
+use Term::ANSIColor qw(colored);
+use Getopt::Std;
 
+use constant C_OK => 'green bold';
+use constant C_FILE => 'bold';
+use constant C_ERROR => 'red bold';
+use constant C_RESUBMIT => 'magenta';
 
 use constant MOTD => <<MOTD;
 ***
-  New: to prevent afs hangs, output is now written to the worker node first.
-       Only at the end of the job it is copied to the current directory.
-       
-  New: jobs now have names depending on the config file: jJOBNUMBER_CONFIG
+  New parameters!
+  
+  -q: choose queue, h_cpu in hours
+        default: -q 12
 
 MOTD
 
@@ -94,33 +100,6 @@ sub getIDtoData {
     %result;
 }
 
-sub checkJob {
-    my $dir = shift;
-    my %running = getRunningJobIDs();#print Dumper \%running; 
-    my %jobids = getIDtoData("$dir/jobids.txt"); #die Dumper \%jobids;
-    my $runningJobs = grep {exists $running{$_}} keys %jobids;
-    my $doneJobs = @{[glob "$dir/out*.txt"]};
-    printf " -->  %d%%  --  %d jobs, %d queueing/running, %d done.\n", 
-        100*$doneJobs / keys %jobids,
-        scalar keys %jobids, 
-        $runningJobs,
-        $doneJobs;
-    for my $batchid (sort grep { !exists $running{$_} } keys %jobids) {
-        if (!-e "$dir/out$jobids{$batchid}{-id}.txt") {
-            if (-e "$dir/err$jobids{$batchid}{-id}.txt") {
-                print "job $batchid --> $jobids{$batchid}{-script}: cmsRun didn't return success, see err$jobids{$batchid}{-id}.txt\n";
-                print " remove the err file and run nafJobSplitter check again to resubmit the job.\n";
-            } else {
-                print "job $batchid --> $jobids{$batchid}{-script} seems to have died, resubmitting...\n";
-                resubmitJob($dir, $jobids{$batchid}{-id}, $jobids{$batchid}{-script});
-            }
-        }
-    }
-#    exit;
-    
-#    print Dumper \%jobids;
-}
-
 sub submitJob {
     my ($dir, $N, $script) = @_;
     my $line = `qsub $dir/$script`;
@@ -150,6 +129,13 @@ sub resubmitJob {
         die "Could not resubmit";
     }
 }
+
+########################
+### PROGRAM BEGINS
+########################
+
+my %args;
+getopts('q:', \%args);
 
 my ($numberOfJobs, $config, $maxEvents) = @ARGV;
 syntax() unless $config;
@@ -247,14 +233,14 @@ END_OF_TEMPLATE
 }
 
 sub getBatchsystemTemplate {
-    return <<'END_OF_TEMPLATE';
+    my $templ = <<'END_OF_BATCH_TEMPLATE';
 #!/bin/zsh
 #
 #(make sure the right shell will be used)
 #$ -S /bin/zsh
 #
 #(the cpu time for this job)
-#$ -l h_cpu=24:00:00
+#$ -l h_cpu=__HCPU__
 #
 #(the maximum memory usage of this job)
 #$ -l h_vmem=2000M
@@ -288,5 +274,57 @@ fi
 
 #mv $TMPDIR/stderr.txt $current/naf_DIRECTORY/
 
-END_OF_TEMPLATE
+END_OF_BATCH_TEMPLATE
+    my $replace = $args{'q'} ? ($args{'q'} . ':00:00') : '01:00:00';
+    $templ =~ s/__HCPU__/$replace/;
+    return $templ;
+}
+
+sub checkJob {
+    my $dir = shift;
+    my %running = getRunningJobIDs();#print Dumper \%running; 
+    my %jobids = getIDtoData("$dir/jobids.txt"); #die Dumper \%jobids;
+    my $runningJobs = grep {exists $running{$_}} keys %jobids;
+    my $doneJobs = @{[glob "$dir/out*.txt"]};
+    printf " -->  %d%%  --  %d jobs, %d queueing/running, %d done.\n", 
+        100*$doneJobs / keys %jobids,
+        scalar keys %jobids, 
+        $runningJobs,
+        $doneJobs;
+    if ($doneJobs == keys %jobids) {
+        open my $JOINED, '<', "$dir/joined.txt" or die "Cannot open joined.txt: $!\n";
+        chomp(my $joined = <$JOINED>);
+        $joined =~ s/^'|'$//g;
+        if (!-e "$dir/$joined") {
+            my $config = $dir; $config =~ s/naf_//;
+            print "Joining output files...\n";
+            system('hadd', '-f', "$dir/$joined", glob("$dir/$config-*.root"));
+            system("sumTriggerReports2.pl $dir/out*.txt > $dir/str.txt");
+            print colored("Joined output file is: ", C_OK),
+                  colored("$dir/$joined\n", C_FILE),
+                  colored("Joined TrigReport is ", C_OK),
+                  colored("$dir/str.txt\n", C_FILE);
+        } else {
+            print colored(" - results have already been joined\n", C_OK);
+        }
+        
+        
+    }
+    
+    for my $batchid (sort grep { !exists $running{$_} } keys %jobids) {
+        if (!-e "$dir/out$jobids{$batchid}{-id}.txt") {
+            if (-e "$dir/err$jobids{$batchid}{-id}.txt") {
+                print "job $batchid --> $jobids{$batchid}{-script}: " .
+                      colored("cmsRun didn't return success, see err$jobids{$batchid}{-id}.txt\n", C_ERROR);
+                print " *** remove the err file and run nafJobSplitter check again to resubmit the job.\n";
+            } else {
+                print "job $batchid --> $jobids{$batchid}{-script} " .
+                      colored("seems to have died, resubmitting...\n", C_RESUBMIT);
+                resubmitJob($dir, $jobids{$batchid}{-id}, $jobids{$batchid}{-script});
+            }
+        }
+    }
+#    exit;
+    
+#    print Dumper \%jobids;
 }
