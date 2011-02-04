@@ -275,7 +275,7 @@ fi
 #mv $TMPDIR/stderr.txt $current/naf_DIRECTORY/
 
 END_OF_BATCH_TEMPLATE
-    my $replace = $args{'q'} ? ($args{'q'} . ':00:00') : '01:00:00';
+    my $replace = $args{'q'} ? ($args{'q'} . ':00:00') : '12:00:00';
     $templ =~ s/__HCPU__/$replace/;
     return $templ;
 }
