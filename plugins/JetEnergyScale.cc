@@ -94,8 +94,12 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
 
       if(scaleType_.substr(scaleType_.find(':')+1)=="up"  ){
 	if(scaleType_.substr(0, scaleType_.find(':'))=="top" ){
-	  float shift = deltaJEC->getUncertainty(true );
-	  scaledJet.scaleEnergy( 1+sqrt(shift*shift+(1.-scaleFactor_)*(1.-scaleFactor_)) );
+	  float shift  = deltaJEC->getUncertainty(true );
+	  // add the recommended PU correction on top  
+	  float pileUp = 0.352/jet->pt()/jet->pt();
+	  // add bjet uncertainty on top
+	  float bjet   = ((50<jet->pt() && jet->pt()<200) && fabs(jet->eta())<2.0) ? 0.02 : 0.03;
+	  scaledJet.scaleEnergy( 1+sqrt(shift*shift + pileUp*pileUp + bjet*bjet) );
 	}
 	if(scaleType_.substr(0, scaleType_.find(':'))=="jes" ){
 	  scaledJet.scaleEnergy( 1+deltaJEC->getUncertainty(true ) );
@@ -104,7 +108,11 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
       if(scaleType_.substr(scaleType_.find(':')+1)=="down"){
 	if(scaleType_.substr(0, scaleType_.find(':'))=="top" ){
 	  float shift = deltaJEC->getUncertainty(false);
-	  scaledJet.scaleEnergy( 1-sqrt(shift*shift+(1.-scaleFactor_)*(1.-scaleFactor_)) );
+	  // add the recommended PU correction on top  
+	  float pileUp = 0.352/jet->pt()/jet->pt();
+	  // add bjet uncertainty on top
+	  float bjet   = ((50<jet->pt() && jet->pt()<200) && fabs(jet->eta())<2.0) ? 0.02 : 0.03;
+	  scaledJet.scaleEnergy( 1-sqrt(shift*shift + pileUp*pileUp + bjet*bjet) );
 	}
 	if(scaleType_.substr(0, scaleType_.find(':'))=="jes" ){
 	  scaledJet.scaleEnergy( 1-deltaJEC->getUncertainty(false) );

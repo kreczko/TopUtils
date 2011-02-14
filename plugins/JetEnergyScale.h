@@ -23,8 +23,12 @@
    scaleType            : type of scaling; you can choose between _abs_ (normal scale 
                           factor), _rel_ (a scale factor relative in eta?), _jes_ (un-
 			  certainty UP and DOWN scaling according to the estimated JES
-			  uncertainties as derived from JetMET) and _top_ (a combination 
-			  of _abs_ and _jes_, following the suggestion of the TopPAG). 
+			  uncertainties as derived from JetMET) and _top_ (here we are 
+			  following the suggestion of the TopPAG: on top of the normal 
+			  JES uncertainty as given by JetMET we add the following un-
+			  certainties on top: 
+			  + PU: add an equivalent of 0.2GeV*0.8(jetArea)*2.2(<PU>))/pt.
+			  + 0.02 (for 50<pt(jet)<200 && |eta(jet)|<2) and 0.03 else.
    resolutionFactor     : factor to rescale the jet resolution. Increasing the JER by 
                           10% requires a resolutionFactor of 1.1
    jetPTThresholdForMET : pt threshold for (uncorrected!) jets considered for Type1 MET 
