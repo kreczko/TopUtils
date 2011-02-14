@@ -99,7 +99,9 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
 	  float pileUp = 0.352/jet->pt()/jet->pt();
 	  // add bjet uncertainty on top
 	  float bjet   = ((50<jet->pt() && jet->pt()<200) && fabs(jet->eta())<2.0) ? 0.02 : 0.03;
-	  scaledJet.scaleEnergy( 1+sqrt(shift*shift + pileUp*pileUp + bjet*bjet) );
+	  // add flat uncertainty for release differences and calibration changes (configurable)
+	  float sw = (1.-scaleFactor_);
+	  scaledJet.scaleEnergy( 1+sqrt(shift*shift + pileUp*pileUp + bjet*bjet + sw*sw) );
 	}
 	if(scaleType_.substr(0, scaleType_.find(':'))=="jes" ){
 	  scaledJet.scaleEnergy( 1+deltaJEC->getUncertainty(true ) );
@@ -112,7 +114,9 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
 	  float pileUp = 0.352/jet->pt()/jet->pt();
 	  // add bjet uncertainty on top
 	  float bjet   = ((50<jet->pt() && jet->pt()<200) && fabs(jet->eta())<2.0) ? 0.02 : 0.03;
-	  scaledJet.scaleEnergy( 1-sqrt(shift*shift + pileUp*pileUp + bjet*bjet) );
+	  // add flat uncertainty for release differences and calibration changes (configurable)
+	  float sw = (1.-scaleFactor_);
+	  scaledJet.scaleEnergy( 1-sqrt(shift*shift + pileUp*pileUp + bjet*bjet + sw*sw) );
 	}
 	if(scaleType_.substr(0, scaleType_.find(':'))=="jes" ){
 	  scaledJet.scaleEnergy( 1-deltaJEC->getUncertainty(false) );
