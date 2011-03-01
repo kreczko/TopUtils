@@ -1,0 +1,11 @@
+<use name="root"/>
+<use name="FWCore/MessageLogger"/>
+<use name="PhysicsTools/CandUtils"/>
+<use name="DataFormats/PatCandidates"/>
+<use name="CondFormats/JetMETObjects"/>
+
+<export>
+   <lib name="TopAnalysisTopUtils"/>
+   <use name="FWCore/MessageLogger"/>
+   <use name="root"/>
+</export>
