@@ -42,10 +42,12 @@ void BaseMacro::save(const std::vector<TH1*>& hists, const std::string& fileName
 void BaseMacro::save(const std::vector<TCanvas*>& canvs, std::string fileName) const
 {
   // open ps file for first canvas to be written to file
-  (*canvs.begin())->Print(fileName.append(".pdf(").c_str());
+  (*canvs.begin())->Print((fileName.append(".ps(")).c_str());
+  std::cout << "canvas: " << (*canvs.begin())->GetName() << std::endl;
   for(std::vector<TCanvas*>::const_iterator canv=canvs.begin()+1; canv!=canvs.end(); ++canv){
+    std::cout << "canvas: " << (*canv)->GetName() << std::endl;
     // fill canvases; close file for last element
-    canv==canvs.end() ? (*canv)->Print(fileName.append(".pdf").c_str()) : (*canv)->Print(fileName.append(".pdf)").c_str());
+    canv==canvs.end() ? (*canv)->Print((fileName.append(".ps)")).c_str()) : (*canv)->Print((fileName.append(".ps")).c_str());
   }
 }
 
