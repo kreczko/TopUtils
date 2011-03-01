@@ -1,7 +1,7 @@
-<use name=FWCore/MessageLogger>
 <use name=root>
-<use name=DataFormats/PatCandidates>
+<use name=FWCore/MessageLogger>
 <use name=PhysicsTools/CandUtils>
+<use name=DataFormats/PatCandidates>
 <use name=CondFormats/JetMETObjects>
 
 <export>
