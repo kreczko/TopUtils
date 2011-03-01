@@ -104,12 +104,11 @@ class BaseMacro {
   /// to -1. for this step to have no effect
   BaseMacro(const edm::ParameterSet& cfg);
   /// default destructor
-  ~BaseMacro();
-
+  ~BaseMacro(){};
  protected:
   /// save a set of Canvases to a single ps file of name fileName; it is foreseen that cnavs is a memeber 
   /// of a derived class, which is passed on to this function
-  void save(const std::vector<TCanvas*>& canvs, std::string& fileName) const;
+  void save(const std::vector<TCanvas*>& canvs, std::string fileName) const;
   /// save a set of histograms to a root file of name fileName; it is foreseen that hists is a member of 
   /// a derived class, which is passed on to this function
   void save(const std::vector<TH1*>& hists, const std::string& fileName) const;
@@ -125,6 +124,9 @@ class BaseMacro {
   HistMap hists_;
   /// luminosity
   double lumi_;
+  /// verbosiry level
+  bool verbose_;
+
 };
 
 #endif

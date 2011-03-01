@@ -1,16 +1,20 @@
 #include "TopAnalysis/TopUtils/interface/BaseMacro.h"
 
-BaseMacro::BaseMacro(const edm::ParameterSet& cfg) : lumi_(cfg.getParameter<double>("lumi"))
+BaseMacro::BaseMacro(const edm::ParameterSet& cfg) : lumi_(cfg.getParameter<double>("lumi")), verbose_(cfg.getParameter<bool>("verbose"))
 {
-  std::cout << "test for here: " << lumi_ << std::endl;
-
   // load input files
+  if(verbose_) std::cout << " prepare InputCollection..." << std::endl;
   std::vector<edm::ParameterSet> inputs = cfg.getParameter<std::vector<edm::ParameterSet> >("inputs");
   for(std::vector<edm::ParameterSet>::const_iterator input=inputs.begin(); input!=inputs.end(); ++input){
+    // check if file exists
+    if(TFile(input->getParameter<std::string>("file").c_str()).IsZombie()){
+      std::cout << "file: " << input->getParameter<std::string>("file").c_str() << "does not exist." << std::endl; exit(-1); 
+    }
     inputs_.push_back(make_pair(new TFile(input->getParameter<std::string>("file").c_str()), make_pair(input->getParameter<std::string>("label"), input->getParameter<double>("scale"))));
   }
-
+  
   //load histograms of interest
+  if(verbose_) std::cout << " prepare HistMap..." << std::endl;
   std::vector<std::string> hists = cfg.getParameter<std::vector<std::string> >("hists");
   for(std::vector<std::string>::const_iterator hist = hists.begin(); hist!=hists.end(); ++hist){
     std::vector<TH1*> buffer;
@@ -35,7 +39,7 @@ void BaseMacro::save(const std::vector<TH1*>& hists, const std::string& fileName
   outputFile->Close();
 }
 
-void BaseMacro::save(const std::vector<TCanvas*>& canvs, std::string& fileName) const 
+void BaseMacro::save(const std::vector<TCanvas*>& canvs, std::string fileName) const
 {
   // open ps file for first canvas to be written to file
   (*canvs.begin())->Print(fileName.append(".pdf(").c_str());

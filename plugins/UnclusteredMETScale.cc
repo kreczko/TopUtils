@@ -1,9 +1,9 @@
 #include "TopAnalysis/TopUtils/plugins/UnclusteredMETScale.h"
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
-#include "FWCore/Framework/interface/Event.h"
 
 UnclusteredMETScale::UnclusteredMETScale(const edm::ParameterSet& cfg):
   inputJets_           (cfg.getParameter<edm::InputTag>("inputJets"           )),

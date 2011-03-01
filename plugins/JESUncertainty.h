@@ -1,6 +1,7 @@
 #ifndef JESUncertainty_h
 #define JESUncertainty_h
 
+#include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EDProducer.h"
 
 class JESUncertainty : public edm::EDProducer {

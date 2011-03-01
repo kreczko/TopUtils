@@ -13,6 +13,6 @@
 <use name="TopAnalysis/TopUtils"/>
 <use name="root"/>
 
-<library file=*.cc name="TopAnalysisTopUtilsPlugins"/>
-  <flags EDM_PLUGIN=1>
+<library file="*.cc" name="TopAnalysisTopUtilsPlugins">
+  <flags EDM_PLUGIN="1"/>
 </library>

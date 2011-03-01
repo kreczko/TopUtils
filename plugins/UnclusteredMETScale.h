@@ -1,6 +1,7 @@
 #ifndef UnclusteredMETScale_h
 #define UnclusteredMETScale_h
 
+#include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EDProducer.h"
 
 class UnclusteredMETScale : public edm::EDProducer {
