@@ -2,6 +2,8 @@
 
 BaseMacro::BaseMacro(const edm::ParameterSet& cfg) : lumi_(cfg.getParameter<double>("lumi"))
 {
+  std::cout << "test for here: " << lumi_ << std::endl;
+
   // load input files
   std::vector<edm::ParameterSet> inputs = cfg.getParameter<std::vector<edm::ParameterSet> >("inputs");
   for(std::vector<edm::ParameterSet>::const_iterator input=inputs.begin(); input!=inputs.end(); ++input){
@@ -36,10 +38,10 @@ void BaseMacro::save(const std::vector<TH1*>& hists, const std::string& fileName
 void BaseMacro::save(const std::vector<TCanvas*>& canvs, std::string& fileName) const 
 {
   // open ps file for first canvas to be written to file
-  (*canvs.begin())->Print(fileName.append(".ps(").c_str());
+  (*canvs.begin())->Print(fileName.append(".pdf(").c_str());
   for(std::vector<TCanvas*>::const_iterator canv=canvs.begin()+1; canv!=canvs.end(); ++canv){
     // fill canvases; close file for last element
-    canv==canvs.end() ? (*canv)->Print(fileName.append(".ps").c_str()) : (*canv)->Print(fileName.append(".ps)").c_str());
+    canv==canvs.end() ? (*canv)->Print(fileName.append(".pdf").c_str()) : (*canv)->Print(fileName.append(".pdf)").c_str());
   }
 }
 
