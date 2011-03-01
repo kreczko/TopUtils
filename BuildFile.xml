@@ -1,4 +1,5 @@
 <use name="root"/>
+<use name="rootgpad"/>
 <use name="FWCore/MessageLogger"/>
 <use name="PhysicsTools/CandUtils"/>
 <use name="DataFormats/PatCandidates"/>

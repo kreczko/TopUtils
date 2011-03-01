@@ -88,15 +88,16 @@
 
 class BaseMacro {
  public:
-  /// this descibes a set of input files, corresponding labels and scaling factors to be used; 
-  /// the expected structure is:
-  /// + input file
+  /// this descibes a set of input files, corresponding labels and scaling factors to be used; the 
+  /// expected structure is:
   /// + sample description (also used for legend)
+  /// + input file
   /// + luminosity normalization for MC (for data this should be 1.)
-  typedef std::vector< std::pair< TFile*, std::pair<std::string, float> > > InputCollection;
-  /// this describes a map of histograms, corresponding to a histogram name and a std::vector 
-  /// of TH1*; for each sample one TH1* is expected in the vector
-  typedef std::map<std::string, std::vector<TH1*> > HistMap;
+  typedef std::vector< std::pair< std::string, std::pair<TFile*, float> > > InputCollection;
+  /// this describes a map of histograms, corresponding to a histogram name and a std::pair of TH1*
+  /// corresponding to each input sample; the std::stringthe the  corresponding TH1* is expected to be 
+  /// the sample description string of the InputCollection
+  typedef std::map<std::string, std::map<std::string, TH1*> > HistMap;
   
  public:
   /// default constructor; opens a set of files corresponding to the input samples, loads a set of a set

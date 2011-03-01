@@ -10,22 +10,29 @@ BaseMacro::BaseMacro(const edm::ParameterSet& cfg) : lumi_(cfg.getParameter<doub
     if(TFile(input->getParameter<std::string>("file").c_str()).IsZombie()){
       std::cout << "file: " << input->getParameter<std::string>("file").c_str() << "does not exist." << std::endl; exit(-1); 
     }
-    inputs_.push_back(make_pair(new TFile(input->getParameter<std::string>("file").c_str()), make_pair(input->getParameter<std::string>("label"), input->getParameter<double>("scale"))));
+    inputs_.push_back(std::make_pair(input->getParameter<std::string>("label"), std::make_pair(new TFile(input->getParameter<std::string>("file").c_str()), input->getParameter<double>("scale"))));
   }
   
   //load histograms of interest
   if(verbose_) std::cout << " prepare HistMap..." << std::endl;
   std::vector<std::string> hists = cfg.getParameter<std::vector<std::string> >("hists");
   for(std::vector<std::string>::const_iterator hist = hists.begin(); hist!=hists.end(); ++hist){
-    std::vector<TH1*> buffer;
+    std::map<std::string, TH1*> mapBuffer;
     for(InputCollection::const_iterator input = inputs_.begin(); input!=inputs_.end(); ++input){
-      // full path within the file need to be given
-      buffer.push_back((TH1*)input->first->Get(hist->c_str()));
-      // apply normalization (expected to be to 1pb)
-      buffer.back()->Scale(input->second.second);
+      TH1F* histBuffer=0;
+      input->second.first->GetObject(hist->c_str(), histBuffer);
+      if(histBuffer){
+	// the full path within the file needs to be given here
+	mapBuffer[input->first] = histBuffer;
+	// apply normalization (expected to be in pb)
+	mapBuffer[input->first]->Scale(input->second.second);
+      }
+      else{
+	std::cout << " WARNING: histogram " << (*hist) << "not in file " << input->second.first->GetName() << std::endl;
+      }
     }
     // add to histogram map
-    hists_[*hist]=buffer;
+    hists_[*hist]=mapBuffer;
   }
 }
 
@@ -41,14 +48,16 @@ void BaseMacro::save(const std::vector<TH1*>& hists, const std::string& fileName
 
 void BaseMacro::save(const std::vector<TCanvas*>& canvs, std::string fileName) const
 {
-  // open ps file for first canvas to be written to file
-  (*canvs.begin())->Print((fileName.append(".ps(")).c_str());
-  std::cout << "canvas: " << (*canvs.begin())->GetName() << std::endl;
-  for(std::vector<TCanvas*>::const_iterator canv=canvs.begin()+1; canv!=canvs.end(); ++canv){
+  // open output file
+  TCanvas* output = new TCanvas("output");
+  output->Print(fileName.append(".ps[").c_str());
+  for(std::vector<TCanvas*>::const_iterator canv=canvs.begin(); canv!=canvs.end(); ++canv){
     std::cout << "canvas: " << (*canv)->GetName() << std::endl;
-    // fill canvases; close file for last element
-    canv==canvs.end() ? (*canv)->Print((fileName.append(".ps)")).c_str()) : (*canv)->Print((fileName.append(".ps")).c_str());
+    output = *canv; output->Print(fileName.append(".ps").c_str());
   }
+  // close ps file
+  output->Print(fileName.append(".ps]").c_str());
+  delete output; 
 }
 
 void BaseMacro::save(const TCanvas& canv, const std::string& fileType) const 
