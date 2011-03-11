@@ -11,20 +11,6 @@ use Scalar::Util qw(looks_like_number);
 
 die "Please give job output files as parameter(s)!\n" unless my @files = @ARGV;
 
-print STDERR <<WARNING;
-
----------------------- WARNING ----------------------
-
-This program will add up everything that looks like a number!
-
-While this will be correct for numbers of events that pass through a filter,
-it will certainly not be correct for trigger bits or event rates.
-
----------------------- WARNING ----------------------
-
-WARNING
-
-
 my @accu;
 
 for my $filename (@files) {
@@ -39,9 +25,9 @@ for my $filename (@files) {
     }
 }
 
-#split on whitespace and also store the whitespace
 for my $lines (@accu) {
-    my $splitRE = qr /(\s+)/;
+    #split on whitespace and also store the whitespace, also allow zero whitespace between = and digit
+    my $splitRE = qr /(\s+|(?<==)(?=\d))/;
     my @original = split $splitRE, @{$lines}[0];
     my @names = @original;
     for (1..@{$lines}-1) {
