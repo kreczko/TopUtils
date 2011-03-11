@@ -2,6 +2,7 @@
 
 use strict;
 use warnings;
+use POSIX;
 use File::Basename;
 use File::Path;
 use Data::Dumper;
@@ -14,55 +15,53 @@ use constant C_ERROR => 'red bold';
 use constant C_RESUBMIT => 'magenta';
 
 use constant MOTD => <<MOTD;
-***
-  New parameters!
-  
-  -q: choose queue, h_cpu in hours
-        default: -q 12
-
 MOTD
 
 
 sub syntax {
-    print <<END_USAGE_INFO;
+    print <<'END_USAGE_INFO';
 *****************************************************************
 * nafJobSplitter.pl                                             *
 * A very simple script to split jobs and submit them to the NAF *
 *****************************************************************
 
-Consider using the config file MyAna.py. It may contain a long
-list of input files.
-
-Instead of running "cmsRun MyAna.py", run "nafJobSplitter.pl NumberOfJobs MyAna.py [maxEvents=-1]"
+Instead of running "cmsRun MyAna.py", run "nafJobSplitter.pl [parameters] NumberOfJobs MyAna.py"
 
 This will create a directory "naf_MyAna" with all files needed to submit 
 many jobs. Then it will submit all jobs to the NAF batch system.
-The optional parameter maxEvents is used for each job, i.e. 2 jobs and maxEvents=100 
-will process 200 events in total.
 
 Please cd to the directory containing the config file first:
 
 DO: "cd PATH_TO_CONFIG ; PATH_TO_SUBMIT/nafJobSplitter.pl 5 configfile.py"
 DO NOT: "./nafJobSplitter.pl 5 PATH_TO_CONFIG/configfile.py".
 
-Run "qstat -u your_username" to check if your jobs are running.
-If needed, use "qsub naf_MyAna/njs_MyAna_jobNUMBER.sh" to resubmit a certain job.
-
-Finally, add the histograms: hadd output.root naf_MyAna/*.root
-
 The jobs will be split on a per file basis, i.e. if you run over 10 files, you cannot 
 use more than 10 jobs. If you run over 3 files using 2 jobs, then one job will run
 over 2 files and one job will run over 1 file (ignoring file sizes).
 
+Parameters  
+  -q: choose queue, h_cpu in hours
+        default: -q 48
+        to modify the default, use the environt variable NJS_QUEUE, e.g. "export NJS_QUEUE=12"
+  -o: output directory 
+        default: `pwd`
+      Note: the output will always be stored in the current directory. If you specify
+      the ouput directory, NJS will create a symlink to it. E.g. it might be useful
+      to specify -o /scratch/hh/current/cms/user/$USER/njs
+      Use NJS_OUTPUT environment variable to set a default
+  -m: maximum number of events per job
+        default: -1 (i.e. no limit)
+  -n: don't join output root files, don't sum the TrigReports automatically
+  -p jobid: peek into job, i.e. show the current stdout
+
 ******************************************************************
 * What to do after submitting - if jobs crash / to monitor jobs  *
 ******************************************************************
-nafJobSplitter check naf_DIRECTORY [timeInMinutes]
+nafJobSplitter [-n] check naf_DIRECTORY [timeInMinutes]
 -> will automatically resubmit crashed jobs
 Automatically joins output files and trigger report if all jobs are done
-
-If timeInMinutes is given, it will check every given minutes. Program
-exits if all jobs are done.
+unless -n is passed. If timeInMinutes is given, it will check every 
+given minutes. Program exits if all jobs are done.
 
 
 END_USAGE_INFO
@@ -70,10 +69,25 @@ END_USAGE_INFO
     exit 1;
 }
 
+sub peekIntoJob {
+    my $jid = shift;
+    my @jobs = grep { $_->[0] eq $jid} map {[split /\s+/]} `qstat -u $ENV{USER}`;
+    #die Dumper \@jobs;
+    die "Did not find the job in the batch system.\n" if @jobs != 1;
+    if ($jobs[0][7] =~ /\@(.+)/) {
+        print "Please wait...\n";
+        system("qrsh -l h_cpu=00:01:00 -l h=$1 -l h_vmem=400M -now n 'cat /tmp/$jid.*/stdout.txt'");
+    } else {
+        die "Didn't find hostname\n";
+    }
+}
+
+# returns a hash: jobid -> status
 sub getRunningJobIDs {
     my $all = `qstat`;
     die "qstat has returned something unexpected:\n$all" unless $all =~ /^job-ID\s+prior/;
-    map { ($_ => 1) } $all =~ m/^(\d+)\s+\S+\s+\S+\s+$ENV{USER}\s+(?:r|qw)\s+/mg;
+    #map { ($_ => 1) } $all =~ m/^(\d+)\s+\S+\s+\S+\s+$ENV{USER}\s+(?:r|qw)\s+/mg;
+    $all =~ m/^(\d+)\s+\S+\s+\S+\s+$ENV{USER}\s+(\S+)\s+/mg;
 }
 
 sub getIDtoData {
@@ -135,74 +149,93 @@ sub resubmitJob {
 ########################
 
 my %args;
-getopts('q:', \%args);
+getopts('np:q:o:m:', \%args);
 
-my ($numberOfJobs, $config, $maxEvents) = @ARGV;
-syntax() unless $config;
-if ($numberOfJobs eq 'check') {
-    my $done;
-    do {
-        { local $|=1;
-          print "Looking for jobs in $ARGV[1]...";
-        }
-        $done = checkJob($ARGV[1]);
-        if (!$done && defined $ARGV[2]) {
-            print "Waiting for next check, cancel with Ctrl-C...\n;";
-            sleep $ARGV[2]*60-10;
-            print "Only 10 seconds left, don't cancel me once the check starts!\n";
-        }
-    } while (!$done && defined $ARGV[2]);
-    exit;
-} 
-$maxEvents ||= -1;
-print MOTD;
-$config =~ s/\.py$//;
+if ($args{'p'}) {
+    peekIntoJob($args{'p'});    
+} else {
 
-mkpath "naf_$config";
-for my $job (0..$numberOfJobs-1) {
-    my $cfg = getConfigTemplate();
-    $cfg =~ s/CONFIGFILE/$config/g;
-    $cfg =~ s/OUTPUTFILE/$config-$job.root/g;
-    $cfg =~ s/NUMBER_OF_JOBS/$numberOfJobs/g;
-    $cfg =~ s/JOB_NUMBER/$job/g;
+    my ($numberOfJobs, $config) = @ARGV;
+    my $maxEvents = $args{'m'} || -1;
+    syntax() unless $config;
+    if ($numberOfJobs eq 'check') {
+        my $done;
+        do {
+            { local $|=1;
+            print "Looking for jobs in $ARGV[1]";
+            }
+            $done = checkJob($ARGV[1]);
+            if (!$done && defined $ARGV[2]) {
+                print "Waiting for next check, cancel with Ctrl-C...\n;";
+                sleep $ARGV[2]*60-10;
+                print "Only 10 seconds left, don't cancel me once the check starts!\n";
+            }
+        } while (!$done && defined $ARGV[2]);
+        exit;
+    } 
+    $maxEvents ||= -1;
+    print MOTD;
+    $config =~ s/\.py$//;
 
-    open my $JOB, '>', "naf_$config/$config$job.py" or die $!;
-    print $JOB $cfg;
+    createNJSDirectory("naf_$config");
     
-    $cfg = getBatchsystemTemplate();
-    $cfg =~ s/CONFIGFILE/$config$job/g;
-    $cfg =~ s/OUTPUTFILE/$config-$job.root/g;
-    $cfg =~ s/NUMBER/$job/g;
-    $cfg =~ s/DIRECTORY/$config/g;
-    open my $BATCH, '>', "naf_$config/j${job}_${config}.sh" or die $!;
-    print $BATCH $cfg;
-}
+    for my $job (0..$numberOfJobs-1) {
+        my $cfg = getConfigTemplate($maxEvents);
+        $cfg =~ s/CONFIGFILE/$config/g;
+        $cfg =~ s/OUTPUTFILE/$config-$job.root/g;
+        $cfg =~ s/NUMBER_OF_JOBS/$numberOfJobs/g;
+        $cfg =~ s/JOB_NUMBER/$job/g;
 
-print "Precompiling python files...\n";
-for my $job (0..$numberOfJobs-1) {
-    system("python -mcompileall naf_$config");
-}
+        open my $JOB, '>', "naf_$config/$config$job.py" or die $!;
+        print $JOB $cfg;
+        
+        $cfg = getBatchsystemTemplate();
+        $cfg =~ s/CONFIGFILE/$config$job/g;
+        $cfg =~ s/OUTPUTFILE/$config-$job.root/g;
+        $cfg =~ s/NUMBER/$job/g;
+        $cfg =~ s/DIRECTORY/$config/g;
+        open my $BATCH, '>', "naf_$config/j${job}_${config}.sh" or die $!;
+        print $BATCH $cfg;
+    }
 
-$_ = 3;
-while (--$_) {
-    print "Submitting in $_ seconds, press Ctrl-C to cancel\n";
-    sleep 1;
-}
+    print "Precompiling python files...\n";
+    for my $job (0..$numberOfJobs-1) {
+        system("python -mcompileall naf_$config");
+    }
 
-open my $JOBIDS, '>>', "naf_$config/jobids.txt" or die $!;
-for my $job (0..$numberOfJobs-1) {
-    print "Submitting job $job...\n";
-    my $jid = submitJob("naf_$config", $job, "j${job}_${config}.sh");
-    if ($jid) {
-        print $JOBIDS "$job\t$jid\tj${job}_${config}.sh\n";
-    } else {
-        die "Cannot submit job!\n";
+    $_ = 3;
+    while (--$_) {
+        print "Submitting in $_ seconds, press Ctrl-C to cancel\n";
+        sleep 1;
+    }
+
+    open my $JOBIDS, '>>', "naf_$config/jobids.txt" or die $!;
+    for my $job (0..$numberOfJobs-1) {
+        print "Submitting job $job...\n";
+        my $jid = submitJob("naf_$config", $job, "j${job}_${config}.sh");
+        if ($jid) {
+            print $JOBIDS "$job\t$jid\tj${job}_${config}.sh\n";
+        } else {
+            die "Cannot submit job!\n";
+        }
     }
 }
 
 
+sub createNJSDirectory {
+    my $dir = shift;
+    my $symlinkDir = $args{'o'} || $ENV{NJS_OUTPUT};
+    if ($symlinkDir) {
+        my $newDir = "$symlinkDir/" . strftime("%Y-%m-%dT%T-",localtime) . $dir;
+        mkpath $newDir;
+        symlink $newDir, $dir;
+    } else {
+        mkpath $dir;
+    }
+}
 
 sub getConfigTemplate {
+    my $maxEvents = shift;
     return <<END_OF_TEMPLATE;
 
 from CONFIGFILE import *
@@ -259,6 +292,7 @@ exec > $TMPDIR/stdout.txt 2>&1
 
 # change to scratch directory
 
+fs flush
 current=`pwd`
 
 perl -pe 's/OUTPUTPATH/$ENV{TMPDIR}/g' < $current/naf_DIRECTORY/CONFIGFILE.py > $TMPDIR/run.py
@@ -275,7 +309,11 @@ fi
 #mv $TMPDIR/stderr.txt $current/naf_DIRECTORY/
 
 END_OF_BATCH_TEMPLATE
-    my $replace = $args{'q'} ? ($args{'q'} . ':00:00') : '12:00:00';
+    my $replace = $args{'q'} 
+        ? ($args{'q'} . ':00:00')
+        : $ENV{NJS_QUEUE} 
+            ? $ENV{NJS_QUEUE}.':00:00' 
+            : '48:00:00';
     $templ =~ s/__HCPU__/$replace/;
     return $templ;
 }
@@ -284,7 +322,7 @@ sub checkJob {
     my $dir = shift;
     my %running = getRunningJobIDs();#print Dumper \%running; 
     my %jobids = getIDtoData("$dir/jobids.txt"); #die Dumper \%jobids;
-    my $runningJobs = grep {exists $running{$_}} keys %jobids;
+    my $runningJobs = grep {exists $running{$_} && $running{$_} !~ /E/} keys %jobids;
     my $doneJobs = @{[glob "$dir/out*.txt"]};
     printf " -->  %d%%  --  %d jobs, %d queueing/running, %d done.\n", 
         100*$doneJobs / keys %jobids,
@@ -297,34 +335,41 @@ sub checkJob {
         $joined =~ s/^'|'$//g;
         if (!-e "$dir/$joined") {
             my $config = $dir; $config =~ s/naf_//;
-            print "Joining output files...\n";
-            system('hadd', '-f', "$dir/$joined", glob("$dir/$config-*.root"));
-            system("sumTriggerReports2.pl $dir/out*.txt > $dir/str.txt");
-            print colored("Joined output file is: ", C_OK),
-                  colored("$dir/$joined\n", C_FILE),
-                  colored("Joined TrigReport is ", C_OK),
-                  colored("$dir/str.txt\n", C_FILE);
+            if ($args{'n'}) {
+                print "-n given, so not joining output files\n";
+            } else {
+                print "Joining output files...\n";
+                system('hadd', '-f', "$dir/$joined", glob("$dir/$config-*.root"));
+                my $str = fileparse($joined, '.root') . '.txt';
+                system("sumTriggerReports2.pl $dir/out*.txt > $dir/$str");
+                print colored("Joined output file is: ", C_OK),
+                    colored("$dir/$joined\n", C_FILE),
+                    colored("Joined TrigReport is ", C_OK),
+                    colored("$dir/$str\n", C_FILE);
+            }
         } else {
             print colored(" - results have already been joined\n", C_OK);
         }
-        
-        
-    }
-    
-    for my $batchid (sort grep { !exists $running{$_} } keys %jobids) {
-        if (!-e "$dir/out$jobids{$batchid}{-id}.txt") {
-            if (-e "$dir/err$jobids{$batchid}{-id}.txt") {
-                print "job $batchid --> $jobids{$batchid}{-script}: " .
-                      colored("cmsRun didn't return success, see err$jobids{$batchid}{-id}.txt\n", C_ERROR);
-                print " *** remove the err file and run nafJobSplitter check again to resubmit the job.\n";
-            } else {
-                print "job $batchid --> $jobids{$batchid}{-script} " .
-                      colored("seems to have died, resubmitting...\n", C_RESUBMIT);
-                resubmitJob($dir, $jobids{$batchid}{-id}, $jobids{$batchid}{-script});
+    } else {
+        for my $batchid (sort grep { !exists $running{$_} || $running{$_} =~/E/} keys %jobids) {
+            if (!-e "$dir/out$jobids{$batchid}{-id}.txt") {
+                if (-e "$dir/err$jobids{$batchid}{-id}.txt") {
+                    print "job $batchid --> $jobids{$batchid}{-script}: " .
+                        colored("cmsRun didn't return success, see $dir/err$jobids{$batchid}{-id}.txt\n", C_ERROR);
+                    print " *** remove the err file and run nafJobSplitter check again to resubmit the job.\n";
+                } else {
+                    if (!exists $running{$batchid}) {
+                        print "job $batchid --> $jobids{$batchid}{-script} " .
+                            colored("seems to have died, resubmitting...\n", C_RESUBMIT);
+                        resubmitJob($dir, $jobids{$batchid}{-id}, $jobids{$batchid}{-script});
+                    } else {
+                        print colored("job $batchid has error state:\n", C_RESUBMIT);
+                        print grep /error reason/, `qstat -j $batchid`;
+                        print colored("clearing error state...\n", C_RESUBMIT);
+                        system("qmod -c $batchid") == 0 or die "Cannot clear error state!\n";
+                    }
+                }
             }
         }
     }
-#    exit;
-    
-#    print Dumper \%jobids;
 }
