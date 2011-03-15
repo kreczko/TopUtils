@@ -93,15 +93,18 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
       JetCorrectionUncertainty* deltaJEC = new JetCorrectionUncertainty(param);
       deltaJEC->setJetEta(jet->eta()); deltaJEC->setJetPt(jet->pt()); 
 
+      // add the recommended PU correction on top  
+      float pileUp = 0.352/jet->pt()/jet->pt();
+      // add bjet uncertainty on top
+      float bjet = 0.;
+      if(jet->genParticle() && (jet->genParticle()->pdgId() == 5 || jet->genParticle()->pdgId() == -5))
+	bjet = ((50<jet->pt() && jet->pt()<200) && fabs(jet->eta())<2.0) ? 0.02 : 0.03;
+      // add flat uncertainty for release differences and calibration changes (configurable)
+      float sw = (1.-scaleFactor_);
+
       if(scaleType_.substr(scaleType_.find(':')+1)=="up"  ){
 	if(scaleType_.substr(0, scaleType_.find(':'))=="top" ){
 	  float shift  = deltaJEC->getUncertainty(true );
-	  // add the recommended PU correction on top  
-	  float pileUp = 0.352/jet->pt()/jet->pt();
-	  // add bjet uncertainty on top
-	  float bjet   = ((50<jet->pt() && jet->pt()<200) && fabs(jet->eta())<2.0) ? 0.02 : 0.03;
-	  // add flat uncertainty for release differences and calibration changes (configurable)
-	  float sw = (1.-scaleFactor_);
 	  scaledJet.scaleEnergy( 1+sqrt(shift*shift + pileUp*pileUp + bjet*bjet + sw*sw) );
 	}
 	if(scaleType_.substr(0, scaleType_.find(':'))=="jes" ){
@@ -111,12 +114,6 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
       if(scaleType_.substr(scaleType_.find(':')+1)=="down"){
 	if(scaleType_.substr(0, scaleType_.find(':'))=="top" ){
 	  float shift = deltaJEC->getUncertainty(false);
-	  // add the recommended PU correction on top  
-	  float pileUp = 0.352/jet->pt()/jet->pt();
-	  // add bjet uncertainty on top
-	  float bjet   = ((50<jet->pt() && jet->pt()<200) && fabs(jet->eta())<2.0) ? 0.02 : 0.03;
-	  // add flat uncertainty for release differences and calibration changes (configurable)
-	  float sw = (1.-scaleFactor_);
 	  scaledJet.scaleEnergy( 1-sqrt(shift*shift + pileUp*pileUp + bjet*bjet + sw*sw) );
 	}
 	if(scaleType_.substr(0, scaleType_.find(':'))=="jes" ){
