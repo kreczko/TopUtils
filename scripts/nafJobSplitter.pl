@@ -507,7 +507,7 @@ package QStat;
 sub new {
     my $class = shift;
     my $self = {};
-    my $all = `qstat -xml -u $ENV{USER}`;
+    my $all = `qstat -xml -g d -u $ENV{USER}`;
     die "qstat has returned something unexpected:\n$all" unless $all =~ m!</job_info>!;
     for ($all =~ m!<job_list.*?>(.*?)</job_list>!sg) {
         my $job = Job->new($_);
