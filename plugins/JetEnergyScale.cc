@@ -97,7 +97,7 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
       float pileUp = 0.352/jet->pt()/jet->pt();
       // add bjet uncertainty on top
       float bjet = 0.;
-      if(jet->genParticle() && (jet->genParticle()->pdgId() == 5 || jet->genParticle()->pdgId() == -5))
+      if(jet->partonFlavour() == 5 || jet->partonFlavour() == -5)
 	bjet = ((50<jet->pt() && jet->pt()<200) && fabs(jet->eta())<2.0) ? 0.02 : 0.03;
       // add flat uncertainty for release differences and calibration changes (configurable)
       float sw = (1.-scaleFactor_);
