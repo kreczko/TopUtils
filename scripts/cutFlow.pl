@@ -14,45 +14,44 @@
 #    to appear in the table
 
 # integrated luminosity of data in /pb
-my $lumi = 36.1450;
+my $lumi = 191;
 
 # input files (last file is for data)
-my @files = ("trigReport_ttbarmumu.txt",
-             "trigReport_ttbartaumu.txt",
-	     "trigReport_ttbarbg.txt",
-	     "trigReport_singletop.txt",
-	     "trigReport_ww.txt",
-	     "trigReport_wz.txt",
-	     "trigReport_zz.txt",
-	     "trigReport_wmu.txt",
-	     "trigReport_wtau.txt",
-	     "trigReport_dytautau.txt",
-	     "trigReport_ztautau_pyt.txt",
-	     "trigReport_ztautau_mad.txt",
-	     "trigReport_dymumu.txt",
-	     "trigReport_zmumu_pyt.txt",
-	     "trigReport_zmumu_mad.txt",
-	     "trigReport_qcd.txt",
-	     #"trigReport_data.txt"
-	     "trigReport_36pb.txt"
+my @files = ("hists_ttbarmumu.txt",
+             "hists_ttbartaumu.txt",
+	     "hists_ttbarbg.txt",
+	     "hists_tw.txt",
+	     "hists_ww.txt",
+	     "hists_wz.txt",
+	     "hists_zz.txt",
+	     "hists_wmu.txt",
+	     "hists_wtau.txt",
+	     "hists_dytautau10.txt",
+	     "hists_dytautau20.txt",
+	     "hists_ztautau.txt",
+	     "hists_dymumu10.txt",
+	     "hists_dymumu20.txt",
+	     "hists_zmumu.txt",
+	     "hists_qcd.txt",
+	     "hists_data.txt"
 	    );
 
 # cross section over number of events	    
-my @weights = ($lumi*157.5/1306182.,
-               $lumi*157.5/1306182.,
-	       $lumi*157.5/1306182.,	   
-	       $lumi*10.6/494961.,	   
+my @weights = ($lumi*157.5/1286491.,
+               $lumi*157.5/1286491.,
+	       $lumi*157.5/1286491.,	   
+	       $lumi*10.6/489417.,	   
 	       $lumi*4.51/110000.,
 	       $lumi*0.61/110000.,
-	       $lumi*7.4/110000.,
-	       $lumi*10438./5323040.,
-	       $lumi*10438./5221750.,
+	       $lumi*7.4/2108608.,
+	       $lumi*10438./5038640.,
+	       $lumi*10438./4773750.,
 	       $lumi*3457./2142450.,
-	       $lumi*1666./2007446.,
-	       $lumi*3048./2543383.,
+	       $lumi*1666./2057446.,
+	       $lumi*3048./2543706.,
 	       $lumi*3457./2227840.,
-	       $lumi*1666./2289913.,
-	       $lumi*3048./2604559.,
+	       $lumi*1666./2244733.,
+	       $lumi*3048./2329439.,
 	       $lumi*296600.*0.2855/29504866.
 	      ); #for data no weight is needed so 
 	         #weight array is 1 shorter then files array	    
