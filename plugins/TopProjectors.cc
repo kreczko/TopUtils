@@ -3,8 +3,8 @@
 #include "DataFormats/PatCandidates/interface/Muon.h"
 
 typedef TopProjector<pat::Muon, reco::PFCandidate> TPPatMuonsOnPFCandidates;
-typedef TopProjector<pat::electron, reco::PFCandidate> TPPatElectronsOnPFCandidates;
+typedef TopProjector<pat::Electron, reco::PFCandidate> TPPatElectronsOnPFCandidates;
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(TPPatMuonsOnPFCandidates);
-DEFINE_FWK_MODULE(TPPatElectronssOnPFCandidates);
+DEFINE_FWK_MODULE(TPPatElectronsOnPFCandidates);
