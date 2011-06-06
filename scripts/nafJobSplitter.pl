@@ -19,7 +19,7 @@ use constant C_RESUBMIT => 'magenta';
 ########################
 
 my %args;
-getopts('W:kJjp:q:o:m:t:', \%args);
+getopts('SW:kJjp:q:o:m:t:', \%args);
 
 if ($args{'p'}) {
     peekIntoJob($args{'p'});    
@@ -48,6 +48,8 @@ nafJobSplitter.pl
 
 Make sure that the name of the variable containing your cms.Process() 
 is "process". (process = cms.Process("whateverNameYouLike") )
+
+Also make sure that you output your histograms using process.TFileService.
 
 Please cd to the directory containing the config file.
 
@@ -98,8 +100,11 @@ put jobs in Eqw state back to qw.
 
 Available Parameters
   -j: join output root files, sum the TrigReports if all jobs are done
-       You only need this if you have used -n to submit the jobs
+       You only need this if you have used -J to submit the jobs
   -t mins: perform the check every mins minutes
+  -S do not show the read speed summary (faster), default is to show 
+     Timing-tstoragefile-read-totalMegabytes and
+     Timing-tstoragefile-read-totalMsecs
 
 To peek into running jobs, i.e. to show the current stdout:
   nafJobSplitter.pl -p jobid
@@ -236,6 +241,9 @@ sub checkJob {
         my $str = shift @N; my $val = shift @N;
         printf $str, $val if $val;
     }
+    unless ($args{'S'}) {
+        showFJRsummary($dir);
+    }
     print ".\n";
     
     if ($NDoneJobs == keys %jobs) {
@@ -258,6 +266,47 @@ sub checkJob {
         } else {
             print colored(" - results have already been joined\n", C_OK);
         }
+    }
+}
+
+sub bytesToHuman {
+    my $bytes = shift;
+    my @PREFIX = qw(k M G T P E Z Y);
+    my $index = 0;
+    while ($bytes >= 1000) {
+        $bytes /= 1000;
+        ++$index;
+    }
+    return ($bytes, $PREFIX[$index]);
+}
+
+sub readFJRFileWithRE {
+    my ($fileName, $sum) = @_;
+    open my $fh, '<', $fileName or die "Cannot open $fileName: $!\n";
+    my $file = do { local $/; <$fh> };
+    my %result;
+    for (keys %$sum) {
+        $result{$_} = $1 if $file =~ m!^\s*<Metric Name="$_" Value="(.*?)"/>$!m;
+    }
+    return %result;
+}
+
+sub showFJRsummary {
+    my $dir = shift;
+    my %sum;
+    #Timing-dcap-read-totalMegabytes Timing-dcap-read-totalMsecs 
+    @sum{qw(Timing-tstoragefile-read-totalMegabytes Timing-tstoragefile-read-totalMsecs)} = (0) x 10;
+    my @files = glob("$dir/jobreport*.xml");
+    for (@files) {
+        my %perf = readFJRFileWithRE($_, \%sum);
+        for (keys %sum) {
+            $sum{$_} += $perf{$_};
+        }
+    }
+    if (@files) {
+        printf ", read %.2f %sB at %.2f %sB/s per job", 
+            bytesToHuman($sum{'Timing-tstoragefile-read-totalMegabytes'}*1000), 
+            bytesToHuman($sum{'Timing-tstoragefile-read-totalMegabytes'}*1000 / ($sum{'Timing-tstoragefile-read-totalMsecs'}/1000));        
     }
 }
 
@@ -372,10 +421,11 @@ perl -pe 's/OUTPUTPATH/$ENV{TMPDIR}/g' < $current/naf_DIRECTORY/CONFIGFILE.py > 
 #     sleep $sleeptime
 # fi
 
-PYTHONDONTWRITEBYTECODE=1 cmsRun $TMPDIR/run.py
+PYTHONDONTWRITEBYTECODE=1 cmsRun -j $TMPDIR/jobreport.xml $TMPDIR/run.py
 
 if [ "$?" = "0" ] ; then
     if [ -e $TMPDIR/joined.txt ] ; then mv $TMPDIR/joined.txt $current/naf_DIRECTORY/ ; fi
+    mv $TMPDIR/jobreport.xml $current/naf_DIRECTORY/jobreport$SGE_TASK_ID.xml
     mv $TMPDIR/CONFIGFILE-$SGE_TASK_ID.root $current/naf_DIRECTORY/
     if [ -e $current/naf_DIRECTORY/autojoin ] ; then
         NDone=`ls $current/naf_DIRECTORY/out*.txt | wc -l`
@@ -424,8 +474,8 @@ sub peek {
     my $self = shift;
     die "Job is not running, cannot peek\n" unless $self->state() eq 'r';
     if ($self->queue() =~ /\@(.+)/) {
-        print "Please wait...\n";
-        my $jid = $self->id();
+        print "Please wait, this can take up to a few minutes...\n";
+        my $jid = $self->fullId();
         system("qrsh -l h_cpu=00:01:00 -l h=$1 -l h_vmem=400M -now n 'cat /tmp/$jid.*/stdout.txt'");
     } else {
         die "Didn't find hostname\n";
