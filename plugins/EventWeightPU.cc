@@ -42,14 +42,14 @@ void EventWeightPU::produce(edm::Event& evt, const edm::EventSetup& setup)
   wght_ = -1;
   *eventWeightPU = wght_;  // default value to allow for tracing errors
   
-  for(iterPU = pPUInfo->begin(); iterPU != pPUInfo->end(); ++iterPU)
-    
-    if (iterPU->getBunchCrossing()==0)
+  for(iterPU = pPUInfo->begin(); iterPU != pPUInfo->end(); ++iterPU)  // vector size is 3
+   
+    if (iterPU->getBunchCrossing()==0) // -1: previous BX, 0: current BX,  1: next BX
     {
       wght_ = LumiWeights_.weight(iterPU->getPU_NumInteractions());
-      *eventWeightPU = wght_;
+      (*eventWeightPU) = wght_;
+      break;
     }
-    else *eventWeightPU = -1; // must be changed for proper out-of time PU handling
   
   evt.put(eventWeightPU);
   
