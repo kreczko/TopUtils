@@ -109,12 +109,12 @@ process.patDefaultSequence.remove(process.countPatLeptons)
 process.patDefaultSequence.remove(process.countPatJets)
 
 ## re-configure and create MET
-process.pfMET.src = 'pfNoTrackMuons'
+process.pfMET.src = 'pfNoPileup'
 process.patMETs.metSource = "pfMET"
 process.patMETs.addMuonCorrections = False
 
 ## let it run
-process.p = cms.Path(
+process.pf2pat = cms.Sequence(
   # this one is only for testing
     process.trackMuons *
     process.pfNoTrackMuons *
