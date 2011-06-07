@@ -17,13 +17,37 @@ removeAllPATObjectsBut(process, ['Muons', 'Electrons'])
 process.patDefaultSequence.remove(process.patJets)
 process.patDefaultSequence.remove(process.patMETs)
 
+# reduce size
+process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
+process.genParticles = cms.EDProducer(
+    #see https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideGenParticlePruner
+    "GenParticlePruner",
+    src = cms.InputTag("genParticles"),
+    select = cms.vstring(
+        "drop  *  ",
+        "++keep++ pdgId = {Z0}",
+        "++keep++ pdgId = {W+}",   "++keep++ pdgId = {W-}",
+        "++keep++ pdgId = {t}",    "++keep++ pdgId = {tbar}",
+        "++keep++ pdgId = {b}",    "++keep++ pdgId = {bbar}",
+        "++keep++ pdgId = {c}",    "++keep++ pdgId = {cbar}",
+        # "drop pdgId = {Z0} & status = 2"
+        "++keep++ pdgId = {e+}",   "++keep++ pdgId = {e-}",
+        "++keep++ pdgId = {mu+}",  "++keep++ pdgId = {mu-}",
+        "++keep++ pdgId = {tau+}", "++keep++ pdgId = {tau-}",
+    )
+)
+
+
 ## let it run
 process.p = cms.Path(
     process.particleFlow *
-    process.patDefaultSequence
+    process.patDefaultSequence *
+    genParticles
 )
 
-process.out.outputCommands+= ['keep *_genParticles_*_*']
+process.out.outputCommands+= ['keep recoGenParticles_genParticles__PAT']
+#process.out.outputCommands+= ['keep *_genParticles_*_*']
+process.out.outputCommands+= ['keep *DcsStatus*_*_*_*']
 process.out.outputCommands+= ['keep recoTracks_generalTracks__*']
 #process.out.outputCommands+= ['keep *_generalTracks__*']
 process.out.outputCommands+= ["keep *_offlineBeamSpot_*_*"]
