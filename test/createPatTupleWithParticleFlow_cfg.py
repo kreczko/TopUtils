@@ -37,18 +37,27 @@ process.genParticles = cms.EDProducer(
     )
 )
 
+## Needed for redoing the ak5GenJets
+process.load("TopAnalysis.TopUtils.GenJetParticles_cff")
+process.load("RecoJets.Configuration.RecoGenJets_cff")
+
+## std sequence to produce the ttGenEvt
+process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 
 ## let it run
 process.p = cms.Path(
-    process.particleFlow *
+    process.makeGenEvt         *
+    process.particleFlow       *
     process.patDefaultSequence *
-    genParticles
+    process.genParticles       *
+    process.genJetParticles    *
+    process.ak5GenJets
 )
 
-process.out.outputCommands+= ['keep recoGenParticles_genParticles__PAT']
+process.out.outputCommands+= ['keep recoGenParticles_genParticles_*_PAT']
 #process.out.outputCommands+= ['keep *_genParticles_*_*']
 process.out.outputCommands+= ['keep *DcsStatus*_*_*_*']
-process.out.outputCommands+= ['keep recoTracks_generalTracks__*']
+process.out.outputCommands+= ['keep recoTracks_generalTracks_*_*']
 #process.out.outputCommands+= ['keep *_generalTracks__*']
 process.out.outputCommands+= ["keep *_offlineBeamSpot_*_*"]
 process.out.outputCommands+= ['keep *_offlinePrimaryVertices_*_*']
@@ -59,4 +68,6 @@ process.out.outputCommands+= ['keep *_pfSelectedMuons_*_*']
 process.out.outputCommands+= ['keep *_pfAllElectrons_*_*']
 process.out.outputCommands+= ['keep *_pfSelectedElectrons_*_*']
 process.out.outputCommands+= ["keep *_genMetTrue_*_*"]
-process.out.outputCommands+= ['keep recoGenJets_ak5GenJets_*_*']
+process.out.outputCommands+= ['keep recoGenJets_ak5GenJets_*_PAT']
+process.out.outputCommands+= ['keep *_genEvt_*_*']
+process.out.outputCommands+= ['keep *_addPileupInfo_*_*']
