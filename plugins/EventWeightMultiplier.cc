@@ -1,4 +1,5 @@
 #include "FWCore/Utilities/interface/EDMException.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "TopAnalysis/TopUtils/plugins/EventWeightMultiplier.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -22,8 +23,8 @@ EventWeightMultiplier::EventWeightMultiplier(const edm::ParameterSet& cfg):
 			  "TFile Service is not registered in cfg file" );
   }
   /// booking of histogram for b tag eff SF
-  hists_["eventWeight"]     = fs->make<TH1F>( "eventWeight", "eventWeight", 100, 0, 10 );
-  hists_["eventWeightMean"] = fs->make<TH1F>( "eventWeightMean", "eventWeightMean", 1, 0, 1 );
+  hists_["eventWeight"]     = fs->make<TH1F>( "eventWeight"    , "eventWeight"    , 100, 0, 10 );
+  hists_["eventWeightMean"] = fs->make<TH1F>( "eventWeightMean", "eventWeightMean", 1  , 0,  1 );
   
 }
 
@@ -42,9 +43,15 @@ EventWeightMultiplier::produce(edm::Event& evt, const edm::EventSetup& setup)
     // get weight from the CMSSW event
     edm::Handle<double> wgt;
     evt.getByLabel(eventWeightTags_[iWeight], wgt);
-    if(verbose_>=1) std::cout<<"  eventWeight "<<iWeight<<": "<<*wgt<<std::flush;
-    // multiply finalWeight with this weight
-    finalWeight *= *wgt;
+    // ignore non existing weights
+    if(wgt.isValid()){
+      if(verbose_>=1) std::cout<<"  eventWeight "<<iWeight<<": "<<*wgt<<std::flush;
+      // multiply finalWeight with this weight
+      finalWeight *= *wgt;
+    }
+    else{
+      edm::LogInfo("weightNotFound") << "eventWeight " << iWeight << " not found";
+    }
   }
   // if additional factor exists, multply with it
   if(additionalFactor_!=1){
