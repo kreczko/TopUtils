@@ -17,6 +17,34 @@ removeAllPATObjectsBut(process, ['Muons', 'Electrons'])
 process.patDefaultSequence.remove(process.patJets)
 process.patDefaultSequence.remove(process.patMETs)
 
+## add CiC electron ID
+process.load('RecoEgamma.ElectronIdentification.cutsInCategoriesElectronIdentificationV06_cfi')
+process.eidCiCSequence = cms.Sequence(
+    process.eidVeryLooseMC  *
+    process.eidLooseMC      *
+    process.eidMediumMC     *
+    process.eidTightMC      *
+    process.eidSuperTightMC *
+    process.eidHyperTight1MC
+    )
+
+process.patElectrons.electronIDSources = cms.PSet(
+    eidVeryLooseMC   = cms.InputTag("eidVeryLooseMC"),
+    eidLooseMC       = cms.InputTag("eidLooseMC"),
+    eidMediumMC      = cms.InputTag("eidMediumMC"),
+    eidTightMC       = cms.InputTag("eidTightMC"),
+    eidSuperTightMC  = cms.InputTag("eidSuperTightMC"),
+    eidHyperTight1MC = cms.InputTag("eidHyperTight1MC")
+)
+
+## adapt isolation cone for muons and electrons
+applyPostfix(process,"isoValMuonWithNeutral",postfix).deposits[0].deltaR     = cms.double(0.3)
+applyPostfix(process,"isoValMuonWithCharged",postfix).deposits[0].deltaR     = cms.double(0.3)
+applyPostfix(process,"isoValMuonWithPhotons",postfix).deposits[0].deltaR     = cms.double(0.3)
+applyPostfix(process,"isoValElectronWithNeutral",postfix).deposits[0].deltaR = cms.double(0.3)
+applyPostfix(process,"isoValElectronWithCharged",postfix).deposits[0].deltaR = cms.double(0.3)
+applyPostfix(process,"isoValElectronWithPhotons",postfix).deposits[0].deltaR = cms.double(0.3)
+
 # reduce size
 process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
 process.genParticles = cms.EDProducer(
@@ -48,6 +76,7 @@ process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 process.p = cms.Path(
     process.makeGenEvt         *
     process.particleFlow       *
+    process.eidCiCSequence     *
     process.patDefaultSequence *
     process.genParticles       *
     process.genJetParticles    *
