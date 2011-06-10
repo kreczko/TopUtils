@@ -16,14 +16,14 @@ pfSelectedChargedHadrons = cms.EDFilter(
 pfSelectedNeutralHadrons = cms.EDFilter(
     "GenericPFCandidateSelector",
     src = cms.InputTag("pfAllNeutralHadrons"),
-    cut = cms.string("et>1")
+    cut = cms.string("") # et>1 # not yet official
 )
 
 ## minimal restriction to photons
 pfSelectedPhotons = cms.EDFilter(
     "GenericPFCandidateSelector",
     src = cms.InputTag("pfAllPhotons"),
-    cut = cms.string("et>1")
+    cut = cms.string("") # et>1 # not yet official
 )
 
 ## isolation configuration for the muons
@@ -53,10 +53,10 @@ particleFlow = cms.Sequence(
   + pfSelectedChargedHadrons
   + pfSelectedNeutralHadrons
   + pfSelectedPhotons
-  # configuration of electrons
-  + pfAllElectrons
-  + pfSelectedElectrons
-  + pfElectronIsolationSequence
+  ## configuration of electrons
+  #+ pfAllElectrons
+  #+ pfSelectedElectrons
+  #+ pfElectronIsolationSequence
   # configuration of muons
   + pfAllMuons
   + pfSelectedMuons
