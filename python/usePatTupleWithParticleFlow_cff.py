@@ -1,9 +1,27 @@
 import FWCore.ParameterSet.Config as cms
 
-def prependPF2PATSequence(process, pathnames): #, postfix = ''):
+def prependPF2PATSequence(process, pathnames = [''], options = dict()):
+
+    ## output all options and set defaults
+    print '==================================================='
+    print '|||||||||||||||||||||||||||||||||||||||||||||||||||'
+    print '==================================================='
+    print 'options used by prependPF2PATSequence:'
+    #print 'isMC:', options.setdefault('isMC', True)
+    #print 'postfix:', options.setdefault('postfix', '')
+    print 'runOnOLDcfg:', options.setdefault('runOnOLDcfg', False)
+    print 'cutsMuon:', options.setdefault('cutsMuon', 'isGlobalMuon & abs(eta) < 2.5 & pt > 10.')
+    print 'cutsElec:', options.setdefault('cutsElec', 'et > 20 & abs(eta) < 2.5')
+    print 'pfIsoConeMuon:', options.setdefault('pfIsoConeMuon', 0.3)
+    print 'pfIsoConeElec:', options.setdefault('pfIsoConeElec', 0.3)
+    print 'pfIsoValMuon:', options.setdefault('pfIsoValMuon', 0.2)
+    print 'pfIsoValElec:', options.setdefault('pfIsoValElec', 1.0)
+    print '==================================================='
+    print '|||||||||||||||||||||||||||||||||||||||||||||||||||'
+    print '==================================================='
 
     ## postfixes are NOT supported right now
-    postfix=''
+    postfix='' #options['postfix']
 
     ## Standard Pat Configuration File
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
@@ -90,19 +108,19 @@ def prependPF2PATSequence(process, pathnames): #, postfix = ''):
     #getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'pfIsolatedMuons'+postfix))
 
     ## apply selection for muons ONLY VAILD FOR THE TOP PROJECTIONS
-    getattr(process, 'pfSelectedMuons'+postfix).cut = 'isGlobalMuon & abs(eta) < 2.5 & pt > 10.'
+    getattr(process, 'pfSelectedMuons'+postfix).cut = options['cutsMuon']
 
     getattr(process, 'isoDepMuonWithCharged'+postfix).src = 'pfSelectedMuons'+postfix
     getattr(process, 'isoDepMuonWithNeutral'+postfix).src = 'pfSelectedMuons'+postfix
     getattr(process, 'isoDepMuonWithPhotons'+postfix).src = 'pfSelectedMuons'+postfix
 
     ## adapt isolation cone for muons
-    getattr(process,"isoValMuonWithNeutral"+postfix).deposits[0].deltaR = cms.double(0.3)
-    getattr(process,"isoValMuonWithCharged"+postfix).deposits[0].deltaR = cms.double(0.3)
-    getattr(process,"isoValMuonWithPhotons"+postfix).deposits[0].deltaR = cms.double(0.3)
+    getattr(process,"isoValMuonWithNeutral"+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeMuon'])
+    getattr(process,"isoValMuonWithCharged"+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeMuon'])
+    getattr(process,"isoValMuonWithPhotons"+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeMuon'])
     
     ## adapt isolation cut
-    process.pfIsolatedMuons.combinedIsolationCut = 0.2
+    process.pfIsolatedMuons.combinedIsolationCut = options['pfIsoValMuon']
 
     ##
     ## customize electrons
@@ -130,8 +148,8 @@ def prependPF2PATSequence(process, pathnames): #, postfix = ''):
 
     getattr(process,'pfAllElectrons'+postfix).src = 'pfNoMuon'+postfix
 
-    ## apply selection for electrons (they are the source of the pat::electrons
-    getattr(process,'pfSelectedElectrons'+postfix).cut = 'et > 20 & abs(eta) < 2.5'
+    ## apply selection for electrons (they are the source of the pat::electrons)
+    getattr(process,'pfSelectedElectrons'+postfix).cut = options['cutsElec']
 
     getattr(process, 'isoDepElectronWithCharged'+postfix).src = 'pfSelectedElectrons'+postfix
     getattr(process, 'isoDepElectronWithNeutral'+postfix).src = 'pfSelectedElectrons'+postfix
@@ -142,11 +160,11 @@ def prependPF2PATSequence(process, pathnames): #, postfix = ''):
     getattr(process,"isoDepElectronWithPhotons"+postfix).ExtractorPSet.inputCandView = 'pfSelectedPhotons'
 
     ## adapt isolation cone for electrons
-    getattr(process,"isoValElectronWithNeutral"+postfix).deposits[0].deltaR = cms.double(0.3)
-    getattr(process,"isoValElectronWithCharged"+postfix).deposits[0].deltaR = cms.double(0.3)
-    getattr(process,"isoValElectronWithPhotons"+postfix).deposits[0].deltaR = cms.double(0.3)
+    getattr(process,"isoValElectronWithNeutral"+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeElec'])
+    getattr(process,"isoValElectronWithCharged"+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeElec'])
+    getattr(process,"isoValElectronWithPhotons"+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeElec'])
 
-    getattr(process,'pfIsolatedElectrons'+postfix).combinedIsolationCut = 1.0
+    getattr(process,'pfIsolatedElectrons'+postfix).combinedIsolationCut = options['pfIsoValElec']
 
     ##
     ## customize taus
@@ -235,5 +253,13 @@ def prependPF2PATSequence(process, pathnames): #, postfix = ''):
     process.pf2pat.remove(getattr(process,'pfNoPileUp'+postfix))
 
     ## append pf2pat sequence to all paths in pathnames
+    if pathnames == ['']:
+        pathnames = process.paths_().keys()
+
+    print 'prepending PF2PAT sequence to paths:', pathnames
     for pathname in pathnames:
+        if options['runOnOLDcfg']:
+            massSearchReplaceAnyInputTag(getattr(process,pathname), 'selectedPatJetsAK5PF', 'selectedPatJets')
+            massSearchReplaceAnyInputTag(getattr(process,pathname), 'patMETsPF', 'patMETs')
+            massSearchReplaceAnyInputTag(getattr(process,pathname), cms.InputTag('scaledJetEnergy', 'selectedPatJetsAK5PF', process.name_()), cms.InputTag('scaledJetEnergy', 'selectedPatJets', process.name_()))
         getattr(process, pathname).insert(0,process.pf2pat)
