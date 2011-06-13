@@ -1,9 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 
-from CommonTools.ParticleFlow.pfMuons_cff import *
-from CommonTools.ParticleFlow.pfNoPileUp_cff import *
-from CommonTools.ParticleFlow.pfElectrons_cff import *
-from CommonTools.ParticleFlow.ParticleSelectors.pfSortByType_cff import *
+from PhysicsTools.PFCandProducer.pfMuons_cff import *
+from PhysicsTools.PFCandProducer.pfNoPileUp_cff import *
+from PhysicsTools.PFCandProducer.pfElectrons_cff import *
+from PhysicsTools.PFCandProducer.ParticleSelectors.pfSortByType_cff import *
 
 ## minimal restriction to charged hadrons
 pfSelectedChargedHadrons = cms.EDFilter(

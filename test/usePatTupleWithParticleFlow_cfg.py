@@ -55,8 +55,8 @@ process.trackMuons = process.selectedPatMuons.clone(
 
 
 ## load configs for pf jet clustering and MET
-process.load("CommonTools.ParticleFlow.pfMET_cfi")
-process.load("CommonTools.ParticleFlow.pfJets_cff")
+process.load("PhysicsTools.PFCandProducer.pfMET_cfi")
+process.load("PhysicsTools.PFCandProducer.pfJets_cff")
 
 ## cutomized top projectors for pat muons and electrons
 process.load("TopAnalysis.TopUtils.patMuonTopProjector_cfi")

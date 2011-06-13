@@ -1,4 +1,4 @@
-#include "CommonTools/ParticleFlow/plugins/TopProjector.h"
+#include "PhysicsTools/PFCandProducer/plugins/TopProjector.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 
