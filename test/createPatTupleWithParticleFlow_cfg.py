@@ -29,7 +29,12 @@ if not options.globalTag == '':
 #process.source.fileNames = cms.untracked.vstring()
 #process.source.fileNames += 'file:/scratch/hh/current/cms/user/eschliec/TTBar_pythia6_Summer11/7ABCBB94-E67D-E011-9B16-00151796D80C.root',
 #process.source.fileNames += 'file:/scratch/hh/current/cms/user/eschliec/TTBar_pythia6_Summer11/4A5D814A-E67D-E011-9052-0015178C0190.root',
-#process.maxEvents.input = cms.untracked.int32(-1)
+#process.source.fileNames += '/store/data/Run2011A/MultiJet/AOD/PromptReco-v4/000/166/841/0C96BC23-F195-E011-A8AB-0030487C608C.root',
+#process.source.fileNames += '/store/data/Run2011A/MultiJet/AOD/PromptReco-v4/000/166/033/76F06A70-348E-E011-B6DA-001D09F25438.root',
+#process.source.fileNames += '/store/data/Run2011A/MultiJet/AOD/PromptReco-v4/000/166/863/F8487AF6-3496-E011-9A68-001D09F23A20.root',
+#process.source.fileNames += '/store/data/Run2011A/MultiJet/AOD/PromptReco-v4/000/165/103/76696D89-EE80-E011-AEF7-003048F024E0.root',
+process.maxEvents.input = cms.untracked.int32(-1)
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 ## run the particle flow classification as far as appropriate
 process.load("TopAnalysis.TopUtils.particleFlowSetup_cff")
@@ -56,7 +61,7 @@ process.goodOfflinePrimaryVerticesWithBS = cms.EDFilter(
     )
 
 ## use only good vertices for pfNoPileUp
-process.pfPileUp.Vertices          = cms.InputTag('goodOfflinePrimaryVertices')
+process.pfPileUp.Vertices = cms.InputTag('goodOfflinePrimaryVertices')
 
 if options.runOnMC:
 
@@ -95,13 +100,47 @@ if options.runOnMC:
         process.initSubset.src  = cms.InputTag("genParticles","","HLT")
         process.decaySubset.src = cms.InputTag("genParticles","","HLT")
 
+## selection for events from data
+
+if not options.runOnMC:
+    ## HBHE noise filter
+    process.load("CommonTools.RecoAlgos.HBHENoiseFilter_cfi")
+    ## s. https://hypernews.cern.ch/HyperNews/CMS/get/JetMET/1196.html
+    process.HBHENoiseFilter.minIsolatedNoiseSumE        = 999999.
+    process.HBHENoiseFilter.minNumIsolatedNoiseChannels = 999999
+    process.HBHENoiseFilter.minIsolatedNoiseSumEt       = 999999.
+
+    ## event scraping filter
+    process.scrapingFilter = cms.EDFilter( "FilterOutScraping"
+                                         , applyfilter = cms.untracked.bool( True )
+                                         , debugOn     = cms.untracked.bool( False )
+                                         , numtrack    = cms.untracked.uint32( 10 )
+                                         , thresh      = cms.untracked.double( 0.25 )
+                                         )
+
+    ## high level trigger filter (non existing Triggers are ignored)
+    process.load("HLTrigger.HLTfilters.hltHighLevel_cfi")
+    process.trigger = process.hltHighLevel.clone(HLTPaths = [
+            #2010 trigger ('v*' to be immune to version changes)
+            '*',
+            #2011 1E33 trigger ('v*' to be immune to version changes)
+            '*',
+            #2011 1E33-2E33 trigger ('v*' to be immune to version changes)
+            '*'],throw = False)
+    
+
 ## let it run
-process.p = cms.Path(
-    process.goodOfflinePrimaryVertices *
-    process.goodOfflinePrimaryVerticesWithBS *
-    process.pfPileUp *
-    process.pfNoPileUp
-    )
+process.p = cms.Path()
+
+if not options.runOnMC:
+    process.p += process.HBHENoiseFilter
+    process.p += process.scrapingFilter
+    process.p += process.trigger
+
+process.p += process.goodOfflinePrimaryVertices
+process.p += process.goodOfflinePrimaryVerticesWithBS
+process.p += process.pfPileUp
+process.p += process.pfNoPileUp
 
 if options.runOnMC:
     if options.isTTBarMC:
@@ -110,7 +149,6 @@ if options.runOnMC:
     process.p += process.genParticles
     process.p += process.genJetParticles
     process.p += process.ak5GenJets
-
 
 process.out.outputCommands+= ['keep *DcsStatus*_*_*_*']
 ## all tracks in the event
