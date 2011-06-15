@@ -19,7 +19,7 @@ use constant C_RESUBMIT => 'magenta';
 ########################
 
 my %args;
-getopts('SW:kJjp:q:o:m:t:', \%args);
+getopts('SsbW:kJjp:q:o:m:t:', \%args);
 
 if ($args{'p'}) {
     peekIntoJob($args{'p'});    
@@ -102,9 +102,11 @@ Available Parameters
   -j: join output root files, sum the TrigReports if all jobs are done
        You only need this if you have used -J to submit the jobs
   -t mins: perform the check every mins minutes
+  -s show extended speed summary (for each job)
   -S do not show the read speed summary (faster), default is to show 
      Timing-tstoragefile-read-totalMegabytes and
      Timing-tstoragefile-read-totalMsecs
+  -b show speed summary in bytes / bytes per second
 
 To peek into running jobs, i.e. to show the current stdout:
   nafJobSplitter.pl -p jobid
@@ -241,10 +243,10 @@ sub checkJob {
         my $str = shift @N; my $val = shift @N;
         printf $str, $val if $val;
     }
-    unless ($args{'S'}) {
-        showFJRsummary($dir);
-    }
+    my @details;
+    @details = showFJRsummary($dir) unless $args{'S'};
     print ".\n";
+    showFJRdetails(@details) if $args{'s'} && !$args{'S'};
     
     if ($NDoneJobs == keys %jobs) {
         open my $JOINED, '<', "$dir/joined.txt" or die "Cannot open joined.txt: $!\n";
@@ -271,7 +273,8 @@ sub checkJob {
 
 sub bytesToHuman {
     my $bytes = shift;
-    my @PREFIX = qw(k M G T P E Z Y);
+    return ($bytes, '') if $args{'b'};
+    my @PREFIX = ('', qw(k M G T P E Z Y));
     my $index = 0;
     while ($bytes >= 1000) {
         $bytes /= 1000;
@@ -285,10 +288,11 @@ sub readFJRFileWithRE {
     open my $fh, '<', $fileName or die "Cannot open $fileName: $!\n";
     my $file = do { local $/; <$fh> };
     my %result;
+    my @files = $file =~ m!^.*/(.*\.root)</LFN>$!mg;
     for (keys %$sum) {
         $result{$_} = $1 if $file =~ m!^\s*<Metric Name="$_" Value="(.*?)"/>$!m;
     }
-    return %result;
+    return (\@files, %result);
 }
 
 sub showFJRsummary {
@@ -297,16 +301,31 @@ sub showFJRsummary {
     #Timing-dcap-read-totalMegabytes Timing-dcap-read-totalMsecs 
     @sum{qw(Timing-tstoragefile-read-totalMegabytes Timing-tstoragefile-read-totalMsecs)} = (0) x 10;
     my @files = glob("$dir/jobreport*.xml");
+    my @details;
     for (@files) {
-        my %perf = readFJRFileWithRE($_, \%sum);
+        my ($filesRef, %perf) = readFJRFileWithRE($_, \%sum);
         for (keys %sum) {
             $sum{$_} += $perf{$_};
         }
+        push @details, [$filesRef, 
+                        $perf{'Timing-tstoragefile-read-totalMegabytes'}*1e6,
+                        $perf{'Timing-tstoragefile-read-totalMegabytes'}*1e6 / ($perf{'Timing-tstoragefile-read-totalMsecs'}/1e3)
+                        ];
     }
     if (@files) {
         printf ", read %.2f %sB at %.2f %sB/s per job", 
-            bytesToHuman($sum{'Timing-tstoragefile-read-totalMegabytes'}*1000), 
-            bytesToHuman($sum{'Timing-tstoragefile-read-totalMegabytes'}*1000 / ($sum{'Timing-tstoragefile-read-totalMsecs'}/1000));        
+            bytesToHuman($sum{'Timing-tstoragefile-read-totalMegabytes'}*1e6), 
+            bytesToHuman($sum{'Timing-tstoragefile-read-totalMegabytes'}*1e6 / ($sum{'Timing-tstoragefile-read-totalMsecs'}/1e3));        
+    }
+    
+    return @details;
+}
+
+sub showFJRdetails {
+    my @details = @_;
+    for (sort {$b->[2] <=> $a->[2]} @details) {
+        printf "%.2f %sB/s (total %.2f %sB): ", bytesToHuman($_->[2]), bytesToHuman($_->[1]);
+        print "@{$_->[0]}\n";
     }
 }
 
