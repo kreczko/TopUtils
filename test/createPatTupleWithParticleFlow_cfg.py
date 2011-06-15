@@ -101,7 +101,7 @@ if not options.runOnMC:
                                                              '*',
                                                              #2011 1E33-2E33 trigger ('v*' to be immune to version changes)
                                                              '*'],
-                                                 TriggerResultsTag = cms.InputTag("TriggerResults","",options.triggerTag)
+                                                 TriggerResultsTag = cms.InputTag("TriggerResults","",options.triggerTag),
                                                  throw = False)
     
 
