@@ -2,17 +2,17 @@ import FWCore.ParameterSet.Config as cms
 
 def prependPF2PATSequence(process, pathnames = [''], options = dict()):
 
-    ## output all options and set defaults
-    print 'options used by prependPF2PATSequence:'
-    print 'runOnMC:', options.setdefault('runOnMC', True)
-    #print 'postfix:', options.setdefault('postfix', '')
-    print 'runOnOLDcfg:', options.setdefault('runOnOLDcfg', False)
-    print 'cutsMuon:', options.setdefault('cutsMuon', 'abs(eta) < 2.5 & pt > 10.')
-    print 'cutsElec:', options.setdefault('cutsElec', 'et > 20 & abs(eta) < 2.5')
-    print 'pfIsoConeMuon:', options.setdefault('pfIsoConeMuon', 0.3)
-    print 'pfIsoConeElec:', options.setdefault('pfIsoConeElec', 0.3)
-    print 'pfIsoValMuon:', options.setdefault('pfIsoValMuon', 0.2)
-    print 'pfIsoValElec:', options.setdefault('pfIsoValElec', 0.13)
+    ## set defaults if variable was not given to function
+    options.setdefault('runOnMC', True)
+    options.setdefault('switchOffEmbedding', True)
+    #options.setdefault('postfix', '')
+    options.setdefault('runOnOLDcfg', False)
+    options.setdefault('cutsMuon', 'abs(eta) < 2.5 & pt > 10.')
+    options.setdefault('cutsElec', 'et > 20 & abs(eta) < 2.5')
+    options.setdefault('pfIsoConeMuon', 0.3)
+    options.setdefault('pfIsoConeElec', 0.3)
+    options.setdefault('pfIsoValMuon', 0.2)
+    options.setdefault('pfIsoValElec', 0.13)
 
     ## postfixes are NOT supported right now
     postfix='' #options['postfix']
@@ -58,8 +58,8 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
              , runOnMC        = options['runOnMC']
              , jetAlgo        = 'AK5'
              , postfix        = postfix
-             , jetCorrections = ( 'AK5PFchs'
-                                , cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute'])
+             , jetCorrections = ('AK5PFchs'
+                                ,cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute'])
                                 )
              )
    
@@ -69,41 +69,36 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## customize PAT
     ##
 
+    ## remove taus and photons from pat sequence
     from PhysicsTools.PatAlgos.tools.coreTools import removeSpecificPATObjects, removeCleaning
     removeSpecificPATObjects(process, ['Taus', 'Photons'], False, postfix)
     removeCleaning(process, False, postfix)
 
-    ## in case of postfix the pfPileUp and pfNoPileUp collections may not get one
-    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
-    massSearchReplaceAnyInputTag(getattr( process, 'patPF2PATSequence' + postfix), 'pfPileUp'   + postfix, 'pfPileUp')
-    massSearchReplaceAnyInputTag(getattr( process, 'patPF2PATSequence' + postfix), 'pfNoPileUp' + postfix, 'pfNoPileUp')
-
     ## make selection for the pf candidates
     from TopAnalysis.TopUtils.particleFlowSetup_cff import pfSelectedChargedHadrons, pfSelectedNeutralHadrons, pfSelectedPhotons
-
-    setattr(process, 'pfSelectedChargedHadrons'+postfix, pfSelectedChargedHadrons.clone())
-    setattr(process, 'pfSelectedNeutralHadrons'+postfix, pfSelectedNeutralHadrons.clone())
-    setattr(process, 'pfSelectedPhotons'       +postfix, pfSelectedPhotons.clone()       )
+    setattr(process,'pfSelectedChargedHadrons'+postfix, pfSelectedChargedHadrons.clone())
+    setattr(process,'pfSelectedNeutralHadrons'+postfix, pfSelectedNeutralHadrons.clone())
+    setattr(process,'pfSelectedPhotons'       +postfix, pfSelectedPhotons.clone()       )
 
     ## add selected pf candidates to the sequence
-    getattr(process, 'patPF2PATSequence' + postfix).replace(getattr(process,'pfAllPhotons'+postfix),
-                                                            getattr(process,'pfAllPhotons'+postfix)*
-                                                            getattr(process,'pfSelectedChargedHadrons'+postfix)*
-                                                            getattr(process,'pfSelectedNeutralHadrons'+postfix)*
-                                                            getattr(process,'pfSelectedPhotons'+postfix)
-                                                            )
+    getattr(process,'patPF2PATSequence'+postfix).replace(getattr(process,'pfAllPhotons'+postfix),
+                                                         getattr(process,'pfAllPhotons'+postfix)*
+                                                         getattr(process,'pfSelectedChargedHadrons'+postfix)*
+                                                         getattr(process,'pfSelectedNeutralHadrons'+postfix)*
+                                                         getattr(process,'pfSelectedPhotons'+postfix)
+                                                         )
 
     ## removal of unnecessary modules
-    getattr(process, 'patPF2PATSequence' + postfix).remove(getattr(process,'patPFParticles'+postfix))
-    getattr(process, 'patPF2PATSequence' + postfix).remove(getattr(process,'patCandidateSummary'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'patPFParticles'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'patCandidateSummary'+postfix))
 
-    getattr(process, 'patPF2PATSequence' + postfix).remove(getattr(process,'selectedPatPFParticles'+postfix))
-    getattr(process, 'patPF2PATSequence' + postfix).remove(getattr(process,'selectedPatCandidateSummary'+postfix))
-    getattr(process, 'patPF2PATSequence' + postfix).remove(getattr(process,'countPatElectrons'+postfix))
-    getattr(process, 'patPF2PATSequence' + postfix).remove(getattr(process,'countPatMuons'+postfix))
-    getattr(process, 'patPF2PATSequence' + postfix).remove(getattr(process,'countPatLeptons'+postfix))
-    getattr(process, 'patPF2PATSequence' + postfix).remove(getattr(process,'countPatJets'+postfix))
-    getattr(process, 'patPF2PATSequence' + postfix).remove(getattr(process,'countPatPFParticles'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'selectedPatPFParticles'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'selectedPatCandidateSummary'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'countPatElectrons'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'countPatMuons'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'countPatLeptons'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'countPatJets'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'countPatPFParticles'+postfix))
 
     ## embedding of resolutions into the patObjects
     process.load("TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff")
@@ -114,10 +109,10 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ##
 
     ## switch muons to be originating from the primary vertex
-    getattr(process, 'pfSelectedMuons'+postfix).src = 'pfMuonsFromVertex'+postfix
+    getattr(process,'pfSelectedMuons'+postfix).src = 'pfMuonsFromVertex'+postfix
 
     ## apply selection for muons
-    getattr(process, 'pfSelectedMuons'+postfix).cut = options['cutsMuon']
+    getattr(process,'pfSelectedMuons'+postfix).cut = options['cutsMuon']
 
     ## calculate isolation only for (kinematically) selected pfMuons
     getattr(process,'isoDepMuonWithCharged'+postfix).src = 'pfSelectedMuons'+postfix
@@ -129,20 +124,34 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     getattr(process,'isoDepMuonWithPhotons'+postfix).ExtractorPSet.inputCandView = 'pfSelectedPhotons'
 
     ## adapt isolation cone for muons
-    getattr(process,"isoValMuonWithNeutral"+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeMuon'])
-    getattr(process,"isoValMuonWithCharged"+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeMuon'])
-    getattr(process,"isoValMuonWithPhotons"+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeMuon'])
+    getattr(process,'isoValMuonWithNeutral'+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeMuon'])
+    getattr(process,'isoValMuonWithCharged'+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeMuon'])
+    getattr(process,'isoValMuonWithPhotons'+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeMuon'])
     
     ## adapt isolation cut
-    getattr(process, 'pfIsolatedMuons'+postfix).combinedIsolationCut = options['pfIsoValMuon']
+    getattr(process,'pfIsolatedMuons'+postfix).combinedIsolationCut = options['pfIsoValMuon']
     
     ## use beamspot for dB calculation
-    getattr(process, 'patMuons'+postfix).usePV = False
+    getattr(process,'patMuons'+postfix).usePV = False
     
-    ## embedding of resolutions into the patObjects
-    process.patMuons.addResolutions = True
-    process.patMuons.resolutions = cms.PSet( default = cms.string("muonResolution") )
+    ## adding of resolutions into the patObjects
+    getattr(process,'patMuons'+postfix).addResolutions = True
+    getattr(process,'patMuons'+postfix).resolutions = cms.PSet( default = cms.string("muonResolution") )
 
+    ## switch off embeding of collections
+    if options['switchOffEmbedding']:
+        getattr(process,'patMuons'+postfix).embedTpfmsMuon          = False
+        getattr(process,'patMuons'+postfix).embedHighLevelSelection = False
+        getattr(process,'patMuons'+postfix).embedCaloMETMuonCorrs   = False
+        getattr(process,'patMuons'+postfix).embedPFCandidate        = False
+        getattr(process,'patMuons'+postfix).embedStandAloneMuon     = False
+        getattr(process,'patMuons'+postfix).embedTrack              = False
+        getattr(process,'patMuons'+postfix).embedTcMETMuonCorrs     = False
+        getattr(process,'patMuons'+postfix).embedCombinedMuon       = False
+        getattr(process,'patMuons'+postfix).embedGenMatch           = False
+        getattr(process,'patMuons'+postfix).embedPickyMuon          = False
+
+    
     ##
     ## customize electrons
     ##
@@ -172,7 +181,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     getattr(process,'pfAllElectrons'+postfix).src = 'pfNoMuon'+postfix
 
     ## switch muons to be originating from the primary vertex
-    getattr(process, 'pfSelectedElectrons'+postfix).src = 'pfElectronsFromVertex'+postfix
+    getattr(process,'pfSelectedElectrons'+postfix).src = 'pfElectronsFromVertex'+postfix
 
     ## apply selection for electrons (they are the source of the pat::electrons)
     getattr(process,'pfSelectedElectrons'+postfix).cut = options['cutsElec']
@@ -187,19 +196,29 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     getattr(process,'isoDepElectronWithPhotons'+postfix).ExtractorPSet.inputCandView = 'pfSelectedPhotons'
 
     ## adapt isolation cone for electrons
-    getattr(process,"isoValElectronWithNeutral"+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeElec'])
-    getattr(process,"isoValElectronWithCharged"+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeElec'])
-    getattr(process,"isoValElectronWithPhotons"+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeElec'])
+    getattr(process,'isoValElectronWithNeutral'+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeElec'])
+    getattr(process,'isoValElectronWithCharged'+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeElec'])
+    getattr(process,'isoValElectronWithPhotons'+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeElec'])
 
     ## adapt isolation cut
     getattr(process,'pfIsolatedElectrons'+postfix).combinedIsolationCut = options['pfIsoValElec']
 
     ## use beamspot for dB calculation
-    getattr(process, 'patElectrons'+postfix).usePV = False
+    getattr(process,'patElectrons'+postfix).usePV = False
 
     ## embedding of resolutions into the patObjects
-    process.patElectrons.addResolutions = True
-    process.patElectrons.resolutions = cms.PSet( default = cms.string("elecResolution") )
+    getattr(process,'patElectrons'+postfix).addResolutions = True
+    getattr(process,'patElectrons'+postfix).resolutions = cms.PSet( default = cms.string("elecResolution") )
+
+    ## switch off embeding of collections
+    if options['switchOffEmbedding']:
+        getattr(process,'patElectrons'+postfix).embedHighLevelSelection = False
+        getattr(process,'patElectrons'+postfix).embedGsfElectronCore    = False
+        getattr(process,'patElectrons'+postfix).embedSuperCluster       = False
+        getattr(process,'patElectrons'+postfix).embedPFCandidate        = False
+        getattr(process,'patElectrons'+postfix).embedGsfTrack           = False
+        getattr(process,'patElectrons'+postfix).embedTrack              = False
+        getattr(process,'patElectrons'+postfix).embedGenMatch           = False
 
 
     ##
@@ -207,54 +226,55 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ##
 
     ## remove the full pftau sequence as it is not needed for us
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'pfTauPFJets08Region'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'pfTauPileUpVertices'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'pfTauTagInfoProducer'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'pfJetsPiZeros'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'pfJetsLegacyTaNCPiZeros'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'pfJetsLegacyHPSPiZeros'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'pfTausBase'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'pfTausBaseDiscriminationByLeadingTrackFinding'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'pfTausBaseDiscriminationByIsolation'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'pfTausBaseDiscriminationByLeadingPionPtCut'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'pfTaus'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'pfNoTau'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByLeadingTrackFinding'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByLeadingTrackPtCut'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByLeadingPionPtCut'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByIsolation'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTrackIsolation'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByECALIsolation'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByIsolationUsingLeadingPion'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTrackIsolationUsingLeadingPion'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByECALIsolationUsingLeadingPion'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationAgainstElectron'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationAgainstMuon'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTaNC'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTaNCfrOnePercent'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTaNCfrHalfPercent'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTaNCfrQuarterPercent'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTaNCfrTenthPercent'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTauPFJets08Region'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTauPileUpVertices'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTauTagInfoProducer'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfJetsPiZeros'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfJetsLegacyTaNCPiZeros'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfJetsLegacyHPSPiZeros'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTausBase'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTausBaseDiscriminationByLeadingTrackFinding'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTausBaseDiscriminationByIsolation'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTausBaseDiscriminationByLeadingPionPtCut'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTaus'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfNoTau'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByLeadingTrackFinding'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByLeadingTrackPtCut'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByLeadingPionPtCut'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByIsolation'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTrackIsolation'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByECALIsolation'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByIsolationUsingLeadingPion'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTrackIsolationUsingLeadingPion'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByECALIsolationUsingLeadingPion'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationAgainstElectron'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationAgainstMuon'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTaNC'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTaNCfrOnePercent'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTaNCfrHalfPercent'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTaNCfrQuarterPercent'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTaNCfrTenthPercent'+postfix))
 
     ##
     ## customize photons
     ##
 
     ## remove the photons match
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'photonMatch'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'photonMatch'+postfix))
 
     ##
     ## customize jets
     ##
 
     ## switchmodules to correct sources
-    massSearchReplaceAnyInputTag(getattr( process, 'patPF2PATSequence' + postfix), 'pfNoTau' + postfix, 'pfJets' + postfix)
+    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+    massSearchReplaceAnyInputTag(getattr(process,'patPF2PATSequence'+postfix),'pfNoTau'+postfix,'pfJets'+postfix)
 
     ## remove soft lepton taggers, which would have needed more RECO collections as input
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'softMuonTagInfosAOD'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'softMuonBJetTagsAOD'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'softMuonByPtBJetTagsAOD'+postfix))
-    getattr( process, 'patPF2PATSequence' + postfix).remove(getattr(process,'softMuonByIP3dBJetTagsAOD'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'softMuonTagInfosAOD'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'softMuonBJetTagsAOD'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'softMuonByPtBJetTagsAOD'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'softMuonByIP3dBJetTagsAOD'+postfix))
     
     getattr(process,'patJets'+postfix).tagInfoSources = []
     getattr(process,'patJets'+postfix).discriminatorSources.remove(cms.InputTag("softMuonBJetTagsAOD"+postfix))
@@ -262,11 +282,26 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     getattr(process,'patJets'+postfix).discriminatorSources.remove(cms.InputTag("softMuonByIP3dBJetTagsAOD"+postfix))
     
     ## embedding of resolutions into the patObjects
-    process.patJets.addResolutions = True
-    process.patJets.resolutions = cms.PSet(
+    getattr(process,'patJets'+postfix).addResolutions = True
+    getattr(process,'patJets'+postfix).resolutions = cms.PSet(
         default = cms.string("udscResolutionPF"),
         bjets = cms.string("bjetResolutionPF"),
         )
+
+    ## remove obsolte genJet clustering sequences
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'genParticlesForJetsNoNu'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'iterativeCone5GenJetsNoNu'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'ak5GenJetsNoNu'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'ak7GenJetsNoNu'+postfix))
+
+    ## switch genJetMatch of patJet to correct input collection, already produced at production
+    getattr(process,'patJetGenJetMatch'+postfix).matched = cms.InputTag('ak5GenJets','','PAT')
+
+    ## switch off embeding of collections
+    if options['switchOffEmbedding']:
+        getattr(process,'patJets'+postfix).embedPFCandidates   = False
+        getattr(process,'patJets'+postfix).embedGenJetMatch    = False
+        getattr(process,'patJets'+postfix).embedGenPartonMatch = False
 
 
     ##
@@ -274,11 +309,12 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ##
 
     ## re-configure and create MET
-    getattr(process,'pfMET'+postfix).src = 'pfNoPileUp'
+    getattr(process,'pfMET'+postfix).src = 'pfNoPileUp'+postfix
 
     ## embedding of resolutions into the patObjects
-    process.patMETs.addResolutions = True
-    process.patMETs.resolutions = cms.PSet( default = cms.string("metResolutionPF") )
+    getattr(process,'patMETs'+postfix).addResolutions = True
+    getattr(process,'patMETs'+postfix).resolutions = cms.PSet( default = cms.string("metResolutionPF") )
+
 
     ##
     ## let it run
@@ -289,7 +325,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
         process.goodOfflinePrimaryVertices *
         process.goodOfflinePrimaryVerticesWithBS *
         process.eidCiCSequence *
-        getattr( process, 'patPF2PATSequence' + postfix)
+        getattr(process,'patPF2PATSequence'+postfix)
         )
 
     ## add kt6PFJets for rho calculation needed for L1FastJet correction
@@ -305,7 +341,8 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     print '|||||||||||||||||||||||||||||||||||||||||||||||||||'
     print '==================================================='
     print 'options used by prependPF2PATSequence:'
-    print 'runOnMC:', options.setdefault('runOnMC', True)
+    print 'runOnMC:', options['runOnMC']
+    print 'switchOffEmbedding:', options['switchOffEmbedding']
     #print 'postfix:', options.setdefault('postfix', '')
     print 'runOnOLDcfg:', options['runOnOLDcfg']
     print 'cutsMuon:', options['cutsMuon']
