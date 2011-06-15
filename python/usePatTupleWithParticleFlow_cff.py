@@ -24,6 +24,27 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     from RecoJets.JetProducers.kt4PFJets_cfi import kt4PFJets
     process.kt6PFJets = kt4PFJets.clone(src='pfNoElectron', doAreaFastjet=True, doRhoFastjet=True, rParam=0.6)
 
+    ## create a good vertex collection
+    pvSelection = cms.PSet(
+          minNdof = cms.double( 4.)
+        , maxZ    = cms.double(24.)
+        , maxRho  = cms.double( 2.)
+        )
+
+    process.goodOfflinePrimaryVertices = cms.EDFilter(
+        "PrimaryVertexObjectFilter" # checks for fake PVs automatically
+        , filterParams = pvSelection
+        , filter       = cms.bool(False) # use only as producer
+        , src          = cms.InputTag('offlinePrimaryVertices')
+        )
+
+    process.goodOfflinePrimaryVerticesWithBS = cms.EDFilter(
+        "PrimaryVertexObjectFilter" # checks for fake PVs automatically
+        , filterParams = pvSelection
+        , filter       = cms.bool(False) # use only as producer
+        , src          = cms.InputTag('offlinePrimaryVerticesWithBS')
+        )
+
     ## only added as the usePF2PAT function needs it to work, is deleted immediately afterwards
     process.out = cms.OutputModule("PoolOutputModule",
                                    fileName = cms.untracked.string('dummyFile.root'),
@@ -265,6 +286,8 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
 
     ## define sequence with all modules in
     process.pf2pat = cms.Sequence(
+        process.goodOfflinePrimaryVertices *
+        process.goodOfflinePrimaryVerticesWithBS *
         process.eidCiCSequence *
         getattr( process, 'patPF2PATSequence' + postfix)
         )
@@ -273,10 +296,6 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     process.pf2pat.replace( getattr(process,'patJetCorrFactors'+postfix)
                           , process.kt6PFJets * getattr(process,'patJetCorrFactors'+postfix)
                           )
-
-    ## remove module already run at creation
-    process.pf2pat.remove(getattr(process,'pfPileUp'+postfix))
-    process.pf2pat.remove(getattr(process,'pfNoPileUp'+postfix))
 
     ##
     ## output all options and set defaults
@@ -308,6 +327,8 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
         ## use only good vertices
         massSearchReplaceAnyInputTag(process.pf2pat, 'offlinePrimaryVertices'      , 'goodOfflinePrimaryVertices')
         massSearchReplaceAnyInputTag(process.pf2pat, 'offlinePrimaryVerticesWithBS', 'goodOfflinePrimaryVerticesWithBS')
+        process.goodOfflinePrimaryVertices.src       = 'offlinePrimaryVertices'
+        process.goodOfflinePrimaryVerticesWithBS.src = 'offlinePrimaryVerticesWithBS'
         massSearchReplaceAnyInputTag(getattr(process,pathname), 'offlinePrimaryVertices'      , 'goodOfflinePrimaryVertices')
         massSearchReplaceAnyInputTag(getattr(process,pathname), 'offlinePrimaryVerticesWithBS', 'goodOfflinePrimaryVerticesWithBS')
         
