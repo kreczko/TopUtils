@@ -9,6 +9,8 @@ options.register('runOnMC', True, VarParsing.VarParsing.multiplicity.singleton, 
 options.register('isTTBarMC', False, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.bool, "decide to produce ttGenEvent")
 ## global Tag to be used (if left empty pat default tag is used)
 options.register('globalTag', '', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "which globalTag should be used")
+## tag of TriggerResults collection
+options.register('triggerTag', 'HLT', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "tag used for the triggerResults")
 
 # get and parse the command line arguments
 if( hasattr(sys, "argv") ):
@@ -35,33 +37,6 @@ if not options.globalTag == '':
 #process.source.fileNames += '/store/data/Run2011A/MultiJet/AOD/PromptReco-v4/000/165/103/76696D89-EE80-E011-AEF7-003048F024E0.root',
 process.maxEvents.input = cms.untracked.int32(-1)
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
-
-## run the particle flow classification as far as appropriate
-process.load("TopAnalysis.TopUtils.particleFlowSetup_cff")
-
-## create a good vertex collection
-pvSelection = cms.PSet(
-  minNdof = cms.double( 7.)
-, maxZ    = cms.double(24.)
-, maxRho  = cms.double( 2.)
-)
-
-process.goodOfflinePrimaryVertices = cms.EDFilter(
-      "PrimaryVertexObjectFilter" # checks for fake PVs automatically
-    , filterParams = pvSelection
-    , filter       = cms.bool(False) # use only as producer
-    , src          = cms.InputTag('offlinePrimaryVertices')
-    )
-
-process.goodOfflinePrimaryVerticesWithBS = cms.EDFilter(
-      "PrimaryVertexObjectFilter" # checks for fake PVs automatically
-    , filterParams = pvSelection
-    , filter       = cms.bool(False) # use only as producer
-    , src          = cms.InputTag('offlinePrimaryVerticesWithBS')
-    )
-
-## use only good vertices for pfNoPileUp
-process.pfPileUp.Vertices = cms.InputTag('goodOfflinePrimaryVertices')
 
 if options.runOnMC:
 
@@ -120,13 +95,14 @@ if not options.runOnMC:
 
     ## high level trigger filter (non existing Triggers are ignored)
     process.load("HLTrigger.HLTfilters.hltHighLevel_cfi")
-    process.trigger = process.hltHighLevel.clone(HLTPaths = [
-            #2010 trigger ('v*' to be immune to version changes)
-            '*',
-            #2011 1E33 trigger ('v*' to be immune to version changes)
-            '*',
-            #2011 1E33-2E33 trigger ('v*' to be immune to version changes)
-            '*'],throw = False)
+    process.trigger = process.hltHighLevel.clone(HLTPaths = [#2010 trigger ('v*' to be immune to version changes)
+                                                             '*',
+                                                             #2011 1E33 trigger ('v*' to be immune to version changes)
+                                                             '*',
+                                                             #2011 1E33-2E33 trigger ('v*' to be immune to version changes)
+                                                             '*'],
+                                                 TriggerResultsTag = cms.InputTag("TriggerResults","",options.triggerTag)
+                                                 throw = False)
     
 
 ## let it run
@@ -136,11 +112,6 @@ if not options.runOnMC:
     process.p += process.HBHENoiseFilter
     process.p += process.scrapingFilter
     process.p += process.trigger
-
-process.p += process.goodOfflinePrimaryVertices
-process.p += process.goodOfflinePrimaryVerticesWithBS
-process.p += process.pfPileUp
-process.p += process.pfNoPileUp
 
 if options.runOnMC:
     if options.isTTBarMC:
@@ -158,8 +129,7 @@ process.out.outputCommands+= ['keep *_offlineBeamSpot_*_*']
 process.out.outputCommands+= ['keep *_offlinePrimaryVertices*_*_*']
 process.out.outputCommands+= ['keep *_goodOfflinePrimaryVertices*_*_*']
 ## collections for PF2PAT
-process.out.outputCommands+= ['keep *_pfPileUp_*_*']
-process.out.outputCommands+= ['keep *_pfNoPileUp_*_*']
+process.out.outputCommands+= ['keep *_particleFlow_*_*']
 ## trigger information
 process.out.outputCommands+= ['keep edmTriggerResults_*_*_*']
 process.out.outputCommands+= ['keep *_hltTriggerSummaryAOD_*_*']
