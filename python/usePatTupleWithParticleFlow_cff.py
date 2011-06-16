@@ -364,6 +364,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
         ## use only good vertices
         massSearchReplaceAnyInputTag(process.pf2pat, 'offlinePrimaryVertices'      , 'goodOfflinePrimaryVertices')
         massSearchReplaceAnyInputTag(process.pf2pat, 'offlinePrimaryVerticesWithBS', 'goodOfflinePrimaryVerticesWithBS')
+        getattr(process,'impactParameterTagInfosAOD'+postfix).primaryVertex = 'offlinePrimaryVertices'
         process.goodOfflinePrimaryVertices.src       = 'offlinePrimaryVertices'
         process.goodOfflinePrimaryVerticesWithBS.src = 'offlinePrimaryVerticesWithBS'
         massSearchReplaceAnyInputTag(getattr(process,pathname), 'offlinePrimaryVertices'      , 'goodOfflinePrimaryVertices')
