@@ -17,7 +17,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     options.setdefault('pfIsoValElec', 0.17)
     options.setdefault('skipIfNoPFMuon', False)
     options.setdefault('skipIfNoPFElec', False)
-    
+
 
     ## postfixes are NOT supported right now
     postfix='' #options['postfix']
@@ -270,6 +270,10 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
 
         for name in eleIDsClassical.parameterNames_():
             setattr(eleIDs,name,getattr(eleIDsClassical,name))
+
+    ## if no electronID is needed, don't try to add it to pat Electron
+    if options['electronIDs'].count('classical') == 0 and options['electronIDs'].count('CiC') == 0 :
+        getattr(process,'patElectrons'+postfix).addElectronID = False
 
     ## add all eleIDs to the pat electron
     getattr(process,'patElectrons'+postfix).electronIDSources = eleIDs
