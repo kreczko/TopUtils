@@ -8,14 +8,14 @@
 // =============
 
 EventWeightPU::EventWeightPU(const edm::ParameterSet& cfg):
-  inTag_MCSampleFile(cfg.getParameter<std::string>("MCSampleFile") ),
+  inTag_MCSampleFile(cfg.getParameter<edm::FileInPath>("MCSampleFile") ),
   inTag_MCSampleHistoName(cfg.getParameter<std::string>("MCSampleHistoName") ),
-  inTag_DataFile(cfg.getParameter<std::string>("DataFile") ),
+  inTag_DataFile(cfg.getParameter<edm::FileInPath>("DataFile") ),
   inTag_DataHistoName(cfg.getParameter<std::string>("DataHistoName") ),
   inTag_PUSource(cfg.getParameter<edm::InputTag>("PUSource") )
 {
 
-  LumiWeights_ = edm::LumiReWeighting(inTag_MCSampleFile,inTag_DataFile,inTag_MCSampleHistoName,inTag_DataHistoName);
+  LumiWeights_ = edm::LumiReWeighting(inTag_MCSampleFile.fullPath(),inTag_DataFile.fullPath(),inTag_MCSampleHistoName,inTag_DataHistoName);
   
   produces<double>();
 }
