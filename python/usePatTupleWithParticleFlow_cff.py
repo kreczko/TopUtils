@@ -46,7 +46,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     process.goodOfflinePrimaryVertices = cms.EDFilter(
         "PrimaryVertexObjectFilter" # checks for fake PVs automatically
         , filterParams = pvSelection
-        , filter       = cms.bool(False) # use only as producer
+        , filter       = cms.bool(True) # use as producer and filter
         , src          = cms.InputTag('offlinePrimaryVertices')
         )
 
