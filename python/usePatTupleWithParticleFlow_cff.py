@@ -10,10 +10,11 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     options.setdefault('runOnOLDcfg', False)
     options.setdefault('cutsMuon', 'abs(eta) < 2.5 & pt > 10.')
     options.setdefault('cutsElec', 'et > 20 & abs(eta) < 2.5')
+    options.setdefault('electronIDs', 'CiC') ## can be set to CiC, classical
     options.setdefault('pfIsoConeMuon', 0.3)
     options.setdefault('pfIsoConeElec', 0.3)
     options.setdefault('pfIsoValMuon', 0.2)
-    options.setdefault('pfIsoValElec', 0.13)
+    options.setdefault('pfIsoValElec', 0.17)
 
     ## postfixes are NOT supported right now
     postfix='' #options['postfix']
@@ -166,26 +167,59 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## customize electrons
     ##
 
-    ## add CiC electron ID
-    process.load('RecoEgamma.ElectronIdentification.cutsInCategoriesElectronIdentificationV06_cfi')
-    process.eidCiCSequence = cms.Sequence(
-        process.eidVeryLooseMC  *
-        process.eidLooseMC      *
-        process.eidMediumMC     *
-        process.eidTightMC      *
-        process.eidSuperTightMC *
-        process.eidHyperTight1MC
-        )
+    ## save eleID sources
+    eleIDs = cms.PSet()
 
-    ## embed CiC electron ID into patElectrons
-    getattr(process,'patElectrons'+postfix).electronIDSources = cms.PSet(
-        eidVeryLooseMC   = cms.InputTag("eidVeryLooseMC"),
-        eidLooseMC       = cms.InputTag("eidLooseMC"),
-        eidMediumMC      = cms.InputTag("eidMediumMC"),
-        eidTightMC       = cms.InputTag("eidTightMC"),
-        eidSuperTightMC  = cms.InputTag("eidSuperTightMC"),
-        eidHyperTight1MC = cms.InputTag("eidHyperTight1MC")
-        )
+    ## add CiC electron ID
+    if options['electronIDs'].count('CiC') > 0 :
+        process.load('RecoEgamma.ElectronIdentification.cutsInCategoriesElectronIdentificationV06_cfi')
+        process.eidCiCSequence = cms.Sequence(
+            process.eidVeryLooseMC  *
+            process.eidLooseMC      *
+            process.eidMediumMC     *
+            process.eidTightMC      *
+            process.eidSuperTightMC *
+            process.eidHyperTight1MC
+            )
+
+        ## embed CiC electron ID into patElectrons
+        eleIDsCiC = cms.PSet(
+            eidVeryLooseMC   = cms.InputTag("eidVeryLooseMC"),
+            eidLooseMC       = cms.InputTag("eidLooseMC"),
+            eidMediumMC      = cms.InputTag("eidMediumMC"),
+            eidTightMC       = cms.InputTag("eidTightMC"),
+            eidSuperTightMC  = cms.InputTag("eidSuperTightMC"),
+            eidHyperTight1MC = cms.InputTag("eidHyperTight1MC")
+            )
+
+        for name in eleIDsCiC.parameterNames_():
+            setattr(eleIDs,name,getattr(eleIDsCiC,name))
+
+    
+    ## add classical electron ID
+    if options['electronIDs'].count('classical') > 0 :
+        process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
+
+        eleIDsClassical = cms.PSet(
+            simpleEleId95relIso = cms.InputTag("simpleEleId95relIso"),
+            simpleEleId90relIso = cms.InputTag("simpleEleId90relIso"),
+            simpleEleId85relIso = cms.InputTag("simpleEleId85relIso"),
+            simpleEleId80relIso = cms.InputTag("simpleEleId80relIso"),
+            simpleEleId70relIso = cms.InputTag("simpleEleId70relIso"),
+            simpleEleId60relIso = cms.InputTag("simpleEleId60relIso"),
+            simpleEleId95cIso   = cms.InputTag("simpleEleId95cIso"),
+            simpleEleId90cIso   = cms.InputTag("simpleEleId90cIso"),
+            simpleEleId85cIso   = cms.InputTag("simpleEleId85cIso"),
+            simpleEleId80cIso   = cms.InputTag("simpleEleId80cIso"),
+            simpleEleId70cIso   = cms.InputTag("simpleEleId70cIso"),
+            simpleEleId60cIso   = cms.InputTag("simpleEleId60cIso")
+            )
+
+        for name in eleIDsClassical.parameterNames_():
+            setattr(eleIDs,name,getattr(eleIDsClassical,name))
+
+    ## add all eleIDs to the pat electron
+    getattr(process,'patElectrons'+postfix).electronIDSources = eleIDs
 
     ## switch input of pfElectrons to collection without muons
     getattr(process,'pfAllElectrons'+postfix).src = 'pfNoMuon'+postfix
@@ -336,10 +370,14 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## define sequence with all modules in
     process.pf2pat = cms.Sequence(
         process.goodOfflinePrimaryVertices *
-        process.goodOfflinePrimaryVerticesWithBS *
-        process.eidCiCSequence *
-        getattr(process,'patPF2PATSequence'+postfix)
+        process.goodOfflinePrimaryVerticesWithBS
         )
+    if options['electronIDs'].count('CiC') > 0 :
+        process.pf2pat += process.eidCiCSequence
+    if options['electronIDs'].count('classical') > 0 :
+        process.pf2pat += process.simpleEleIdSequence
+    process.pf2pat += getattr(process,'patPF2PATSequence'+postfix)
+    
 
     ## add kt6PFJets for rho calculation needed for L1FastJet correction
     process.pf2pat.replace( getattr(process,'patJetCorrFactors'+postfix)
@@ -361,6 +399,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     print 'runOnOLDcfg:', options['runOnOLDcfg']
     print 'cutsMuon:', options['cutsMuon']
     print 'cutsElec:', options['cutsElec']
+    print 'electronIDs:', options['electronIDs']
     print 'pfIsoConeMuon:', options['pfIsoConeMuon']
     print 'pfIsoConeElec:', options['pfIsoConeElec']
     print 'pfIsoValMuon:', options['pfIsoValMuon']
