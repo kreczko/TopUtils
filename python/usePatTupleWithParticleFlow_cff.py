@@ -109,7 +109,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'countPatPFParticles'+postfix))
 
     ## embedding of resolutions into the patObjects
-    if options.['addResolutions']:
+    if options['addResolutions']:
         process.load("TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff")
 
 
@@ -144,7 +144,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     getattr(process,'patMuons'+postfix).usePV = False
     
     ## adding of resolutions into the patObjects
-    if options.['addResolutions']:
+    if options['addResolutions']:
         getattr(process,'patMuons'+postfix).addResolutions = True
         getattr(process,'patMuons'+postfix).resolutions = cms.PSet( default = cms.string("muonResolution") )
 
@@ -217,7 +217,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     getattr(process,'patElectrons'+postfix).usePV = False
 
     ## embedding of resolutions into the patObjects
-    if options.['addResolutions']:
+    if options['addResolutions']:
         getattr(process,'patElectrons'+postfix).addResolutions = True
         getattr(process,'patElectrons'+postfix).resolutions = cms.PSet( default = cms.string("elecResolution") )
 
@@ -293,7 +293,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     getattr(process,'patJets'+postfix).discriminatorSources.remove(cms.InputTag("softMuonByIP3dBJetTagsAOD"+postfix))
     
     ## embedding of resolutions into the patObjects
-    if options.['addResolutions']:
+    if options['addResolutions']:
         getattr(process,'patJets'+postfix).addResolutions = True
         getattr(process,'patJets'+postfix).resolutions = cms.PSet(
             default = cms.string("udscResolutionPF"),
@@ -324,7 +324,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     getattr(process,'pfMET'+postfix).src = 'pfNoPileUp'+postfix
 
     ## embedding of resolutions into the patObjects
-    if options.['addResolutions']:
+    if options['addResolutions']:
         getattr(process,'patMETs'+postfix).addResolutions = True
         getattr(process,'patMETs'+postfix).resolutions = cms.PSet( default = cms.string("metResolutionPF") )
 
@@ -356,7 +356,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     print 'options used by prependPF2PATSequence:'
     print 'runOnMC:', options['runOnMC']
     print 'switchOffEmbedding:', options['switchOffEmbedding']
-    print 'addResolutions:', options.['addResolutions']
+    print 'addResolutions:', options['addResolutions']
     #print 'postfix:', options.setdefault('postfix', '')
     print 'runOnOLDcfg:', options['runOnOLDcfg']
     print 'cutsMuon:', options['cutsMuon']
