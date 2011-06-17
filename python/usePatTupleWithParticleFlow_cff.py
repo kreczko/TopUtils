@@ -8,13 +8,16 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     options.setdefault('addResolutions', True)
     #options.setdefault('postfix', '')
     options.setdefault('runOnOLDcfg', False)
-    options.setdefault('cutsMuon', 'abs(eta) < 2.5 & pt > 10.')
-    options.setdefault('cutsElec', 'et > 20 & abs(eta) < 2.5')
+    options.setdefault('cutsMuon', 'pt > 10. & abs(eta) < 2.5')
+    options.setdefault('cutsElec', 'et > 20. & abs(eta) < 2.5')
     options.setdefault('electronIDs', 'CiC') ## can be set to CiC, classical
     options.setdefault('pfIsoConeMuon', 0.3)
     options.setdefault('pfIsoConeElec', 0.3)
     options.setdefault('pfIsoValMuon', 0.2)
     options.setdefault('pfIsoValElec', 0.17)
+    options.setdefault('skipIfNoPFMuon', False)
+    options.setdefault('skipIfNoPFElec', False)
+    
 
     ## postfixes are NOT supported right now
     postfix='' #options['postfix']
@@ -141,6 +144,18 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## adapt isolation cut
     getattr(process,'pfIsolatedMuons'+postfix).combinedIsolationCut = options['pfIsoValMuon']
     
+    ## filter event if no isolated muon found
+    if options['skipIfNoPFMuon']:
+        process.isoMuonFilter = cms.EDFilter("CandViewCountFilter", 
+                                             src = cms.InputTag("pfIsolatedMuons"+postfix),
+                                             minNumber = cms.uint32(1)
+                                             )
+        
+        getattr(process,'patPF2PATSequence'+postfix).replace(getattr(process,'pfIsolatedMuons'+postfix),
+                                                             getattr(process,'pfIsolatedMuons'+postfix)*
+                                                             process.isoMuonFilter
+                                                             )
+       
     ## use beamspot for dB calculation
     getattr(process,'patMuons'+postfix).usePV = False
     
@@ -166,6 +181,44 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ##
     ## customize electrons
     ##
+
+    ## switch input of pfElectrons to collection without muons
+    getattr(process,'pfAllElectrons'+postfix).src = 'pfNoMuon'+postfix
+
+    ## switch muons to be originating from the primary vertex
+    getattr(process,'pfSelectedElectrons'+postfix).src = 'pfElectronsFromVertex'+postfix
+
+    ## apply selection for electrons (they are the source of the pat::electrons)
+    getattr(process,'pfSelectedElectrons'+postfix).cut = options['cutsElec']
+
+    ## calculate isolation only for (kinematically) selected pfElectrons
+    getattr(process,'isoDepElectronWithCharged'+postfix).src = 'pfSelectedElectrons'+postfix
+    getattr(process,'isoDepElectronWithNeutral'+postfix).src = 'pfSelectedElectrons'+postfix
+    getattr(process,'isoDepElectronWithPhotons'+postfix).src = 'pfSelectedElectrons'+postfix
+    ## calculate isolation only based on selected pfCandidates
+    getattr(process,'isoDepElectronWithCharged'+postfix).ExtractorPSet.inputCandView = 'pfSelectedChargedHadrons'
+    getattr(process,'isoDepElectronWithNeutral'+postfix).ExtractorPSet.inputCandView = 'pfSelectedNeutralHadrons'
+    getattr(process,'isoDepElectronWithPhotons'+postfix).ExtractorPSet.inputCandView = 'pfSelectedPhotons'
+
+    ## adapt isolation cone for electrons
+    getattr(process,'isoValElectronWithNeutral'+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeElec'])
+    getattr(process,'isoValElectronWithCharged'+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeElec'])
+    getattr(process,'isoValElectronWithPhotons'+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeElec'])
+
+    ## adapt isolation cut
+    getattr(process,'pfIsolatedElectrons'+postfix).combinedIsolationCut = options['pfIsoValElec']
+
+    ## filter event if no isolated electron found
+    if options['skipIfNoPFElec']:
+        process.isoElectronFilter = cms.EDFilter("CandViewCountFilter", 
+                                                 src = cms.InputTag("pfIsolatedElectrons"+postfix),
+                                                 minNumber = cms.uint32(1)
+                                                 )
+        
+        getattr(process,'patPF2PATSequence'+postfix).replace(getattr(process,'pfIsolatedElectrons'+postfix),
+                                                             getattr(process,'pfIsolatedElectrons'+postfix)*
+                                                             process.isoElectronFilter
+                                                             )
 
     ## save eleID sources
     eleIDs = cms.PSet()
@@ -220,32 +273,6 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
 
     ## add all eleIDs to the pat electron
     getattr(process,'patElectrons'+postfix).electronIDSources = eleIDs
-
-    ## switch input of pfElectrons to collection without muons
-    getattr(process,'pfAllElectrons'+postfix).src = 'pfNoMuon'+postfix
-
-    ## switch muons to be originating from the primary vertex
-    getattr(process,'pfSelectedElectrons'+postfix).src = 'pfElectronsFromVertex'+postfix
-
-    ## apply selection for electrons (they are the source of the pat::electrons)
-    getattr(process,'pfSelectedElectrons'+postfix).cut = options['cutsElec']
-
-    ## calculate isolation only for (kinematically) selected pfElectrons
-    getattr(process,'isoDepElectronWithCharged'+postfix).src = 'pfSelectedElectrons'+postfix
-    getattr(process,'isoDepElectronWithNeutral'+postfix).src = 'pfSelectedElectrons'+postfix
-    getattr(process,'isoDepElectronWithPhotons'+postfix).src = 'pfSelectedElectrons'+postfix
-    ## calculate isolation only based on selected pfCandidates
-    getattr(process,'isoDepElectronWithCharged'+postfix).ExtractorPSet.inputCandView = 'pfSelectedChargedHadrons'
-    getattr(process,'isoDepElectronWithNeutral'+postfix).ExtractorPSet.inputCandView = 'pfSelectedNeutralHadrons'
-    getattr(process,'isoDepElectronWithPhotons'+postfix).ExtractorPSet.inputCandView = 'pfSelectedPhotons'
-
-    ## adapt isolation cone for electrons
-    getattr(process,'isoValElectronWithNeutral'+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeElec'])
-    getattr(process,'isoValElectronWithCharged'+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeElec'])
-    getattr(process,'isoValElectronWithPhotons'+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeElec'])
-
-    ## adapt isolation cut
-    getattr(process,'pfIsolatedElectrons'+postfix).combinedIsolationCut = options['pfIsoValElec']
 
     ## use beamspot for dB calculation
     getattr(process,'patElectrons'+postfix).usePV = False
@@ -404,6 +431,8 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     print 'pfIsoConeElec:', options['pfIsoConeElec']
     print 'pfIsoValMuon:', options['pfIsoValMuon']
     print 'pfIsoValElec:', options['pfIsoValElec']
+    print 'skipIfNoPFMuon:', options['skipIfNoPFMuon']
+    print 'skipIfNoPFElec:', options['skipIfNoPFElec']
     print '==================================================='
     print '|||||||||||||||||||||||||||||||||||||||||||||||||||'
     print '==================================================='
