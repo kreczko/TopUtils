@@ -4,6 +4,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
 
     ## set defaults if variable was not given to function
     options.setdefault('runOnMC', True)
+    options.setdefault('runOnAOD', False)
     options.setdefault('switchOffEmbedding', True)
     options.setdefault('addResolutions', True)
     #options.setdefault('postfix', '')
@@ -29,7 +30,31 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     if not hasattr(process, 'magfield'):
         process.load("Configuration.StandardSequences.MagneticField_cff")
 
-    ## Standard Pat Configuration File
+    ## prepare everything to run on AOD samples instead of pre-computed skims
+    if options['runOnAOD']: 
+        if options['runOnMC']:
+            ## needed for redoing the ak5GenJets
+            process.load("TopAnalysis.TopUtils.GenJetParticles_cff")
+            process.load("RecoJets.Configuration.RecoGenJets_cff")
+
+        ## do proper event filters when running on non-pre-computed data skims
+        else:
+            ## HBHE noise filter
+            process.load("CommonTools.RecoAlgos.HBHENoiseFilter_cfi")
+            ## s. https://hypernews.cern.ch/HyperNews/CMS/get/JetMET/1196.html
+            process.HBHENoiseFilter.minIsolatedNoiseSumE        = 999999.
+            process.HBHENoiseFilter.minNumIsolatedNoiseChannels = 999999
+            process.HBHENoiseFilter.minIsolatedNoiseSumEt       = 999999.
+
+            ## event scraping filter
+            process.scrapingFilter = cms.EDFilter( "FilterOutScraping"
+                                                 , applyfilter = cms.untracked.bool( True )
+                                                 , debugOn     = cms.untracked.bool( False )
+                                                 , numtrack    = cms.untracked.uint32( 10 )
+                                                 , thresh      = cms.untracked.double( 0.25 )
+                                                 )
+
+    ## standard PAT configuration file
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
     ## this needs to be re-run to compute rho for the L1Fastjet corrections
@@ -372,7 +397,10 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'ak7GenJetsNoNu'+postfix))
 
     ## switch genJetMatch of patJet to correct input collection, already produced at production
-    getattr(process,'patJetGenJetMatch'+postfix).matched = cms.InputTag('ak5GenJets','','PAT')
+    if options['runOnAOD']:
+        getattr(process,'patJetGenJetMatch'+postfix).matched = cms.InputTag('ak5GenJets','',process.name_())
+    else:
+        getattr(process,'patJetGenJetMatch'+postfix).matched = cms.InputTag('ak5GenJets','','PAT')
 
     ## switch off embeding of collections
     if options['switchOffEmbedding']:
@@ -403,10 +431,23 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
         process.goodOfflinePrimaryVertices *
         process.goodOfflinePrimaryVerticesWithBS
         )
+
+    ## prepare running of sequence if input is AOD
+    if options['runOnAOD']:
+        if options['runOnMC']:
+            process.pf2pat += process.genJetParticles
+            process.pf2pat += process.ak5GenJets
+        else:
+            process.pf2pat += process.HBHENoiseFilter
+            process.pf2pat += process.scrapingFilter
+
+    ## add electronIDs that should be added to the par electron
     if options['electronIDs'].count('CiC') > 0 :
         process.pf2pat += process.eidCiCSequence
     if options['electronIDs'].count('classical') > 0 :
         process.pf2pat += process.simpleEleIdSequence
+
+    ## run PF2PAT sequence
     process.pf2pat += getattr(process,'patPF2PATSequence'+postfix)
     
 
@@ -424,6 +465,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     print '==================================================='
     print 'options used by prependPF2PATSequence:'
     print 'runOnMC:', options['runOnMC']
+    print 'runOnAOD:', options['runOnAOD']
     print 'switchOffEmbedding:', options['switchOffEmbedding']
     print 'addResolutions:', options['addResolutions']
     #print 'postfix:', options.setdefault('postfix', '')
