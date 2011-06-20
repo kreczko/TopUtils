@@ -19,7 +19,7 @@ use constant C_RESUBMIT => 'magenta';
 ########################
 
 my %args;
-getopts('SsbW:kJjp:q:o:m:t:', \%args);
+getopts('SsbW:kJjp:q:o:m:t:c:O:', \%args);
 
 if ($args{'p'}) {
     peekIntoJob($args{'p'});    
@@ -78,6 +78,8 @@ Available Parameters
       the ouput directory, NJS will create a symlink to it. E.g. it might be useful
       to specify -o /scratch/hh/current/cms/user/$USER/njs
       Use NJS_OUTPUT environment variable to set a default
+  -c: additional command line arguments to cmsRun (put after the .py file),
+      use for VarParsing
   -m: maximum number of events per job
         default: -1 (i.e. no limit)
   -J: Don't automatically join output files and sum up TrigReports
@@ -87,7 +89,11 @@ Available Parameters
   -k: keep all source root files after hadd'ing them
        touch/remove the file 'autoremove' to enable/disable the 
        feature at some later point in time
-  -W secs: waiting time in secs before submission (default: 2 secs)
+  -W: waiting time in secs before submission (default: 2 secs)
+  -O: alternative output file name = do not look for a TFileService,
+      rather copy output files with a given name (for prodction jobs)
+      WARNING: you need to save your file to the local temp dir, i.e.
+      ....fileName=cms.untracked.string(os.environ['TMPDIR']+'/file.root')
 
 ******************************************************************
 * What to do after submitting - if jobs crash / to monitor jobs  *
@@ -372,6 +378,7 @@ sub peekIntoJob {
 
 sub getConfigTemplate {
     my $maxEvents = $args{'m'} || -1;
+    my $alternativeOutput = $args{'O'}?'True':'False';
     return <<END_OF_TEMPLATE;
 
 import os
@@ -389,15 +396,16 @@ process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32($maxEvents)
 )
 
-if jobNumber == 0:
+if jobNumber == 0 and not $alternativeOutput:
     fh = open('OUTPUTPATH/joined.txt', 'w')
     fh.write(eval(process.TFileService.fileName.pythonValue()))
     fh.close
 
 ## overwrite TFileService
-process.TFileService = cms.Service("TFileService",
-    fileName = cms.string("OUTPUTPATH/CONFIGFILE-" + str(jobNumber + 1) + ".root")
-)
+if not $alternativeOutput:
+    process.TFileService = cms.Service("TFileService",
+        fileName = cms.string("OUTPUTPATH/CONFIGFILE-" + str(jobNumber + 1) + ".root")
+    )
 
 END_OF_TEMPLATE
 }
@@ -440,27 +448,32 @@ perl -pe 's/OUTPUTPATH/$ENV{TMPDIR}/g' < $current/naf_DIRECTORY/CONFIGFILE.py > 
 #     sleep $sleeptime
 # fi
 
-PYTHONDONTWRITEBYTECODE=1 cmsRun -j $TMPDIR/jobreport.xml $TMPDIR/run.py
+PYTHONDONTWRITEBYTECODE=1 cmsRun -j $TMPDIR/jobreport.xml $TMPDIR/run.py CMSRUNPARAMETER
 
 if [ "$?" = "0" ] ; then
     if [ -e $TMPDIR/joined.txt ] ; then mv $TMPDIR/joined.txt $current/naf_DIRECTORY/ ; fi
     mv $TMPDIR/jobreport.xml $current/naf_DIRECTORY/jobreport$SGE_TASK_ID.xml
-    mv $TMPDIR/CONFIGFILE-$SGE_TASK_ID.root $current/naf_DIRECTORY/
-    if [ -e $current/naf_DIRECTORY/autojoin ] ; then
-        NDone=`ls $current/naf_DIRECTORY/out*.txt | wc -l`
-        NDone=$(($NDone + 1))
-        if [ "$NDone" = "NUMBER_OF_JOBS" ] ; then
-            joined=`cat $current/naf_DIRECTORY/joined.txt`
-            hadd -f $current/naf_DIRECTORY/$joined.$SGE_TASK_ID $current/naf_DIRECTORY/CONFIGFILE-*.root
-            if [ "$?" = "0" ] ; then
-                mv -f $current/naf_DIRECTORY/$joined.$SGE_TASK_ID $current/naf_DIRECTORY/$joined
-                cp -f $TMPDIR/stdout.txt $current/naf_DIRECTORY/out$SGE_TASK_ID.txt
-                sumTriggerReports2.pl $current/naf_DIRECTORY/out*.txt > $current/naf_DIRECTORY/`basename $joined .root`.txt
-                if [ -e $current/naf_DIRECTORY/autoremove ] ; then
-                    rm -f $current/naf_DIRECTORY/CONFIGFILE-*.root
+    alternativeOutput=ALTERNATIVEOUTPUT
+    if [ -z "${alternativeOutput}" ]; then
+        mv $TMPDIR/CONFIGFILE-$SGE_TASK_ID.root $current/naf_DIRECTORY/
+        if [ -e $current/naf_DIRECTORY/autojoin ] ; then
+            NDone=`ls $current/naf_DIRECTORY/out*.txt | wc -l`
+            NDone=$(($NDone + 1))
+            if [ "$NDone" = "NUMBER_OF_JOBS" ] ; then
+                joined=`cat $current/naf_DIRECTORY/joined.txt`
+                hadd -f $current/naf_DIRECTORY/$joined.$SGE_TASK_ID $current/naf_DIRECTORY/CONFIGFILE-*.root
+                if [ "$?" = "0" ] ; then
+                    mv -f $current/naf_DIRECTORY/$joined.$SGE_TASK_ID $current/naf_DIRECTORY/$joined
+                    cp -f $TMPDIR/stdout.txt $current/naf_DIRECTORY/out$SGE_TASK_ID.txt
+                    sumTriggerReports2.pl $current/naf_DIRECTORY/out*.txt > $current/naf_DIRECTORY/`basename $joined .root`.txt
+                    if [ -e $current/naf_DIRECTORY/autoremove ] ; then
+                        rm -f $current/naf_DIRECTORY/CONFIGFILE-*.root
+                    fi
                 fi
             fi
         fi
+    else
+        mv $TMPDIR/${alternativeOutput} $current/naf_DIRECTORY/`basename ${alternativeOutput} .root`${SGE_TASK_ID}.root
     fi
     mv -f $TMPDIR/stdout.txt $current/naf_DIRECTORY/out$SGE_TASK_ID.txt
 else
@@ -474,6 +487,10 @@ END_OF_BATCH_TEMPLATE
             ? $ENV{NJS_QUEUE}.':00:00' 
             : '48:00:00';
     $templ =~ s/__HCPU__/$replace/;
+    $args{'c'} ||= '';
+    $templ =~ s/CMSRUNPARAMETER/$args{'c'}/;
+    $args{'O'} ||= '';
+    $templ =~ s/ALTERNATIVEOUTPUT/$args{'O'}/;
     return $templ;
 }
 
