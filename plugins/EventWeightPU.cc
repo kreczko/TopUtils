@@ -2,6 +2,7 @@
 #define EventWeightPU_cc
 
 #include "EventWeightPU.h"
+#include "DataFormats/Common/interface/View.h"
 
 // =============
 //  Constructor
@@ -34,10 +35,10 @@ void EventWeightPU::produce(edm::Event& evt, const edm::EventSetup& setup)
 {
   std::auto_ptr<double> eventWeightPU(new double); 
   
-  edm::Handle<std::vector<PileupSummaryInfo> > pPUInfo;
+  edm::Handle<edm::View<PileupSummaryInfo> > pPUInfo;
   evt.getByLabel(inTag_PUSource, pPUInfo);
 
-  std::vector<PileupSummaryInfo>::const_iterator iterPU;
+  edm::View<PileupSummaryInfo>::const_iterator iterPU;
 
   wght_ = -1;
   *eventWeightPU = wght_;  // default value to allow for tracing errors
