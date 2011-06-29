@@ -1,4 +1,5 @@
 import FWCore.ParameterSet.Config as cms
+import os
 
 def prependPF2PATSequence(process, pathnames = [''], options = dict()):
 
@@ -88,17 +89,33 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
                                    outputCommands = cms.untracked.vstring('drop *')
                                    )
 
-    ## run the full PF2PAT sequence
-    from PhysicsTools.PatAlgos.tools.pfTools import usePF2PAT
-    usePF2PAT( process
-             , runPF2PAT      = True
-             , runOnMC        = options['runOnMC']
-             , jetAlgo        = 'AK5'
-             , postfix        = postfix
-             , jetCorrections = ('AK5PFchs'
-                                ,cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute'])
-                                )
-             )
+    ## adaptions needed to run with CMSSW 41X
+    if os.getenv('CMSSW_VERSION').startswith('CMSSW_4_1_'):
+        ## run the full PF2PAT sequence
+        from PhysicsTools.PatAlgos.tools.pfTools import usePF2PAT
+        usePF2PAT( process
+                 , runPF2PAT      = True
+                 , runOnMC        = options['runOnMC']
+                 , jetAlgo        = 'AK5'
+                 , postfix        = postfix
+                 )
+   
+        getattr(process,'patJetCorrFactors'+postfix).levels = cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute'])
+        getattr(process,'patJetCorrFactors'+postfix).payload = 'AK5PFchs'
+
+        getattr(process,'patDefaultSequence'+postfix).remove(getattr(process,'selectedPatTaus'+postfix))
+
+    ## for all other releases use the new configuration
+    else:
+        ## run the full PF2PAT sequence
+        from PhysicsTools.PatAlgos.tools.pfTools import usePF2PAT
+        usePF2PAT( process
+                 , runPF2PAT      = True
+                 , runOnMC        = options['runOnMC']
+                 , jetAlgo        = 'AK5'
+                 , postfix        = postfix
+                 , jetCorrections = ('AK5PFchs',cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute']))
+                 )
    
     delattr(process,'out')
 
@@ -112,10 +129,28 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     removeCleaning(process, False, postfix)
 
     ## make selection for the pf candidates
-    from TopAnalysis.TopUtils.particleFlowSetup_cff import pfSelectedChargedHadrons, pfSelectedNeutralHadrons, pfSelectedPhotons
-    setattr(process,'pfSelectedChargedHadrons'+postfix, pfSelectedChargedHadrons.clone())
-    setattr(process,'pfSelectedNeutralHadrons'+postfix, pfSelectedNeutralHadrons.clone())
-    setattr(process,'pfSelectedPhotons'       +postfix, pfSelectedPhotons.clone()       )
+
+    ## minimal restriction to charged hadrons
+    pfSelectedChargedHadrons = cms.EDFilter( "GenericPFCandidateSelector"
+                                           , src = cms.InputTag("pfAllChargedHadrons")
+                                           , cut = cms.string("")
+                                           )
+
+    ## minimal restriction to neutral hadrons
+    pfSelectedNeutralHadrons = cms.EDFilter( "GenericPFCandidateSelector"
+                                           , src = cms.InputTag("pfAllNeutralHadrons")
+                                           , cut = cms.string("") # et>1 # not yet official
+                                           )
+    
+    ## minimal restriction to photons
+    pfSelectedPhotons = cms.EDFilter( "GenericPFCandidateSelector"
+                                    , src = cms.InputTag("pfAllPhotons")
+                                    , cut = cms.string("") # et>1 # not yet official
+                                    )
+
+    setattr(process,'pfSelectedChargedHadrons'+postfix, pfSelectedChargedHadrons)
+    setattr(process,'pfSelectedNeutralHadrons'+postfix, pfSelectedNeutralHadrons)
+    setattr(process,'pfSelectedPhotons'       +postfix, pfSelectedPhotons       )
 
     ## add selected pf candidates to the sequence
     getattr(process,'patPF2PATSequence'+postfix).replace(getattr(process,'pfAllPhotons'+postfix),
@@ -327,8 +362,9 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ##
 
     ## remove the full pftau sequence as it is not needed for us
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTauPFJets08Region'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTauPileUpVertices'+postfix))
+    if not os.getenv('CMSSW_VERSION').startswith('CMSSW_4_1_'):
+        getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTauPFJets08Region'+postfix))
+        getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTauPileUpVertices'+postfix))
     getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTauTagInfoProducer'+postfix))
     getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfJetsPiZeros'+postfix))
     getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfJetsLegacyTaNCPiZeros'+postfix))
