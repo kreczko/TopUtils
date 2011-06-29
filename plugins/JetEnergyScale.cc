@@ -93,33 +93,34 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
       JetCorrectionUncertainty* deltaJEC = new JetCorrectionUncertainty(param);
       deltaJEC->setJetEta(jet->eta()); deltaJEC->setJetPt(jet->pt()); 
 
-      // add the recommended PU correction on top  
-      float pileUp = 0.352/jet->pt()/jet->pt();
-      // add bjet uncertainty on top
-      float bjet = 0.;
-      if(jet->partonFlavour() == 5 || jet->partonFlavour() == -5)
-	bjet = ((50<jet->pt() && jet->pt()<200) && fabs(jet->eta())<2.0) ? 0.02 : 0.03;
-      // add flat uncertainty for release differences and calibration changes (configurable)
-      float sw = (1.-scaleFactor_);
+      // additional JES uncertainty from Top group
+      // sum of squared shifts of jet energy to be applied
+      float topShift2 = 0.;
+      if(scaleType_.substr(0, scaleType_.find(':'))=="top"){
+	// add the recommended PU correction on top  
+	float pileUp = 0.352/jet->pt()/jet->pt();
+	// add bjet uncertainty on top
+	float bjet = 0.;
+	if(jet->partonFlavour() == 5 || jet->partonFlavour() == -5)
+	  bjet = ((50<jet->pt() && jet->pt()<200) && fabs(jet->eta())<2.0) ? 0.02 : 0.03;
+	// add flat uncertainty for release differences and calibration changes (configurable)
+	float sw = (1.-scaleFactor_);
+	// add top systematics to JES uncertainty
+	topShift2 += pileUp*pileUp + bjet*bjet + sw*sw;
+      }
 
-      if(scaleType_.substr(scaleType_.find(':')+1)=="up"  ){
-	if(scaleType_.substr(0, scaleType_.find(':'))=="top" ){
-	  float shift  = deltaJEC->getUncertainty(true );
-	  scaledJet.scaleEnergy( 1+sqrt(shift*shift + pileUp*pileUp + bjet*bjet + sw*sw) );
-	}
-	if(scaleType_.substr(0, scaleType_.find(':'))=="jes" ){
-	  scaledJet.scaleEnergy( 1+deltaJEC->getUncertainty(true ) );
-	}
+      // scale jet energy
+      if(scaleType_.substr(scaleType_.find(':')+1)=="up"){
+	// JetMET JES uncertainty
+	float jetMet = deltaJEC->getUncertainty(true);
+	scaledJet.scaleEnergy( 1+std::sqrt(jetMet*jetMet + topShift2) );
       }
-      if(scaleType_.substr(scaleType_.find(':')+1)=="down"){
-	if(scaleType_.substr(0, scaleType_.find(':'))=="top" ){
-	  float shift = deltaJEC->getUncertainty(false);
-	  scaledJet.scaleEnergy( 1-sqrt(shift*shift + pileUp*pileUp + bjet*bjet + sw*sw) );
-	}
-	if(scaleType_.substr(0, scaleType_.find(':'))=="jes" ){
-	  scaledJet.scaleEnergy( 1-deltaJEC->getUncertainty(false) );
-	}
+      else if(scaleType_.substr(scaleType_.find(':')+1)=="down"){
+	// JetMET JES uncertainty
+	float jetMet = deltaJEC->getUncertainty(false);
+	scaledJet.scaleEnergy( 1-std::sqrt(jetMet*jetMet + topShift2) );
       }
+
       scaledJet.scaleEnergy( resolutionFactor(scaledJet) );
       delete deltaJEC;
     }
