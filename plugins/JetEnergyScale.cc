@@ -152,6 +152,21 @@ double
 JetEnergyScale::resolutionFactor(const pat::Jet& jet)
 {
   if(!jet.genJet()) { return 1.; }
+  // check if vectors are filled properly
+  if((2*resolutionFactor_.size())!=resolutionRanges_.size()){
+    // eta range==infinity
+    if(resolutionFactor_.size()==resolutionRanges_.size()&&resolutionRanges_.size()==1&&resolutionRanges_[0]==-1.){
+      resolutionRanges_[0]=0;
+      resolutionRanges_.push_back(-1.);
+    }
+    // others
+    else{
+      edm::LogError msg("JetEnergyResolution");
+      msg << "\n resolutionEtaRanges or resolutionFactors in module JetEnergyScale not filled properly.\n";
+      msg << "\n resolutionEtaRanges needs a min and max value for each entry in resolutionFactors.\n";
+      throw cms::Exception("invalidVectorFilling");
+    }
+  }
   // calculate eta dependend JER factor
   double modifiedResolution = 1.;
   for(unsigned int numberOfJERvariation=0; numberOfJERvariation<resolutionFactor_.size(); ++numberOfJERvariation){
@@ -159,6 +174,12 @@ JetEnergyScale::resolutionFactor(const pat::Jet& jet)
     int etaMax = etaMin+1;
     if(std::abs(jet.eta())>=resolutionRanges_[etaMin]&&(std::abs(jet.eta())<resolutionRanges_[etaMax]||resolutionRanges_[etaMax]==-1.)){
       modifiedResolution*=resolutionFactor_[numberOfJERvariation];
+      // take care of negative scale factors 
+      if(resolutionFactor_[numberOfJERvariation]<0){
+	edm::LogError msg("JetEnergyResolution");
+	msg << "\n chosen scale factor " << resolutionFactor_[numberOfJERvariation] << " is not valid, must be positive.\n";
+	throw cms::Exception("negJERscaleFactors");
+      }
     }
   }
   // calculate pt smearing factor
