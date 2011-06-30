@@ -18,7 +18,8 @@ JetEnergyScale::JetEnergyScale(const edm::ParameterSet& cfg):
   payload_             (cfg.getParameter<std::string>  ("payload"             )),  
   scaleType_           (cfg.getParameter<std::string>  ("scaleType"           )),  
   scaleFactor_         (cfg.getParameter<double>       ("scaleFactor"         )),
-  resolutionFactor_    (cfg.getParameter<double>       ("resolutionFactor"    )),
+  resolutionFactor_    (cfg.getParameter<std::vector<double> > ("resolutionFactors"   )),
+  resolutionRanges_    (cfg.getParameter<std::vector<double> > ("resolutionEtaRanges" )),
   jetPTThresholdForMET_(cfg.getParameter<double>       ("jetPTThresholdForMET")),
   jetEMLimitForMET_    (cfg.getParameter<double>       ("jetEMLimitForMET"    ))
 {
@@ -151,6 +152,16 @@ double
 JetEnergyScale::resolutionFactor(const pat::Jet& jet)
 {
   if(!jet.genJet()) { return 1.; }
-  double factor = 1. + (resolutionFactor_-1.)*(jet.pt() - jet.genJet()->pt())/jet.pt();
+  // calculate eta dependend JER factor
+  double modifiedResolution = 1.;
+  for(unsigned int numberOfJERvariation=0; numberOfJERvariation<resolutionFactor_.size(); ++numberOfJERvariation){
+    int etaMin = 2*numberOfJERvariation;
+    int etaMax = etaMin+1;
+    if(std::abs(jet.eta())>=resolutionRanges_[etaMin]&&(std::abs(jet.eta())<resolutionRanges_[etaMax]||resolutionRanges_[etaMax]==-1.)){
+      modifiedResolution*=resolutionFactor_[numberOfJERvariation];
+    }
+  }
+  // calculate pt smearing factor
+  double factor = 1. + (modifiedResolution-1.)*(jet.pt() - jet.genJet()->pt())/jet.pt();
   return (factor<0 ? 0. : factor);
 }

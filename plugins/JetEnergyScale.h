@@ -75,8 +75,10 @@ class JetEnergyScale : public edm::EDProducer {
   std::string scaleType_;
   /// scale factor for the rescaling of JES
   double scaleFactor_;
-  /// scale factor for the energy resolution of jets
-  double resolutionFactor_;
+  /// scale factors for the energy resolution of jets
+  std::vector<double> resolutionFactor_;
+  /// valid |eta| ranges for the energy resolution scale factors
+  std::vector<double> resolutionRanges_;
   /// threshold on (raw!) jet pt for Type1 MET corrections 
   double jetPTThresholdForMET_;
   /// limit on the emf of the jet for Type1 MET corrections 
