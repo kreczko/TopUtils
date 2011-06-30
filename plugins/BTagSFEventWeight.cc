@@ -142,8 +142,18 @@ double BTagSFEventWeight::effBTag(double jetPt, double jetEta)
 // b tag eff. SF as a function of jet pt, eta
 double BTagSFEventWeight::effBTagSF(double jetPt, double jetEta)
 {
-  double result = -1111., error = -1111.; jetPt =-1111.; jetEta =-1111.; // to avoid unused variables
-  if(bTagAlgo_ == "SSVHEM") { result = 0.854; error = 0.054;}
+  double result = -1111., error = -1111.; jetEta =-1111.; // to avoid unused variables
+  if(bTagAlgo_ == "SSVHEM") {
+    if(jetPt<30)               { result = 1; error = 0.15; }
+    if(jetPt>30 && jetPt<40)   { result = 1.014; error = 0.067; }
+    if(jetPt>40 && jetPt<50)   { result = 0.981; error = 0.064; }
+    if(jetPt>50 && jetPt<60)   { result = 0.977; error = 0.073; }
+    if(jetPt>60 && jetPt<70)   { result = 0.892; error = 0.069; }
+    if(jetPt>70 && jetPt<80)   { result = 0.982; error = 0.078; }
+    if(jetPt>80 && jetPt<100)  { result = 0.966; error = 0.123; }
+    if(jetPt>100 && jetPt<120) { result = 0.947; error = 0.123; }
+    if(jetPt>120)              { result = 0.795; error = 0.169; }
+  }
   if(sysVar_ == "bTagSFUp") result += error;
   if(sysVar_ == "bTagSFDown") result -= error;
   if(verbose_>=2) std::cout<< "effBTagSF= "<<result<<std::endl;
@@ -185,7 +195,7 @@ double BTagSFEventWeight::effMisTag(double jetPt, double jetEta)
 double BTagSFEventWeight::effMisTagSF(double jetPt, double jetEta)
 {
   double result = -1111., error = -1111.; jetPt =-1111.; jetEta =-1111.; // to avoid unused variables
-  if(bTagAlgo_ == "SSVHEM") { result = 0.97; error = 0.1;}
+  if(bTagAlgo_ == "SSVHEM") { result = 0.91; error = 0.1;}
   if(sysVar_ == "misTagSFUp") result += error;
   if(sysVar_ == "misTagSFDown") result -= error;
   if(verbose_>=2) std::cout<< "effMisTagSF= "<<result<<std::endl;
