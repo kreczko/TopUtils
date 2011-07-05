@@ -8,7 +8,7 @@
 //
 // Original Author:  Holger Enderle,68/111,4719,
 //         Created:  Mon Jan 26 16:29:19 CET 2009
-// $Id: ResolutionTreeWriter.cc,v 1.4 2010/05/18 13:01:43 henderle Exp $
+// $Id: ResolutionTreeWriter.cc,v 1.5 2011/07/05 08:20:36 henderle Exp $
 //
 //
 
@@ -123,15 +123,20 @@ ResolutionTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 	 while (deltaPhi <= -TMath::Pi()) deltaPhi += 2*TMath::Pi();
 	 deltaEta = jet_iter->genParton()->eta() - jet_iter->eta();
 	 deltaR = sqrt(deltaPhi*deltaPhi + deltaEta*deltaEta);
-	 treeMemPtr->fillVariables(jet_iter->genParton()->energy(), jet_iter->genParton()->et(), jet_iter->genParton()->pt(), jet_iter->genParton()->eta(), jet_iter->genParton()->phi(), jet_iter->energy(), jet_iter->et(), jet_iter->pt(), jet_iter->eta(), jet_iter->phi(), jet_iter->pt()/jet_iter->genParton()->pt(), jet_iter->partonFlavour(), jet_iter->emEnergyFraction(), METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, 0, 0.);
-	 
+	 if(jet_iter->isCaloJet())
+	   treeMemPtr->fillVariables(jet_iter->genParton()->energy(), jet_iter->genParton()->et(), jet_iter->genParton()->pt(), jet_iter->genParton()->eta(), jet_iter->genParton()->phi(), jet_iter->energy(), jet_iter->et(), jet_iter->pt(), jet_iter->eta(), jet_iter->phi(), jet_iter->pt()/jet_iter->genParton()->pt(), jet_iter->partonFlavour(), jet_iter->emEnergyFraction(), METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, 0, 0.);
+	 else if(jet_iter->isPFJet())
+	   treeMemPtr->fillVariables(jet_iter->genParton()->energy(), jet_iter->genParton()->et(), jet_iter->genParton()->pt(), jet_iter->genParton()->eta(), jet_iter->genParton()->phi(), jet_iter->energy(), jet_iter->et(), jet_iter->pt(), jet_iter->eta(), jet_iter->phi(), jet_iter->pt()/jet_iter->genParton()->pt(), jet_iter->partonFlavour(), jet_iter->chargedEmEnergyFraction(), METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, jet_iter->genParton()->pdgId(), 0.);
+	 else
+	   treeMemPtr->fillVariables(0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.);
+
 	 tree->Fill();
        }
    }
 
    for(edm::View<pat::Electron>::const_iterator ele_iter = electrons.begin(); ele_iter!=electrons.end(); ++ele_iter){
      if(ele_iter->genLepton())
-       if(ele_iter->genLepton()->pt()>0. && TMath::Abs(ele_iter->genLepton()->eta())<3.0 && ele_iter->electronID("eidRobustTight")){
+       if(ele_iter->genLepton()->pt()>0. && TMath::Abs(ele_iter->genLepton()->eta())<3.0){
 	 nextdeltaR = 99;
 	 for(edm::View<pat::Electron>::const_iterator ele_iter2 = electrons.begin(); ele_iter2!=electrons.end(); ++ele_iter2){
 	   if(ele_iter==ele_iter2)continue;
@@ -211,7 +216,10 @@ ResolutionTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
        while (deltaPhi <= -TMath::Pi()) deltaPhi += 2*TMath::Pi();
        deltaEta = METs.begin()->genMET()->eta() - METs.begin()->eta();
        deltaR = sqrt(deltaPhi*deltaPhi + deltaEta*deltaEta);
-       treeMemPtr->fillVariables(METs.begin()->genMET()->energy(), METs.begin()->genMET()->et(), METs.begin()->genMET()->pt(), METs.begin()->genMET()->eta(), METs.begin()->genMET()->phi(), METs.begin()->energy(), METs.begin()->et(), METs.begin()->pt(), METs.begin()->eta(), METs.begin()->phi(), METs.begin()->pt()/METs.begin()->genMET()->pt(), -21, METs.begin()->emEtFraction(), METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, 0, 0.);
+       if(METs.begin()->isCaloMET())
+	 treeMemPtr->fillVariables(METs.begin()->genMET()->energy(), METs.begin()->genMET()->et(), METs.begin()->genMET()->pt(), METs.begin()->genMET()->eta(), METs.begin()->genMET()->phi(), METs.begin()->energy(), METs.begin()->et(), METs.begin()->pt(), METs.begin()->eta(), METs.begin()->phi(), METs.begin()->pt()/METs.begin()->genMET()->pt(), -21, METs.begin()->emEtFraction(), METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, 0, 0.);
+       else
+	 treeMemPtr->fillVariables(METs.begin()->genMET()->energy(), METs.begin()->genMET()->et(), METs.begin()->genMET()->pt(), METs.begin()->genMET()->eta(), METs.begin()->genMET()->phi(), METs.begin()->energy(), METs.begin()->et(), METs.begin()->pt(), METs.begin()->eta(), METs.begin()->phi(), METs.begin()->pt()/METs.begin()->genMET()->pt(), -21, 0., METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, 0, 0.);
        
        tree->Fill();
      }
