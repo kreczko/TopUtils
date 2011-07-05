@@ -24,7 +24,28 @@ int main(int argc, char* argv[])
   TFile* inputfile = new TFile(inputfilename,"READ");
   TTree* tree = (TTree*)inputfile->Get("resolutionTreeWriter/ResolutionTree");
   ResolutionVariables* resobject = new ResolutionVariables();
+  tree->SetMakeClass(1);
   tree->SetBranchAddress("ResolutionVariables",&resobject);
+  tree->SetBranchAddress("Gen_energy",&resobject->Gen_energy);
+  tree->SetBranchAddress("Gen_et",&resobject->Gen_et);
+  tree->SetBranchAddress("Gen_pt",&resobject->Gen_pt);
+  tree->SetBranchAddress("Gen_eta",&resobject->Gen_eta);
+  tree->SetBranchAddress("Gen_phi",&resobject->Gen_phi);
+  tree->SetBranchAddress("Reco_energy",&resobject->Reco_energy);
+  tree->SetBranchAddress("Reco_et",&resobject->Reco_et);
+  tree->SetBranchAddress("Reco_pt",&resobject->Reco_pt);
+  tree->SetBranchAddress("Reco_eta",&resobject->Reco_eta);
+  tree->SetBranchAddress("Reco_phi",&resobject->Reco_phi);
+  tree->SetBranchAddress("pt_reco_over_gen",&resobject->pt_reco_over_gen);
+  tree->SetBranchAddress("Reco_emFraction",&resobject->Reco_emFraction);
+  tree->SetBranchAddress("Gen_sumEt",&resobject->Gen_sumEt);
+  tree->SetBranchAddress("Reco_sumEt",&resobject->Reco_sumEt);
+  tree->SetBranchAddress("DeltaPhi",&resobject->DeltaPhi);
+  tree->SetBranchAddress("DeltaR",&resobject->DeltaR);
+  tree->SetBranchAddress("nextDeltaR",&resobject->nextDeltaR);
+  tree->SetBranchAddress("pTinnerTracker",&resobject->pTinnerTracker);
+  tree->SetBranchAddress("Particle_ID",&resobject->Particle_ID);
+  tree->SetBranchAddress("whichMuon",&resobject->whichMuon);
 
   Int_t ParticleID = 0; //0 = non b jets, 1 = b jets, 2 = electrons, 3 = muons, 4 = MET
   if(argc>=2)ParticleID = atoi(argv[1]);
