@@ -83,28 +83,22 @@ int main(int argc, char* argv[])
   TH1D* axeshisto = new TH1D("axeshisto","axeshisto",etbinNum,&(etbinning.front()));
     
   TCanvas* bet = new TCanvas("bet","bet",700,900);
-//   TCanvas* justanothercanvas = new TCanvas("justanothercanvas","justanothercanvas",400,500);
   TCanvas* etetacanvas = new TCanvas("etetacanvas","etetacanvas",700,900);
   etetacanvas->Divide(1,2);
   TCanvas* chi2canvas = new TCanvas("chi2canvas","chi2canvas",500,900);
   chi2canvas->Divide(1,3);
-//   TCanvas* chi2distributioncan = new TCanvas("chi2distributioncan","chi2distributioncan",900,500);
 
   TCanvas* beteta = new TCanvas("beteta","beteta",700,900);
-//   TCanvas* justanothercanvaseta = new TCanvas("justanothercanvaseta","justanothercanvaseta",400,500);
   TCanvas* etetacanvaseta = new TCanvas("etetacanvaseta","etetacanvaseta",700,900);
   etetacanvaseta->Divide(1,2);
   TCanvas* chi2canvaseta = new TCanvas("chi2canvaseta","chi2canvaseta",500,900);
   chi2canvaseta->Divide(1,3);
-//   TCanvas* chi2distributioncaneta = new TCanvas("chi2distributioncaneta","chi2distributioncaneta",900,500);
 
   TCanvas* betphi = new TCanvas("betphi","betphi",700,900);
-//   TCanvas* justanothercanvasphi = new TCanvas("justanothercanvasphi","justanothercanvasphi",400,500);
   TCanvas* etetacanvasphi = new TCanvas("etetacanvasphi","etetacanvasphi",700,900);
   etetacanvasphi->Divide(1,2);
   TCanvas* chi2canvasphi = new TCanvas("chi2canvasphi","chi2canvasphi",500,900);
   chi2canvasphi->Divide(1,3);
-//   TCanvas* chi2distributioncanphi = new TCanvas("chi2distributioncanphi","chi2distributioncanphi",900,500);
 
   TString etstrg;
   TString etastrg;
@@ -117,10 +111,10 @@ int main(int argc, char* argv[])
   TF1* myetfunction = 0;
 
   // define 1D functions in E_T here!
-  if(ParticleID == 3 && i_etetaphi==0)myetfunction = new TF1("myetfunction","[0]+[1]*x",etbinning[etstartbin],1800.);//muon ET resolution
-  else if((ParticleID==0 || ParticleID==1)&& i_etetaphi!=0)
-    myetfunction = new TF1("myetfunction","sqrt([0]*[0]+[1]*[1]/(x*x))",etbinning[etstartbin],1800.);
-  else myetfunction = new TF1("myetfunction","sqrt([0]*[0]+[1]*[1]/(x)+[2]*[2]/(x*x))",etbinning[etstartbin],1800.);
+  if(ParticleID == 3 && i_etetaphi==0)myetfunction = new TF1("linear","[0]+[1]*x",etbinning[etstartbin],1800.);//muon ET resolution
+  else if(((ParticleID==0 || ParticleID==1)&& i_etetaphi!=0) || (ParticleID == 3 && i_etetaphi==1) || (ParticleID == 2 && i_etetaphi==1))
+    myetfunction = new TF1("reduced","sqrt([0]*[0]+[1]*[1]/(x*x))",etbinning[etstartbin],1800.);
+  else myetfunction = new TF1("complete","sqrt([0]*[0]+[1]*[1]/(x)+[2]*[2]/(x*x))",etbinning[etstartbin],1800.);
 
   file->cd();
   for(Int_t ieta = 0; ieta < etabinNum; ieta++){
@@ -175,7 +169,11 @@ int main(int argc, char* argv[])
       }
       else betphi->cd(2);
     }
-    axeshisto->GetXaxis()->SetTitle("E_{T} [GeV]");
+    if(ParticleID == 0)axeshisto->GetXaxis()->SetTitle("light jet E_{T} [GeV]");
+    if(ParticleID == 1)axeshisto->GetXaxis()->SetTitle("b jet E_{T} [GeV]");
+    if(ParticleID == 2)axeshisto->GetXaxis()->SetTitle("electron E_{T} [GeV]");
+    if(ParticleID == 3)axeshisto->GetXaxis()->SetTitle("muon E_{T} [GeV]");
+    if(ParticleID == 4)axeshisto->GetXaxis()->SetTitle("MET [GeV]");
     axeshisto->GetYaxis()->SetTitle("#sigma(E_{T}^{rec}/E_{T}^{gen})");
     if(i_etetaphi==1)axeshisto->GetYaxis()->SetTitle("#sigma(#eta^{rec})");
     if(i_etetaphi==2)axeshisto->GetYaxis()->SetTitle("#sigma(#phi^{rec})");
@@ -187,7 +185,7 @@ int main(int argc, char* argv[])
     myetfunction->SetLineWidth(1);
     myetfunction->SetLineColor(kRed);
 
-    bGraph[ieta]->Fit("myetfunction","+QR");
+    bGraph[ieta]->Fit(myetfunction->GetName(),"+QR");
     bGraph[ieta]->DrawClone("pe1same");
     if(ParticleID == 1)myetfunction->SetRange(0,300);
     else myetfunction->SetRange(0,500);
@@ -219,35 +217,34 @@ int main(int argc, char* argv[])
     sprintf(parachar,"%1.5f",myetfunction->GetParameter(0));
     parastring = parachar;
 
-    if(ParticleID == 3 && i_etetaphi==0){
-      sprintf(parachar,"+%1.6f#upointE_{T}",myetfunction->GetParameter(1));
-      parastring += parachar;
-    }
-    else{
+    if((TString)myetfunction->GetName()=="complete"){
       sprintf(parachar,"^{2}+%1.4f^{2}/E_{T}+",myetfunction->GetParameter(1));
       parastring += parachar;
       sprintf(parachar,"%1.4f",myetfunction->GetParameter(2));
       parastring += parachar;
+      if(ParticleID == 0 || ParticleID == 1)l.DrawLatex(50.,0.4,etastring +"#sqrt{"+ parastring +"^{2}/E_{T}^{2}}");
+      else if(ParticleID == 2){
+	if(i_etetaphi==0)l.DrawLatex(50.,0.09,etastring +"#sqrt{"+ parastring +"^{2}/E_{T}^{2}}");
+	else l.DrawLatex(50.,0.0027,etastring +"#sqrt{"+ parastring +"^{2}/E_{T}^{2}}");
+      }
+      else if(ParticleID == 3)l.DrawLatex(50.,0.0027,etastring +"#sqrt{"+ parastring +"^{2}/E_{T}^{2}}");
+      else if(ParticleID == 4 && i_etetaphi!=1)l.DrawLatex(50.,2.2,"#sqrt{"+ parastring +"^{2}/E_{T}^{2}}");
     }
-    if(ParticleID == 3&& i_etetaphi==0)l.DrawLatex(50.,0.09,etastring +parastring);
-    else if(ParticleID == 0 || ParticleID == 1){
-      if(i_etetaphi==0)
-	l.DrawLatex(50.,0.4,etastring +"#sqrt{"+ parastring +"^{2}/E_{T}^{2}}");
-      else 
-	l.DrawLatex(50.,0.09,etastring +"#sqrt{"+ parastring +"^{2}/E_{T}^{2}}");
+    else if((TString)myetfunction->GetName()=="reduced"){
+      sprintf(parachar,"^{2}+%1.4f^{2}/E_{T}^{2}}",myetfunction->GetParameter(1));
+      parastring += parachar;
+      if(ParticleID == 0 || ParticleID == 1)l.DrawLatex(50.,0.09,etastring +"#sqrt{"+ parastring);
+      if(ParticleID == 2 || ParticleID == 3)l.DrawLatex(50.,0.0027,etastring +"#sqrt{"+ parastring);
     }
-    else if(ParticleID == 2){
-      if(i_etetaphi==0)
-	l.DrawLatex(50.,0.09,etastring +"#sqrt{"+ parastring +"^{2}/E_{T}^{2}}");
-      else 
-	l.DrawLatex(50.,0.0027,etastring +"#sqrt{"+ parastring +"^{2}/E_{T}^{2}}");
+    else if((TString)myetfunction->GetName()=="linear"){
+      sprintf(parachar,"+%1.6f#upointE_{T}",myetfunction->GetParameter(1));
+      parastring += parachar;
+      l.DrawLatex(50.,0.09,etastring +parastring);
     }
-    else if(ParticleID == 3)
-      l.DrawLatex(50.,0.0027,etastring +"#sqrt{"+ parastring +"^{2}/E_{T}^{2}}");
     else{
-      if(i_etetaphi!=1)
-	l.DrawLatex(50.,1.7,"#sqrt{"+ parastring +"^{2}/E_{T}^{2}}");
+      l.DrawLatex(50.,0.09,"unknown function");
     }
+	
     Char_t tmpformulachar0[10];
     sprintf(tmpformulachar0,"%g",TMath::Abs(rounderror(myetfunction->GetParameter(0), myetfunction->GetParError(0), 2)));
     Char_t tmpformulachar1[10];
@@ -258,13 +255,31 @@ int main(int argc, char* argv[])
     if(i_etetaphi==0){
       etstrg  = "    cms.PSet(\n";
       if(ParticleID != 4)etstrg += "    bin = cms.string('"+loweretastring+"<=abs(eta) && abs(eta)<"+upperetastring+"'),\n";
-      if(ParticleID == 0 || ParticleID == 1 || ParticleID == 2 || ParticleID == 4)etstrg += "    et  = cms.string('et * (sqrt("+TString(tmpformulachar0)+"^2 + ("+TString(tmpformulachar1)+"/sqrt(et))^2 + ("+TString(tmpformulachar2)+"/et)^2))'),\n";
-      else etstrg += "    et  = cms.string('et * ("+TString(tmpformulachar0)+" + "+TString(tmpformulachar1)+" * et)'),\n";
+      if((TString)myetfunction->GetName()=="complete")
+	etstrg += "    et  = cms.string('et * (sqrt("+TString(tmpformulachar0)+"^2 + ("+TString(tmpformulachar1)+"/sqrt(et))^2 + ("+TString(tmpformulachar2)+"/et)^2))'),\n";
+      else if((TString)myetfunction->GetName()=="reduced")
+	etstrg += "    et  = cms.string('et * (sqrt("+TString(tmpformulachar0)+"^2 + ("+TString(tmpformulachar1)+"/et)^2))'),\n";
+      else if((TString)myetfunction->GetName()=="linear")
+	etstrg += "    et  = cms.string('et * ("+TString(tmpformulachar0)+" + "+TString(tmpformulachar1)+" * et)'),\n";
+      else 
+	etstrg += "    et  = cms.string('unknown function'),\n";
     }
-    if(i_etetaphi==1)
-      etastrg = "    eta = cms.string('sqrt("+TString(tmpformulachar0)+"^2 + ("+TString(tmpformulachar1)+"/sqrt(et))^2 + ("+TString(tmpformulachar2)+"/et)^2)'),\n";
+    if(i_etetaphi==1){
+      if((TString)myetfunction->GetName()=="complete")
+	etastrg = "    eta  = cms.string('sqrt("+TString(tmpformulachar0)+"^2 + ("+TString(tmpformulachar1)+"/sqrt(et))^2 + ("+TString(tmpformulachar2)+"/et)^2)'),\n";
+      else if((TString)myetfunction->GetName()=="reduced")
+	etastrg = "    eta  = cms.string('sqrt("+TString(tmpformulachar0)+"^2 + ("+TString(tmpformulachar1)+"/et)^2)'),\n";
+      else 
+	etastrg = "    eta  = cms.string('unknown function'),\n";
+    }
     if(i_etetaphi==2){
-      phistrg  = "    phi = cms.string('sqrt("+TString(tmpformulachar0)+"^2 + ("+TString(tmpformulachar1)+"/sqrt(et))^2 + ("+TString(tmpformulachar2)+"/et)^2)'),\n";
+      if((TString)myetfunction->GetName()=="complete")
+	phistrg = "    phi  = cms.string('sqrt("+TString(tmpformulachar0)+"^2 + ("+TString(tmpformulachar1)+"/sqrt(et))^2 + ("+TString(tmpformulachar2)+"/et)^2)'),\n";
+      else if((TString)myetfunction->GetName()=="reduced")
+	phistrg = "    phi  = cms.string('sqrt("+TString(tmpformulachar0)+"^2 + ("+TString(tmpformulachar1)+"/et)^2)'),\n";
+      else 
+	phistrg = "    phi  = cms.string('unknown function'),\n";
+
       phistrg += "    ),\n";
     }
     if(i_etetaphi==0)etvec.push_back(etstrg);
@@ -287,232 +302,13 @@ int main(int argc, char* argv[])
       betphi->Print("binnedetbincentercorr_phi"+identifier+namestring+".eps");
       betphi->Clear();
     }
-//     if(ParticleID != 4){
-//       Double_t sigmaError = 1000.;
-//       if(i_etetaphi==0)etetacanvas->cd(1);
-//       else if(i_etetaphi==1)etetacanvaseta->cd(1);
-//       else if(i_etetaphi==2)etetacanvasphi->cd(1);
-//       for(Int_t iet = 0; iet < etbinNum; iet++){
-// 	eteta->Fill((etbinning[iet]+etbinning[iet+1])/2,(etabinning[ieta]+etabinning[ieta+1])/2,myetfunction->Eval((etbinning[iet]+etbinning[iet+1])/2));
-// 	sigmaError = bGraph[ieta]->GetErrorY(iet);
-// 	eteta->SetBinError(iet+1,ieta+1,sigmaError);
-// 	//eteta->SetBinError(iet+1,ieta+1,sqrt(TMath::Power(myetfunction->GetParError(0),2)+TMath::Power(myetfunction->GetParError(1)/sqrt((etbinning[iet]+etbinning[iet+1])/2),2)));
-//       }
-//       for(Int_t iet = 0; iet < etbinNum; iet++){
-// 	sigmaError = bGraph[ieta]->GetErrorY(iet);
-// 	for(Int_t iiet = 0; iiet < 100; iiet++){
-// 	  etetadraw->Fill(etbinning[iet]+(etbinning[iet+1]-etbinning[iet])*iiet/100.,(etabinning[ieta]+etabinning[ieta+1])/2,myetfunction->Eval(etbinning[iet]+(etbinning[iet+1]-etbinning[iet])*iiet/100.));
-// 	  etetadraw->SetBinError((iet*10)+1+iiet,ieta+1,sigmaError);
-// 	  //eteta->SetBinError(iet+1,ieta+1,sqrt(TMath::Power(myetfunction->GetParError(0),2)+TMath::Power(myetfunction->GetParError(1)/sqrt((etbinning[iet]+etbinning[iet+1])/2),2)));
-// 	}
-//       }
-//     }
   }
-//   TF2* mybarrelfunction = 0;
-//   TF2* myendcapfunction = 0;
-
-//   // define 2D functions in E_T and eta for barrel and endcap here!
-
-//   Double_t crack = 0.;
-//   if(ParticleID == 3 && i_etetaphi==0)crack = 1.1;
-//   else if(ParticleID == 2 || ParticleID == 3)crack = 0.9;
-//   else crack = 1.479;
-//   Char_t barrelfktchar[60];
-//   Char_t endcapfktchar[100];
-//   if(ParticleID == 3 && i_etetaphi==0){
-//     sprintf(barrelfktchar,"[0]+[1]*x+[2]*y*y");
-//     sprintf(endcapfktchar,"[0]+[1]*x+[2]*%1.3f*%1.3f+[3]*x*(y-%1.3f)+[4]*(y-%1.3f)",crack,crack,crack,crack);
-//   }
-//   else if(i_etetaphi==0){
-//     sprintf(barrelfktchar,"sqrt([0]+[1]/(x)+[2]/(x*x))+[3]*y*y");
-//     sprintf(endcapfktchar,"(sqrt([0]+[1]/(x)+[2]/(x*x))+[3]*%1.3f*%1.3f)+[4]*(y*y-%1.3f*%1.3f)+[5]*(y-%1.3f)+[6]*(y-%1.3f)/sqrt(x)",crack,crack,crack,crack,crack,crack);
-//   }
-//   else{
-//     sprintf(barrelfktchar,"[0]*[0]+[1]/(x)+[2]*y*y");
-//     sprintf(endcapfktchar,"[0]*[0]+[1]/(x)+[2]*%1.3f*%1.3f+[3]*(y*y-%1.3f*%1.3f)+[4]*(y-%1.3f)+[5]*(y-%1.3f)/sqrt(x)",crack,crack,crack,crack,crack,crack);
-//   }
-//   //TString crackstrg = crackchar;
-
-// //   if(ParticleID == 3 && i_etetaphi==0)mybarrelfunction = new TF2("mybarrelfunction","[0]+[1]*x+[2]*y",etbinning[etstartbin],500.,0.,crack);
-// //   else mybarrelfunction = new TF2("mybarrelfunction","sqrt([0]+[1]/(x)+[2]/(x*x))+[3]*y*y",etbinning[etstartbin],500.,0.,crack);//"[0]+[1]/sqrt(x)+[2]*y*y/(x)"
-//   mybarrelfunction = new TF2("mybarrelfunction",barrelfktchar,etbinning[etstartbin],500.,0.,crack);
-//   myendcapfunction = new TF2("myendcapfunction",endcapfktchar,etbinning[etstartbin],500.,crack,2.5);
-
-
-// //   if(ParticleID == 3 && i_etetaphi==0)myendcapfunction = new TF2("myendcapfunction","[0]+[1]*x+[2]*"+crackstrg+"+[3]*x*(y-"+crackstrg+")+[4]*(y-"+crackstrg+")",etbinning[etstartbin],500.,crack,2.5);
-// //   else if((ParticleID == 2 || ParticleID == 3) && i_etetaphi!=0)myendcapfunction = new TF2("myendcapfunction","(sqrt([0]+[1]/(x)+[2]/(x*x))+[3]*"+crackstrg+"*"+crackstrg+")+[4]*(y*y-"+crackstrg+"*"+crackstrg+")+[5]*(y-"+crackstrg+")+[6]*(y-"+crackstrg+")/sqrt(x)",etbinning[etstartbin],500.,crack,2.5);
-// //   else myendcapfunction = new TF2("myendcapfunction","(sqrt([0]+[1]/(x)+[2]/(x*x))+[3]*1.479*1.479)+[4]*(y*y-1.479*1.479)+[5]*(y-1.479)+[6]*(y-1.479)/sqrt(x)",etbinning[etstartbin],500.,crack,2.5);//"sqrt([0]+[1]/(x)+[2]*1.479*1.479*1.479*1.479/(x*x)+[3]*(y*y-1.479*1.479)/(x)+[4]*(y*y*y*y-1.479*1.479*1.479*1.479)/(x*x))"    ,    "[0]+[1]/sqrt(x)+[2]*y/sqrt(x)"    ,    "[0]+[1]/sqrt(x)+[2]*1.479*1.479/(x)+[3]*(y-1.479)/sqrt(x)+[4]*(y*y-1.479*1.479)/x"
-
-//   if(ParticleID != 4){
-//     eteta->Fit("mybarrelfunction","+R0m");
-//     myendcapfunction->FixParameter(0,mybarrelfunction->GetParameter(0));
-//     myendcapfunction->FixParameter(1,mybarrelfunction->GetParameter(1));
-//     myendcapfunction->FixParameter(2,mybarrelfunction->GetParameter(2));
-//     if(i_etetaphi==0 && ParticleID != 3){
-//       myendcapfunction->FixParameter(3,mybarrelfunction->GetParameter(3));
-//     }
-//     eteta->Fit("myendcapfunction","+R0m");
-    
-//     etetadraw->GetXaxis()->SetRangeUser(etbinning[etstartbin],500);
-//     if(i_etetaphi==0)etetadraw->SetTitle("E_{T} resolution from 1D fits");
-//     if(i_etetaphi==1)etetadraw->SetTitle("#eta resolution from 1D fits");
-//     if(i_etetaphi==2)etetadraw->SetTitle("#phi resolution from 1D fits");
-//     etetadraw->GetXaxis()->SetTitle("E_{T} [GeV]");
-//     etetadraw->GetYaxis()->SetTitle("#eta");
-//     gPad->SetRightMargin(0.14);
-//     etetadraw->Draw("colz");
-//     //etetacanvas->Print("binned1Dfit_eteta.eps");
-//   }
-
-//   TH1D* chi2probhisto = new TH1D("chi2probhisto","chi2probhisto",50,0.,1.);
-//   TH1D* barrelchi2probhisto = new TH1D("barrelchi2probhisto","barrelchi2probhisto",50,0.,1.);
-//   TH1D* endcapchi2probhisto = new TH1D("endcapchi2probhisto","endcapchi2probhisto",50,0.,1.);
-//   TH2D* chi2distribution = new TH2D("chi2distribution","chi2distribution",etbinNum,&(etbinning.front()),etabinNum,&(etabinning.front()));
-//   TH1D* justanotherhisto = new TH1D("justanotherhisto","justanotherhisto",50,-5.,5.);
-//   Double_t chi2 = 0.;
-//   Double_t barrelchi2 = 0.;
-//   Double_t endcapchi2 = 0.;
-//   Int_t barreletabins = 0;
-//   Int_t endcapetabins = 0;
-
-//   for(Int_t ieta = 0; ieta < etabinNum; ieta++){
-//     for(Int_t iet = etstartbin; iet < etbinNum; iet++){
-//       Double_t et = 0.;
-//       Double_t sigma = 0.;
-//       bGraph[ieta]->GetPoint(iet,et,sigma);
-//       Double_t sigmaError = bGraph[ieta]->GetErrorY(iet);
-//       Double_t myMET_sigma = myetfunction->Eval(et);
-//       Double_t mybarrel_sigma = mybarrelfunction->Eval(et,(etabinning[ieta]+etabinning[ieta+1])/2);
-//       Double_t myendcap_sigma = myendcapfunction->Eval(et,(etabinning[ieta]+etabinning[ieta+1])/2);
-//       if(ParticleID != 4){
-//       if(etabinning[ieta]<crack){
-// 	if(iet==etbinNum-1)barreletabins++;
-// 	chi2probhisto->Fill(TMath::Prob(TMath::Power((sigma-mybarrel_sigma)/sigmaError,2),1));
-// 	barrelchi2probhisto->Fill(TMath::Prob(TMath::Power((sigma-mybarrel_sigma)/sigmaError,2),1));
-// 	chi2 += TMath::Power((sigma-mybarrel_sigma)/sigmaError,2);
-// 	barrelchi2 += TMath::Power((sigma-mybarrel_sigma)/sigmaError,2);
-// 	chi2distribution->SetBinContent(iet+1,ieta+1,(sigma-mybarrel_sigma)/sigmaError);
-// 	justanotherhisto->Fill((sigma-mybarrel_sigma)/sigmaError);
-// 	for(Int_t iieta = 0; iieta < 10; iieta++){
-// 	  for(Int_t iiieta = 0; iiieta < 100; iiieta++){
-// 	    Double_t mybarrel_sigma2 = mybarrelfunction->Eval(etbinning[iet]+(etbinning[iet+1]-etbinning[iet])*iiieta/100.,etabinning[ieta]+(etabinning[ieta+1]-etabinning[ieta])*iieta/10.);
-// 	    eteta2->SetBinContent((100*iet)+iiieta+1,(10*ieta)+iieta+1,mybarrel_sigma2);
-// 	  }
-// 	}
-//       }
-//       else{
-// 	if(iet==etbinNum-1)endcapetabins++;
-// 	chi2probhisto->Fill(TMath::Prob(TMath::Power((sigma-myendcap_sigma)/sigmaError,2),1));
-// 	endcapchi2probhisto->Fill(TMath::Prob(TMath::Power((sigma-myendcap_sigma)/sigmaError,2),1));
-// 	chi2 += TMath::Power((sigma-myendcap_sigma)/sigmaError,2);
-// 	endcapchi2 += TMath::Power((sigma-myendcap_sigma)/sigmaError,2);
-// 	chi2distribution->SetBinContent(iet+1,ieta+1,(sigma-myendcap_sigma)/sigmaError);
-// 	justanotherhisto->Fill((sigma-myendcap_sigma)/sigmaError);
-// 	for(Int_t iieta = 0; iieta < 10; iieta++){
-// 	  for(Int_t iiieta = 0; iiieta < 100; iiieta++){
-// 	    Double_t myendcap_sigma2 = myendcapfunction->Eval(etbinning[iet]+(etbinning[iet+1]-etbinning[iet])*iiieta/100.,etabinning[ieta]+(etabinning[ieta+1]-etabinning[ieta])*iieta/10.);
-// 	    eteta2->SetBinContent((100*iet)+iiieta+1,(10*ieta)+iieta+1,myendcap_sigma2);
-// 	  }
-// 	}
-//       }
-//       }
-//       else{
-// 	chi2probhisto->Fill(TMath::Prob(TMath::Power((sigma-myMET_sigma)/sigmaError,2),1));
-// 	chi2 += TMath::Power((sigma-myMET_sigma)/sigmaError,2);
-// 	justanotherhisto->Fill((sigma-myMET_sigma)/sigmaError);
-//       }
-//     }
-//   }
-//   if(i_etetaphi==0)justanothercanvas->cd();
-//   else if(i_etetaphi==1)justanothercanvaseta->cd();
-//   else if(i_etetaphi==2)justanothercanvasphi->cd();
-//   justanotherhisto->Draw("e");
-//   if(i_etetaphi==0)chi2canvas->cd(1);
-//   else if(i_etetaphi==1)chi2canvaseta->cd(1);
-//   else if(i_etetaphi==2)chi2canvasphi->cd(1);
-//   chi2probhisto->Draw("e");
-//   if(i_etetaphi==0)chi2canvas->cd(2);
-//   else if(i_etetaphi==1)chi2canvaseta->cd(2);
-//   else if(i_etetaphi==2)chi2canvasphi->cd(2);
-//   barrelchi2probhisto->Draw("e");
-//   if(i_etetaphi==0)chi2canvas->cd(3);
-//   else if(i_etetaphi==1)chi2canvaseta->cd(3);
-//   else if(i_etetaphi==2)chi2canvasphi->cd(3);
-//   endcapchi2probhisto->Draw("e");
-
-//   if(ParticleID != 4){
-//   if(i_etetaphi==0)etetacanvas->cd(2);
-//   else if(i_etetaphi==1)etetacanvaseta->cd(2);
-//   else if(i_etetaphi==2)etetacanvasphi->cd(2);
-//   eteta2->GetXaxis()->SetRangeUser(etbinning[etstartbin],500);
-//   if(i_etetaphi==0)eteta2->SetTitle("E_{T} resolution from 2D fit");
-//   if(i_etetaphi==1)eteta2->SetTitle("#eta resolution from 2D fit");
-//   if(i_etetaphi==2)eteta2->SetTitle("#phi resolution from 2D fit");
-//   eteta2->GetXaxis()->SetTitle("E_{T} [GeV]");
-//   eteta2->GetYaxis()->SetTitle("#eta");
-//   gPad->SetRightMargin(0.14);
-//   eteta2->Draw("colz");
-//   if(i_etetaphi==0){
-//   etetacanvas->Print("binnedfit"+identifier+"_eteta.eps");
-//   etetacanvas->Print("binnedfit"+identifier+"_eteta.root");
-//   chi2distributioncan->cd();
-//   }
-//   else if(i_etetaphi==1){
-//   etetacanvaseta->Print("binnedfiteta"+identifier+"_eteta.eps");
-//   etetacanvaseta->Print("binnedfiteta"+identifier+"_eteta.root");
-//   chi2distributioncaneta->cd();
-//   }
-//   else if(i_etetaphi==2){
-//   etetacanvasphi->Print("binnedfitphi"+identifier+"_eteta.eps");
-//   etetacanvasphi->Print("binnedfitphi"+identifier+"_eteta.root");
-//   chi2distributioncanphi->cd();
-//   }
-//   chi2distribution->GetXaxis()->SetRangeUser(etbinning[etstartbin],500);
-//   chi2distribution->SetTitle("normalized residuals");
-//   chi2distribution->GetXaxis()->SetTitle("E_{T} [GeV]");
-//   chi2distribution->GetYaxis()->SetTitle("#eta");
-//   gPad->SetRightMargin(0.14);
-//   chi2distribution->Draw("colz");
-//   if(i_etetaphi==0){
-//     chi2distributioncan->Print("normresdistribution"+identifier+".eps");
-//     cout << "ET resolution:" << endl;
-//   }
-//   else if(i_etetaphi==1){
-//     chi2distributioncaneta->Print("normresdistributioneta"+identifier+".eps");
-//     cout << "eta resolution:" << endl;
-//   }
-//   else if(i_etetaphi==2){
-//     chi2distributioncanphi->Print("normresdistributionphi"+identifier+".eps");
-//     cout << "phi resolution:" << endl;
-//   }
-
-//   cout << "barrelfunction: " << mybarrelfunction->GetExpFormula("p") << endl;
-//   cout << "endcapfunction: " << myendcapfunction->GetExpFormula("p") << endl;
-
-//   cout << "barrel: chi^2/Ndof = " << barrelchi2 << "/" << mybarrelfunction->GetNDF() << " = " << barrelchi2/mybarrelfunction->GetNDF() << endl;
-//   cout << "endcap: chi^2/Ndof = " << endcapchi2 << "/" << myendcapfunction->GetNDF() << " = " << endcapchi2/myendcapfunction->GetNDF() << endl;
-//   Double_t allNdof = mybarrelfunction->GetNDF()+myendcapfunction->GetNDF();
-//   cout << "chi^2/Ndof = " << chi2 << "/" << allNdof << " = " << chi2/allNdof << endl;
-//   }
-//   else if(i_etetaphi!=1){
-//     if(i_etetaphi==0)cout << "ET resolution:" << endl;
-//     else if(i_etetaphi==2)cout << "phi resolution:" << endl;
-//     cout << "function: " << myetfunction->GetExpFormula("p") << endl;
-
-//     Double_t chi2perNdof = chi2/((etbinNum-etstartbin)-myetfunction->GetNumberFreeParameters());
-//     cout << "chi^2/Ndof = " << chi2 << "/" << ((etbinNum-etstartbin)-myetfunction->GetNumberFreeParameters()) << " = " << chi2perNdof << endl;
-//   }
   delete eteta;
   delete etetadraw;
   delete eteta2;
-//   delete chi2probhisto;
-//   delete barrelchi2probhisto;
-//   delete endcapchi2probhisto;
-//   delete chi2distribution;
-//   delete justanotherhisto;
   }
   ofstream res_file;
-  res_file.open ("resolution_cff.py");
+  res_file.open ("resolution_"+identifier+"_cff.py");
 
   if(ParticleID==0)res_file<<"udscResolution = stringResolution.clone(parametrization = 'EtEtaPhi',\n";
   if(ParticleID==1)res_file<<"bjetResolution = stringResolution.clone(parametrization = 'EtEtaPhi',\n";
