@@ -12,6 +12,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     options.setdefault('runOnOLDcfg', False)
     options.setdefault('cutsMuon', 'pt > 10. & abs(eta) < 2.5')
     options.setdefault('cutsElec', 'et > 20. & abs(eta) < 2.5')
+    options.setdefault('cutsJets', 'pt > 10 && abs(eta) < 5.0')
     options.setdefault('electronIDs', 'CiC') ## can be set to CiC, classical
     options.setdefault('pfIsoConeMuon', 0.3)
     options.setdefault('pfIsoConeElec', 0.3)
@@ -89,6 +90,12 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
                                    outputCommands = cms.untracked.vstring('drop *')
                                    )
 
+    ## choose correct set of jec levels for MC and data
+    if options['runOnMC']:
+        jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
+    else:
+        jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute','L2L3Residual']
+        
     ## adaptions needed to run with CMSSW 41X
     if os.getenv('CMSSW_VERSION').startswith('CMSSW_4_1_'):
         ## run the full PF2PAT sequence
@@ -100,7 +107,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
                  , postfix        = postfix
                  )
    
-        getattr(process,'patJetCorrFactors'+postfix).levels = cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute'])
+        getattr(process,'patJetCorrFactors'+postfix).levels = cms.vstring(jecLevels)
         getattr(process,'patJetCorrFactors'+postfix).payload = 'AK5PFchs'
 
         getattr(process,'patDefaultSequence'+postfix).remove(getattr(process,'selectedPatTaus'+postfix))
@@ -114,7 +121,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
                  , runOnMC        = options['runOnMC']
                  , jetAlgo        = 'AK5'
                  , postfix        = postfix
-                 , jetCorrections = ('AK5PFchs',cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute']))
+                 , jetCorrections = ('AK5PFchs',cms.vstring(jecLevels))
                  )
    
     delattr(process,'out')
@@ -444,6 +451,9 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
         getattr(process,'patJets'+postfix).embedGenJetMatch    = False
         getattr(process,'patJets'+postfix).embedGenPartonMatch = False
 
+    ## apply selection for pat jets
+    getattr(process,'selectedPatJets'+postfix).cut = options['cutsJets']
+
 
     ##
     ## customize MET
@@ -508,6 +518,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     print 'runOnOLDcfg:', options['runOnOLDcfg']
     print 'cutsMuon:', options['cutsMuon']
     print 'cutsElec:', options['cutsElec']
+    print 'cutsJets:', options['cutsJets']
     print 'electronIDs:', options['electronIDs']
     print 'pfIsoConeMuon:', options['pfIsoConeMuon']
     print 'pfIsoConeElec:', options['pfIsoConeElec']
