@@ -31,10 +31,20 @@ class EventWeightPU : public edm::EDProducer {
 
       edm::InputTag inTag_PUSource;
 
+      float inTag_PUSysShiftUp;
+      float inTag_PUSysShiftDown;
+
       edm::LumiReWeighting LumiWeights_;
 
-      double wght_;
+      reweight::PoissonMeanShifter PUShiftUp_;
+      reweight::PoissonMeanShifter PUShiftDown_;
 
+      double wght_;
+      double wght_Up_;
+      double wght_Down_;
+      double wght3BX_;
+      double wght3BX_Up_;
+      double wght3BX_Down_;
 };
 
 #endif
