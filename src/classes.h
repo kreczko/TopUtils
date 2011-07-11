@@ -18,6 +18,9 @@ using namespace reco;
 
 namespace {
   struct dictionary {
+    edm::Wrapper<std::vector<std::vector<int> > > bla;
+    std::vector<std::vector<int> > bla_vector;  
+    
     edm::RefToBaseVector<pat::Muon> murtbv;
     edm::Wrapper<edm::RefToBaseVector<pat::Muon> > murtbv_w;
     edm::reftobase::BaseVectorHolder<pat::Muon>* bvhmu_p;
