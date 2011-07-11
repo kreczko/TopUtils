@@ -94,9 +94,9 @@ Available Parameters
        feature at some later point in time
   -W: waiting time in secs before submission (default: 2 secs)
   -O: alternative output file name = do not look for a TFileService,
-      rather copy output files with a given name (for prodction jobs)
+      rather copy output files with a given name (for production jobs)
       WARNING: you need to save your file to the local temp dir, i.e.
-      ....fileName=cms.untracked.string(os.environ['TMPDIR']+'/file.root')
+      ....fileName=cms.untracked.string(os.getenv('TMPDIR', '.') + '/file.root')
 
 ******************************************************************
 * What to do after submitting - if jobs crash / to monitor jobs  *
@@ -409,6 +409,8 @@ process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32($maxEvents)
 )
 
+process.options.wantSummary = cms.untracked.bool(True)
+
 if jobNumber == 0 and not $alternativeOutput:
     fh = open('OUTPUTPATH/joined.txt', 'w')
     fh.write(eval(process.TFileService.fileName.pythonValue()))
@@ -449,6 +451,9 @@ exec > $TMPDIR/stdout.txt 2>&1
 # change to scratch directory
 
 #fs flush
+echo "Running on host"
+hostname
+
 current=`pwd`
 
 perl -pe 's/OUTPUTPATH/$ENV{TMPDIR}/g' < $current/naf_DIRECTORY/CONFIGFILE.py > $TMPDIR/run.py
