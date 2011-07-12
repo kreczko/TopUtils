@@ -12,7 +12,9 @@ process.MessageLogger.cerr.threshold = 'INFO'
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-    '/store/mc/Spring10/TTbarJets-madgraph/AODSIM/START3X_V26_S09-v1/0005/0210B899-9C46-DF11-A10F-003048C69294.root'
+    #'/store/mc/Spring10/TTbarJets-madgraph/AODSIM/START3X_V26_S09-v1/0005/0210B899-9C46-DF11-A10F-003048C69294.root'
+    '/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/FEEE3638-F297-E011-AAF8-00304867BEC0.root'
+
     )
 )
 
@@ -30,7 +32,7 @@ process.options = cms.untracked.PSet(
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = cms.string('START38_V14::All')
+process.GlobalTag.globaltag = cms.string('START42_V12::All')
 
 ## pat sequences
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
@@ -42,7 +44,8 @@ from TopAnalysis.TopUtils.JetEnergyScale_cff import *
 scaledJetEnergy.scaleType   = "top:up"
 scaledJetEnergy.scaleFactor = 1.053
 scaledJetEnergy.payload     = "AK5Calo"
-scaledJetEnergy.resolutionFactor = 1.1
+scaledJetEnergy.resolutionFactors = cms.vdouble(1.1)
+scaledJetEnergy.resolutionEtaRanges = cms.vdouble(0.,-1.)
 
 from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
 run36xOn35xInput(process)
