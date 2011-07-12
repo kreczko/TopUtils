@@ -38,8 +38,8 @@ process.options = cms.untracked.PSet(
 
 process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
 
-process.eventWeightPU.MCSampleFile      = "TopAnalysis/TopUtils/data/MC_PUDist_TTbar.root"
-process.eventWeightPU.MCSampleHistoName = "pileup"
+process.eventWeightPU.MCSampleFile      = "TopAnalysis/TopUtils/data/MC_PUDist_TTJets_TuneZ2_7TeV_madgraph_tauola.root"
+process.eventWeightPU.MCSampleHistoName = "MCPUDistribution/pileup"
 process.eventWeightPU.DataFile          = "TopAnalysis/TopUtils/data/Data_PUDist_160404-166861_7TeV_PromptReco_Collisions11.root"
 process.eventWeightPU.DataHistoName     = "pileup"    
 process.eventWeightPU.PUSysShiftUp      = 0.6
@@ -51,7 +51,7 @@ process.eventWeightPU.PUSysShiftDown    = -0.6
 
 process.out = cms.OutputModule("PoolOutputModule",
                                fileName = cms.untracked.string("myOutputFile.root"),
-                               outputCommands = cms.untracked.vstring('keep *_*_*_*', "drop *_*_*3BX*_*") 
+                               outputCommands = cms.untracked.vstring('keep *_*_*_*') 
                                )
 #### Path
 
