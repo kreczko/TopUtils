@@ -6,12 +6,18 @@
 #include <iostream>
 
 #include "TH1.h"
+#include "TH2.h"
 #include "TFile.h"
 #include "TString.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+
+#include "RecoBTag/Records/interface/BTagPerformanceRecord.h"
+#include "RecoBTag/PerformanceDB/interface/BtagPerformance.h"
+#include "CondFormats/PhysicsToolsObjects/interface/BinningPointByMap.h"
+#include "FWCore/Framework/interface/ESHandle.h"
 
 /// This module calculates a b tag scale factor (SF) for the whole event with >=2 b tags,
 /// which is put into the CMSSW event
@@ -40,12 +46,20 @@ class BTagSFEventWeight : public edm::EDProducer {
   std::string sysVar_;
   int verbose_;
   std::string filename_;
+  double maxPt_;
+  double maxEta_;
+  
+  /// to load database
+  std::map<std::string,PerformanceResult::ResultType> measureMap_;
+  edm::ESHandle<BtagPerformance> perfHBTag;
+  edm::ESHandle<BtagPerformance> perfHMisTag;
   
   /// histogram container
   /// for output
   std::map<std::string, TH1F*> hists_;
   /// efficiency histos as input
-  std::map<std::string, TH1F*> effHists_;
+  //std::map<std::string, TH1F*> effHists_;
+  std::map<std::string, TH2F*> effHists_;
   
   /// file with histos
   TFile * file_;
