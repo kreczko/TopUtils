@@ -4,6 +4,8 @@
 <use name="PhysicsTools/CandUtils"/>
 <use name="DataFormats/PatCandidates"/>
 <use name="CondFormats/JetMETObjects"/>
+<use name="RecoBTag/PerformanceDB"/>
+<use name="RecoBTag/Records"/>
 
 <export>
    <lib name="TopAnalysisTopUtils"/>
