@@ -20,6 +20,8 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     options.setdefault('pfIsoValElec', 0.17)
     options.setdefault('skipIfNoPFMuon', False)
     options.setdefault('skipIfNoPFElec', False)
+    options.setdefault('analyzersBeforeMuonIso', cms.Sequence())
+    options.setdefault('analyzersBeforeElecIso', cms.Sequence())
 
 
     ## postfixes are NOT supported right now
@@ -28,12 +30,12 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     # check if needed standard sequences are available, else load them
     if not hasattr(process, 'XMLIdealGeometryESSource'):
         process.load("Configuration.StandardSequences.Geometry_cff")
-    
+
     if not hasattr(process, 'magfield'):
         process.load("Configuration.StandardSequences.MagneticField_cff")
 
     ## prepare everything to run on AOD samples instead of pre-computed skims
-    if options['runOnAOD']: 
+    if options['runOnAOD']:
         if options['runOnMC']:
             ## needed for redoing the ak5GenJets
             process.load("TopAnalysis.TopUtils.GenJetParticles_cff")
@@ -95,7 +97,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
         jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
     else:
         jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute','L2L3Residual']
-        
+
     ## adaptions needed to run with CMSSW 41X
     if os.getenv('CMSSW_VERSION').startswith('CMSSW_4_1_'):
         ## run the full PF2PAT sequence
@@ -106,7 +108,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
                  , jetAlgo        = 'AK5'
                  , postfix        = postfix
                  )
-   
+
         getattr(process,'patJetCorrFactors'+postfix).levels = cms.vstring(jecLevels)
         getattr(process,'patJetCorrFactors'+postfix).payload = 'AK5PFchs'
 
@@ -123,7 +125,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
                  , postfix        = postfix
                  , jetCorrections = ('AK5PFchs',cms.vstring(jecLevels))
                  )
-   
+
     delattr(process,'out')
 
     ##
@@ -148,7 +150,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
                                            , src = cms.InputTag("pfAllNeutralHadrons")
                                            , cut = cms.string("") # et>1 # not yet official
                                            )
-    
+
     ## minimal restriction to photons
     pfSelectedPhotons = cms.EDFilter( "GenericPFCandidateSelector"
                                     , src = cms.InputTag("pfAllPhotons")
@@ -207,25 +209,30 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     getattr(process,'isoValMuonWithNeutral'+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeMuon'])
     getattr(process,'isoValMuonWithCharged'+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeMuon'])
     getattr(process,'isoValMuonWithPhotons'+postfix).deposits[0].deltaR = cms.double(options['pfIsoConeMuon'])
-    
+
     ## adapt isolation cut
     getattr(process,'pfIsolatedMuons'+postfix).combinedIsolationCut = options['pfIsoValMuon']
-    
+
+    getattr(process,'patPF2PATSequence'+postfix).replace(getattr(process,'pfIsolatedMuons'+postfix),
+                                                         options['analyzersBeforeMuonIso'] *
+                                                         getattr(process,'pfIsolatedMuons'+postfix)
+                                                        )
+
     ## filter event if no isolated muon found
     if options['skipIfNoPFMuon']:
-        process.isoMuonFilter = cms.EDFilter("CandViewCountFilter", 
+        process.isoMuonFilter = cms.EDFilter("CandViewCountFilter",
                                              src = cms.InputTag("pfIsolatedMuons"+postfix),
                                              minNumber = cms.uint32(1)
                                              )
-        
+
         getattr(process,'patPF2PATSequence'+postfix).replace(getattr(process,'pfIsolatedMuons'+postfix),
                                                              getattr(process,'pfIsolatedMuons'+postfix)*
                                                              process.isoMuonFilter
                                                              )
-       
+
     ## use beamspot for dB calculation
     getattr(process,'patMuons'+postfix).usePV = False
-    
+
     ## adding of resolutions into the patObjects
     if options['addResolutions']:
         getattr(process,'patMuons'+postfix).addResolutions = True
@@ -244,7 +251,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
         getattr(process,'patMuons'+postfix).embedGenMatch           = False
         getattr(process,'patMuons'+postfix).embedPickyMuon          = False
 
-    
+
     ##
     ## customize electrons
     ##
@@ -275,13 +282,18 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## adapt isolation cut
     getattr(process,'pfIsolatedElectrons'+postfix).combinedIsolationCut = options['pfIsoValElec']
 
+    getattr(process,'patPF2PATSequence'+postfix).replace(getattr(process,'pfIsolatedElectrons'+postfix),
+                                                         options['analyzersBeforeElecIso'] *
+                                                         getattr(process,'pfIsolatedElectrons'+postfix)
+                                                        )
+
     ## filter event if no isolated electron found
     if options['skipIfNoPFElec']:
-        process.isoElectronFilter = cms.EDFilter("CandViewCountFilter", 
+        process.isoElectronFilter = cms.EDFilter("CandViewCountFilter",
                                                  src = cms.InputTag("pfIsolatedElectrons"+postfix),
                                                  minNumber = cms.uint32(1)
                                                  )
-        
+
         getattr(process,'patPF2PATSequence'+postfix).replace(getattr(process,'pfIsolatedElectrons'+postfix),
                                                              getattr(process,'pfIsolatedElectrons'+postfix)*
                                                              process.isoElectronFilter
@@ -315,7 +327,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
         for name in eleIDsCiC.parameterNames_():
             setattr(eleIDs,name,getattr(eleIDsCiC,name))
 
-    
+
     ## add classical electron ID
     if options['electronIDs'].count('classical') > 0 :
         process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
@@ -419,12 +431,12 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'softMuonBJetTagsAOD'+postfix))
     getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'softMuonByPtBJetTagsAOD'+postfix))
     getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'softMuonByIP3dBJetTagsAOD'+postfix))
-    
+
     getattr(process,'patJets'+postfix).tagInfoSources = []
     getattr(process,'patJets'+postfix).discriminatorSources.remove(cms.InputTag("softMuonBJetTagsAOD"+postfix))
     getattr(process,'patJets'+postfix).discriminatorSources.remove(cms.InputTag("softMuonByPtBJetTagsAOD"+postfix))
     getattr(process,'patJets'+postfix).discriminatorSources.remove(cms.InputTag("softMuonByIP3dBJetTagsAOD"+postfix))
-    
+
     ## embedding of resolutions into the patObjects
     if options['addResolutions']:
         getattr(process,'patJets'+postfix).addResolutions = True
@@ -495,7 +507,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
 
     ## run PF2PAT sequence
     process.pf2pat += getattr(process,'patPF2PATSequence'+postfix)
-    
+
 
     ## add kt6PFJets for rho calculation needed for L1FastJet correction
     process.pf2pat.replace( getattr(process,'patJetCorrFactors'+postfix)
@@ -544,7 +556,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
         process.goodOfflinePrimaryVerticesWithBS.src = 'offlinePrimaryVerticesWithBS'
         massSearchReplaceAnyInputTag(getattr(process,pathname), 'offlinePrimaryVertices'      , 'goodOfflinePrimaryVertices')
         massSearchReplaceAnyInputTag(getattr(process,pathname), 'offlinePrimaryVerticesWithBS', 'goodOfflinePrimaryVerticesWithBS')
-        
+
         ## replace everything from the old selection with the newly generated collections
         if options['runOnOLDcfg']:
             massSearchReplaceAnyInputTag(getattr(process,pathname), 'selectedPatJetsAK5PF', 'selectedPatJets')
