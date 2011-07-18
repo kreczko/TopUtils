@@ -405,11 +405,12 @@ process.source.fileNames = process.source.fileNames[jobNumber:numberOfFiles:numb
 print "running over these files:"
 print process.source.fileNames
 
-process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32($maxEvents)
-)
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32($maxEvents))
 
-process.options.wantSummary = cms.untracked.bool(True)
+if hasattr(process, "options"):
+    process.options.wantSummary = cms.untracked.bool(True)
+else:
+    process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 if jobNumber == 0 and not $alternativeOutput:
     fh = open('OUTPUTPATH/joined.txt', 'w')
