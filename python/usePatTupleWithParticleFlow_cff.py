@@ -281,7 +281,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
 
         setattr(process,'noCutPfIsolatedMuons'+postfix, getattr(process,'pfIsolatedMuons'+postfix).clone(src = 'pfAllMuons'+postfix,
                                                                                                          isolationValueMaps   = noCutIsolationValueMapsMuon,
-                                                                                                         combinedIsolationCut = 1e15))
+                                                                                                         combinedIsolationCut = 1e30))
 
         setattr(process,'noCutMuonMatch'+postfix, getattr(process,'muonMatch'+postfix).clone(src = 'noCutPfIsolatedMuons'+postfix))
 
@@ -459,12 +459,14 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
 
         setattr(process,'noCutPfIsolatedElectrons'+postfix, getattr(process,'pfIsolatedElectrons'+postfix).clone(src = 'noCutPfAllElectrons'+postfix,
                                                                                                                  isolationValueMaps   = noCutIsolationValueMapsElectron,
-                                                                                                                 combinedIsolationCut = 1e15))
+                                                                                                                 combinedIsolationCut = 1e30))
 
-        setattr(process,'noCutElectronMatch'+postfix, getattr(process,'electronMatch'+postfix).clone(src = 'noCutPfIsolatedElectrons'+postfix))
+        ## right now no new matcher is needed as the gsfElectrons need to be matched
+        #setattr(process,'noCutElectronMatch'+postfix, getattr(process,'electronMatch'+postfix).clone())
+        getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'electronMatch'+postfix))
 
         setattr(process,'noCutPatElectrons'+postfix, getattr(process,'patElectrons'+postfix).clone(pfElectronSource = 'noCutPfIsolatedElectrons'+postfix,
-                                                                                                   genParticleMatch = 'noCutElectronMatch'+postfix,
+                                                                                                   #genParticleMatch = 'noCutElectronMatch'+postfix,
                                                                                                    isoDeposits      = noCutIsoDepElectron,
                                                                                                    isolationValues  = noCutIsoValElectron))
         
@@ -476,13 +478,14 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
                                                  getattr(process,'noCutIsoValElectronWithNeutral'+postfix) *
                                                  getattr(process,'noCutIsoValElectronWithPhotons'+postfix) *
                                                  getattr(process,'noCutPfIsolatedElectrons'+postfix) *
-                                                 getattr(process,'noCutElectronMatch'+postfix) *
+                                                 #getattr(process,'noCutElectronMatch'+postfix) *
+                                                 getattr(process,'electronMatch'+postfix)       *
                                                  getattr(process,'noCutPatElectrons'+postfix)
                                                  )
     
-        #getattr(process,'patPF2PATSequence'+postfix).replace( getattr(process,'pfAllElectrons'+postfix)
-        #                                                    , noCutPatElectronsSequence * getattr(process,'pfAllElectrons'+postfix)
-        #                                                    )
+        getattr(process,'patPF2PATSequence'+postfix).replace( getattr(process,'pfAllElectrons'+postfix)
+                                                            , noCutPatElectronsSequence * getattr(process,'pfAllElectrons'+postfix)
+                                                            )
 
 
     ##
