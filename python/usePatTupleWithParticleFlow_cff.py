@@ -22,9 +22,14 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     options.setdefault('skipIfNoPFElec', False)
     options.setdefault('addNoCutPFMuon', False)
     options.setdefault('addNoCutPFElec', False)
+    options.setdefault('noMuonTopProjection', False)
+    options.setdefault('noElecTopProjection', False)
     options.setdefault('analyzersBeforeMuonIso', cms.Sequence())
     options.setdefault('analyzersBeforeElecIso', cms.Sequence())
 
+
+    ## tool to replace all input tags in a given sequence
+    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
 
     ## postfixes are NOT supported right now
     postfix='' #options['postfix']
@@ -192,6 +197,10 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## customize muons
     ##
 
+    ## disable muon top projections
+    if options['noMuonTopProjection']:
+        getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfNoMuon'+postfix))
+
     ## switch muons to be originating from the primary vertex
     getattr(process,'pfSelectedMuons'+postfix).src = 'pfMuonsFromVertex'+postfix
 
@@ -310,8 +319,9 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## customize electrons
     ##
 
-    ## switch input of pfElectrons to collection without muons
-    getattr(process,'pfAllElectrons'+postfix).src = 'pfNoMuon'+postfix
+    ## disable electron top projections
+    if options['noElecTopProjection']:
+        getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfNoElectron'+postfix))
 
     ## switch muons to be originating from the primary vertex
     getattr(process,'pfSelectedElectrons'+postfix).src = 'pfElectronsFromVertex'+postfix
@@ -537,8 +547,10 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## activate jet area calculation needed for L1FastJet corrections
     getattr(process,'pfJets'+postfix).doAreaFastjet = True
 
+    ## source of PFJets
+    getattr(process,'pfJets'+postfix).src = 'pfNoElectron'
+
     ## switchmodules to correct sources
-    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     massSearchReplaceAnyInputTag(getattr(process,'patPF2PATSequence'+postfix),'pfNoTau'+postfix,'pfJets'+postfix)
 
     ## remove soft lepton taggers, which would have needed more RECO collections as input
@@ -599,6 +611,12 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## let it run
     ##
 
+    ## disable muon and / or electron top projections
+    if options['noElecTopProjection']:
+        massSearchReplaceAnyInputTag(getattr(process,'patPF2PATSequence'+postfix),'pfNoElectron'+postfix,'pfNoMuon'+postfix)
+    if options['noMuonTopProjection']:
+        massSearchReplaceAnyInputTag(getattr(process,'patPF2PATSequence'+postfix),'pfNoMuon'+postfix,'pfNoPileUp'+postfix)
+
     ## define sequence with all modules in
     process.pf2pat = cms.Sequence(
         process.goodOfflinePrimaryVertices *
@@ -655,6 +673,8 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     print 'skipIfNoPFElec:', options['skipIfNoPFElec']
     print 'addNoCutPFMuon:', options['addNoCutPFMuon']
     print 'addNoCutPFElec:', options['addNoCutPFElec']
+    print 'noMuonTopProjection:', options['noMuonTopProjection']
+    print 'noElecTopProjection:', options['noElecTopProjection']
     print 'analyzersBeforeMuonIso:', options['analyzersBeforeMuonIso']
     print 'analyzersBeforeElecIso:', options['analyzersBeforeElecIso']
     print '==================================================='
@@ -682,7 +702,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
             massSearchReplaceAnyInputTag(getattr(process,pathname), 'patMETsPF', 'patMETs')
             massSearchReplaceAnyInputTag(getattr(process,pathname), cms.InputTag('scaledJetEnergy', 'selectedPatJetsAK5PF', process.name_()), cms.InputTag('scaledJetEnergy', 'selectedPatJets', process.name_()))
 
-        ## finaly insert the sequence into all (given) paths
+        ## finally insert the sequence into all (given) paths
         getattr(process, pathname).insert(0,process.pf2pat)
 
     if 'postfix' in options:
