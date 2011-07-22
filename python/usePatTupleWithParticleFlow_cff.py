@@ -593,6 +593,11 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## apply selection for pat jets
     getattr(process,'selectedPatJets'+postfix).cut = options['cutsJets']
 
+    ## add kt6PFJets for rho calculation needed for L1FastJet correction
+    getattr(process,'patPF2PATSequence'+postfix).replace(getattr(process,'patJetCorrFactors'+postfix)
+                                                        ,process.kt6PFJets * getattr(process,'patJetCorrFactors'+postfix)
+                                                        )
+
 
     ##
     ## customize MET
@@ -641,11 +646,6 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## run PF2PAT sequence
     process.pf2pat += getattr(process,'patPF2PATSequence'+postfix)
 
-
-    ## add kt6PFJets for rho calculation needed for L1FastJet correction
-    process.pf2pat.replace( getattr(process,'patJetCorrFactors'+postfix)
-                          , process.kt6PFJets * getattr(process,'patJetCorrFactors'+postfix)
-                          )
 
     ##
     ## output all options and set defaults
