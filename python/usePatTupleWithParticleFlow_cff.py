@@ -252,7 +252,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## switch off embeding of collections
     if options['switchOffEmbedding']:
         getattr(process,'patMuons'+postfix).embedTpfmsMuon          = False
-        getattr(process,'patMuons'+postfix).embedHighLevelSelection = False
+        #getattr(process,'patMuons'+postfix).embedHighLevelSelection = False
         getattr(process,'patMuons'+postfix).embedCaloMETMuonCorrs   = False
         getattr(process,'patMuons'+postfix).embedPFCandidate        = False
         getattr(process,'patMuons'+postfix).embedStandAloneMuon     = False
@@ -431,7 +431,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
 
     ## switch off embeding of collections
     if options['switchOffEmbedding']:
-        getattr(process,'patElectrons'+postfix).embedHighLevelSelection = False
+        #getattr(process,'patElectrons'+postfix).embedHighLevelSelection = False
         getattr(process,'patElectrons'+postfix).embedGsfElectronCore    = False
         getattr(process,'patElectrons'+postfix).embedSuperCluster       = False
         getattr(process,'patElectrons'+postfix).embedPFCandidate        = False
