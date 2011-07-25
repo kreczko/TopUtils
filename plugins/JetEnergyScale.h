@@ -75,6 +75,8 @@ class JetEnergyScale : public edm::EDProducer {
   std::string scaleType_;
   /// scale factor for the rescaling of JES
   double scaleFactor_;
+  /// scale factor bJES/JES
+  double scaleFactorB_;
   /// scale factors for the energy resolution of jets
   std::vector<double> resolutionFactor_;
   /// valid |eta| ranges for the energy resolution scale factors

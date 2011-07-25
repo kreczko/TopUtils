@@ -18,6 +18,7 @@ JetEnergyScale::JetEnergyScale(const edm::ParameterSet& cfg):
   payload_             (cfg.getParameter<std::string>  ("payload"             )),  
   scaleType_           (cfg.getParameter<std::string>  ("scaleType"           )),  
   scaleFactor_         (cfg.getParameter<double>       ("scaleFactor"         )),
+  scaleFactorB_        (cfg.getParameter<double>       ("scaleFactorB"        )),
   resolutionFactor_    (cfg.getParameter<std::vector<double> > ("resolutionFactors"   )),
   resolutionRanges_    (cfg.getParameter<std::vector<double> > ("resolutionEtaRanges" )),
   jetPTThresholdForMET_(cfg.getParameter<double>       ("jetPTThresholdForMET")),
@@ -76,6 +77,9 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
     
     if(scaleType_=="abs"){
       scaledJet.scaleEnergy( scaleFactor_ );
+      if (abs(scaledJet.partonFlavour()) == 5) {
+        scaledJet.scaleEnergy( scaleFactorB_ );
+      }
       scaledJet.scaleEnergy( resolutionFactor(scaledJet) );
     }        
     if(scaleType_=="rel"){
