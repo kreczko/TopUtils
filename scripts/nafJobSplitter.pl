@@ -480,9 +480,9 @@ if [ "$?" = "0" ] ; then
             NDone=$(($NDone + 1))
             if [ "$NDone" = "NUMBER_OF_JOBS" ] ; then
                 joined=`cat $current/naf_DIRECTORY/joined.txt`
-                hadd -f $current/naf_DIRECTORY/$joined.$SGE_TASK_ID $current/naf_DIRECTORY/CONFIGFILE-*.root
+                hadd -f $current/naf_DIRECTORY/`basename $joined`.$SGE_TASK_ID $current/naf_DIRECTORY/CONFIGFILE-*.root
                 if [ "$?" = "0" ] ; then
-                    mv -f $current/naf_DIRECTORY/$joined.$SGE_TASK_ID $current/naf_DIRECTORY/$joined
+                    mv -f $current/naf_DIRECTORY/`basename $joined`.$SGE_TASK_ID $current/naf_DIRECTORY/`basename $joined`
                     cp -f $TMPDIR/stdout.txt $current/naf_DIRECTORY/out$SGE_TASK_ID.txt
                     sumTriggerReports2.pl $current/naf_DIRECTORY/out*.txt > $current/naf_DIRECTORY/`basename $joined .root`.txt
                     if [ -e $current/naf_DIRECTORY/autoremove ] ; then
