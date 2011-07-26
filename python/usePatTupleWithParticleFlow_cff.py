@@ -139,6 +139,11 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## customize PAT
     ##
 
+    if os.getenv('CMSSW_VERSION').startswith('CMSSW_4_1_'):
+        process.pfPileUp.checkClosestZVertex = True
+    else:
+        process.pfPileUp.checkClosestZVertex = False
+
     ## remove taus and photons from pat sequence
     from PhysicsTools.PatAlgos.tools.coreTools import removeSpecificPATObjects, removeCleaning
     removeSpecificPATObjects(process, ['Taus', 'Photons'], False, postfix)
@@ -690,7 +695,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
         ## use only good vertices
         massSearchReplaceAnyInputTag(process.pf2pat, 'offlinePrimaryVertices'      , 'goodOfflinePrimaryVertices')
         massSearchReplaceAnyInputTag(process.pf2pat, 'offlinePrimaryVerticesWithBS', 'goodOfflinePrimaryVerticesWithBS')
-        getattr(process,'impactParameterTagInfosAOD'+postfix).primaryVertex = 'offlinePrimaryVertices'
+        #getattr(process,'impactParameterTagInfosAOD'+postfix).primaryVertex = 'offlinePrimaryVertices'
         process.goodOfflinePrimaryVertices.src       = 'offlinePrimaryVertices'
         process.goodOfflinePrimaryVerticesWithBS.src = 'offlinePrimaryVerticesWithBS'
         massSearchReplaceAnyInputTag(getattr(process,pathname), 'offlinePrimaryVertices'      , 'goodOfflinePrimaryVertices')
