@@ -139,9 +139,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## customize PAT
     ##
 
-    if os.getenv('CMSSW_VERSION').startswith('CMSSW_4_1_'):
-        process.pfPileUp.checkClosestZVertex = True
-    else:
+    if not os.getenv('CMSSW_VERSION').startswith('CMSSW_4_1_'):
         process.pfPileUp.checkClosestZVertex = False
 
     ## remove taus and photons from pat sequence
