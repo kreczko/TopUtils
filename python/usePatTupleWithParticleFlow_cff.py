@@ -293,6 +293,9 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
                                              getattr(process,'noCutPatMuons'+postfix)
                                              )
     
+        if not options['runOnMC']:
+            noCutPatMuonsSequence.remove(getattr(process,'noCutMuonMatch'+postfix))
+    
         getattr(process,'patPF2PATSequence'+postfix).replace( getattr(process,'pfAllMuons'+postfix)
                                                             , getattr(process,'pfAllMuons'+postfix) * noCutPatMuonsSequence
                                                             )
@@ -473,6 +476,9 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
                                                  getattr(process,'electronMatch'+postfix)       *
                                                  getattr(process,'noCutPatElectrons'+postfix)
                                                  )
+
+        if not options['runOnMC']:
+            noCutPatElectronsSequence.remove(getattr(process,'electronMatch'+postfix))
     
         getattr(process,'patPF2PATSequence'+postfix).replace( getattr(process,'pfAllElectrons'+postfix)
                                                             , noCutPatElectronsSequence * getattr(process,'pfAllElectrons'+postfix)
