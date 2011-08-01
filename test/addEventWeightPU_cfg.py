@@ -20,15 +20,15 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 
 #### Input Files
 
-process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring("/store/mc/Summer11/QCD_Pt-15to3000_TuneD6T_Flat_7TeV_pythia6/AODSIM/PU_S3_START42_V11-v2/0000/84488536-2B7E-E011-989D-001A92810A94.root"))
+process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring("/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/02719D6B-1398-E011-AA71-001A92971B94.root"))
+
 #process.load("TopAnalysis.Configuration.samples.Spring11_WJets_PATtuple_cff")
 
 #### Number of Events
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10)
+    input = cms.untracked.int32(10000)
     )
-
 
 #### Process Options
 
@@ -36,16 +36,16 @@ process.options = cms.untracked.PSet(
     wantSummary = cms.untracked.bool(True)
 )
 
+#### Definiton for Module
+
 process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
 
-process.eventWeightPU.MCSampleFile      = "TopAnalysis/TopUtils/data/MC_PUDist_TTJets_TuneZ2_7TeV_madgraph_tauola.root"
+process.eventWeightPU.MCSampleFile      = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_TTJets_TuneZ2_7TeV_madgraph_tauola.root"
 process.eventWeightPU.MCSampleHistoName = "MCPUDistribution/pileup"
-process.eventWeightPU.DataFile          = "TopAnalysis/TopUtils/data/Data_PUDist_160404-166861_7TeV_PromptReco_Collisions11.root"
+process.eventWeightPU.DataFile          = "TopAnalysis/TopUtils/data/Data_PUDist_160404-163869_7TeV_May10ReReco_Collisions11_v2_and_165088-167913_7TeV_PromptReco_Collisions11.root"
 process.eventWeightPU.DataHistoName     = "pileup"    
-process.eventWeightPU.PUSysShiftUp      = 0.6
+process.eventWeightPU.PUSysShiftUp      =  0.6
 process.eventWeightPU.PUSysShiftDown    = -0.6
-
-# process.myProducerLabel = cms.EDProducer('EventWeightPU')
 
 #### Output Module
 
