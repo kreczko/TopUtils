@@ -59,6 +59,8 @@ class JetEnergyScale : public edm::EDProducer {
   virtual void produce(edm::Event&, const edm::EventSetup&);
   /// rescale the resolution of the jet
   double resolutionFactor(const pat::Jet&);
+  /// scale all energies of the jet
+  void scaleJetEnergy(pat::Jet&, double);
 
  private:
   /// jet input collection 

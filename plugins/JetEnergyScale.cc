@@ -76,15 +76,20 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
     pat::Jet scaledJet = *jet;
     
     if(scaleType_=="abs"){
-      scaledJet.scaleEnergy( scaleFactor_ );
+      //scaledJet.scaleEnergy( scaleFactor_ );
+      scaleJetEnergy( scaledJet, scaleFactor_ );
       if (abs(scaledJet.partonFlavour()) == 5) {
-        scaledJet.scaleEnergy( scaleFactorB_ );
+        //scaledJet.scaleEnergy( scaleFactorB_ );
+	scaleJetEnergy( scaledJet, scaleFactorB_ );
       }
-      scaledJet.scaleEnergy( resolutionFactor(scaledJet) );
-    }        
+      //scaledJet.scaleEnergy( resolutionFactor(scaledJet) );
+      scaleJetEnergy( scaledJet, resolutionFactor(scaledJet) );
+    }
     if(scaleType_=="rel"){
-      scaledJet.scaleEnergy( 1+(fabs(scaledJet.eta())*(scaleFactor_-1. )));    
-      scaledJet.scaleEnergy( resolutionFactor(scaledJet) );
+      //scaledJet.scaleEnergy( 1+(fabs(scaledJet.eta())*(scaleFactor_-1. )));    
+      scaleJetEnergy( scaledJet, 1+(fabs(scaledJet.eta())*(scaleFactor_-1. )) );
+      //scaledJet.scaleEnergy( resolutionFactor(scaledJet) );
+      scaleJetEnergy( scaledJet, resolutionFactor(scaledJet) );
     }    
     if(scaleType_.substr(0, scaleType_.find(':'))=="jes" || 
        scaleType_.substr(0, scaleType_.find(':'))=="top" ){
@@ -118,15 +123,18 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
       if(scaleType_.substr(scaleType_.find(':')+1)=="up"){
 	// JetMET JES uncertainty
 	float jetMet = deltaJEC->getUncertainty(true);
-	scaledJet.scaleEnergy( 1+std::sqrt(jetMet*jetMet + topShift2) );
+	//scaledJet.scaleEnergy( 1+std::sqrt(jetMet*jetMet + topShift2) );
+	scaleJetEnergy( scaledJet, 1+std::sqrt(jetMet*jetMet + topShift2) );
       }
       else if(scaleType_.substr(scaleType_.find(':')+1)=="down"){
 	// JetMET JES uncertainty
 	float jetMet = deltaJEC->getUncertainty(false);
-	scaledJet.scaleEnergy( 1-std::sqrt(jetMet*jetMet + topShift2) );
+	//scaledJet.scaleEnergy( 1-std::sqrt(jetMet*jetMet + topShift2) );
+	scaleJetEnergy( scaledJet, 1-std::sqrt(jetMet*jetMet + topShift2) );
       }
 
-      scaledJet.scaleEnergy( resolutionFactor(scaledJet) );
+      //scaledJet.scaleEnergy( resolutionFactor(scaledJet) );
+      scaleJetEnergy( scaledJet, resolutionFactor(scaledJet) );
       delete deltaJEC;
     }
     pJets->push_back( scaledJet );
@@ -189,4 +197,53 @@ JetEnergyScale::resolutionFactor(const pat::Jet& jet)
   // calculate pt smearing factor
   double factor = 1. + (modifiedResolution-1.)*(jet.pt() - jet.genJet()->pt())/jet.pt();
   return (factor<0 ? 0. : factor);
+}
+
+void
+JetEnergyScale::scaleJetEnergy(pat::Jet& jet, double factor)
+{
+  jet.scaleEnergy( factor );
+
+  if(jet.isPFJet()){
+    pat::PFSpecific specificPF = jet.pfSpecific();
+    specificPF.mChargedHadronEnergy = factor * specificPF.mChargedHadronEnergy;
+    specificPF.mNeutralHadronEnergy = factor * specificPF.mNeutralHadronEnergy;
+    specificPF.mPhotonEnergy        = factor * specificPF.mPhotonEnergy       ;
+    specificPF.mElectronEnergy      = factor * specificPF.mElectronEnergy     ;
+    specificPF.mMuonEnergy          = factor * specificPF.mMuonEnergy         ;
+    specificPF.mHFHadronEnergy      = factor * specificPF.mHFHadronEnergy     ;
+    specificPF.mHFEMEnergy          = factor * specificPF.mHFEMEnergy         ;
+    specificPF.mChargedEmEnergy     = factor * specificPF.mChargedEmEnergy    ;
+    specificPF.mChargedMuEnergy     = factor * specificPF.mChargedMuEnergy    ;
+    specificPF.mNeutralEmEnergy     = factor * specificPF.mNeutralEmEnergy    ;
+    jet.setPFSpecific(specificPF);
+  }
+  else if(jet.isCaloJet() || jet.isJPTJet()){
+    pat::CaloSpecific specificCalo = jet.caloSpecific();
+    specificCalo.mMaxEInEmTowers         = factor * specificCalo.mMaxEInEmTowers        ;
+    specificCalo.mMaxEInHadTowers        = factor * specificCalo.mMaxEInHadTowers       ;
+    specificCalo.mHadEnergyInHO          = factor * specificCalo.mHadEnergyInHO         ;
+    specificCalo.mHadEnergyInHB          = factor * specificCalo.mHadEnergyInHB         ;
+    specificCalo.mHadEnergyInHF          = factor * specificCalo.mHadEnergyInHF         ;
+    specificCalo.mHadEnergyInHE          = factor * specificCalo.mHadEnergyInHE         ;
+    specificCalo.mEmEnergyInEB           = factor * specificCalo.mEmEnergyInEB          ;
+    specificCalo.mEmEnergyInEE           = factor * specificCalo.mEmEnergyInEE          ;
+    specificCalo.mEmEnergyInHF           = factor * specificCalo.mEmEnergyInHF          ;
+    specificCalo.mEnergyFractionHadronic = factor * specificCalo.mEnergyFractionHadronic;
+    specificCalo.mEnergyFractionEm       = factor * specificCalo.mEnergyFractionEm      ;
+    jet.setCaloSpecific(specificCalo);
+
+    if(jet.isJPTJet()){
+      pat::JPTSpecific specificJPT = jet.jptSpecific();
+      specificJPT.mChargedHadronEnergy          = factor * specificJPT.mChargedHadronEnergy         ;
+      specificJPT.mNeutralHadronEnergy          = factor * specificJPT.mNeutralHadronEnergy         ;
+      specificJPT.mChargedEmEnergy              = factor * specificJPT.mChargedEmEnergy             ;
+      specificJPT.mNeutralEmEnergy              = factor * specificJPT.mNeutralEmEnergy             ;
+      specificJPT.mSumPtOfChargedWithEff        = factor * specificJPT.mSumPtOfChargedWithEff       ;
+      specificJPT.mSumPtOfChargedWithoutEff     = factor * specificJPT.mSumPtOfChargedWithoutEff    ;
+      specificJPT.mSumEnergyOfChargedWithEff    = factor * specificJPT.mSumEnergyOfChargedWithEff   ;
+      specificJPT.mSumEnergyOfChargedWithoutEff = factor * specificJPT.mSumEnergyOfChargedWithoutEff;
+      jet.setJPTSpecific(specificJPT);
+    }
+  }
 }
