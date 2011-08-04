@@ -595,30 +595,19 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     if options['applyMETCorrections']:
         ## create jet correctors for MET corrections
         from JetMETCorrections.Configuration.JetCorrectionServicesAllAlgos_cff import ak5PFL1Fastjet, ak5PFL2Relative, ak5PFL3Absolute, ak5PFResidual
-        if os.getenv('CMSSW_VERSION').startswith('CMSSW_4_1_'):
-            whichJECEra = 'Jec10V3'
-        else:
-            whichJECEra = 'Jec11V2'
         ## L1FastJet
         process.ak5PFL1FastjetChs = ak5PFL1Fastjet.clone( algorithm = 'AK5PFchs'
-                                                        , era       = whichJECEra
                                                         , srcRho    = cms.InputTag('kt6PFJets'+postfix,'rho')
                                                         )
     
         ## L2Relative
-        process.ak5PFL2RelativeChs = ak5PFL2Relative.clone( algorithm = 'AK5PFchs'
-                                                          , era       = whichJECEra
-                                                          )
+        process.ak5PFL2RelativeChs = ak5PFL2Relative.clone( algorithm = 'AK5PFchs' )
 
         ## L3Absolute
-        process.ak5PFL3AbsoluteChs = ak5PFL3Absolute.clone( algorithm = 'AK5PFchs'
-                                                          , era       = whichJECEra
-                                                          )
+        process.ak5PFL3AbsoluteChs = ak5PFL3Absolute.clone( algorithm = 'AK5PFchs' )
 
         ## Residual
-        process.ak5PFResidualChs = ak5PFResidual.clone( algorithm = 'AK5PFchs'
-                                                      , era       = whichJECEra
-                                                      )
+        process.ak5PFResidualChs = ak5PFResidual.clone( algorithm = 'AK5PFchs' )
 
         ## combinded corrections
         process.combinedCorrector = cms.ESSource( 'JetCorrectionServiceChain'
