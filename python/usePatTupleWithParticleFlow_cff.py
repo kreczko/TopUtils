@@ -27,6 +27,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     options.setdefault('analyzersBeforeMuonIso', cms.Sequence())
     options.setdefault('analyzersBeforeElecIso', cms.Sequence())
     options.setdefault('excludeElectronsFromWsFromGenJets', False)
+    options.setdefault('applyMETCorrections', False)
 
 
     ## tool to replace all input tags in a given sequence
@@ -579,8 +580,8 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     getattr(process,'selectedPatJets'+postfix).cut = options['cutsJets']
 
     ## add kt6PFJets for rho calculation needed for L1FastJet correction
-    getattr(process,'patPF2PATSequence'+postfix).replace( getattr(process,'patJetCorrFactors'+postfix)
-                                                        , process.kt6PFJets * getattr(process,'patJetCorrFactors'+postfix)
+    getattr(process,'patPF2PATSequence'+postfix).replace( getattr(process,'pfMET'+postfix)
+                                                        , process.kt6PFJets * getattr(process,'pfMET'+postfix)
                                                         )
 
 
@@ -590,6 +591,62 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
 
     ## re-configure and create MET
     getattr(process,'pfMET'+postfix).src = 'pfNoPileUp'+postfix
+
+    if options['applyMETCorrections']:
+        ## create jet correctors for MET corrections
+        from JetMETCorrections.Configuration.JetCorrectionServicesAllAlgos_cff import ak5PFL1Fastjet, ak5PFL2Relative, ak5PFL3Absolute, ak5PFResidual
+        ## L1FastJet
+        process.ak5PFL1FastjetChs = ak5PFL1Fastjet.clone( algorithm = 'AK5PFchs'
+                                                        , era       = 'Jec10V1'
+                                                        , srcRho    = cms.InputTag('kt6PFJets'+postfix,'rho')
+                                                        )
+    
+        ## L2Relative
+        process.ak5PFL2RelativeChs = ak5PFL2Relative.clone( algorithm = 'AK5PFchs'
+                                                          , era       = 'Jec10V1' 
+                                                          )
+
+        ## L3Absolute
+        process.ak5PFL3AbsoluteChs = ak5PFL3Absolute.clone( algorithm = 'AK5PFchs'
+                                                          , era       = 'Jec10V1' 
+                                                          )
+
+        ## Residual
+        process.ak5PFResidualChs = ak5PFResidual.clone( algorithm = 'AK5PFchs'
+                                                      , era       = 'Jec10V1' 
+                                                      )
+
+        ## combinded corrections
+        process.combinedCorrector = cms.ESSource( 'JetCorrectionServiceChain'
+                                                , correctors = cms.vstring('ak5PFL1FastjetChs','ak5PFL2RelativeChs','ak5PFL3AbsoluteChs','ak5PFResidualChs')
+                                                )
+
+        ## remove residual corrections from MET corrections for MC
+        if options['runOnMC']:
+            process.combinedCorrector.correctors.remove('ak5PFResidualChs')
+
+        ## configuration of MET corrections
+        from JetMETCorrections.Type1MET.MetType1Corrections_cff import metJESCorAK5PFJet
+        setattr(process,'metJESCorPFAK5'+postfix,metJESCorAK5PFJet.clone())
+        getattr(process,'metJESCorPFAK5'+postfix).inputUncorJetsLabel = 'pfJets'+postfix
+        getattr(process,'metJESCorPFAK5'+postfix).metType = 'PFMET'
+        getattr(process,'metJESCorPFAK5'+postfix).inputUncorMetLabel = 'pfMET'
+        getattr(process,'metJESCorPFAK5'+postfix).jetPTthreshold = cms.double(10.0)
+        getattr(process,'metJESCorPFAK5'+postfix).corrector = cms.string('combinedCorrector')
+        getattr(process,'metJESCorPFAK5'+postfix).useTypeII = True
+        getattr(process,'metJESCorPFAK5'+postfix).jetPTthreshold = cms.double(10.0)
+        getattr(process,'metJESCorPFAK5'+postfix).UscaleA = cms.double(1.5)
+        getattr(process,'metJESCorPFAK5'+postfix).UscaleB = cms.double(0)
+        getattr(process,'metJESCorPFAK5'+postfix).UscaleC = cms.double(0)
+        getattr(process,'metJESCorPFAK5'+postfix).inputUncorUnlusteredLabel = cms.untracked.InputTag('pfNoJet'+postfix)
+    
+        ## add MET corrections to sequence
+        getattr(process,'patPF2PATSequence'+postfix).replace( getattr(process,'pfMET'+postfix)
+                                                            , getattr(process,'pfMET'+postfix) * getattr(process,'metJESCorPFAK5'+postfix)
+                                                            )
+
+        ## change uncorrected MET to corrected MET in PAT
+        getattr(process,'patMETs'+postfix).metSource = 'metJESCorPFAK5'+postfix
 
     ## embedding of resolutions into the patObjects
     if options['addResolutions']:
@@ -619,6 +676,8 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
             process.HBHENoiseFilter.minIsolatedNoiseSumE        = 999999.
             process.HBHENoiseFilter.minNumIsolatedNoiseChannels = 999999
             process.HBHENoiseFilter.minIsolatedNoiseSumEt       = 999999.
+            labelOfHBHENoiseFilter = process.HBHENoiseFilter.label
+            delattr(process.HBHENoiseFilter, 'label')
 
             ## event scraping filter
             process.scrapingFilter = cms.EDFilter( "FilterOutScraping"
@@ -658,6 +717,12 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## run PF2PAT sequence
     process.pf2pat += getattr(process,'patPF2PATSequence'+postfix)
 
+    ## use selected collection of good primary vertices in pf2pat sequence
+    massSearchReplaceAnyInputTag(process.pf2pat, 'offlinePrimaryVertices'      , 'goodOfflinePrimaryVertices')
+    massSearchReplaceAnyInputTag(process.pf2pat, 'offlinePrimaryVerticesWithBS', 'goodOfflinePrimaryVerticesWithBS')
+    process.goodOfflinePrimaryVertices.src       = 'offlinePrimaryVertices'
+    process.goodOfflinePrimaryVerticesWithBS.src = 'offlinePrimaryVerticesWithBS'
+
 
     ##
     ## output all options and set defaults
@@ -690,6 +755,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     print 'analyzersBeforeMuonIso:', options['analyzersBeforeMuonIso']
     print 'analyzersBeforeElecIso:', options['analyzersBeforeElecIso']
     print 'excludeElectronsFromWsFromGenJets:', options['excludeElectronsFromWsFromGenJets']
+    print 'applyMETCorrections:', options['applyMETCorrections']
     print '==================================================='
     print '|||||||||||||||||||||||||||||||||||||||||||||||||||'
     print '==================================================='
@@ -701,11 +767,6 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     print 'prepending PF2PAT sequence to paths:', pathnames
     for pathname in pathnames:
         ## use only good vertices
-        massSearchReplaceAnyInputTag(process.pf2pat, 'offlinePrimaryVertices'      , 'goodOfflinePrimaryVertices')
-        massSearchReplaceAnyInputTag(process.pf2pat, 'offlinePrimaryVerticesWithBS', 'goodOfflinePrimaryVerticesWithBS')
-        #getattr(process,'impactParameterTagInfosAOD'+postfix).primaryVertex = 'offlinePrimaryVertices'
-        process.goodOfflinePrimaryVertices.src       = 'offlinePrimaryVertices'
-        process.goodOfflinePrimaryVerticesWithBS.src = 'offlinePrimaryVerticesWithBS'
         massSearchReplaceAnyInputTag(getattr(process,pathname), 'offlinePrimaryVertices'      , 'goodOfflinePrimaryVertices')
         massSearchReplaceAnyInputTag(getattr(process,pathname), 'offlinePrimaryVerticesWithBS', 'goodOfflinePrimaryVerticesWithBS')
 
@@ -717,6 +778,11 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
 
         ## finally insert the sequence into all (given) paths
         getattr(process, pathname).insert(0,process.pf2pat)
+
+    ## BUGFIX FOR STUPID ERROR IN HBHENoiseFilter
+    if options['runOnAOD']:
+        if not options['runOnMC']:
+            setattr(process.HBHENoiseFilter, 'label', labelOfHBHENoiseFilter)
 
     if 'postfix' in options:
         print 'POSTFIXES ARE NOT SUPPORTED AT THE MOMENT, THIS OPTION IS IGNORED'
