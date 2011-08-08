@@ -7,11 +7,14 @@
 
 
 EffSFMuonEventWeight::EffSFMuonEventWeight(const edm::ParameterSet& cfg):
-  particles_    ( cfg.getParameter<edm::InputTag>    ("particles"   ) ),
-  sysVar_  ( cfg.getParameter<std::string>      ("sysVar"  ) ),
-  verbose_ ( cfg.getParameter<int>              ("verbose" ) ),
-  filename_( cfg.getParameter<std::string>      ("filename"  ) ),
-  additionalFactor_( cfg.getParameter<double>   ("additionalFactor"  ) )
+  particles_            ( cfg.getParameter<edm::InputTag>    ("particles"   ) ),
+  sysVar_               ( cfg.getParameter<std::string>      ("sysVar"  ) ),
+  verbose_              ( cfg.getParameter<int>              ("verbose" ) ),
+  filename_             ( cfg.getParameter<std::string>      ("filename"  ) ),
+  additionalFactor_     ( cfg.getParameter<double>   ("additionalFactor"  ) ),
+  additionalFactorErr_  ( cfg.getParameter<double>   ("additionalFactorErr"  ) ),
+  meanTriggerEffSF_     ( cfg.getParameter<double>   ("meanTriggerEffSF"  ) ),
+  shapeDistortionFactor_( cfg.getParameter<double>   ("shapeDistortionFactor"  ) )
 {
   produces<double>();
   
@@ -21,6 +24,8 @@ EffSFMuonEventWeight::EffSFMuonEventWeight(const edm::ParameterSet& cfg):
     throw edm::Exception( edm::errors::Configuration,
 			  "TFile Service is not registered in cfg file" );
   }
+  /// booking of histogram for b tag eff SF
+  hists_["muonEffSF"]     = fs->make<TH1F>( "muonEffSF", "muonEffSF", 200, 0.5, 1.5 );
   
   /// getting efficiency histos from input files
   if(filename_!=""){
@@ -61,7 +66,8 @@ EffSFMuonEventWeight::produce(edm::Event& evt, const edm::EventSetup& setup)
     pt  = part->pt();
     eta = part->eta();
     numPart++;
-    if(filename_!="") {
+    /// eta dependent trigger eff. SF
+    if(filename_!="" && sysVar_!="flatTriggerSF") {
       TH1F* his = effHists_.find("effSFEta")->second;
       if(eta >= his->GetBinLowEdge(his->GetNbinsX()+1)) {
 	result= his->GetBinContent(his->GetNbinsX());
@@ -77,13 +83,22 @@ EffSFMuonEventWeight::produce(edm::Event& evt, const edm::EventSetup& setup)
       }
     }
     else{
+        result = meanTriggerEffSF_;
     }
+    /// systematic variations for trigger eff. SF (normalisation and shape uncertainties)
+    if     (sysVar_ == "triggerEffSFNormUp")   result += error;
+    else if(sysVar_ == "triggerEffSFNormDown") result -= error;
+    else if(sysVar_ == "triggerEffSFShapeUp")  result += shapeDistortionFactor_ * (result - meanTriggerEffSF_);
+    else if(sysVar_ == "triggerEffSFShapeDown")result -= shapeDistortionFactor_ * (result - meanTriggerEffSF_);
     
-    if(sysVar_ == "EffSFUp") result += error;
-    if(sysVar_ == "EffSFDown") result -= error;
+    /// additional factor as lepton selection eff. SF
     result *= additionalFactor_;
+    /// systematic variations for lepton selection eff. SF
+    if     (sysVar_ == "selectionEffSFNormUp")   result *= (1+additionalFactorErr_);
+    else if(sysVar_ == "selectionEffSFNormDown") result *= (1-additionalFactorErr_);
     
     if(verbose_>=1) std::cout<<numPart<< ": pt=" <<pt<< "; eta=" <<eta<< "; SF= "<<result<<"; error="<< error <<std::endl;
+    hists_.find("muonEffSF" )->second->Fill( result );
 
   std::auto_ptr<double> SFEventWeight(new double);
   *SFEventWeight = result;    

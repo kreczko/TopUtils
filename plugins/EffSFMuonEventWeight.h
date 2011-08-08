@@ -17,10 +17,19 @@
 /// which is put into the CMSSW event
 /// as a double, which can be used as an event weight in the analyzers of interest.
 /// cfg parameters:
-/// particles_        particle collection
-/// sysVar_           name of the systematic variation (noSys, EffSFUp, EffSFDown)
-/// verbose_          set to 0 if no output on terminal is desired, 1 for moderate and 2 for detailed output
-/// filename_         if not set to "", efficiencies are loaded from histos in filename_
+/// particles_             particle collection
+/// sysVar_                name of the systematic variation 
+///                        "noSys"
+///                        "triggerEffSFNormUp/Down": normalisation uncertainty using the statistical errors
+///                        "triggerEffSFShapeUp/Down" : uncertainty to distort the shape (softens or tightens the dependence)
+///                        "flatTriggerSF": uses meanTriggerEffSF_ as flat SF
+///                        "selectionEffSFNormUp/Down": uses additionalFactorErr_ as flat global uncertainty
+/// verbose_               set to 0 if no output on terminal is desired, 1 for moderate and 2 for detailed output
+/// filename_              if not set to "", efficiencies are loaded from histos in filename_
+/// additionalFactor_      multiplies with factor (can be used for flat SF)
+/// additionalFactorErr_   flat normalisation error for additional factor (e.g. 0.03 = 3%)
+/// meanTriggerEffSF_      flat mean trigger eff.
+/// shapeDistortionFactor_ for eff SF shape uncertainty
 
 class EffSFMuonEventWeight : public edm::EDProducer {
 
@@ -38,10 +47,15 @@ class EffSFMuonEventWeight : public edm::EDProducer {
   int verbose_;
   std::string filename_;
   double additionalFactor_;
+  double additionalFactorErr_;
+  double meanTriggerEffSF_;
+  double shapeDistortionFactor_;
   
   /// histogram container
   /// efficiency histos as input
   std::map<std::string, TH1F*> effHists_;
+  /// hists as output for control
+  std::map<std::string, TH1F*> hists_;
   
   /// file with histos
   TFile * file_;
