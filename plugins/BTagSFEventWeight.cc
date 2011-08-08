@@ -26,7 +26,7 @@ BTagSFEventWeight::BTagSFEventWeight(const edm::ParameterSet& cfg):
 			  "TFile Service is not registered in cfg file" );
   }
   /// booking of histogram for b tag eff SF
-  hists_["effBTagEventSF"]     = fs->make<TH1F>( "effBTagEventSF", "effBTagEventSF", 100, 0, 1 );
+  hists_["effBTagEventSF"]     = fs->make<TH1F>( "effBTagEventSF", "effBTagEventSF", 100, 0.5, 1.5 );
   hists_["effBTagEventSFMean"] = fs->make<TH1F>( "effBTagEventSFMean", "effBTagEventSFMean", 1, 0, 1 );
   
   /// getting efficiency histos from input files
