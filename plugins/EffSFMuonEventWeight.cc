@@ -88,8 +88,16 @@ EffSFMuonEventWeight::produce(edm::Event& evt, const edm::EventSetup& setup)
     /// systematic variations for trigger eff. SF (normalisation and shape uncertainties)
     if     (sysVar_ == "triggerEffSFNormUp")   result += error;
     else if(sysVar_ == "triggerEffSFNormDown") result -= error;
-    else if(sysVar_ == "triggerEffSFShapeUp")  result += shapeDistortionFactor_ * (result - meanTriggerEffSF_);
-    else if(sysVar_ == "triggerEffSFShapeDown")result -= shapeDistortionFactor_ * (result - meanTriggerEffSF_);
+    else if(sysVar_ == "triggerEffSFShapeUpEta")  result += shapeDistortionFactor_ * (result - meanTriggerEffSF_);
+    else if(sysVar_ == "triggerEffSFShapeDownEta")result -= shapeDistortionFactor_ * (result - meanTriggerEffSF_);
+    else if(sysVar_ == "triggerEffSFShapeUpPt")  { 
+      if(pt<40) result += 0.01; 
+      else      result -= 0.01;
+    }
+    else if(sysVar_ == "triggerEffSFShapeDownPt"){ 
+      if(pt<40) result -= 0.01; 
+      else      result += 0.01;
+    }
     
     /// additional factor as lepton selection eff. SF
     result *= additionalFactor_;
