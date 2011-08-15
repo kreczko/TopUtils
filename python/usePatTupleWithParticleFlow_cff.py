@@ -672,8 +672,11 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
             process.HBHENoiseFilter.minIsolatedNoiseSumE        = 999999.
             process.HBHENoiseFilter.minNumIsolatedNoiseChannels = 999999
             process.HBHENoiseFilter.minIsolatedNoiseSumEt       = 999999.
-            labelOfHBHENoiseFilter = process.HBHENoiseFilter.label
-            delattr(process.HBHENoiseFilter, 'label')
+            labelOfHBHENoiseFilter = cms.InputTag("")
+            if type(process.HBHENoiseFilter.label) == cms.InputTag:
+                labelOfHBHENoiseFilter = process.HBHENoiseFilter.label
+                delattr(process.HBHENoiseFilter, 'label')
+            #if str(type(process.HBHENoiseFilter.label)) == "<type 'instancemethod'>":
 
             ## event scraping filter
             process.scrapingFilter = cms.EDFilter( "FilterOutScraping"
