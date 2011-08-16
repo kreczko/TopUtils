@@ -30,8 +30,10 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     options.setdefault('analyzersBeforeMuonIso', cms.Sequence())
     options.setdefault('analyzersBeforeElecIso', cms.Sequence())
     options.setdefault('excludeElectronsFromWsFromGenJets', False)
-    options.setdefault('applyMETCorrections', False)
+    options.setdefault('METCorrectionLevel', 0)
 
+    if 'applyMETCorrections' in options:
+        raise KeyError, "The option 'applyMETCorrections' is not supported anymore by prependPF2PATSequence, please use 'METCorrectionLevel'! 'METCorrectionLevel' may be set to 0,1,2 (no correction, TypeI, TypeII corrections)"
 
     ## tool to replace all input tags in a given sequence
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
@@ -48,10 +50,6 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
 
     ## standard PAT configuration file
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
-
-    ## this needs to be re-run to compute rho for the L1Fastjet corrections
-    from RecoJets.JetProducers.kt4PFJets_cfi import kt4PFJets
-    process.kt6PFJets = kt4PFJets.clone(src='pfNoElectron', doAreaFastjet=True, doRhoFastjet=True, rParam=0.6)
 
     ## create a good vertex collection
     pvSelection = cms.PSet( minNdof = cms.double( 4.)
@@ -157,12 +155,11 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     setattr(process,'pfSelectedPhotons'       +postfix, pfSelectedPhotons       )
 
     ## add selected pf candidates to the sequence
-    getattr(process,'patPF2PATSequence'+postfix).replace(getattr(process,'pfAllPhotons'+postfix),
-                                                         getattr(process,'pfAllPhotons'+postfix)*
-                                                         getattr(process,'pfSelectedChargedHadrons'+postfix)*
-                                                         getattr(process,'pfSelectedNeutralHadrons'+postfix)*
-                                                         getattr(process,'pfSelectedPhotons'+postfix)
-                                                         )
+    getattr(process,'patPF2PATSequence'+postfix).replace( getattr(process,'pfAllPhotons'+postfix), getattr(process,'pfAllPhotons'+postfix)
+                                                        * getattr(process,'pfSelectedChargedHadrons'+postfix)
+                                                        * getattr(process,'pfSelectedNeutralHadrons'+postfix)
+                                                        * getattr(process,'pfSelectedPhotons'+postfix)
+                                                        )
 
     ## removal of unnecessary modules
     getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'patPFParticles'+postfix))
@@ -212,10 +209,9 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## adapt isolation cut
     getattr(process,'pfIsolatedMuons'+postfix).combinedIsolationCut = options['pfIsoValMuon']
 
-    getattr(process,'patPF2PATSequence'+postfix).replace(getattr(process,'pfIsolatedMuons'+postfix),
-                                                         options['analyzersBeforeMuonIso'] *
-                                                         getattr(process,'pfIsolatedMuons'+postfix)
-                                                         )
+    getattr(process,'patPF2PATSequence'+postfix).replace( getattr(process,'pfIsolatedMuons'+postfix)
+                                                        , options['analyzersBeforeMuonIso'] * getattr(process,'pfIsolatedMuons'+postfix)
+                                                        )
 
     ## filter event if no isolated muon found
     if options['skipIfNoPFMuon']:
@@ -224,8 +220,8 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
                                             , minNumber = cms.uint32(1)
                                             )
 
-        getattr(process,'patPF2PATSequence'+postfix).replace( getattr(process,'pfIsolatedMuons'+postfix)
-                                                            , getattr(process,'pfIsolatedMuons'+postfix) * process.isoMuonFilter
+        getattr(process,'patPF2PATSequence'+postfix).replace( getattr(process,'pfIsolatedMuons'+postfix), getattr(process,'pfIsolatedMuons'+postfix)
+                                                            * process.isoMuonFilter
                                                             )
 
     ## use beamspot for dB calculation
@@ -255,9 +251,10 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
         setattr(process,'noCutIsoDepMuonWithNeutral'+postfix, getattr(process,'isoDepMuonWithNeutral'+postfix).clone(src = 'pfAllMuons'+postfix))
         setattr(process,'noCutIsoDepMuonWithPhotons'+postfix, getattr(process,'isoDepMuonWithPhotons'+postfix).clone(src = 'pfAllMuons'+postfix))
 
-        noCutIsoDepMuon = cms.PSet(pfNeutralHadrons = cms.InputTag("noCutIsoDepMuonWithNeutral"+postfix),
-                                   pfChargedHadrons = cms.InputTag("noCutIsoDepMuonWithCharged"+postfix),
-                                   pfPhotons        = cms.InputTag("noCutIsoDepMuonWithPhotons"+postfix))
+        noCutIsoDepMuon = cms.PSet( pfNeutralHadrons = cms.InputTag("noCutIsoDepMuonWithNeutral"+postfix)
+                                  , pfChargedHadrons = cms.InputTag("noCutIsoDepMuonWithCharged"+postfix)
+                                  , pfPhotons        = cms.InputTag("noCutIsoDepMuonWithPhotons"+postfix)
+                                  )
 
         setattr(process,'noCutIsoValMuonWithCharged'+postfix, getattr(process,'isoValMuonWithCharged'+postfix).clone())
         setattr(process,'noCutIsoValMuonWithNeutral'+postfix, getattr(process,'isoValMuonWithNeutral'+postfix).clone())
@@ -267,41 +264,45 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
         getattr(process,'noCutIsoValMuonWithNeutral'+postfix).deposits[0].src = 'noCutIsoDepMuonWithNeutral'+postfix
         getattr(process,'noCutIsoValMuonWithPhotons'+postfix).deposits[0].src = 'noCutIsoDepMuonWithPhotons'+postfix
 
-        noCutIsoValMuon = cms.PSet(pfNeutralHadrons = cms.InputTag("noCutIsoValMuonWithNeutral"+postfix),
-                                   pfChargedHadrons = cms.InputTag("noCutIsoValMuonWithCharged"+postfix),
-                                   pfPhotons        = cms.InputTag("noCutIsoValMuonWithPhotons"+postfix))
+        noCutIsoValMuon = cms.PSet( pfNeutralHadrons = cms.InputTag("noCutIsoValMuonWithNeutral"+postfix)
+                                  , pfChargedHadrons = cms.InputTag("noCutIsoValMuonWithCharged"+postfix)
+                                  , pfPhotons        = cms.InputTag("noCutIsoValMuonWithPhotons"+postfix)
+                                  )
 
-        noCutIsolationValueMapsMuon = cms.VInputTag(cms.InputTag("noCutIsoValMuonWithCharged"),
-                                                    cms.InputTag("noCutIsoValMuonWithNeutral"),
-                                                    cms.InputTag("noCutIsoValMuonWithPhotons"))
+        noCutIsolationValueMapsMuon = cms.VInputTag( cms.InputTag("noCutIsoValMuonWithCharged")
+                                                   , cms.InputTag("noCutIsoValMuonWithNeutral")
+                                                   , cms.InputTag("noCutIsoValMuonWithPhotons")
+                                                   )
 
         setattr(process,'noCutPfIsolatedMuons'+postfix, getattr(process,'pfIsolatedMuons'+postfix).clone( src = 'pfAllMuons'+postfix
                                                                                                         , isolationValueMaps   = noCutIsolationValueMapsMuon
-                                                                                                        , combinedIsolationCut = 1e30))
+                                                                                                        , combinedIsolationCut = 1e30
+                                                                                                        ))
 
         setattr(process,'noCutMuonMatch'+postfix, getattr(process,'muonMatch'+postfix).clone(src = 'noCutPfIsolatedMuons'+postfix))
 
         setattr(process,'noCutPatMuons'+postfix, getattr(process,'patMuons'+postfix).clone( pfMuonSource     = 'noCutPfIsolatedMuons'+postfix
                                                                                           , genParticleMatch = 'noCutMuonMatch'+postfix
                                                                                           , isoDeposits      = noCutIsoDepMuon
-                                                                                          , isolationValues  = noCutIsoValMuon))
+                                                                                          , isolationValues  = noCutIsoValMuon
+                                                                                          ))
 
-        noCutPatMuonsSequence = cms.Sequence(getattr(process,'noCutIsoDepMuonWithCharged'+postfix) *
-                                             getattr(process,'noCutIsoDepMuonWithNeutral'+postfix) *
-                                             getattr(process,'noCutIsoDepMuonWithPhotons'+postfix) *
-                                             getattr(process,'noCutIsoValMuonWithCharged'+postfix) *
-                                             getattr(process,'noCutIsoValMuonWithNeutral'+postfix) *
-                                             getattr(process,'noCutIsoValMuonWithPhotons'+postfix) *
-                                             getattr(process,'noCutPfIsolatedMuons'+postfix) *
-                                             getattr(process,'noCutMuonMatch'+postfix) *
-                                             getattr(process,'noCutPatMuons'+postfix)
-                                             )
+        noCutPatMuonsSequence = cms.Sequence( getattr(process,'noCutIsoDepMuonWithCharged'+postfix)
+                                            * getattr(process,'noCutIsoDepMuonWithNeutral'+postfix)
+                                            * getattr(process,'noCutIsoDepMuonWithPhotons'+postfix)
+                                            * getattr(process,'noCutIsoValMuonWithCharged'+postfix)
+                                            * getattr(process,'noCutIsoValMuonWithNeutral'+postfix)
+                                            * getattr(process,'noCutIsoValMuonWithPhotons'+postfix)
+                                            * getattr(process,'noCutPfIsolatedMuons'+postfix)
+                                            * getattr(process,'noCutMuonMatch'+postfix)
+                                            * getattr(process,'noCutPatMuons'+postfix)
+                                            )
 
         if not options['runOnMC']:
             noCutPatMuonsSequence.remove(getattr(process,'noCutMuonMatch'+postfix))
 
-        getattr(process,'patPF2PATSequence'+postfix).replace( getattr(process,'pfAllMuons'+postfix)
-                                                            , getattr(process,'pfAllMuons'+postfix) * noCutPatMuonsSequence
+        getattr(process,'patPF2PATSequence'+postfix).replace( getattr(process,'pfAllMuons'+postfix), getattr(process,'pfAllMuons'+postfix)
+                                                            * noCutPatMuonsSequence
                                                             )
 
 
@@ -347,8 +348,8 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
                                                 , minNumber = cms.uint32(1)
                                                 )
 
-        getattr(process,'patPF2PATSequence'+postfix).replace( getattr(process,'pfIsolatedElectrons'+postfix)
-                                                            , getattr(process,'pfIsolatedElectrons'+postfix) * process.isoElectronFilter
+        getattr(process,'patPF2PATSequence'+postfix).replace( getattr(process,'pfIsolatedElectrons'+postfix), getattr(process,'pfIsolatedElectrons'+postfix)
+                                                            * process.isoElectronFilter
                                                             )
 
     ## save eleID sources
@@ -357,24 +358,22 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## add CiC electron ID
     if options['electronIDs'].count('CiC') > 0 :
         process.load('RecoEgamma.ElectronIdentification.cutsInCategoriesElectronIdentificationV06_cfi')
-        process.eidCiCSequence = cms.Sequence(
-            process.eidVeryLooseMC  *
-            process.eidLooseMC      *
-            process.eidMediumMC     *
-            process.eidTightMC      *
-            process.eidSuperTightMC *
-            process.eidHyperTight1MC
-            )
+        process.eidCiCSequence = cms.Sequence( process.eidVeryLooseMC
+                                             * process.eidLooseMC
+                                             * process.eidMediumMC
+                                             * process.eidTightMC
+                                             * process.eidSuperTightMC
+                                             * process.eidHyperTight1MC
+                                             )
 
         ## embed CiC electron ID into patElectrons
-        eleIDsCiC = cms.PSet(
-            eidVeryLooseMC   = cms.InputTag("eidVeryLooseMC"),
-            eidLooseMC       = cms.InputTag("eidLooseMC"),
-            eidMediumMC      = cms.InputTag("eidMediumMC"),
-            eidTightMC       = cms.InputTag("eidTightMC"),
-            eidSuperTightMC  = cms.InputTag("eidSuperTightMC"),
-            eidHyperTight1MC = cms.InputTag("eidHyperTight1MC")
-            )
+        eleIDsCiC = cms.PSet( eidVeryLooseMC   = cms.InputTag("eidVeryLooseMC")
+                            , eidLooseMC       = cms.InputTag("eidLooseMC")
+                            , eidMediumMC      = cms.InputTag("eidMediumMC")
+                            , eidTightMC       = cms.InputTag("eidTightMC")
+                            , eidSuperTightMC  = cms.InputTag("eidSuperTightMC")
+                            , eidHyperTight1MC = cms.InputTag("eidHyperTight1MC")
+                            )
 
         for name in eleIDsCiC.parameterNames_():
             setattr(eleIDs,name,getattr(eleIDsCiC,name))
@@ -384,20 +383,19 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     if options['electronIDs'].count('classical') > 0 :
         process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
 
-        eleIDsClassical = cms.PSet(
-            simpleEleId95relIso = cms.InputTag("simpleEleId95relIso"),
-            simpleEleId90relIso = cms.InputTag("simpleEleId90relIso"),
-            simpleEleId85relIso = cms.InputTag("simpleEleId85relIso"),
-            simpleEleId80relIso = cms.InputTag("simpleEleId80relIso"),
-            simpleEleId70relIso = cms.InputTag("simpleEleId70relIso"),
-            simpleEleId60relIso = cms.InputTag("simpleEleId60relIso"),
-            simpleEleId95cIso   = cms.InputTag("simpleEleId95cIso"),
-            simpleEleId90cIso   = cms.InputTag("simpleEleId90cIso"),
-            simpleEleId85cIso   = cms.InputTag("simpleEleId85cIso"),
-            simpleEleId80cIso   = cms.InputTag("simpleEleId80cIso"),
-            simpleEleId70cIso   = cms.InputTag("simpleEleId70cIso"),
-            simpleEleId60cIso   = cms.InputTag("simpleEleId60cIso")
-            )
+        eleIDsClassical = cms.PSet( simpleEleId95relIso = cms.InputTag("simpleEleId95relIso")
+                                  , simpleEleId90relIso = cms.InputTag("simpleEleId90relIso")
+                                  , simpleEleId85relIso = cms.InputTag("simpleEleId85relIso")
+                                  , simpleEleId80relIso = cms.InputTag("simpleEleId80relIso")
+                                  , simpleEleId70relIso = cms.InputTag("simpleEleId70relIso")
+                                  , simpleEleId60relIso = cms.InputTag("simpleEleId60relIso")
+                                  , simpleEleId95cIso   = cms.InputTag("simpleEleId95cIso")
+                                  , simpleEleId90cIso   = cms.InputTag("simpleEleId90cIso")
+                                  , simpleEleId85cIso   = cms.InputTag("simpleEleId85cIso")
+                                  , simpleEleId80cIso   = cms.InputTag("simpleEleId80cIso")
+                                  , simpleEleId70cIso   = cms.InputTag("simpleEleId70cIso")
+                                  , simpleEleId60cIso   = cms.InputTag("simpleEleId60cIso")
+                                  )
 
         for name in eleIDsClassical.parameterNames_():
             setattr(eleIDs,name,getattr(eleIDsClassical,name))
@@ -435,9 +433,10 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
         setattr(process,'noCutIsoDepElectronWithNeutral'+postfix, getattr(process,'isoDepElectronWithNeutral'+postfix).clone(src = 'noCutPfAllElectrons'+postfix))
         setattr(process,'noCutIsoDepElectronWithPhotons'+postfix, getattr(process,'isoDepElectronWithPhotons'+postfix).clone(src = 'noCutPfAllElectrons'+postfix))
 
-        noCutIsoDepElectron = cms.PSet(pfNeutralHadrons = cms.InputTag("noCutIsoDepElectronWithNeutral"+postfix),
-                                       pfChargedHadrons = cms.InputTag("noCutIsoDepElectronWithCharged"+postfix),
-                                       pfPhotons        = cms.InputTag("noCutIsoDepElectronWithPhotons"+postfix))
+        noCutIsoDepElectron = cms.PSet( pfNeutralHadrons = cms.InputTag("noCutIsoDepElectronWithNeutral"+postfix)
+                                      , pfChargedHadrons = cms.InputTag("noCutIsoDepElectronWithCharged"+postfix)
+                                      , pfPhotons        = cms.InputTag("noCutIsoDepElectronWithPhotons"+postfix)
+                                      )
 
         setattr(process,'noCutIsoValElectronWithCharged'+postfix, getattr(process,'isoValElectronWithCharged'+postfix).clone())
         setattr(process,'noCutIsoValElectronWithNeutral'+postfix, getattr(process,'isoValElectronWithNeutral'+postfix).clone())
@@ -447,17 +446,20 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
         getattr(process,'noCutIsoValElectronWithNeutral'+postfix).deposits[0].src = 'noCutIsoDepElectronWithNeutral'+postfix
         getattr(process,'noCutIsoValElectronWithPhotons'+postfix).deposits[0].src = 'noCutIsoDepElectronWithPhotons'+postfix
 
-        noCutIsoValElectron = cms.PSet(pfNeutralHadrons = cms.InputTag("noCutIsoValElectronWithNeutral"+postfix),
-                                       pfChargedHadrons = cms.InputTag("noCutIsoValElectronWithCharged"+postfix),
-                                       pfPhotons        = cms.InputTag("noCutIsoValElectronWithPhotons"+postfix))
+        noCutIsoValElectron = cms.PSet( pfNeutralHadrons = cms.InputTag("noCutIsoValElectronWithNeutral"+postfix)
+                                      , pfChargedHadrons = cms.InputTag("noCutIsoValElectronWithCharged"+postfix)
+                                      , pfPhotons        = cms.InputTag("noCutIsoValElectronWithPhotons"+postfix)
+                                      )
 
-        noCutIsolationValueMapsElectron = cms.VInputTag(cms.InputTag("noCutIsoValElectronWithCharged"),
-                                                        cms.InputTag("noCutIsoValElectronWithNeutral"),
-                                                        cms.InputTag("noCutIsoValElectronWithPhotons"))
+        noCutIsolationValueMapsElectron = cms.VInputTag( cms.InputTag("noCutIsoValElectronWithCharged")
+                                                       , cms.InputTag("noCutIsoValElectronWithNeutral")
+                                                       , cms.InputTag("noCutIsoValElectronWithPhotons")
+                                                       )
 
         setattr(process,'noCutPfIsolatedElectrons'+postfix, getattr(process,'pfIsolatedElectrons'+postfix).clone( src = 'noCutPfAllElectrons'+postfix
                                                                                                                 , isolationValueMaps   = noCutIsolationValueMapsElectron
-                                                                                                                , combinedIsolationCut = 1e30))
+                                                                                                                , combinedIsolationCut = 1e30
+                                                                                                                ))
 
         ## right now no new matcher is needed as the gsfElectrons need to be matched
         #setattr(process,'noCutElectronMatch'+postfix, getattr(process,'electronMatch'+postfix).clone())
@@ -466,20 +468,21 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
         setattr(process,'noCutPatElectrons'+postfix, getattr(process,'patElectrons'+postfix).clone( pfElectronSource = 'noCutPfIsolatedElectrons'+postfix
                                                                                                   #, genParticleMatch = 'noCutElectronMatch'+postfix
                                                                                                   , isoDeposits      = noCutIsoDepElectron
-                                                                                                  , isolationValues  = noCutIsoValElectron))
+                                                                                                  , isolationValues  = noCutIsoValElectron
+                                                                                                  ))
 
-        noCutPatElectronsSequence = cms.Sequence(getattr(process,'noCutPfAllElectrons'+postfix) *
-                                                 getattr(process,'noCutIsoDepElectronWithCharged'+postfix) *
-                                                 getattr(process,'noCutIsoDepElectronWithNeutral'+postfix) *
-                                                 getattr(process,'noCutIsoDepElectronWithPhotons'+postfix) *
-                                                 getattr(process,'noCutIsoValElectronWithCharged'+postfix) *
-                                                 getattr(process,'noCutIsoValElectronWithNeutral'+postfix) *
-                                                 getattr(process,'noCutIsoValElectronWithPhotons'+postfix) *
-                                                 getattr(process,'noCutPfIsolatedElectrons'+postfix) *
-                                                 #getattr(process,'noCutElectronMatch'+postfix) *
-                                                 getattr(process,'electronMatch'+postfix)       *
-                                                 getattr(process,'noCutPatElectrons'+postfix)
-                                                 )
+        noCutPatElectronsSequence = cms.Sequence( getattr(process,'noCutPfAllElectrons'+postfix)
+                                                * getattr(process,'noCutIsoDepElectronWithCharged'+postfix)
+                                                * getattr(process,'noCutIsoDepElectronWithNeutral'+postfix)
+                                                * getattr(process,'noCutIsoDepElectronWithPhotons'+postfix)
+                                                * getattr(process,'noCutIsoValElectronWithCharged'+postfix)
+                                                * getattr(process,'noCutIsoValElectronWithNeutral'+postfix)
+                                                * getattr(process,'noCutIsoValElectronWithPhotons'+postfix)
+                                                * getattr(process,'noCutPfIsolatedElectrons'+postfix)
+                                                #* getattr(process,'noCutElectronMatch'+postfix)
+                                                * getattr(process,'electronMatch'+postfix)
+                                                * getattr(process,'noCutPatElectrons'+postfix)
+                                                )
 
         if not options['runOnMC']:
             noCutPatElectronsSequence.remove(getattr(process,'electronMatch'+postfix))
@@ -558,8 +561,9 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## embedding of resolutions into the patObjects
     if options['addResolutions']:
         getattr(process,'patJets'+postfix).addResolutions = True
-        getattr(process,'patJets'+postfix).resolutions = cms.PSet(default = cms.string("udscResolutionPF"),
-                                                                  bjets = cms.string("bjetResolutionPF"))
+        getattr(process,'patJets'+postfix).resolutions = cms.PSet( default = cms.string("udscResolutionPF")
+                                                                 , bjets = cms.string("bjetResolutionPF")
+                                                                 )
 
     ## remove obsolte genJet clustering sequences
     getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'genParticlesForJetsNoNu'+postfix))
@@ -582,6 +586,10 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## apply selection for pat jets
     getattr(process,'selectedPatJets'+postfix).cut = options['cutsJets']
 
+    ## this needs to be re-run to compute rho for the L1Fastjet corrections
+    from RecoJets.JetProducers.kt4PFJets_cfi import kt4PFJets
+    process.kt6PFJets = kt4PFJets.clone(src=getattr(process,'pfJets'+postfix).src, doAreaFastjet=True, doRhoFastjet=True, rParam=0.6)
+
     ## add kt6PFJets for rho calculation needed for L1FastJet correction
     getattr(process,'patPF2PATSequence'+postfix).replace( getattr(process,'pfMET'+postfix)
                                                         , process.kt6PFJets * getattr(process,'pfMET'+postfix)
@@ -595,7 +603,9 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## re-configure and create MET
     getattr(process,'pfMET'+postfix).src = 'pfNoPileUp'+postfix
 
-    if options['applyMETCorrections']:
+    if options['METCorrectionLevel'] == 0 and not str(options['METCorrectionLevel']) == 'False':
+        print "Raw MET will be used, no corrections will be applied!"
+    elif options['METCorrectionLevel'] == 1 and not str(options['METCorrectionLevel']) == 'True' or options['METCorrectionLevel'] == 2 :
         ## create jet correctors for MET corrections
         from JetMETCorrections.Configuration.JetCorrectionServicesAllAlgos_cff import ak5PFL1Fastjet, ak5PFL2Relative, ak5PFL3Absolute, ak5PFResidual
         ## L1FastJet
@@ -623,26 +633,36 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
 
         ## configuration of MET corrections
         from JetMETCorrections.Type1MET.MetType1Corrections_cff import metJESCorAK5PFJet
-        setattr(process,'metJESCorPFAK5'+postfix,metJESCorAK5PFJet.clone())
-        getattr(process,'metJESCorPFAK5'+postfix).inputUncorJetsLabel = 'pfJets'+postfix
-        getattr(process,'metJESCorPFAK5'+postfix).metType = 'PFMET'
-        getattr(process,'metJESCorPFAK5'+postfix).inputUncorMetLabel = 'pfMET'
-        getattr(process,'metJESCorPFAK5'+postfix).jetPTthreshold = cms.double(10.0)
-        getattr(process,'metJESCorPFAK5'+postfix).corrector = cms.string('combinedCorrector')
-        getattr(process,'metJESCorPFAK5'+postfix).useTypeII = True
-        getattr(process,'metJESCorPFAK5'+postfix).jetPTthreshold = cms.double(10.0)
-        getattr(process,'metJESCorPFAK5'+postfix).UscaleA = cms.double(1.5)
-        getattr(process,'metJESCorPFAK5'+postfix).UscaleB = cms.double(0)
-        getattr(process,'metJESCorPFAK5'+postfix).UscaleC = cms.double(0)
-        getattr(process,'metJESCorPFAK5'+postfix).inputUncorUnlusteredLabel = cms.untracked.InputTag('pfNoJet'+postfix)
+        setattr(process,'corMet'+postfix,metJESCorAK5PFJet.clone())
+        getattr(process,'corMet'+postfix).metType = 'PFMET'
+        getattr(process,'corMet'+postfix).inputUncorMetLabel = 'pfMET'
+        ## configuration of TypeI corrections
+        getattr(process,'corMet'+postfix).inputUncorJetsLabel = 'pfJets'+postfix
+        getattr(process,'corMet'+postfix).jetPTthreshold = cms.double(10.0)
+        getattr(process,'corMet'+postfix).corrector = cms.string('combinedCorrector')
+        ## decide which MET correction level to use
+        if options['METCorrectionLevel'] == 1 :
+            print "TypeI corrected MET will be used, corrections for JEC will be applied!"
+            getattr(process,'corMet'+postfix).useTypeII = False
+        elif options['METCorrectionLevel'] == 2 :
+            print "TypeII corrected MET will be used, corrections for JEC and unclustered energy will be applied!"
+            getattr(process,'corMet'+postfix).useTypeII = True
+        ## configuration of TypeII corrections
+        getattr(process,'corMet'+postfix).UscaleA = cms.double(1.5)
+        getattr(process,'corMet'+postfix).UscaleB = cms.double(0)
+        getattr(process,'corMet'+postfix).UscaleC = cms.double(0)
+        getattr(process,'corMet'+postfix).inputUncorUnlusteredLabel = cms.untracked.InputTag('pfNoJet'+postfix)
 
         ## add MET corrections to sequence
-        getattr(process,'patPF2PATSequence'+postfix).replace( getattr(process,'pfMET'+postfix)
-                                                            , getattr(process,'pfMET'+postfix) * getattr(process,'metJESCorPFAK5'+postfix)
+        getattr(process,'patPF2PATSequence'+postfix).replace( getattr(process,'pfMET'+postfix), getattr(process,'pfMET'+postfix)
+                                                            * getattr(process,'corMet'+postfix)
                                                             )
 
         ## change uncorrected MET to corrected MET in PAT
-        getattr(process,'patMETs'+postfix).metSource = 'metJESCorPFAK5'+postfix
+        getattr(process,'patMETs'+postfix).metSource = 'corMet'+postfix
+
+    else:
+        raise ValueError, "Wrong config: 'METCorrectionLevel' may only be set to 0,1,2 (no correction, TypeI, TypeII corrections) but was set to *"+str(options['METCorrectionLevel'])+"*!"
 
     ## embedding of resolutions into the patObjects
     if options['addResolutions']:
@@ -693,10 +713,9 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
         massSearchReplaceAnyInputTag(getattr(process,'patPF2PATSequence'+postfix),'pfNoMuon'+postfix,'pfNoPileUp'+postfix)
 
     ## define sequence with all modules in
-    process.pf2pat = cms.Sequence(
-        process.goodOfflinePrimaryVertices *
-        process.goodOfflinePrimaryVerticesWithBS
-        )
+    process.pf2pat = cms.Sequence( process.goodOfflinePrimaryVertices
+                                 * process.goodOfflinePrimaryVerticesWithBS
+                                 )
 
     ## prepare running of sequence if input is AOD
     if options['runOnAOD']:
@@ -754,7 +773,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     print 'analyzersBeforeMuonIso:', options['analyzersBeforeMuonIso']
     print 'analyzersBeforeElecIso:', options['analyzersBeforeElecIso']
     print 'excludeElectronsFromWsFromGenJets:', options['excludeElectronsFromWsFromGenJets']
-    print 'applyMETCorrections:', options['applyMETCorrections']
+    print 'METCorrectionLevel:', options['METCorrectionLevel']
     print '==================================================='
     print '|||||||||||||||||||||||||||||||||||||||||||||||||||'
     print '==================================================='
