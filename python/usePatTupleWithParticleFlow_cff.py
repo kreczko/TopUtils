@@ -497,42 +497,42 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ##
 
     ## remove the full pftau sequence as it is not needed for us
-    if not os.getenv('CMSSW_VERSION').startswith('CMSSW_4_1_'):
-        getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTauPFJets08Region'+postfix))
-        getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTauPileUpVertices'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTauTagInfoProducer'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfJetsPiZeros'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfJetsLegacyTaNCPiZeros'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfJetsLegacyHPSPiZeros'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTausBase'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTausBaseDiscriminationByLeadingTrackFinding'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTausBaseDiscriminationByIsolation'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTausBaseDiscriminationByLeadingPionPtCut'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTaus'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfNoTau'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByLeadingTrackFinding'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByLeadingTrackPtCut'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByLeadingPionPtCut'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByIsolation'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTrackIsolation'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByECALIsolation'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByIsolationUsingLeadingPion'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTrackIsolationUsingLeadingPion'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByECALIsolationUsingLeadingPion'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationAgainstElectron'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationAgainstMuon'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTaNC'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTaNCfrOnePercent'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTaNCfrHalfPercent'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTaNCfrQuarterPercent'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTaNCfrTenthPercent'+postfix))
+#    if not os.getenv('CMSSW_VERSION').startswith('CMSSW_4_1_'):
+#        getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTauPFJets08Region'+postfix))
+#        getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTauPileUpVertices'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTauTagInfoProducer'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfJetsPiZeros'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfJetsLegacyTaNCPiZeros'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfJetsLegacyHPSPiZeros'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTausBase'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTausBaseDiscriminationByLeadingTrackFinding'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTausBaseDiscriminationByIsolation'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTausBaseDiscriminationByLeadingPionPtCut'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfTaus'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfNoTau'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByLeadingTrackFinding'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByLeadingTrackPtCut'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByLeadingPionPtCut'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByIsolation'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTrackIsolation'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByECALIsolation'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByIsolationUsingLeadingPion'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTrackIsolationUsingLeadingPion'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByECALIsolationUsingLeadingPion'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationAgainstElectron'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationAgainstMuon'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTaNC'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTaNCfrOnePercent'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTaNCfrHalfPercent'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTaNCfrQuarterPercent'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'shrinkingConePFTauDiscriminationByTaNCfrTenthPercent'+postfix))
 
     ##
     ## customize photons
     ##
 
     ## remove the photons match
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'photonMatch'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'photonMatch'+postfix))
 
     ##
     ## customize jets
