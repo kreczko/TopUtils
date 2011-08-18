@@ -800,7 +800,8 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## BUGFIX FOR STUPID ERROR IN HBHENoiseFilter
     if options['runOnAOD']:
         if not options['runOnMC']:
-            setattr(process.HBHENoiseFilter, 'label', labelOfHBHENoiseFilter)
+            if not labelOfHBHENoiseFilter == cms.InputTag(""):
+                setattr(process.HBHENoiseFilter, 'label', labelOfHBHENoiseFilter)
 
     if 'postfix' in options:
         print 'POSTFIXES ARE NOT SUPPORTED AT THE MOMENT, THIS OPTION IS IGNORED'
