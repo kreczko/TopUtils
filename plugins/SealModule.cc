@@ -9,6 +9,9 @@ DEFINE_FWK_MODULE( EventWeightPlain );
 #include "TopAnalysis/TopUtils/plugins/EventWeightPU.h"
 DEFINE_FWK_MODULE( EventWeightPU );
 
+#include "TopAnalysis/TopUtils/plugins/EventWeightDileptonSF.h"
+DEFINE_FWK_MODULE( EventWeightDileptonSF );
+
 #include "TopAnalysis/TopUtils/plugins/JetEnergyScale.h"
 DEFINE_FWK_MODULE( JetEnergyScale );
 
