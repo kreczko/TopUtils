@@ -6,6 +6,7 @@
 <use name="CondFormats/JetMETObjects"/>
 <use name="RecoBTag/PerformanceDB"/>
 <use name="RecoBTag/Records"/>
+<use   name="AnalysisDataFormats/TopObjects"/>
 
 <export>
    <lib name="TopAnalysisTopUtils"/>
