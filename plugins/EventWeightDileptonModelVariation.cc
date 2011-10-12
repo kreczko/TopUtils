@@ -22,6 +22,7 @@ private:
     double getTopEtaWeight();
     double getTopMassWeight();
     double getTopMassWeightLandau();
+    double getTopRapidityWeight();
 
     edm::InputTag ttGenEvent_;
     edm::Handle<TtGenEvent> genEvt;
@@ -93,6 +94,14 @@ double EventWeightDileptonModelVariation::getTopEtaWeight()
     return weight;
 }
 
+double EventWeightDileptonModelVariation::getTopRapidityWeight()
+{
+    double weight = (1+(std::abs(genEvt->top()->rapidity())-weight1x_)*slope_) 
+                  * (1+(std::abs(genEvt->topBar()->rapidity())-weight1x_)*slope_);
+    //maxeta_->Fill(maxeta);
+    return weight;
+}
+
 double EventWeightDileptonModelVariation::getTopMassWeight()
 {
     double mass = (genEvt->top()->p4() + genEvt->topBar()->p4()).M();
@@ -121,6 +130,7 @@ void EventWeightDileptonModelVariation::produce(edm::Event& evt, const edm::Even
     if (genEvt.failedToGet() || weightVariable_.empty()) *eventWeight = 1;
     else if (!weightVariable_.compare("toppt")) *eventWeight = getTopPtWeight();
     else if (!weightVariable_.compare("topeta")) *eventWeight = getTopEtaWeight();
+    else if (!weightVariable_.compare("toprapidity")) *eventWeight = getTopRapidityWeight();
     else if (!weightVariable_.compare("ttbarmass")) *eventWeight = getTopMassWeight();
     else if (!weightVariable_.compare("ttbarmasslandau")) *eventWeight = getTopMassWeightLandau();
     else edm::LogError("EventWeightDilepton") << "don't know which variation to take, " 
