@@ -8,6 +8,7 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "TMath.h"
+#include <TH2.h>
 
 class EventWeightDileptonModelVariation : public edm::EDProducer {
 
@@ -34,9 +35,9 @@ private:
     double landauSigma_;
     double landauMoveX_;
     TH1 *modelWeightSum_;
-    TH1 *maxpt_, *maxptWeighted_;
-    TH1 *maxeta_;
+    TH1 *pt_, *ptWeighted_;
     TH1 *mass_, *massWeighted_;
+    TH2 *weightVsMass_;
 };
 
 EventWeightDileptonModelVariation::EventWeightDileptonModelVariation(const edm::ParameterSet& cfg):
@@ -67,37 +68,37 @@ void EventWeightDileptonModelVariation::beginJob()
     modelWeightSum_->GetXaxis()->SetBinLabel(1, "NEvents");
     modelWeightSum_->GetXaxis()->SetBinLabel(2, "Weighted");
     
-    maxpt_ = fs->make<TH1F>("maxpt", "maxpt", 100, 0, 400);
-    maxptWeighted_ = fs->make<TH1F>("maxptWeighted", "maxptWeighted", 100, 0, 400);
-    maxeta_ = fs->make<TH1F>("maxeta", "maxeta", 50, -5, 5);
+    pt_ = fs->make<TH1F>("pttop", "pttop", 100, 0, 400);
+    ptWeighted_ = fs->make<TH1F>("maxptWeighted", "maxptWeighted", 100, 0, 400);
+    //maxeta_ = fs->make<TH1F>("maxeta", "maxeta", 50, -5, 5);
     mass_ = fs->make<TH1F>("ttbarmass", "ttbarmass", 100, 0, 2000);
     massWeighted_ = fs->make<TH1F>("ttbarmassWeighted", "ttbarmassWeighted", 100, 0, 2000);
-
+    weightVsMass_ = fs->make<TH2F>("weightVsMass", "weightVsMass", 100, 0, 2000, 100, 0, 100);
 }
 
 
 double EventWeightDileptonModelVariation::getTopPtWeight()
 {
-    double maxpt = std::max(genEvt->top()->pt(), genEvt->topBar()->pt());
-//     std::cout << "getTopPtWeight: " << maxpt << " " << genEvt->top()->pt() << " " << genEvt->topBar()->pt() << " " 
-//         << weight1x_ << " " << slope_ << "\n";
-    double weight = 1+(maxpt-weight1x_)*slope_;
-    maxpt_->Fill(maxpt);
-    maxptWeighted_->Fill(maxpt, weight);
+    double weight = (1+(genEvt->top()->pt()-weight1x_)*slope_) * (1+(genEvt->topBar()->pt()-weight1x_)*slope_);
+    pt_->Fill(genEvt->top()->pt());
+    ptWeighted_->Fill(genEvt->top()->pt(), weight);
     return weight;
 }
 
 double EventWeightDileptonModelVariation::getTopEtaWeight()
 {
-    double maxeta = std::max(std::abs(genEvt->top()->eta()), std::abs(genEvt->topBar()->eta()));
-    maxeta_->Fill(maxeta);
-    return (1+(maxeta-weight1x_)*slope_);
+    double weight = (1+(std::abs(genEvt->top()->eta())-weight1x_)*slope_) 
+                  * (1+(std::abs(genEvt->topBar()->eta())-weight1x_)*slope_);
+    //maxeta_->Fill(maxeta);
+    return weight;
 }
 
 double EventWeightDileptonModelVariation::getTopMassWeight()
 {
     double mass = (genEvt->top()->p4() + genEvt->topBar()->p4()).M();
-    return (1+(mass-weight1x_)*slope_);
+    double weight = (1+(mass-weight1x_)*slope_);
+    weightVsMass_->Fill(mass, weight);
+    return weight;
 }
 
 double EventWeightDileptonModelVariation::getTopMassWeightLandau()
