@@ -34,6 +34,9 @@ class EventWeightPU : public edm::EDProducer {
       float inTag_PUSysShiftUp;
       float inTag_PUSysShiftDown;
 
+      bool inTag_CreateWeight3DHisto;
+      std::string inTag_Weight3DHistoFile;
+
       edm::LumiReWeighting LumiWeights_;
 
       reweight::PoissonMeanShifter PUShiftUp_;
@@ -45,6 +48,9 @@ class EventWeightPU : public edm::EDProducer {
       double wght3BX_;
       double wght3BX_Up_;
       double wght3BX_Down_;
+      double wght3D_;
+      double wght3D_Up_;
+      double wght3D_Down_;
 };
 
 #endif

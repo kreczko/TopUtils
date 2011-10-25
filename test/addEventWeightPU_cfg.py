@@ -27,7 +27,7 @@ process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring("/sto
 #### Number of Events
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10000)
+    input = cms.untracked.int32(10)
     )
 
 #### Process Options
@@ -40,12 +40,14 @@ process.options = cms.untracked.PSet(
 
 process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
 
-process.eventWeightPU.MCSampleFile      = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_TTJets_TuneZ2_7TeV_madgraph_tauola.root"
-process.eventWeightPU.MCSampleHistoName = "MCPUDistribution/pileup"
-process.eventWeightPU.DataFile          = "TopAnalysis/TopUtils/data/Data_PUDist_160404-163869_7TeV_May10ReReco_Collisions11_v2_and_165088-167913_7TeV_PromptReco_Collisions11.root"
-process.eventWeightPU.DataHistoName     = "pileup"    
-process.eventWeightPU.PUSysShiftUp      =  0.6
-process.eventWeightPU.PUSysShiftDown    = -0.6
+process.eventWeightPU.MCSampleFile        = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_TTJets_TuneZ2_7TeV_madgraph_tauola.root"
+process.eventWeightPU.MCSampleHistoName   = "MCPUDistribution/pileup"
+process.eventWeightPU.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_160404-163869_7TeV_May10ReReco_Collisions11_v2_and_165088-167913_7TeV_PromptReco_Collisions11.root"
+process.eventWeightPU.DataHistoName       = "pileup"    
+process.eventWeightPU.PUSysShiftUp        =  0.6
+process.eventWeightPU.PUSysShiftDown      = -0.6
+process.eventWeightPU.CreateWeight3DHisto = False
+process.eventWeightPU.Weight3DHistoFile   = "data/DefaultWeight3D.root"
 
 #### Output Module
 
