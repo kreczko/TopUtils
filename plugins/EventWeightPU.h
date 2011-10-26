@@ -35,7 +35,7 @@ class EventWeightPU : public edm::EDProducer {
       float inTag_PUSysShiftDown;
 
       bool inTag_CreateWeight3DHisto;
-      std::string inTag_Weight3DHistoFile;
+      edm::FileInPath inTag_Weight3DHistoFile;
 
       edm::LumiReWeighting LumiWeights_;
 

@@ -17,7 +17,7 @@ EventWeightPU::EventWeightPU(const edm::ParameterSet& cfg):
   inTag_PUSysShiftUp(cfg.getParameter<double>("PUSysShiftUp") ),
   inTag_PUSysShiftDown(cfg.getParameter<double>("PUSysShiftDown") ),
   inTag_CreateWeight3DHisto(cfg.getParameter<bool>("CreateWeight3DHisto") ), 
-  inTag_Weight3DHistoFile(cfg.getParameter<std::string>("Weight3DHistoFile") )
+  inTag_Weight3DHistoFile(cfg.getParameter<edm::FileInPath>("Weight3DHistoFile") )
 {
 
   LumiWeights_ = edm::LumiReWeighting(inTag_MCSampleFile.fullPath(),inTag_DataFile.fullPath(),inTag_MCSampleHistoName,inTag_DataHistoName);
@@ -26,7 +26,7 @@ EventWeightPU::EventWeightPU(const edm::ParameterSet& cfg):
   PUShiftDown_ = reweight::PoissonMeanShifter(inTag_PUSysShiftDown);
 
   if (inTag_CreateWeight3DHisto){ std::cout << "Create new 3D matrix." << std::endl; LumiWeights_.weight3D_init();}
-  else LumiWeights_.weight3D_init(inTag_Weight3DHistoFile);
+  else LumiWeights_.weight3D_init(inTag_Weight3DHistoFile.fullPath());
 
   produces<double>("eventWeightPU");
   produces<double>("eventWeightPUUp");

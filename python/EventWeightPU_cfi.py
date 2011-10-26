@@ -9,8 +9,8 @@ eventWeightPU = cms.EDProducer("EventWeightPU",
     DataHistoName       = cms.string("pileup"),          
     PUSysShiftUp        = cms.double(0.6),
     PUSysShiftDown      = cms.double(-0.6),
-    CreateWeight3DHisto = cms.bool(True),
-    Weight3DHistoFile   = cms.string("TopAnalysis/TopUtils/data/Weight3D.root")
+    CreateWeight3DHisto = cms.bool(False),
+    Weight3DHistoFile   = cms.FileInPath("TopAnalysis/TopUtils/data/DefaultWeight3D.root")
 )
 
 makeWeightsPU = cms.Sequence(eventWeightPU)
