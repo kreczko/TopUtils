@@ -225,12 +225,16 @@ sub submitJob {
 sub check {
     my @dirs = @_;
     my $alldone;
+    my %doneDirs;
     do {
         $alldone = 1;
         my $qstat = QStat->new();
         for my $dir (@dirs) {
+            next if $doneDirs{$dir};
             { local $|=1; print "Looking for jobs in $dir"; }
-            $alldone = checkJob($dir, $qstat) && $alldone;
+            my $thisDone = checkJob($dir, $qstat);
+            $doneDirs{$dir} = 1 if $thisDone;
+            $alldone = $thisDone && $alldone;
         }
         if (!$alldone && defined $args{'t'}) {
             print "Waiting for next check at " . localtime(time + $args{'t'}*60) . ", cancel with Ctrl-C...\n";
@@ -243,6 +247,7 @@ sub check {
 
 sub checkJob {
     my ($dir, $qstat) = @_;
+    my $isComplete = 0;
     my %jobs = getJobs($qstat, "$dir/jobids.txt"); #get arrayid => job-object
 
 #     opendir(my $dirHandle, $dir) or die "can't opendir $dir: $!";
@@ -293,6 +298,7 @@ sub checkJob {
     print "\n" if $NResubmitted || $NError;
     if ($NDoneJobs == keys %jobs) {
         print " --> ", colored("100% done!", 'on_green bold'), "  --  $NDoneJobs jobs";
+        $isComplete = 1;
     } else {
         printf " -->  %d%%  --  %d jobs", 100*$NDoneJobs / keys %jobs, scalar keys %jobs;
         my @N = (colored(', %d queueing', 'dark cyan') => $NWaiting,
@@ -331,6 +337,7 @@ sub checkJob {
             #print colored(" - results have already been joined\n", C_OK);
         }
     }
+    return $isComplete;
 }
 
 sub bytesToHuman {
@@ -516,9 +523,11 @@ if [ -e $current/naf_DIRECTORY/out$SGE_TASK_ID.txt.part.1 ] ; then
     NSkip=$(sumTriggerReports2.pl $current/naf_DIRECTORY/out$SGE_TASK_ID.txt.part.* | perl -ne 'print($1), exit if /TrigReport\s*Events\stotal\s*=\s*(\d+)/')
     echo "Skipping $NSkip old events"
     PYTHONDONTWRITEBYTECODE=1 cmsRun -j $tmp/jobreport.xml $tmp/run.py CMSRUNPARAMETER,skipEvents=$NSkip
+    #DCACHE_CLIENT_ACTIVE=1 PYTHONDONTWRITEBYTECODE=1 cmsRun -j $tmp/jobreport.xml $tmp/run.py CMSRUNPARAMETER,skipEvents=$NSkip
 else
     continueOldJobNo=0
     PYTHONDONTWRITEBYTECODE=1 cmsRun -j $tmp/jobreport.xml $tmp/run.py CMSRUNPARAMETER
+    #DCACHE_CLIENT_ACTIVE=1 PYTHONDONTWRITEBYTECODE=1 cmsRun -j $tmp/jobreport.xml $tmp/run.py CMSRUNPARAMETER
 fi
 
 
