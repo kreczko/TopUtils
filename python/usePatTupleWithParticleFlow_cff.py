@@ -11,6 +11,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     options.setdefault('runOnAOD', False)
     options.setdefault('switchOffEmbedding', True)
     options.setdefault('addResolutions', True)
+    options.setdefault('resolutionsVersion', 'tqaf') ## can be set to 'tqaf' and 'summer11'
     #options.setdefault('postfix', '')
     options.setdefault('runOnOLDcfg', False)
     options.setdefault('cutsMuon', 'pt > 10. & abs(eta) < 2.5')
@@ -175,7 +176,12 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
 
     ## embedding of resolutions into the patObjects
     if options['addResolutions']:
-        process.load("TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff")
+        if options['resolutionsVersion'] == 'tqaf'     :
+          process.load("TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff")
+        if options['resolutionsVersion'] == 'summer11' :
+          process.load("TopAnalysis.Configuration.stringResolutions_etEtaPhi_Summer11_cff")
+        else :
+          raise ValueError, "Wrong config: 'resolutionsVersion' may only be set to 'tqaf' or 'summer11', not to *"+str(options['resolutionsVersion'])+"*!"
 
 
     ##
