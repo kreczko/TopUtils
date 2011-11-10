@@ -62,11 +62,9 @@ EffSFElectronEventWeight::produce(edm::Event& evt, const edm::EventSetup& setup)
   evt.getByLabel(particles_, particles);
 
   double pt, eta, relIso;
-  double result=-1;
-  double error=-1;
-  int numPart=0;
-  
-
+  double result =  1.0;
+  double error  = -1.0;
+  int numPart   =  0;
   
   for(edm::View<pat::Electron>::const_iterator part=particles->begin(); part!=particles->end(); ++part){
 
@@ -128,12 +126,13 @@ EffSFElectronEventWeight::produce(edm::Event& evt, const edm::EventSetup& setup)
     if(verbose_>=1) std::cout<<numPart<< ": pt=" <<pt<< "; eta=" <<eta<< "; SF= "<<result<<"; error="<< error <<std::endl;
     hists_.find("electronEffSF" )->second->Fill( result );
 
-  std::auto_ptr<double> SFEventWeight(new double);
-  *SFEventWeight = result;    
-  evt.put(SFEventWeight);
-  // break in order to have only one event weight (the one of the leading part.) in case of more part. in the event
-  break;
+    // break in order to have only one event weight (the one of the leading part.) in case of more part. in the event
+    break;
   }
+  
+  std::auto_ptr<double> SFEventWeight(new double);
+  *SFEventWeight = result;
+  evt.put(SFEventWeight);
 }
 
 // executed at the end after looping over all events
