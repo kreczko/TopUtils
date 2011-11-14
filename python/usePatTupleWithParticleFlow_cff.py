@@ -178,7 +178,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     if options['addResolutions']:
         if options['resolutionsVersion'] == 'tqaf'     :
           process.load("TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff")
-        if options['resolutionsVersion'] == 'summer11' :
+        elif options['resolutionsVersion'] == 'summer11' :
           process.load("TopAnalysis.Configuration.stringResolutions_etEtaPhi_Summer11_cff")
         else :
           raise ValueError, "Wrong config: 'resolutionsVersion' may only be set to 'tqaf' or 'summer11', not to *"+str(options['resolutionsVersion'])+"*!"
