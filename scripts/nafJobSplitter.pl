@@ -492,8 +492,8 @@ sub getBatchsystemTemplate {
 #$ -l s_rt=__SCPU__
 #
 #(the maximum memory usage of this job)
-#$ -l h_vmem=2500M
-#$ -l s_vmem=2400M
+#$ -l h_vmem=3700M
+#$ -l s_vmem=3400M
 #
 #(stderr and stdout are merged together to stdout)
 #$ -j y
