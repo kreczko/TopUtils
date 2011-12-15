@@ -194,7 +194,23 @@ double BTagSFEventWeight::effBTagSF(double jetPt, double jetEta)
          error = perf.getResult( measureMap_[ "BTAGBERRCORR" ], measurePoint);
     else error = 0.1;
   if(sysVar_ == "bTagSFUp")   result += error;
-  if(sysVar_ == "bTagSFDown") result -= error;
+  else if(sysVar_ == "bTagSFDown") result -= error;
+  else if(sysVar_ == "bTagSFShapeUpPt"){
+    if(jetPt<shapeVarPtThreshold_) result += error;
+    else                           result -= error;
+  }
+  else if(sysVar_ == "bTagSFShapeDownPt"){
+    if(jetPt<shapeVarPtThreshold_) result -= error;
+    else                           result += error;
+  }
+  else if(sysVar_ == "bTagSFShapeUpEta"){
+    if(fabs(jetEta)<shapeVarEtaThreshold_) result += error;
+    else                                   result -= error;
+  }
+  else if(sysVar_ == "bTagSFShapeDownEta"){
+    if(fabs(jetEta)<shapeVarEtaThreshold_) result -= error;
+    else                                   result += error;
+  }
   if(verbose_>=2) std::cout<< "effBTagSF= "<<result<<" +/- "<<error<<std::endl;
   return result;
 }
