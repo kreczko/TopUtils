@@ -10,6 +10,8 @@
 EffSFElectronEventWeight::EffSFElectronEventWeight(const edm::ParameterSet& cfg):
   particles_            ( cfg.getParameter<edm::InputTag>    ("particles"   ) ),
   sysVar_               ( cfg.getParameter<std::string>      ("sysVar"  ) ),
+  shapeVarPtThreshold_  ( cfg.getParameter<double>      ("shapeVarPtThreshold"  ) ),
+  shapeVarEtaThreshold_ ( cfg.getParameter<double>      ("shapeVarEtaThreshold"  ) ),
   verbose_              ( cfg.getParameter<int>              ("verbose" ) ),
   //filename_             ( cfg.getParameter<std::string>      ("filename"  ) ),
   additionalFactor_     ( cfg.getParameter<double>   ("additionalFactor"  ) ),
@@ -17,6 +19,7 @@ EffSFElectronEventWeight::EffSFElectronEventWeight(const edm::ParameterSet& cfg)
   meanTriggerEffSF_     ( cfg.getParameter<double>   ("meanTriggerEffSF"  ) ),
   meanTriggerEffSFErr_  ( cfg.getParameter<double>   ("meanTriggerEffSFErr"  ) ),
   shapeDistortionFactor_( cfg.getParameter<double>   ("shapeDistortionFactor"  ) )
+  
 {
   produces<double>();
   
@@ -101,20 +104,20 @@ EffSFElectronEventWeight::produce(edm::Event& evt, const edm::EventSetup& setup)
     if     (sysVar_ == "triggerEffSFNormUp")   result += meanTriggerEffSFErr_;
     else if(sysVar_ == "triggerEffSFNormDown") result -= meanTriggerEffSFErr_;
     else if(sysVar_ == "triggerEffSFShapeUpPt")  { 
-        if(pt<40) result += shapeDistortionFactor_ * meanTriggerEffSFErr_; 
-	else      result -= shapeDistortionFactor_ * meanTriggerEffSFErr_;
+      if(pt<shapeVarPtThreshold_) result += shapeDistortionFactor_ * meanTriggerEffSFErr_; 
+      else                        result -= shapeDistortionFactor_ * meanTriggerEffSFErr_;
     }
     else if(sysVar_ == "triggerEffSFShapeDownPt"){ 
-        if(pt<40) result -= shapeDistortionFactor_ * meanTriggerEffSFErr_; 
-        else      result += shapeDistortionFactor_ * meanTriggerEffSFErr_;
+      if(pt<shapeVarPtThreshold_) result -= shapeDistortionFactor_ * meanTriggerEffSFErr_; 
+      else                        result += shapeDistortionFactor_ * meanTriggerEffSFErr_;
     }
     else if(sysVar_ == "triggerEffSFShapeUpEta")  { 
-      if(std::abs(eta)<1.479) result += shapeDistortionFactor_ * meanTriggerEffSFErr_; 
-      else                    result -= shapeDistortionFactor_ * meanTriggerEffSFErr_;
+      if(std::abs(eta)<shapeVarEtaThreshold_) result += shapeDistortionFactor_ * meanTriggerEffSFErr_; 
+      else                                    result -= shapeDistortionFactor_ * meanTriggerEffSFErr_;
     }
     else if(sysVar_ == "triggerEffSFShapeDownEta"){ 
-      if(std::abs(eta)<1.479) result -= shapeDistortionFactor_ * meanTriggerEffSFErr_; 
-      else                    result += shapeDistortionFactor_ * meanTriggerEffSFErr_;
+      if(std::abs(eta)<shapeVarEtaThreshold_) result -= shapeDistortionFactor_ * meanTriggerEffSFErr_; 
+      else                                    result += shapeDistortionFactor_ * meanTriggerEffSFErr_;
     }
     
     /// additional factor as lepton selection eff. SF

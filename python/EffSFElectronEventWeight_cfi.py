@@ -5,8 +5,10 @@ effSFElectronEventWeight = cms.EDProducer("EffSFElectronEventWeight",
   sysVar   = cms.string(""),                  ## "noSys", "triggerEffSFNormUp/Down", "triggerEffSFShapeUpPt(Eta)/DownPt(Eta)", 
                                               ## "selectionEffSFNormUp/Down"
                                               ## "flatTriggerSF"
+  shapeVarPtThreshold  = cms.double(55.),     ## pt threshold which divides up/down variations during SFShapeUp/DownPt
+  shapeVarEtaThreshold = cms.double(0.7),     ## eta threshold which divides up/down variations during SFShapeUp/DownEta
   verbose  = cms.int32(  0),                  ## set to 1 if terminal text output is desired
-  #filename = cms.string(""),                  ## if filename != "", the efficiencies are read from histos
+  #filename = cms.string(""),                 ## if filename != "", the efficiencies are read from histos
                                               ## provided in that file
   additionalFactor = cms.double(1.),          ## result is multiplied with this additional factor
                                               ## (can be used for other flat SF)

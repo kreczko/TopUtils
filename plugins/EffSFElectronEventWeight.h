@@ -31,6 +31,7 @@
 /// meanTriggerEffSF_      flat mean trigger eff.
 /// meanTriggerEffSFErr_    error on flat mean trigger eff.
 /// shapeDistortionFactor_ for eff SF shape uncertainty
+/// shapeVarPt/EtaThreshold_  pT/eta value which divides up and down variation for shape variations
 
 class EffSFElectronEventWeight : public edm::EDProducer {
 
@@ -45,6 +46,8 @@ class EffSFElectronEventWeight : public edm::EDProducer {
  private:
   edm::InputTag particles_;
   std::string sysVar_;
+  double shapeVarPtThreshold_;
+  double shapeVarEtaThreshold_;
   int verbose_;
   //std::string filename_;
   double additionalFactor_;
