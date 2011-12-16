@@ -14,7 +14,8 @@ EffSFMuonEventWeight::EffSFMuonEventWeight(const edm::ParameterSet& cfg):
   additionalFactor_     ( cfg.getParameter<double>   ("additionalFactor"  ) ),
   additionalFactorErr_  ( cfg.getParameter<double>   ("additionalFactorErr"  ) ),
   meanTriggerEffSF_     ( cfg.getParameter<double>   ("meanTriggerEffSF"  ) ),
-  shapeDistortionFactor_( cfg.getParameter<double>   ("shapeDistortionFactor"  ) )
+  shapeDistortionFactor_( cfg.getParameter<double>   ("shapeDistortionFactor"  ) ),
+  shapeVarPtThreshold_    ( cfg.getParameter<double>      ("shapeVarPtThreshold"  ) )
 {
   produces<double>();
   
@@ -91,12 +92,12 @@ EffSFMuonEventWeight::produce(edm::Event& evt, const edm::EventSetup& setup)
     else if(sysVar_ == "triggerEffSFShapeUpEta")  result += shapeDistortionFactor_ * (result - meanTriggerEffSF_);
     else if(sysVar_ == "triggerEffSFShapeDownEta")result -= shapeDistortionFactor_ * (result - meanTriggerEffSF_);
     else if(sysVar_ == "triggerEffSFShapeUpPt")  { 
-      if(pt<40) result += 0.01; 
-      else      result -= 0.01;
+      if(pt<shapeVarPtThreshold_) result += 0.01; 
+      else                        result -= 0.01;
     }
     else if(sysVar_ == "triggerEffSFShapeDownPt"){ 
-      if(pt<40) result -= 0.01; 
-      else      result += 0.01;
+      if(pt<shapeVarPtThreshold_) result -= 0.01; 
+      else                        result += 0.01;
     }
     
     /// additional factor as lepton selection eff. SF

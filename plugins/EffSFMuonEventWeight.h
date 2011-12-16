@@ -30,6 +30,7 @@
 /// additionalFactorErr_   flat normalisation error for additional factor (e.g. 0.03 = 3%)
 /// meanTriggerEffSF_      flat mean trigger eff.
 /// shapeDistortionFactor_ for eff SF shape uncertainty
+/// shapeVarPtThreshold_   pT value which divides up and down variation for shape variations
 
 class EffSFMuonEventWeight : public edm::EDProducer {
 
@@ -50,6 +51,7 @@ class EffSFMuonEventWeight : public edm::EDProducer {
   double additionalFactorErr_;
   double meanTriggerEffSF_;
   double shapeDistortionFactor_;
+  double shapeVarPtThreshold_;
   
   /// histogram container
   /// efficiency histos as input
