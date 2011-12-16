@@ -7,9 +7,13 @@
 
 
 BTagSFEventWeight::BTagSFEventWeight(const edm::ParameterSet& cfg):
-  jets_    ( cfg.getParameter<edm::InputTag>    ( "jets"   ) ),
-  bTagAlgo_( cfg.getParameter<std::string>      ("bTagAlgo") ),
-  sysVar_  ( cfg.getParameter<std::string>      ("sysVar"  ) ),
+  jets_                   ( cfg.getParameter<edm::InputTag>    ( "jets"   ) ),
+  bTagAlgo_               ( cfg.getParameter<std::string>      ("bTagAlgo") ),
+  sysVar_                 ( cfg.getParameter<std::string>      ("sysVar"  ) ),
+  shapeVarPtThreshold_    ( cfg.getParameter<double>      ("shapeVarPtThreshold"  ) ),
+  shapeVarEtaThreshold_   ( cfg.getParameter<double>      ("shapeVarEtaThreshold"  ) ),
+  uncertaintySFb_         ( cfg.getParameter<double>      ("uncertaintySFb"  ) ),
+  shapeDistortionFactor_  ( cfg.getParameter<double>      ("shapeDistortionFactor"  ) ),
   verbose_ ( cfg.getParameter<int>              ("verbose" ) ),
   filename_( cfg.getParameter<std::string>      ("filename"  ) )
 {
@@ -183,35 +187,38 @@ double BTagSFEventWeight::effBTag(double jetPt, double jetEta)
 double BTagSFEventWeight::effBTagSF(double jetPt, double jetEta)
 {
   double result = -1111., error = -1111.;
-  const BtagPerformance & perf = *(perfHBTag.product());
-    BinningPointByMap measurePoint;
-    measurePoint.insert(BinningVariables::JetEt, jetPt);
-    measurePoint.insert(BinningVariables::JetAbsEta, jetEta);
-    if(perf.isResultOk( measureMap_[ "BTAGBEFFCORR" ], measurePoint))
-         result = perf.getResult( measureMap_[ "BTAGBEFFCORR" ], measurePoint);
-    else result = 1.;
-    if(perf.isResultOk( measureMap_[ "BTAGBERRCORR" ], measurePoint))
-         error = perf.getResult( measureMap_[ "BTAGBERRCORR" ], measurePoint);
-    else error = 0.1;
+    const BtagPerformance & perf = *(perfHBTag.product());
+      BinningPointByMap measurePoint;
+      measurePoint.insert(BinningVariables::JetEt, jetPt);
+      measurePoint.insert(BinningVariables::JetAbsEta, jetEta);
+      if(perf.isResultOk( measureMap_[ "BTAGBEFFCORR" ], measurePoint))
+	  result = perf.getResult( measureMap_[ "BTAGBEFFCORR" ], measurePoint);
+      else std::cout << "ERROR! B-tag SF could not be taken from DB! b-tag SF is taken as -1111!" << std::endl;
+  if(uncertaintySFb_<0.){
+      if(perf.isResultOk( measureMap_[ "BTAGBERRCORR" ], measurePoint))
+	   error = perf.getResult( measureMap_[ "BTAGBERRCORR" ], measurePoint);
+      else std::cout << "ERROR! B-tag SF err could not be taken from DB! b-tag SF err is taken as -1111!" << std::endl;
+  }
+  else     error = uncertaintySFb_;
   if(sysVar_ == "bTagSFUp")   result += error;
   else if(sysVar_ == "bTagSFDown") result -= error;
   else if(sysVar_ == "bTagSFShapeUpPt"){
-    if(jetPt<shapeVarPtThreshold_) result += error;
-    else                           result -= error;
+    if(jetPt<shapeVarPtThreshold_) result += (shapeDistortionFactor_*error);
+    else                           result -= (shapeDistortionFactor_*error);
   }
   else if(sysVar_ == "bTagSFShapeDownPt"){
-    if(jetPt<shapeVarPtThreshold_) result -= error;
-    else                           result += error;
+    if(jetPt<shapeVarPtThreshold_) result -= (shapeDistortionFactor_*error);
+    else                           result += (shapeDistortionFactor_*error);
   }
   else if(sysVar_ == "bTagSFShapeUpEta"){
-    if(fabs(jetEta)<shapeVarEtaThreshold_) result += error;
-    else                                   result -= error;
+    if(fabs(jetEta)<shapeVarEtaThreshold_) result += (shapeDistortionFactor_*error);
+    else                                   result -= (shapeDistortionFactor_*error);
   }
   else if(sysVar_ == "bTagSFShapeDownEta"){
-    if(fabs(jetEta)<shapeVarEtaThreshold_) result -= error;
-    else                                   result += error;
+    if(fabs(jetEta)<shapeVarEtaThreshold_) result -= (shapeDistortionFactor_*error);
+    else                                   result += (shapeDistortionFactor_*error);
   }
-  if(verbose_>=2) std::cout<< "effBTagSF= "<<result<<" +/- "<<error<<std::endl;
+  if(verbose_>=2) std::cout<< "effBTagSF= "<<result<<" +/- "<<error<< "------ shapeDistortionFactor_=" << shapeDistortionFactor_ << "------ shapeDistortionFactor_*error=" << shapeDistortionFactor_*error <<std::endl;
   return result;
 }
 

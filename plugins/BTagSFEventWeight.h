@@ -46,6 +46,8 @@ class BTagSFEventWeight : public edm::EDProducer {
   std::string sysVar_;
   double shapeVarPtThreshold_;
   double shapeVarEtaThreshold_;
+  double uncertaintySFb_;
+  double shapeDistortionFactor_;
   int verbose_;
   std::string filename_;
   double maxPt_;
