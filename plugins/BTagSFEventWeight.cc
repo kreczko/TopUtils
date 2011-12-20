@@ -20,8 +20,8 @@ BTagSFEventWeight::BTagSFEventWeight(const edm::ParameterSet& cfg):
   produces<double>();
   
   // set the edges of the last histo bin
-  maxPt_ = 250.;
-  maxEta_= 3.;
+  maxPt_ = 240.;
+  maxEta_= 2.4;
   
   // laod TFile Service
   edm::Service<TFileService> fs;
@@ -174,9 +174,10 @@ double BTagSFEventWeight::effBTag(double jetPt, double jetEta)
   // if histo file exists, take value from there; else return a default value
   if(filename_!="") {
     TH2F* his = effHists_.find("EffBJetsTaggedPtEta")->second;
-    if(jetPt >= maxPt_)       result = his->GetBinContent(his->FindBin(maxPt_-0.1, jetEta));
-    else if(jetEta >= maxEta_)result = his->GetBinContent(his->FindBin(jetPt, maxEta_-0.01));
-    else                      result = his->GetBinContent( his->FindBin(jetPt, jetEta) );
+    // ensure that pt is in accepted range of BTV DB
+    if(jetPt >= maxPt_) jetPt = maxPt_-1.;
+    if(jetEta >= maxEta_) jetEta = maxEta_-0.1;
+    result = his->GetBinContent( his->FindBin(jetPt, jetEta) );
   }
   else if(bTagAlgo_ == "SSVHEM") { result = 0.564/0.854;}
   if(verbose_>=2) std::cout<< "effBTag= "<<result<<std::endl;
@@ -189,15 +190,25 @@ double BTagSFEventWeight::effBTagSF(double jetPt, double jetEta)
   double result = -1111., error = -1111.;
     const BtagPerformance & perf = *(perfHBTag.product());
       BinningPointByMap measurePoint;
+
+      // ensure that pt is in accepted range of BTV DB
+      if(jetPt >= maxPt_) jetPt = maxPt_-1.;
+      if(jetEta >= maxEta_) jetEta = maxEta_-0.1;
       measurePoint.insert(BinningVariables::JetEt, jetPt);
-      measurePoint.insert(BinningVariables::JetAbsEta, jetEta);
+      measurePoint.insert(BinningVariables::JetAbsEta, jetEta);      
       if(perf.isResultOk( measureMap_[ "BTAGBEFFCORR" ], measurePoint))
-	  result = perf.getResult( measureMap_[ "BTAGBEFFCORR" ], measurePoint);
-      else std::cout << "ERROR! B-tag SF could not be taken from DB! b-tag SF is taken as -1111!" << std::endl;
+	result = perf.getResult( measureMap_[ "BTAGBEFFCORR" ], measurePoint);
+      else {
+	std::cout << "ERROR! B-tag SF could not be taken from DB! b-tag SF is taken as 1!" << std::endl;
+	result = 1.;
+      }
   if(uncertaintySFb_<0.){
       if(perf.isResultOk( measureMap_[ "BTAGBERRCORR" ], measurePoint))
-	   error = perf.getResult( measureMap_[ "BTAGBERRCORR" ], measurePoint);
-      else std::cout << "ERROR! B-tag SF err could not be taken from DB! b-tag SF err is taken as -1111!" << std::endl;
+	error = perf.getResult( measureMap_[ "BTAGBERRCORR" ], measurePoint);
+      else {
+	std::cout << "ERROR! B-tag SF err could not be taken from DB! b-tag SF err is taken as 0.1!" << std::endl;
+	error = 0.1;
+      }
   }
   else     error = uncertaintySFb_;
   if(sysVar_ == "bTagSFUp")   result += error;
@@ -230,9 +241,10 @@ double BTagSFEventWeight::effBTagCjet(double jetPt, double jetEta)
   // if histo file exists, take value from there; else return a default value
   if(filename_!="") {
     TH2F* his = effHists_.find("EffCJetsTaggedPtEta")->second;
-    if(jetPt >= maxPt_)       result = his->GetBinContent(his->FindBin(maxPt_-0.1, jetEta));
-    else if(jetEta >= maxEta_)result = his->GetBinContent(his->FindBin(jetPt, maxEta_-0.01));
-    else                      result = his->GetBinContent( his->FindBin(jetPt, jetEta) );
+    // ensure that pt is in accepted range of BTV DB
+    if(jetPt >= maxPt_) jetPt = maxPt_-1.;
+    if(jetEta >= maxEta_) jetEta = maxEta_-0.1;
+    result = his->GetBinContent( his->FindBin(jetPt, jetEta) );
   }
   else if(bTagAlgo_ == "SSVHEM") { result = (0.564/0.854 + 0.0195)/2;}
   if(verbose_>=2) std::cout<< "effBTagCjet= "<<result<<std::endl;
@@ -246,9 +258,10 @@ double BTagSFEventWeight::effMisTag(double jetPt, double jetEta)
   // if histo file exists, take value from there; else return a default value
   if(filename_!="") {
     TH2F* his = effHists_.find("EffLJetsTaggedPtEta")->second;
-    if(jetPt >= maxPt_)       result = his->GetBinContent(his->FindBin(maxPt_-0.1, jetEta));
-    else if(jetEta >= maxEta_)result = his->GetBinContent(his->FindBin(jetPt, maxEta_-0.01));
-    else                      result = his->GetBinContent( his->FindBin(jetPt, jetEta) );
+    // ensure that pt is in accepted range of BTV DB
+    if(jetPt >= maxPt_) jetPt = maxPt_-1.;
+    if(jetEta >= maxEta_) jetEta = maxEta_-0.1;
+    result = his->GetBinContent( his->FindBin(jetPt, jetEta) );
   }
   else if(bTagAlgo_ == "SSVHEM") { result = 0.0195/0.97;}
   if(verbose_>=2) std::cout<< "effMisTag= "<<result<<std::endl;
