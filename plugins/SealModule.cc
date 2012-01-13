@@ -3,6 +3,9 @@
 #include "TopAnalysis/TopUtils/plugins/EventWeight.h"
 DEFINE_FWK_MODULE( EventWeight );
 
+#include "TopAnalysis/TopUtils/plugins/EventWeightMC.h"
+DEFINE_FWK_MODULE( EventWeightMC );
+
 #include "TopAnalysis/TopUtils/plugins/EventWeightPlain.h"
 DEFINE_FWK_MODULE( EventWeightPlain );
 

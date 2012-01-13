@@ -12,6 +12,7 @@
 <use name="CommonTools/UtilAlgos"/>
 <use name="PhysicsTools/PatUtils"/>
 <use name="TopAnalysis/TopUtils"/>
+<use name="SimDataFormats/GeneratorProducts"/>
 <use name="root"/>
 
 <library file="*.cc" name="TopAnalysisTopUtilsPlugins">
