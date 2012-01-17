@@ -33,4 +33,6 @@ DEFINE_FWK_MODULE( TtSemiLepSignalSelectorMVATrainer );
 #include "TopAnalysis/TopUtils/plugins/TtSemiLepSignalSelectorMVAComputer.h"
 DEFINE_FWK_MODULE( TtSemiLepSignalSelectorMVAComputer );
 
+#include "TopAnalysis/TopUtils/plugins/partonTruthReweightingEventWeight.h"
+DEFINE_FWK_MODULE( partonTruthReweightingEventWeight );
 
