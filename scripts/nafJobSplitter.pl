@@ -5,6 +5,7 @@ use warnings;
 use POSIX;
 use File::Basename;
 use File::Path;
+use File::Spec;
 use Data::Dumper;
 use Term::ANSIColor qw(colored);
 use Getopt::Std;
@@ -154,7 +155,9 @@ sub submitNewJob {
 
     my $dir = $config;
     if ($args{'d'}) {
-        $dir .= '_' . $args{'d'};
+        #$dir .= '_' . $args{'d'};
+        $dir = $args{d};
+        die "Directory $dir must not contain '-'!\n" if $dir =~ /-/;
     } else {
         if (my $varparsing = $args{'c'}) {
             $varparsing =~ s/\W/_/g;
@@ -201,24 +204,32 @@ sub submitNewJob {
 }
 
 sub submitJob {
-    my ($dir, $from, $to, $script) = @_;
-    $script ||= do { open my $FH, '<', "$dir/exe"; <$FH> };
-    my $line = `qsub -t $from-$to:1 $dir/$script`;
-    if ($line =~ /Your job-array (\d+)(?:\.\d+-\d+:1) \(".+"\) has been submitted/) {
-        my $success;
-        my $ids = ''; $ids .= "$_\t$1\n" for $from..$to;
-        do {
-            $success = open my $FH, '>>', "$dir/jobids.txt";
-            $success &&= print $FH $ids;
-            if (!$success) {
-                print "$!\nCan't write to $dir/jobids.txt, trying again in 5sec\n";
-                sleep 5;
-            }
-        } while (!$success);
-        print $from == $to ? "Job $from submitted with job-id $1\n" : "Jobs $from to $to submitted with job-id $1\n";
-        return $1;
+    my ($dirWithRelPath, $from, $to, $script) = @_;
+    my $current = $ENV{PWD};
+    my ($dir, $dirBase) = fileparse(File::Spec->canonpath("$current/$dirWithRelPath"));
+    if (chdir($dirBase)) {
+        $script ||= do { open my $FH, '<', "$dir/exe"; <$FH> };
+        my $line = `qsub -t $from-$to:1 $dir/$script`;
+        if ($line =~ /Your job-array (\d+)(?:\.\d+-\d+:1) \(".+"\) has been submitted/) {
+            my $success;
+            my $ids = ''; $ids .= "$_\t$1\n" for $from..$to;
+            do {
+                $success = open my $FH, '>>', "$dir/jobids.txt";
+                $success &&= print $FH $ids;
+                if (!$success) {
+                    print "$!\nCan't write to $dir/jobids.txt, trying again in 5sec\n";
+                    sleep 5;
+                }
+            } while (!$success);
+            chdir $current or die "Cannot chdir back to original directory!\n";
+            print $from == $to ? "Job $from submitted with job-id $1\n" : "Jobs $from to $to submitted with job-id $1\n";
+            return $1;
+        } else {
+            die "Cannot submit job!\n$line";
+        }        
     } else {
-        die "Cannot submit job!\n$line";
+        print colored("Could not chdir to $dirBase!\n", C_ERROR);
+        return;
     }
 }
 
@@ -246,7 +257,9 @@ sub check {
 }
 
 sub checkJob {
-    my ($dir, $qstat) = @_;
+    my ($dir, $qstat) = @_; 
+    #$dir contains njs_whatever, assuming you have chdir'ed into the correct directory
+    #$qstat contains an instance of a qstat class
     my $isComplete = 0;
     my %jobs = getJobs($qstat, "$dir/jobids.txt"); #get arrayid => job-object
 
@@ -417,7 +430,7 @@ sub createNJSDirectory {
     my $dir = shift;
     my $symlinkDir = $args{'o'} || $ENV{NJS_OUTPUT};
     if ($symlinkDir) {
-        my $newDir = "$symlinkDir/" . strftime("%Y-%m-%dT%T-",localtime) . $dir;
+        my $newDir = "$symlinkDir/" . strftime("%Y%m%dT%H%M%S_",localtime) . $dir;
         if (-l $dir) {
             warn "Old symlink $dir exists, removing it.\n";
             unlink $dir;
