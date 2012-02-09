@@ -7,12 +7,12 @@ eventWeightPU = cms.EDProducer("EventWeightPU",
     Weight3DName        = cms.string("eventWeightPU3D"),                   
                                
     MCSampleFile        = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root"),
-    MCSampleHistoName   = cms.string("histoSummer11_flat_observed"),
+    MCSampleHistoName   = cms.string("histo_Fall11_true"),
     DataFile            = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root"),
-    DataHistoName       = cms.string("histoData_observed"),
+    DataHistoName       = cms.string("histoData_true"),
  
     MCSample3DFile      = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root"),
-    MCSample3DHistoName = cms.string("histoSummer11_flat_true"),
+    MCSample3DHistoName = cms.string("histo_Fall11_true"),
     Data3DFile          = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root"),
     Data3DHistoName     = cms.string("histoData_true_fineBinning"),                                
 

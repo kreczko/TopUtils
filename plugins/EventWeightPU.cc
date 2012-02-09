@@ -81,9 +81,9 @@ void EventWeightPU::produce(edm::Event& evt, const edm::EventSetup& setup)
   { 
     int BX = iterPU->getBunchCrossing(); // -1: previous BX, 0: current BX,  1: next BX
     
-    if      (BX == -1) nvtx_m = iterPU->getPU_NumInteractions();
-    else if (BX ==  0) nvtx   = iterPU->getPU_NumInteractions();
-    else if (BX ==  1) nvtx_p = iterPU->getPU_NumInteractions();  
+    if      (BX == -1) nvtx_m = iterPU->getTrueNumInteractions();
+    else if (BX ==  0) nvtx   = iterPU->getTrueNumInteractions();
+    else if (BX ==  1) nvtx_p = iterPU->getTrueNumInteractions();  
   }
 
   wght_   = LumiWeights_.weight(nvtx);

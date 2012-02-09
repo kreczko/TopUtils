@@ -80,7 +80,7 @@ process.eventWeightPU.Data3DFile          = "TopAnalysis/TopUtils/data/Data_PUDi
 process.eventWeightPU.Data3DHistoName     = "histoData_true_fineBinning"
                      
 process.eventWeightPU.CreateWeight3DHisto = False
-process.eventWeightPU.Weight3DHistoFile   = "./data/DefaultWeight3D.root"
+process.eventWeightPU.Weight3DHistoFile   = "../data/DefaultWeight3D.root"
 
 #### Configuration for PU Up Variations
 
