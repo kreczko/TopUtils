@@ -10,9 +10,11 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/ParameterSet/interface/FileInPath.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "DataFormats/Common/interface/View.h"
 
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
+#include "PhysicsTools/Utilities/interface/Lumi3DReWeighting.h"
 
 class EventWeightPU : public edm::EDProducer {
 
@@ -24,33 +26,28 @@ class EventWeightPU : public edm::EDProducer {
 
       virtual void produce(edm::Event&, const edm::EventSetup&);
 
+      edm::InputTag   inTag_PUSource;
+      std::string     inTag_WeightName;
+      std::string     inTag_Weight3DName; 
+
       edm::FileInPath inTag_MCSampleFile;
-      std::string inTag_MCSampleHistoName;
+      std::string     inTag_MCSampleHistoName;
       edm::FileInPath inTag_DataFile;
-      std::string inTag_DataHistoName;
+      std::string     inTag_DataHistoName;
+     
+      edm::FileInPath inTag_MCSample3DFile; 
+      std::string     inTag_MCSample3DHistoName; 
+      edm::FileInPath inTag_Data3DFile;   
+      std::string     inTag_Data3DHistoName;
 
-      edm::InputTag inTag_PUSource;
+      bool        inTag_CreateWeight3DHisto;
+      std::string inTag_Weight3DHistoFile;
 
-      float inTag_PUSysShiftUp;
-      float inTag_PUSysShiftDown;
-
-      bool inTag_CreateWeight3DHisto;
-      edm::FileInPath inTag_Weight3DHistoFile;
-
-      edm::LumiReWeighting LumiWeights_;
-
-      reweight::PoissonMeanShifter PUShiftUp_;
-      reweight::PoissonMeanShifter PUShiftDown_;
+      edm::LumiReWeighting   LumiWeights_;
+      edm::Lumi3DReWeighting LumiWeights3D_;
 
       double wght_;
-      double wght_Up_;
-      double wght_Down_;
-      double wght3BX_;
-      double wght3BX_Up_;
-      double wght3BX_Down_;
       double wght3D_;
-      double wght3D_Up_;
-      double wght3D_Down_;
 };
 
 #endif
