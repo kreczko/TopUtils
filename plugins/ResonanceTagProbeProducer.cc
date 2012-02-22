@@ -39,6 +39,7 @@ ResonanceTagProbeProducer::ResonanceTagProbeProducer(const edm::ParameterSet& cf
   hists_["MultTag"]=fs->make<TH1F>("MultTag", "MultTag", 10,0.,10.);
   hists_["MultGlobal"]=fs->make<TH1F>("MultGlobal", "MultGlobal", 10,0.,10.);
   hists_["lepLepMass"]=fs->make<TH1F>("lepLepMass", "lepLepMass", 40,0.,200.);
+  hists_["lepLepCharge"]=fs->make<TH1F>("lepLepCharge", "lepLepCharge", 2,-1.5,1.5);
 }
 
 void
@@ -67,12 +68,17 @@ void
       for(edm::View<pat::Electron>::const_iterator probe=probes->begin(); probe!=probes->end(); ++probe){
 	// check and skip overlaps
 	if( probe->originalObjectRef() != tag->originalObjectRef() ){
-	  if( fabs((tag->p4()+probe->p4()).mass()-mass_)<deltaM_){
-	    taggedProbes->push_back(*probe);
-	    taggedProbesCounterEv++;
-	    taggedProbesCounterTg++;
-	  }
+	  // select as probe muon if in resonance mass range and of opposite charge
+	  if((tag->charge()*probe->charge()) < 0){
+	    if( fabs((tag->p4()+probe->p4()).mass()-mass_)<deltaM_){
+	      taggedProbes->push_back(*probe);
+	      taggedProbesCounterEv++;
+	      taggedProbesCounterTg++;
+	      }
 	  hists_.find("lepLepMass")->second->Fill((tag->p4()+probe->p4()).mass()); //histo with di-muon mass
+	  }
+	  //histo with multiplied charge to check the ratio between same and opposite charge leptons
+	  if( fabs((tag->p4()+probe->p4()).mass()-mass_)<deltaM_) hists_.find("lepLepCharge")->second->Fill(tag->charge()*probe->charge());
 	}
       }
       hists_.find("taggedProbesCounterTg")->second->Fill(taggedProbesCounterTg);
@@ -106,12 +112,17 @@ void
       for(edm::View<pat::Muon>::const_iterator probe=probes->begin(); probe!=probes->end(); ++probe){
 	// check and skip overlaps
 	if( probe->originalObjectRef() != tag->originalObjectRef() ){
-	  if( fabs((tag->p4()+probe->p4()).mass()-mass_)<deltaM_){
-	    taggedProbes->push_back(*probe);
-	    taggedProbesCounterEv++;
-	    taggedProbesCounterTg++;
+	  // select as probe muon if in resonance mass range and of opposite charge
+	  if((tag->charge()*probe->charge()) < 0){
+	    if( fabs((tag->p4()+probe->p4()).mass()-mass_)<deltaM_){
+	      taggedProbes->push_back(*probe);
+	      taggedProbesCounterEv++;
+	      taggedProbesCounterTg++;
+	    }
+	    hists_.find("lepLepMass")->second->Fill((tag->p4()+probe->p4()).mass()); //histo with di-muon mass
 	  }
-	  hists_.find("lepLepMass")->second->Fill((tag->p4()+probe->p4()).mass()); //histo with di-muon mass
+	  //histo with multiplied charge to check the ratio between same and opposite charge leptons
+	  if( fabs((tag->p4()+probe->p4()).mass()-mass_)<deltaM_) hists_.find("lepLepCharge")->second->Fill(tag->charge()*probe->charge());
 	}
       }
       hists_.find("taggedProbesCounterTg")->second->Fill(taggedProbesCounterTg);
