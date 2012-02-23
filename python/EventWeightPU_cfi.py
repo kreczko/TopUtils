@@ -17,5 +17,5 @@ eventWeightPU = cms.EDProducer("EventWeightPU",
     Data3DHistoName     = cms.string("histoData_true_fineBinning"),                                
 
     CreateWeight3DHisto = cms.bool(False),
-    Weight3DHistoFile   = cms.string("./data/DefaultWeight3D.root")
+    Weight3DHistoFile   = cms.FileInPath("TopAnalysis/TopUtils/data/DefaultWeight3D.root")
 )

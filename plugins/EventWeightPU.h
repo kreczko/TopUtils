@@ -40,8 +40,8 @@ class EventWeightPU : public edm::EDProducer {
       edm::FileInPath inTag_Data3DFile;   
       std::string     inTag_Data3DHistoName;
 
-      bool        inTag_CreateWeight3DHisto;
-      std::string inTag_Weight3DHistoFile;
+      bool            inTag_CreateWeight3DHisto;
+      edm::FileInPath inTag_Weight3DHistoFile;
 
       edm::LumiReWeighting   LumiWeights_;
       edm::Lumi3DReWeighting LumiWeights3D_;

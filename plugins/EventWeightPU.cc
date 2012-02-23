@@ -23,7 +23,7 @@ EventWeightPU::EventWeightPU(const edm::ParameterSet& cfg):
   inTag_Data3DHistoName(cfg.getParameter<std::string>("Data3DHistoName") ),
 
   inTag_CreateWeight3DHisto(cfg.getParameter<bool>("CreateWeight3DHisto") ), 
-  inTag_Weight3DHistoFile(cfg.getParameter<std::string>("Weight3DHistoFile") )
+  inTag_Weight3DHistoFile(cfg.getParameter<edm::FileInPath>("Weight3DHistoFile") )
 {
 
   // ohject for standard re-weighting, in-time-pileup only
@@ -35,14 +35,14 @@ EventWeightPU::EventWeightPU(const edm::ParameterSet& cfg):
 
   LumiWeights3D_ = edm::Lumi3DReWeighting(inTag_MCSample3DFile.fullPath(),inTag_Data3DFile.fullPath(),
 					  inTag_MCSample3DHistoName,inTag_Data3DHistoName,
-					  inTag_Weight3DHistoFile);
+					  inTag_Weight3DHistoFile.fullPath());
   
   if (inTag_CreateWeight3DHisto)
   { 
     std::cout << "Create new 3D matrix." << std::endl;
     LumiWeights3D_.weight3D_init(1.0);
   }
-  else LumiWeights3D_.weight3D_init(inTag_Weight3DHistoFile);
+  else LumiWeights3D_.weight3D_init(inTag_Weight3DHistoFile.fullPath());
 
   produces<double>(inTag_WeightName);
   produces<double>(inTag_Weight3DName);  
@@ -92,7 +92,7 @@ void EventWeightPU::produce(edm::Event& evt, const edm::EventSetup& setup)
   (*eventWeightPU)   = wght_;
   (*eventWeightPU3D) = wght3D_;
 
-  evt.put(eventWeightPU,inTag_WeightName);
+  evt.put(eventWeightPU,  inTag_WeightName);
   evt.put(eventWeightPU3D,inTag_Weight3DName);  
 }
 
