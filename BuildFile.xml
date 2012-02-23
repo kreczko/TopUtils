@@ -4,6 +4,7 @@
 <use name="PhysicsTools/CandUtils"/>
 <use name="DataFormats/PatCandidates"/>
 <use name="CondFormats/JetMETObjects"/>
+<use name="SimGeneral/HepPDTRecord"/>
 <use name="RecoBTag/PerformanceDB"/>
 <use name="RecoBTag/Records"/>
 <use   name="AnalysisDataFormats/TopObjects"/>
