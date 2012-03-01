@@ -15,7 +15,7 @@ see details in the description of the  function getGenJetWith
 //
 // Original Author:  Benjamin Lutz,,,DESY
 //         Created:  Thu Feb  2 13:30:58 CET 2012
-// $Id: GenLevelBJetProducer.cc,v 1.1 2012/02/23 15:54:52 iasincru Exp $
+// $Id: GenLevelBJetProducer.cc,v 1.2 2012/03/01 11:40:34 blutz Exp $
 //
 //
 
@@ -69,18 +69,19 @@ private:
   std::vector<int> getGenJetWith( const reco::Candidate* bQuark, const reco::GenJetCollection& genJets );
   int getGenJetNear( const reco::Candidate* particle, std::vector<const reco::GenJet*> &genJets );
   typedef const reco::Candidate* pCRC;
-  bool searchInMothers( const reco::Candidate* bQuark, const reco::Candidate* thisParticle, std::string particleChain, pCRC *bHadron);
-  void saveParticle(std::string& particleChain, const reco::Candidate* particle);
+  bool searchInMothers( const reco::Candidate* bQuark, const reco::Candidate* thisParticle, std::vector<const reco::Candidate*> particleChain, pCRC *bHadron);
+  bool checkForLoop(std::vector<const reco::Candidate*> &particleChain, const reco::Candidate* particle);
   std::string getParticleName(int id) const;
 
   inline std::string printJetInfo(const size_t iJet, const reco::GenJet* ) const;
-  inline std::string printParticleChain(const std::string &particleChain, const reco::Candidate *bHadron) const;
+  inline std::string printParticleChain(const std::vector<const reco::Candidate*> &particleChain, const reco::Candidate *bHadron) const;
 
   // ----------member data ---------------------------
   edm::InputTag ttGenEvent_;
   edm::InputTag genJets_;
   double deltaR_;
   bool noBBbarResonances_;
+  bool resolveName_;
 
   edm::ESHandle<ParticleDataTable> pdt_;
 
@@ -104,6 +105,7 @@ GenLevelBJetProducer::GenLevelBJetProducer(const edm::ParameterSet& cfg) {
   genJets_           = cfg.getParameter<edm::InputTag>("genJets");
   deltaR_            = cfg.getParameter<double>("deltaR");
   noBBbarResonances_ = cfg.getParameter<bool>("noBBbarResonances");
+  resolveName_       = cfg.getParameter<bool>("resolveParticleName");
 
   produces< std::vector<int> >("BHadJetIndex");
   produces< std::vector<int> >("AntiBHadJetIndex");
@@ -118,6 +120,7 @@ void GenLevelBJetProducer::fillDescriptions(edm::ConfigurationDescriptions& desc
   desc.add<edm::InputTag>("genJets",edm::InputTag("ak5GenJets","","HLT"));
   desc.add<double>("deltaR",.5);
   desc.add<bool>("noBBbarResonances",true);
+  desc.add<bool>("resolveParticleName",false);
   descriptions.add("produceGenLevelBJets",desc);
 }
 
@@ -145,7 +148,9 @@ void GenLevelBJetProducer::produce(edm::Event& evt, const edm::EventSetup& setup
   edm::Handle<reco::GenJetCollection> genJets;
   evt.getByLabel(genJets_, genJets);
 
+  LogDebug("bJet") << "searching for b-jets in " << genJets_;
   *bIdx = getGenJetWith(genEvt->b(), *genJets);
+  LogDebug("bJet") << "searching for anti-b-jets in " << genJets_;
   *AntibIdx = getGenJetWith(genEvt->bBar(), *genJets);
 
   evt.put(bIdx, "BHadJetIndex");
@@ -216,7 +221,7 @@ std::vector<int> GenLevelBJetProducer::getGenJetWith ( const reco::Candidate* bQ
     std::vector<const reco::GenParticle*> particles = thisJet->getGenConstituents();
 
 
-    LogDebug("Jets") << printJetInfo(iJet, thisJet);
+    LogTrace("Jets") << printJetInfo(iJet, thisJet);
 
     bool isBquarkCandidate = false;
     bool isBhadronCandidate = false;
@@ -227,8 +232,8 @@ std::vector<int> GenLevelBJetProducer::getGenJetWith ( const reco::Candidate* bQ
     for (unsigned int iParticle = 0; iParticle < particles.size(); ++iParticle) {
       const reco::GenParticle* thisParticle = particles[iParticle];
       const reco::Candidate* bHadron = 0;
-      std::string particleChain;
-      saveParticle(particleChain,thisParticle);
+      std::vector<const reco::Candidate*> particleChain;
+      checkForLoop(particleChain,thisParticle);
       if (searchInMothers(bQuark, thisParticle, particleChain, &bHadron)) {
         isBquarkCandidate = true;
         ++nBquarkDaughters;
@@ -312,18 +317,20 @@ std::vector<int> GenLevelBJetProducer::getGenJetWith ( const reco::Candidate* bQ
 }
 
 /**
- * helper function to keep track of the decay chain that lead to the current particle
+ * helper function to keep track of the decay chain and identify loops in the decay tree
  *
- * @param[out] particleChain string to which a human readable info about the current particle is added
+ * @param[out] vector of particles building up the current chain
  * @param[in] particle particle that should be added
+ *
+ * returns true if a particle is already in the chain
  */
-void GenLevelBJetProducer::saveParticle(std::string &particleChain, const reco::Candidate* particle) {
-  // debug output no functionality
-#ifdef EDM_ML_DEBUG
-  std::ostringstream stream;
-  stream << particleChain << getParticleName(particle->pdgId()) << "(" << particle->status() << ")<-";
-  particleChain = stream.str();
-#endif // EDM_ML_DEBUG -- debug output
+bool GenLevelBJetProducer::checkForLoop(std::vector<const reco::Candidate*> &particleChain, const reco::Candidate* particle) {
+
+  for (unsigned int i = 0; i < particleChain.size(); ++i)
+    if (particleChain[i] ==  particle) return true;
+
+  particleChain.push_back(particle);
+  return false;
 }
 
 /**
@@ -338,7 +345,7 @@ void GenLevelBJetProducer::saveParticle(std::string &particleChain, const reco::
  *
  * @returns if the b-quark was found or not
  */
-bool GenLevelBJetProducer::searchInMothers(const reco::Candidate* bQuark, const reco::Candidate* thisParticle, std::string particleChain, pCRC *bHadron) {
+bool GenLevelBJetProducer::searchInMothers(const reco::Candidate* bQuark, const reco::Candidate* thisParticle, std::vector<const reco::Candidate*> particleChain, pCRC *bHadron) {
 
   if ( thisParticle->pdgId() / 1000  == bQuark->pdgId()  // b-baryions
        || ( thisParticle->pdgId() / 100 % 10 == -bQuark->pdgId() // b-mesons
@@ -348,7 +355,15 @@ bool GenLevelBJetProducer::searchInMothers(const reco::Candidate* bQuark, const 
   for (size_t iMother = 0; iMother < thisParticle->numberOfMothers(); ++iMother) {
 
     const reco::Candidate* mother = thisParticle->mother(iMother);
-    saveParticle(particleChain, mother);
+    if ( checkForLoop(particleChain, mother) ) {
+      edm::LogWarning("decayChain") << "Identified a loop in the current decay chain."
+                                    << " Paricle " << mother
+                                    << " PDG: " << mother->pdgId()
+                                    << " " << mother->p4()
+                                    << " is already in the chain."
+                                    << " Will stop this branch here. B-hadron identification might be incomplete." ;
+      return false;
+    }
     if (bQuark->p4() == mother->p4() && bQuark->pdgId() == mother->pdgId() && bQuark->status() == mother->status()) {
       LogTrace("decayChain") << printParticleChain(particleChain,*bHadron);
       return true;
@@ -359,22 +374,32 @@ bool GenLevelBJetProducer::searchInMothers(const reco::Candidate* bQuark, const 
   return false;
 }
 
-/**
- * helper function to get a human readable particle name from the PDG-ID
- */
-
 std::string GenLevelBJetProducer::getParticleName(int id) const
 {
-  const ParticleData * pd = pdt_->particle( id );
+
+  const ParticleData * pd = 0;
+  if (resolveName_) pdt_->particle( id );
   if (!pd) {
     std::ostringstream ss;
     ss << "P" << id;
     return ss.str();
-  } else
+  }
+  else
     return pd->name();
+
 }
 
 
+/**
+ * helper function to print jet properies
+ *
+ * this function is inlined to allow efficient optimisation when compiled without debug option
+ *
+ * @param[in] iJet the index of the jet
+ * @param[in] thisJet pointer to the jet
+ *
+ * @returns string to be printed
+ */
 inline std::string GenLevelBJetProducer::printJetInfo(const size_t iJet, const reco::GenJet* thisJet) const {
   std::ostringstream out;
   out <<  "Jet: " << iJet
@@ -385,12 +410,26 @@ inline std::string GenLevelBJetProducer::printJetInfo(const size_t iJet, const r
   return out.str();
 }
 
-inline std::string GenLevelBJetProducer::printParticleChain(const std::string &particleChain, const reco::Candidate* bHadron) const {
+/**
+ * helper function to generate a human readable representation of the decay chain
+ *
+ * this function is inlined to allow efficient optimisation when compiled without debug option
+ *
+ * @param[in] particleChain the decay chain
+ * @param[in] bHadron the identified b-hadron
+ *
+ * @returns string to be printed
+ */
+inline std::string GenLevelBJetProducer::printParticleChain(const std::vector<const reco::Candidate*> &particleChain, const reco::Candidate* bHadron) const {
   std::ostringstream out;
-  out << particleChain;
 
-  if (bHadron) out << "  daughter of this b-Hadron:" << getParticleName(bHadron->pdgId());
-  else out << "  no b-Hadron in chain";
+  for (int i = particleChain.size()-1; i >= 0; --i) {
+    if ( particleChain[i] == bHadron )
+      out << "*" << getParticleName( particleChain[i]->pdgId() ) <<"*";
+    else
+      out << getParticleName( particleChain[i]->pdgId() );
+    if (i>0) out  << "-->";
+  }
   return out.str();
 }
 
