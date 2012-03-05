@@ -46,7 +46,7 @@ class EffSFMuonEventWeight : public edm::EDProducer {
   edm::InputTag particles_;
   std::string sysVar_;
   int verbose_;
-  std::string filename_;
+  edm::FileInPath filename_;
   double additionalFactor_;
   double additionalFactorErr_;
   double meanTriggerEffSF_;

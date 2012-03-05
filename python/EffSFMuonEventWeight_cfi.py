@@ -6,7 +6,7 @@ effSFMuonEventWeight = cms.EDProducer("EffSFMuonEventWeight",
                                               ## "selectionEffSFNormUp/Down"
                                               ## "flatTriggerSF"
   verbose  = cms.int32(  0),                  ## set to 1 if terminal text output is desired
-  filename = cms.string(""),                  ## if filename != "", the efficiencies are read from histos
+  filename = cms.FileInPath(""),              ## if filename != "", the efficiencies are read from histos
                                               ## provided in that file
   additionalFactor = cms.double(1.),          ## result is multiplied with this additional factor
                                               ## (can be used for other flat SF)

@@ -11,6 +11,6 @@ bTagSFEventWeight = cms.EDProducer("BTagSFEventWeight",
   uncertaintySFb = cms.double(-1),            ## uncertainty of SFb (0.05 means 5%); if set to <0, the values from the b-tag DB are taken
   shapeDistortionFactor = cms.double(0.5),    ## for shape uncertainty calculation (fraction of normalisation uncertainty)
   verbose  = cms.int32(  0),                  ## set to 1 if terminal text output is desired
-  filename = cms.string("")                   ## if filename != "", the efficiencies are read from histos
+  filename = cms.FileInPath("")               ## if filename != "", the efficiencies are read from histos
                                               ## provided in that file
 )

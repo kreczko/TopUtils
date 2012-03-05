@@ -10,7 +10,7 @@ EffSFMuonEventWeight::EffSFMuonEventWeight(const edm::ParameterSet& cfg):
   particles_            ( cfg.getParameter<edm::InputTag>    ("particles"   ) ),
   sysVar_               ( cfg.getParameter<std::string>      ("sysVar"  ) ),
   verbose_              ( cfg.getParameter<int>              ("verbose" ) ),
-  filename_             ( cfg.getParameter<std::string>      ("filename"  ) ),
+  filename_             ( cfg.getParameter<edm::FileInPath>  ("filename"  ) ),
   additionalFactor_     ( cfg.getParameter<double>   ("additionalFactor"  ) ),
   additionalFactorErr_  ( cfg.getParameter<double>   ("additionalFactorErr"  ) ),
   meanTriggerEffSF_     ( cfg.getParameter<double>   ("meanTriggerEffSF"  ) ),
@@ -29,25 +29,25 @@ EffSFMuonEventWeight::EffSFMuonEventWeight(const edm::ParameterSet& cfg):
   hists_["muonEffSF"]     = fs->make<TH1F>( "muonEffSF", "muonEffSF", 200, 0.5, 1.5 );
   
   /// getting efficiency histos from input files
-  if(filename_!=""){
-    file_ = new TFile((TString)filename_);
+  if(filename_.location()){
+    file_ = new TFile((TString)filename_.fullPath());
     if(!(file_->IsZombie())){
-      if(verbose_>=1) std::cout<<filename_<<" opened"<<std::endl;
+      if(verbose_>=1) std::cout<<filename_.fullPath()<<" opened"<<std::endl;
       // use ->FindObject because ComparisonSFtapTrigger_3 is a TPad object
       effHists_["effSFEta"]       = (TH1F*) file_->Get("ComparisonSFtapTrigger_3")->FindObject("effSFEta_1")->Clone();
       if(verbose_>=1) std::cout<<"histo found"<<std::endl;
      
     }
     else{
-      std::cout<<filename_<<" not found!!!!! Efficiencies cannot be taken from this file!!! Default taken!"<<std::endl;
-      filename_ = "";
+      std::cout<<filename_.fullPath()<<" not found!!!!! Efficiencies cannot be taken from this file!!! Default taken!"<<std::endl;
+      filename_ = edm::FileInPath();
     }
   }
 }
 
 EffSFMuonEventWeight::~EffSFMuonEventWeight()
 {
-  if(filename_!="") {if(!(file_->IsZombie())) file_->Close();}
+  if(filename_.location()) {if(!(file_->IsZombie())) file_->Close();}
 }
 
 void
@@ -68,7 +68,7 @@ EffSFMuonEventWeight::produce(edm::Event& evt, const edm::EventSetup& setup)
     eta = part->eta();
     numPart++;
     /// eta dependent trigger eff. SF
-    if(filename_!="" && sysVar_!="flatTriggerSF") {
+    if(filename_.location() && sysVar_!="flatTriggerSF") {
       TH1F* his = effHists_.find("effSFEta")->second;
       if(eta >= his->GetBinLowEdge(his->GetNbinsX()+1)) {
 	result= his->GetBinContent(his->GetNbinsX());

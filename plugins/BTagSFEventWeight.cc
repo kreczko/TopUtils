@@ -15,7 +15,7 @@ BTagSFEventWeight::BTagSFEventWeight(const edm::ParameterSet& cfg):
   uncertaintySFb_         ( cfg.getParameter<double>      ("uncertaintySFb"  ) ),
   shapeDistortionFactor_  ( cfg.getParameter<double>      ("shapeDistortionFactor"  ) ),
   verbose_ ( cfg.getParameter<int>              ("verbose" ) ),
-  filename_( cfg.getParameter<std::string>      ("filename"  ) )
+  filename_( cfg.getParameter<edm::FileInPath>  ("filename") )
 {
   produces<double>();
   
@@ -34,10 +34,10 @@ BTagSFEventWeight::BTagSFEventWeight(const edm::ParameterSet& cfg):
   hists_["effBTagEventSFMean"] = fs->make<TH1F>( "effBTagEventSFMean", "effBTagEventSFMean", 1, 0, 1 );
   
   /// getting efficiency histos from input files
-  if(filename_!=""){
-    file_ = new TFile((TString)filename_);
+  if(filename_.location()){
+    file_ = new TFile((TString)filename_.fullPath());
     if(!(file_->IsZombie())){
-      if(verbose_>=1) std::cout<<filename_<<" opened"<<std::endl;
+      if(verbose_>=1) std::cout<<filename_.fullPath()<<" opened"<<std::endl;
 //       effHists_["NumBJetsPt"]       = (TH1F*) file_->Get("bTagEff/NumBJetsPt")->Clone();
 //       effHists_["NumBJetsTaggedPt"] = (TH1F*) file_->Get("bTagEff/NumBJetsTaggedPt")->Clone();
 //       effHists_["EffBJetsTaggedPt"] = (TH1F*) file_->Get("bTagEff/EffBJetsTaggedPt")->Clone();
@@ -92,12 +92,12 @@ BTagSFEventWeight::BTagSFEventWeight(const edm::ParameterSet& cfg):
 	 }
 	 else{
 	   std::cout<<"Eff.Histos not found!!!!! Efficiencies cannot be taken from this file!!! Default taken!"<<std::endl;
-	   filename_ = "";
+	   filename_ = edm::FileInPath();
 	 }
     }
     else{
-      std::cout<<filename_<<" not found!!!!! Efficiencies cannot be taken from this file!!! Default taken!"<<std::endl;
-      filename_ = "";
+      std::cout<<filename_.fullPath()<<" not found!!!!! Efficiencies cannot be taken from this file!!! Default taken!"<<std::endl;
+      filename_ = edm::FileInPath();
     }
   }
   
@@ -110,7 +110,7 @@ BTagSFEventWeight::BTagSFEventWeight(const edm::ParameterSet& cfg):
 
 BTagSFEventWeight::~BTagSFEventWeight()
 {
-  if(filename_!="") {if(!(file_->IsZombie())) file_->Close();}
+  if(filename_.location()) {if(!(file_->IsZombie())) file_->Close();}
 }
 
 void
@@ -172,7 +172,7 @@ double BTagSFEventWeight::effBTag(double jetPt, double jetEta)
 {
   double result = -1111.;
   // if histo file exists, take value from there; else return a default value
-  if(filename_!="") {
+  if(filename_.location()) {
     TH2F* his = effHists_.find("EffBJetsTaggedPtEta")->second;
     // ensure that pt is in accepted range of BTV DB
     if(jetPt >= maxPt_) jetPt = maxPt_-1.;
@@ -239,7 +239,7 @@ double BTagSFEventWeight::effBTagCjet(double jetPt, double jetEta)
 {
   double result = -1111.;
   // if histo file exists, take value from there; else return a default value
-  if(filename_!="") {
+  if(filename_.location()) {
     TH2F* his = effHists_.find("EffCJetsTaggedPtEta")->second;
     // ensure that pt is in accepted range of BTV DB
     if(jetPt >= maxPt_) jetPt = maxPt_-1.;
@@ -256,7 +256,7 @@ double BTagSFEventWeight::effMisTag(double jetPt, double jetEta)
 {
   double result = -1111.;
   // if histo file exists, take value from there; else return a default value
-  if(filename_!="") {
+  if(filename_.location()) {
     TH2F* his = effHists_.find("EffLJetsTaggedPtEta")->second;
     // ensure that pt is in accepted range of BTV DB
     if(jetPt >= maxPt_) jetPt = maxPt_-1.;
