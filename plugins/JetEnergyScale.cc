@@ -21,6 +21,7 @@ JetEnergyScale::JetEnergyScale(const edm::ParameterSet& cfg):
   scaleFactorB_        (cfg.getParameter<double>       ("scaleFactorB"        )),
   resolutionFactor_    (cfg.getParameter<std::vector<double> > ("resolutionFactors"   )),
   resolutionRanges_    (cfg.getParameter<std::vector<double> > ("resolutionEtaRanges" )),
+  JECUncSrcFile_       (cfg.getParameter<edm::FileInPath>("JECUncSrcFile") ),
   jetPTThresholdForMET_(cfg.getParameter<double>       ("jetPTThresholdForMET")),
   jetEMLimitForMET_    (cfg.getParameter<double>       ("jetEMLimitForMET"    ))
 {
@@ -31,6 +32,8 @@ JetEnergyScale::JetEnergyScale(const edm::ParameterSet& cfg):
   allowedTypes_.push_back(std::string("jes:down"));
   allowedTypes_.push_back(std::string("top:up"));
   allowedTypes_.push_back(std::string("top:down"));
+  allowedTypes_.push_back(std::string("flavor:up"));
+  allowedTypes_.push_back(std::string("flavor:down"));
 
   // use label of input to create label for output
   outputJets_ = inputJets_.label();
@@ -134,6 +137,29 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
       }
 
       //scaledJet.scaleEnergy( resolutionFactor(scaledJet) );
+      scaleJetEnergy( scaledJet, resolutionFactor(scaledJet) );
+      delete deltaJEC;
+    }
+    // Use AK5PF flavor uncertainty as estimator on the difference between uds- and b-jets
+    // Maybe we could make this more generic later (if needed)
+    if(scaleType_.substr(0, scaleType_.find(':'))=="flavor") {
+      // get the uncertainty parameters from file, see
+      // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JECUncertaintySources
+      JetCorrectorParameters* param = new JetCorrectorParameters(JECUncSrcFile_.fullPath(), "Flavor");
+      // instantiate the jec uncertainty object
+      JetCorrectionUncertainty* deltaJEC = new JetCorrectionUncertainty(*param);
+      deltaJEC->setJetEta(jet->eta()); deltaJEC->setJetPt(jet->pt()); 
+      
+      if (abs(scaledJet.partonFlavour()) == 5) {
+        if(scaleType_.substr(scaleType_.find(':')+1)=="up") {
+          float jetMet = deltaJEC->getUncertainty(true);
+          scaleJetEnergy( scaledJet, 1+jetMet );
+        }
+        else if(scaleType_.substr(scaleType_.find(':')+1)=="down"){
+          float jetMet = deltaJEC->getUncertainty(false);
+          scaleJetEnergy( scaledJet, 1-jetMet );
+        }
+      }
       scaleJetEnergy( scaledJet, resolutionFactor(scaledJet) );
       delete deltaJEC;
     }

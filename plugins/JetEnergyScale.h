@@ -2,6 +2,7 @@
 #define JetEnergyScale_h
 
 #include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/ParameterSet/interface/FileInPath.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 
 /**
@@ -83,6 +84,8 @@ class JetEnergyScale : public edm::EDProducer {
   std::vector<double> resolutionFactor_;
   /// valid |eta| ranges for the energy resolution scale factors
   std::vector<double> resolutionRanges_;
+  /// JECUncertaintySource File
+  edm::FileInPath JECUncSrcFile_;
   /// threshold on (raw!) jet pt for Type1 MET corrections 
   double jetPTThresholdForMET_;
   /// limit on the emf of the jet for Type1 MET corrections 
