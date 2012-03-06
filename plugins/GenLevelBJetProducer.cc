@@ -15,7 +15,7 @@ see details in the description of the  function getGenJetWith
 //
 // Original Author:  Benjamin Lutz,,,DESY
 //         Created:  Thu Feb  2 13:30:58 CET 2012
-// $Id: GenLevelBJetProducer.cc,v 1.2 2012/03/01 11:40:34 blutz Exp $
+// $Id: GenLevelBJetProducer.cc,v 1.3 2012/03/06 16:00:59 blutz Exp $
 //
 //
 
@@ -361,7 +361,8 @@ bool GenLevelBJetProducer::searchInMothers(const reco::Candidate* bQuark, const 
                                     << " PDG: " << mother->pdgId()
                                     << " " << mother->p4()
                                     << " is already in the chain."
-                                    << " Will stop this branch here. B-hadron identification might be incomplete." ;
+                                    << " Will stop this branch here. B-hadron identification might be incomplete."
+                                    << " " << printParticleChain(particleChain,*bHadron);
       return false;
     }
     if (bQuark->p4() == mother->p4() && bQuark->pdgId() == mother->pdgId() && bQuark->status() == mother->status()) {
