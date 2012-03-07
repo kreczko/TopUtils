@@ -6,14 +6,15 @@
 /**\class GenLevelBJetProducer GenLevelBJetProducer.cc blutz/GenLevelBJetProducer/src/GenLevelBJetProducer.cc
    @brief matches GenJets versus b-hadrons
 
-   Identifies the b-Jet inside the generator jets by matching it with the b-hadron. See details in the description of the  function GenLevelBJetProducer::getGenJetWith()
+   Identifies the b-Jet inside the generator jets by matching it with the b-hadron. See details in the description of the  function getGenJetWith()
 
+   The description of the run-time parameters can be found at fillDescriptions()
 */
 
 //
 // Original Author:  Benjamin Lutz,,,DESY
 //         Created:  Thu Feb  2 13:30:58 CET 2012
-// $Id: GenLevelBJetProducer.cc,v 1.4 2012/03/07 15:30:35 blutz Exp $
+// $Id: GenLevelBJetProducer.cc,v 1.5 2012/03/07 18:38:46 blutz Exp $
 //
 //
 
@@ -79,6 +80,7 @@ private:
   edm::InputTag genJets_;
   double deltaR_;
   bool noBBbarResonances_;
+  bool requireTopBquark_;
   bool resolveName_;
 
   edm::ESHandle<ParticleDataTable> pdt_;
@@ -103,6 +105,7 @@ GenLevelBJetProducer::GenLevelBJetProducer(const edm::ParameterSet& cfg) {
   genJets_           = cfg.getParameter<edm::InputTag>("genJets");
   deltaR_            = cfg.getParameter<double>("deltaR");
   noBBbarResonances_ = cfg.getParameter<bool>("noBBbarResonances");
+  requireTopBquark_  = cfg.getParameter<bool>("requireTopBquark");
   resolveName_       = cfg.getParameter<bool>("resolveParticleName");
 
   produces< std::vector<int> >("BHadJetIndex");
@@ -111,6 +114,20 @@ GenLevelBJetProducer::GenLevelBJetProducer(const edm::ParameterSet& cfg) {
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
+/**
+ * @brief description of the run-time parameters
+ *
+ * <TABLE>
+ * <TR><TH> name                </TH><TH> description </TH> </TR>
+ * <TR><TD> ttGenEvent          </TD><TD> input collection of TtGenEvent, used to identify the b-quark from top </TD></TR>
+ * <TR><TD> genJets             </TD><TD> input GenJetCollection </TD></TR>
+ * <TR><TD> deltaR              </TD><TD> maximum angle between b-hadron and GenJet </TD></TR>
+ * <TR><TD> noBBbarResonances   </TD><TD> exclude b-bar resonances to be identified as b-hadrons </TD></TR>
+ * <TR><TD> requireTopBquark    </TD><TD> only accept b-hadrons coming from the top-b-quark </TD></TR>
+ * <TR><TD> resolveParticleName </TD><TD> print particle name during warning and debug output instead of PDG ID </TD></TR>
+ * </TABLE>
+ *
+ */
 void GenLevelBJetProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
 
   edm::ParameterSetDescription desc;
@@ -118,6 +135,7 @@ void GenLevelBJetProducer::fillDescriptions(edm::ConfigurationDescriptions& desc
   desc.add<edm::InputTag>("genJets",edm::InputTag("ak5GenJets","","HLT"));
   desc.add<double>("deltaR",.5);
   desc.add<bool>("noBBbarResonances",true);
+  desc.add<bool>("requireTopBquark",false);
   desc.add<bool>("resolveParticleName",false);
   descriptions.add("produceGenLevelBJets",desc);
 }
@@ -133,7 +151,7 @@ GenLevelBJetProducer::~GenLevelBJetProducer() {
 // ------------ method called to produce the data  ------------
 void GenLevelBJetProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
 
-  //  setup.getData( pdt_ );
+  setup.getData( pdt_ );
 
   using namespace edm;
 
@@ -187,11 +205,12 @@ void GenLevelBJetProducer::endLuminosityBlock(edm::LuminosityBlock&, edm::EventS
  * @brief identify the jets that contain b-hadrons
  *
  * All jets which have a b-hadron with the right b content (b or anti-b) are identified in the GenJetCollection.
- * b-bbar resonances can either be excluded or included. The b-hadrons are not required to originate from a b-quark.
  * Only jets within the given @f$\delta_{r}@f$ are accepted.
  * In case more than one jet originates from the same b-hadron the jet which is nearer in @f$\delta_{r}@f$ is chosen.
  *
- * @todo add option to restrict to b hadrons coming from b-quarks
+ * b-bbar resonances can either be considered b-hadrons or not depending on the configuration.
+ *
+ * The b-hadrons can be required to originate from the given b-quark depending on the configuration.
  *
  * @param[in] bQuark used to set the charge of the b-Hadrons
  * @param[in] genJets the GenJetCollection to be searched
@@ -248,7 +267,7 @@ std::vector<int> GenLevelBJetProducer::getGenJetWith ( const reco::Candidate* bQ
       bQuarkCandidateIndex.push_back(iJet);
       nBquarkParticles.push_back(nBquarkDaughters);
     }
-    if (isBhadronCandidate) {
+    if (isBhadronCandidate && (isBquarkCandidate || !requireTopBquark_) ) {
       bHadronCandidates.push_back(thisJet);
       bHadronCandidateIndex.push_back(iJet);
       nBhadronParticles.push_back(nBhadronDaughters);

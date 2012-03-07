@@ -5,6 +5,7 @@ produceGenLevelBJets = cms.EDProducer("GenLevelBJetProducer",
     genJets = cms.InputTag('ak5GenJets','','HLT'),
     deltaR = cms.double(0.5),
     resolveParticleName = cms.bool(False),
+    requireTopBquark = cms.bool(False),
     noBBbarResonances = cms.bool(True)
 )
 
