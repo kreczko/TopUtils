@@ -4,18 +4,16 @@
 // Class:      GenLevelBJetProducer
 //
 /**\class GenLevelBJetProducer GenLevelBJetProducer.cc blutz/GenLevelBJetProducer/src/GenLevelBJetProducer.cc
+   @brief matches GenJets versus b-hadrons
 
-Description: identifies the b-Jet inside the generator jets by matching it with the b-hadron
-
-Implementation:
-see details in the description of the  function getGenJetWith
+   Identifies the b-Jet inside the generator jets by matching it with the b-hadron. See details in the description of the  function GenLevelBJetProducer::getGenJetWith()
 
 */
 
 //
 // Original Author:  Benjamin Lutz,,,DESY
 //         Created:  Thu Feb  2 13:30:58 CET 2012
-// $Id: GenLevelBJetProducer.cc,v 1.3 2012/03/06 16:00:59 blutz Exp $
+// $Id: GenLevelBJetProducer.cc,v 1.4 2012/03/07 15:30:35 blutz Exp $
 //
 //
 
@@ -186,7 +184,7 @@ void GenLevelBJetProducer::endLuminosityBlock(edm::LuminosityBlock&, edm::EventS
 // ------------ helper functions -------------
 
 /**
- * identify the jets that contain b-hadrons
+ * @brief identify the jets that contain b-hadrons
  *
  * All jets which have a b-hadron with the right b content (b or anti-b) are identified in the GenJetCollection.
  * b-bbar resonances can either be excluded or included. The b-hadrons are not required to originate from a b-quark.
@@ -317,9 +315,9 @@ std::vector<int> GenLevelBJetProducer::getGenJetWith ( const reco::Candidate* bQ
 }
 
 /**
- * helper function to keep track of the decay chain and identify loops in the decay tree
+ * @brief helper function to keep track of the decay chain and identify loops in the decay tree
  *
- * @param[out] vector of particles building up the current chain
+ * @param[out] particleChain vector of particles building up the current chain
  * @param[in] particle particle that should be added
  *
  * returns true if a particle is already in the chain
@@ -334,7 +332,7 @@ bool GenLevelBJetProducer::checkForLoop(std::vector<const reco::Candidate*> &par
 }
 
 /**
- * do a recursive search for the mother particles until the b-quark is found or the absolute mother is found
+ * @brief do a recursive search for the mother particles until the b-quark is found or the absolute mother is found
  *
  * the treatment of b-bar resonances depends on the global parameter noBBbarResonances_
  *
@@ -375,6 +373,9 @@ bool GenLevelBJetProducer::searchInMothers(const reco::Candidate* bQuark, const 
   return false;
 }
 
+/**
+ * @brief helper function to resolve realname of PDG-ID
+ */
 std::string GenLevelBJetProducer::getParticleName(int id) const
 {
 
@@ -392,7 +393,7 @@ std::string GenLevelBJetProducer::getParticleName(int id) const
 
 
 /**
- * helper function to print jet properies
+ * @brief helper function to print jet properies
  *
  * this function is inlined to allow efficient optimisation when compiled without debug option
  *
@@ -412,7 +413,7 @@ inline std::string GenLevelBJetProducer::printJetInfo(const size_t iJet, const r
 }
 
 /**
- * helper function to generate a human readable representation of the decay chain
+ * @brief helper function to generate a human readable representation of the decay chain
  *
  * this function is inlined to allow efficient optimisation when compiled without debug option
  *
@@ -436,11 +437,11 @@ inline std::string GenLevelBJetProducer::printParticleChain(const std::vector<co
 
 
 /**
- * identify which of the jets is the nearest to the particle
+ * @brief identify which of the jets is the nearest to the particle
  *
- * @param particle reference particel
+ * @param particle reference particle
  * @param genJets candidate jets
- * @returns index of the best jet in the vector or -1 if no jet within the maximum @f$\delta_{r}@f
+ * @returns index of the best jet in the vector or -1 if no jet within the maximum @f$\delta_{r}@f$
  */
 int GenLevelBJetProducer::getGenJetNear( const reco::Candidate* particle, std::vector<const reco::GenJet*> &genJets ) {
   int result = -1;
