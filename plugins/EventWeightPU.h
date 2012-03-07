@@ -24,22 +24,20 @@ class EventWeightPU : public edm::EDProducer {
 
    private:
 
+      int error_code;
+
       virtual void produce(edm::Event&, const edm::EventSetup&);
 
       edm::InputTag   inTag_PUSource;
       std::string     inTag_WeightName;
-      std::string     inTag_Weight3DName; 
+
+      std::string     inTag_MCSampleTag;
 
       edm::FileInPath inTag_MCSampleFile;
       std::string     inTag_MCSampleHistoName;
       edm::FileInPath inTag_DataFile;
       std::string     inTag_DataHistoName;
      
-      edm::FileInPath inTag_MCSample3DFile; 
-      std::string     inTag_MCSample3DHistoName; 
-      edm::FileInPath inTag_Data3DFile;   
-      std::string     inTag_Data3DHistoName;
-
       bool            inTag_CreateWeight3DHisto;
       edm::FileInPath inTag_Weight3DHistoFile;
 
