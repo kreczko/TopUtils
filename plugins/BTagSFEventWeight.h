@@ -43,6 +43,7 @@ class BTagSFEventWeight : public edm::EDProducer {
  private:
   edm::InputTag jets_;
   std::string bTagAlgo_;
+  std::string version_;
   std::string sysVar_;
   double shapeVarPtThreshold_;
   double shapeVarEtaThreshold_;
@@ -50,7 +51,9 @@ class BTagSFEventWeight : public edm::EDProducer {
   double shapeDistortionFactor_;
   int verbose_;
   edm::FileInPath filename_;
-  double maxPt_;
+  double maxPtDB_;
+  double maxPt11004_;
+  double maxPtMisTag_;
   double maxEta_;
   
   /// to load database
@@ -68,7 +71,8 @@ class BTagSFEventWeight : public edm::EDProducer {
   /// file with histos
   TFile * file_;
 
-  
+  double effBTagSF11004(double);
+  double effBTagSFerr11004(double);
   double effBTag    (double, double);
   double effBTagSF  (double, double);
   double effBTagCjet(double, double);

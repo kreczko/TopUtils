@@ -9,19 +9,22 @@
 BTagSFEventWeight::BTagSFEventWeight(const edm::ParameterSet& cfg):
   jets_                   ( cfg.getParameter<edm::InputTag>    ( "jets"   ) ),
   bTagAlgo_               ( cfg.getParameter<std::string>      ("bTagAlgo") ),
+  version_                ( cfg.getParameter<std::string>      ("version"  ) ),
   sysVar_                 ( cfg.getParameter<std::string>      ("sysVar"  ) ),
-  shapeVarPtThreshold_    ( cfg.getParameter<double>      ("shapeVarPtThreshold"  ) ),
-  shapeVarEtaThreshold_   ( cfg.getParameter<double>      ("shapeVarEtaThreshold"  ) ),
-  uncertaintySFb_         ( cfg.getParameter<double>      ("uncertaintySFb"  ) ),
-  shapeDistortionFactor_  ( cfg.getParameter<double>      ("shapeDistortionFactor"  ) ),
-  verbose_ ( cfg.getParameter<int>              ("verbose" ) ),
-  filename_( cfg.getParameter<edm::FileInPath>  ("filename") )
+  shapeVarPtThreshold_    ( cfg.getParameter<double>           ("shapeVarPtThreshold"  ) ),
+  shapeVarEtaThreshold_   ( cfg.getParameter<double>           ("shapeVarEtaThreshold"  ) ),
+  uncertaintySFb_         ( cfg.getParameter<double>           ("uncertaintySFb"  ) ),
+  shapeDistortionFactor_  ( cfg.getParameter<double>           ("shapeDistortionFactor"  ) ),
+  verbose_                ( cfg.getParameter<int>              ("verbose" ) ),
+  filename_               ( cfg.getParameter<edm::FileInPath>  ("filename") )
 {
   produces<double>();
   
   // set the edges of the last histo bin
-  maxPt_ = 240.;
-  maxEta_= 2.4;
+  maxPtDB_     = 240.;
+  maxPt11004_  = 670.;
+  maxPtMisTag_ = 520.;
+  maxEta_      = 2.4;
   
   // laod TFile Service
   edm::Service<TFileService> fs;
@@ -38,31 +41,6 @@ BTagSFEventWeight::BTagSFEventWeight(const edm::ParameterSet& cfg):
     file_ = new TFile((TString)filename_.fullPath());
     if(!(file_->IsZombie())){
       if(verbose_>=1) std::cout<<filename_.fullPath()<<" opened"<<std::endl;
-//       effHists_["NumBJetsPt"]       = (TH1F*) file_->Get("bTagEff/NumBJetsPt")->Clone();
-//       effHists_["NumBJetsTaggedPt"] = (TH1F*) file_->Get("bTagEff/NumBJetsTaggedPt")->Clone();
-//       effHists_["EffBJetsTaggedPt"] = (TH1F*) file_->Get("bTagEff/EffBJetsTaggedPt")->Clone();
-//       effHists_["NumCJetsPt"]       = (TH1F*) file_->Get("bTagEff/NumCJetsPt")->Clone();
-//       effHists_["NumCJetsTaggedPt"] = (TH1F*) file_->Get("bTagEff/NumCJetsTaggedPt")->Clone();
-//       effHists_["EffCJetsTaggedPt"] = (TH1F*) file_->Get("bTagEff/EffCJetsTaggedPt")->Clone();
-//       effHists_["NumLJetsPt"]       = (TH1F*) file_->Get("bTagEff/NumLJetsPt")->Clone();
-//       effHists_["NumLJetsTaggedPt"] = (TH1F*) file_->Get("bTagEff/NumLJetsTaggedPt")->Clone();
-//       effHists_["EffLJetsTaggedPt"] = (TH1F*) file_->Get("bTagEff/EffLJetsTaggedPt")->Clone();
-//       
-//       /// re-calculation of b tag efficiencies as input might be corrupted due to hadd
-//       if(effHists_.count("NumBJetsPt") && effHists_.count("NumBJetsTaggedPt") && effHists_.count("EffBJetsTaggedPt") &&
-// 	 effHists_.count("NumCJetsPt") && effHists_.count("NumCJetsTaggedPt") && effHists_.count("EffCJetsTaggedPt") &&
-// 	 effHists_.count("NumBJetsPt") && effHists_.count("NumBJetsTaggedPt") && effHists_.count("EffBJetsTaggedPt")) {
-// 	
-// 	effHists_.find("EffBJetsTaggedPt")->second->Reset();
-//         effHists_.find("EffCJetsTaggedPt")->second->Reset();
-//         effHists_.find("EffLJetsTaggedPt")->second->Reset();
-//       
-//         effHists_.find("EffBJetsTaggedPt")->second->Divide(effHists_.find("NumBJetsTaggedPt")->second, 
-//             effHists_.find("NumBJetsPt")->second,1,1,"B");
-//         effHists_.find("EffCJetsTaggedPt")->second->Divide(effHists_.find("NumCJetsTaggedPt")->second, 
-//             effHists_.find("NumCJetsPt")->second,1,1,"B");
-//         effHists_.find("EffLJetsTaggedPt")->second->Divide(effHists_.find("NumLJetsTaggedPt")->second, 
-//             effHists_.find("NumLJetsPt")->second,1,1,"B");
       
 	effHists_["NumBJetsPtEta"]       = (TH2F*) file_->Get("bTagEff/NumBJetsPtEta")->Clone();
 	effHists_["NumBJetsTaggedPtEta"] = (TH2F*) file_->Get("bTagEff/NumBJetsTaggedPtEta")->Clone();
@@ -163,9 +141,97 @@ BTagSFEventWeight::produce(edm::Event& evt, const edm::EventSetup& setup)
 
 //--------------------------------------------------------------------------
 
-// Default Eff. and SF values taken from PAS BTV-11-001 (pTrel method),
-// or from user-defined histo as a function of pt (in the future also eta?).
-// In the future take SF directly from file provided by BTV.
+/// Default SF values taken from database wrt. PAS BTV-11-001 (pTrel method),
+/// or from PAS BTV-11-004
+/// Values for eff. from user-defined histo as a function of pt and eta.
+
+double BTagSFEventWeight::effBTagSF11004(double x)
+{
+  // function from PAS 11-004; x = jetPt
+  if(bTagAlgo_=="SSVHEM") return 0.896462*((1.+(0.00957275*x))/(1.+(0.00837582*x)));
+  if(bTagAlgo_=="CSVM")   return 0.6981*((1.+(0.414063*x))/(1.+(0.300155*x)));
+  if(bTagAlgo_=="JPM")    return 0.90806*((1.+(0.000236997*x))/(1.+(5.49455e-05*x)));
+  else { 
+    std::cout<< "WARNING!!! b tag SF for "<< bTagAlgo_ <<" not in code!!! CHECK!!!"<<std::endl;
+    return 1.; 
+  }
+}
+
+double BTagSFEventWeight::effBTagSFerr11004(double x)
+{
+  // function from PAS 11-004; x = jetPt
+  // pt binning
+  double pt[] = {30, 40, 50, 60, 70, 80, 100, 120, 160, 210, 260, 320, 400, 500, 670};
+  // corresponding SFb uncertainties
+  double SFb_errorSSVHEM[] = {
+    0.0316234,
+    0.0310149,
+    0.02381,
+    0.0223228,
+    0.023461,
+    0.0202517,
+    0.0156249,
+    0.0214799,
+    0.0399369,
+    0.0416666,
+    0.0431031,
+    0.0663209,
+    0.0687731,
+    0.0793305 };
+  double SFb_errorCSVM[] = {
+    0.0295675,
+    0.0295095,
+    0.0210867,
+    0.0219349,
+    0.0227033,
+    0.0204062,
+    0.0185857,
+    0.0256242,
+    0.0383341,
+    0.0409675,
+    0.0420284,
+    0.0541299,
+    0.0578761,
+    0.0655432 };
+  double SFb_errorJPM[] = {
+    0.0352594,
+    0.0353008,
+    0.0299008,
+    0.0276606,
+    0.0292312,
+    0.0336607,
+    0.0284701,
+    0.029544,
+    0.0358872,
+    0.0367869,
+    0.0375048,
+    0.0597367,
+    0.0653152,
+    0.074242 };
+  /// look for index corresponding to pt
+  int iBin = -1;
+  // if pt<30 use 12%
+  if (x<pt[0]) return 0.12;
+  for(int i=0; i<14; i++) {
+    if (x>pt[i] && x<pt[i+1]) {
+      iBin =i;
+      break;
+    }
+  }
+  double factor = 1.;
+  if(iBin<0){
+    // if pt>670 use SFb(670) and twice its error
+    iBin=13;
+    factor=2;
+  }
+  if(bTagAlgo_=="SSVHEM") return factor * SFb_errorSSVHEM[iBin];
+  if(bTagAlgo_=="CSVM")   return factor * SFb_errorCSVM[iBin];
+  if(bTagAlgo_=="JPM")    return factor * SFb_errorJPM[iBin];
+  else { 
+    std::cout<< "WARNING!!! b tag SF for "<< bTagAlgo_ <<" not in code!!! CHECK!!!"<<std::endl;
+    return 1.; 
+  }
+}
 
 // b tag eff. from MC as a function of jet pt, eta
 double BTagSFEventWeight::effBTag(double jetPt, double jetEta)
@@ -175,11 +241,11 @@ double BTagSFEventWeight::effBTag(double jetPt, double jetEta)
   if(filename_.location()) {
     TH2F* his = effHists_.find("EffBJetsTaggedPtEta")->second;
     // ensure that pt is in accepted range of BTV DB
-    if(jetPt >= maxPt_) jetPt = maxPt_-1.;
+    if(jetPt >= maxPt11004_) jetPt = maxPt11004_-1.;
     if(jetEta >= maxEta_) jetEta = maxEta_-0.1;
     result = his->GetBinContent( his->FindBin(jetPt, jetEta) );
   }
-  else if(bTagAlgo_ == "SSVHEM") { result = 0.564/0.854;}
+  else {result = 0.7; std::cout<< "WARNING!!! b tag eff. is ALWAYS 0.7!!! CHECK!!!"<<std::endl; }
   if(verbose_>=2) std::cout<< "effBTag= "<<result<<std::endl;
   return result;
 }
@@ -188,11 +254,12 @@ double BTagSFEventWeight::effBTag(double jetPt, double jetEta)
 double BTagSFEventWeight::effBTagSF(double jetPt, double jetEta)
 {
   double result = -1111., error = -1111.;
-    const BtagPerformance & perf = *(perfHBTag.product());
-      BinningPointByMap measurePoint;
-
-      // ensure that pt is in accepted range of BTV DB
-      if(jetPt >= maxPt_) jetPt = maxPt_-1.;
+  const BtagPerformance & perf = *(perfHBTag.product());
+  BinningPointByMap measurePoint;
+  if(version_=="DB11-001"){
+    /// either take SF from BTV database...
+      // ensure that pt is in accepted range
+      if(jetPt >= maxPtDB_) jetPt = maxPtDB_-1.;
       if(jetEta >= maxEta_) jetEta = maxEta_-0.1;
       measurePoint.insert(BinningVariables::JetEt, jetPt);
       measurePoint.insert(BinningVariables::JetAbsEta, jetEta);      
@@ -202,15 +269,29 @@ double BTagSFEventWeight::effBTagSF(double jetPt, double jetEta)
 	std::cout << "ERROR! B-tag SF could not be taken from DB! b-tag SF is taken as 1!" << std::endl;
 	result = 1.;
       }
+  }
+  else if(version_=="11-004"){
+    /// ...or by hand from 11-004 (Moriond recommendation)
+    result = effBTagSF11004(jetPt);
+  }
   if(uncertaintySFb_<0.){
+    if(version_=="DB11-001"){
+      /// either take SF from BTV database...
       if(perf.isResultOk( measureMap_[ "BTAGBERRCORR" ], measurePoint))
 	error = perf.getResult( measureMap_[ "BTAGBERRCORR" ], measurePoint);
       else {
 	std::cout << "ERROR! B-tag SF err could not be taken from DB! b-tag SF err is taken as 0.1!" << std::endl;
 	error = 0.1;
       }
+    }
+    else if(version_=="11-004"){
+      /// ...or by hand from 11-004 (Moriond recommendation)
+      error = effBTagSFerr11004(jetPt);
+    }
   }
   else     error = uncertaintySFb_;
+  
+  /// different versions of sys. variations
   if(sysVar_ == "bTagSFUp")   result += error;
   else if(sysVar_ == "bTagSFDown") result -= error;
   else if(sysVar_ == "bTagSFShapeUpPt"){
@@ -241,12 +322,12 @@ double BTagSFEventWeight::effBTagCjet(double jetPt, double jetEta)
   // if histo file exists, take value from there; else return a default value
   if(filename_.location()) {
     TH2F* his = effHists_.find("EffCJetsTaggedPtEta")->second;
-    // ensure that pt is in accepted range of BTV DB
-    if(jetPt >= maxPt_) jetPt = maxPt_-1.;
+    // ensure that pt is in accepted range
+    if(jetPt >= maxPt11004_) jetPt = maxPt11004_-1.;
     if(jetEta >= maxEta_) jetEta = maxEta_-0.1;
     result = his->GetBinContent( his->FindBin(jetPt, jetEta) );
   }
-  else if(bTagAlgo_ == "SSVHEM") { result = (0.564/0.854 + 0.0195)/2;}
+  else {result = 0.35; std::cout<< "WARNING!!! b tag eff. is ALWAYS 0.35!!! CHECK!!!"<<std::endl; }
   if(verbose_>=2) std::cout<< "effBTagCjet= "<<result<<std::endl;
   return result;
 }
@@ -258,12 +339,12 @@ double BTagSFEventWeight::effMisTag(double jetPt, double jetEta)
   // if histo file exists, take value from there; else return a default value
   if(filename_.location()) {
     TH2F* his = effHists_.find("EffLJetsTaggedPtEta")->second;
-    // ensure that pt is in accepted range of BTV DB
-    if(jetPt >= maxPt_) jetPt = maxPt_-1.;
+    // ensure that pt is in accepted range
+    if(jetPt >= maxPtMisTag_) jetPt = maxPtMisTag_-1.;
     if(jetEta >= maxEta_) jetEta = maxEta_-0.1;
     result = his->GetBinContent( his->FindBin(jetPt, jetEta) );
   }
-  else if(bTagAlgo_ == "SSVHEM") { result = 0.0195/0.97;}
+  else {result = 0.01; std::cout<< "WARNING!!! b tag eff. is ALWAYS 0.01!!! CHECK!!!"<<std::endl; }
   if(verbose_>=2) std::cout<< "effMisTag= "<<result<<std::endl;
   return result;
 }
@@ -271,9 +352,13 @@ double BTagSFEventWeight::effMisTag(double jetPt, double jetEta)
 // mistag eff. SF as a function of jet pt, eta
 double BTagSFEventWeight::effMisTagSF(double jetPt, double jetEta)
 {
+  /// At the moment ALWAYS taken from BTV DB as no uncertainties were available for 11004
+  ///
   double result = -1111., error = -1111.;
   const BtagPerformance & perf = *(perfHMisTag.product());
   BinningPointByMap measurePoint;
+  if(jetPt >= maxPtMisTag_) jetPt = maxPtMisTag_-1.;
+  if(jetEta >= maxEta_) jetEta = maxEta_-0.1;
   measurePoint.insert(BinningVariables::JetEt, jetPt);
   measurePoint.insert(BinningVariables::JetAbsEta, jetEta);
   if(perf.isResultOk( measureMap_[ "BTAGLEFFCORR" ], measurePoint))
