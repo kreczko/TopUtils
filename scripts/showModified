@@ -1,0 +1,19 @@
+#!/bin/zsh
+
+echo modified files in current CVS tree
+cvs status 2>&1 | awk '{
+  if ($1 == "?") print "\033[34mnew:\033[m "$2
+  else if ($3=="Examining") {currentDir=$4}
+  else if ($1=="File:" && $4!="Up-to-date") {
+     if ($4=="Needs") {
+        if ($5=="Patch") status="\033[32moutdated:\033[m";
+        if ($5=="Merge") status="\033[41mmerge needed:\033[m";
+     }
+     else if ($4=="Locally" && $5=="Modified") {
+        status="\033[31mmodified:\033[m";
+     }
+     else status="unsupported status:";
+     print status" "currentDir"/"$2
+  }
+}'
+

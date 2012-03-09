@@ -1,0 +1,3 @@
+#!/bin/zsh
+
+cvs -q diff -bup "$@" | colordiff
