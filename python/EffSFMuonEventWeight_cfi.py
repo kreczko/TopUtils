@@ -2,8 +2,9 @@ import FWCore.ParameterSet.Config as cms
 
 effSFMuonEventWeight = cms.EDProducer("EffSFMuonEventWeight",
   particles  = cms.InputTag(""), ## jet collection (after jet selection, before b-tagging)
-  sysVar   = cms.string(""),                  ## "noSys", "triggerEffSFNormUp/Down", "triggerEffSFShapeUp/Down", 
-                                              ## "selectionEffSFNormUp/Down"
+  sysVar   = cms.string(""),                  ## "noSys", "combinedEffSFNormUpStat/Down", "combinedEffSFShapeUpEta(Pt)/Down", 
+                                              ## "combinedEffSFNormUpSys/Down"
+                                              ## "PUup", "PUdown"
                                               ## "flatTriggerSF"
   verbose  = cms.int32(  0),                  ## set to 1 if terminal text output is desired
   filename = cms.FileInPath(""),              ## if filename != "", the efficiencies are read from histos
@@ -12,6 +13,8 @@ effSFMuonEventWeight = cms.EDProducer("EffSFMuonEventWeight",
                                               ## (can be used for other flat SF)
   additionalFactorErr = cms.double(0.),       ## error
   meanTriggerEffSF    = cms.double(1.) ,      ## in case of flat SF and for trigger SF shape uncertainty calculation
-  shapeDistortionFactor = cms.double(0.),     ## for shape uncertainty calculation (modifies difference between mean and actual SF)
-  shapeVarPtThreshold  = cms.double(55.)      ## pt threshold which divides up/down variations SFShapeUp/DownPt
+  shapeDistortionFactor = cms.double(0.),     ## for shape uncertainty calculation: if >0 modifies difference between mean and actual SF
+                                              ## if -1: up/down variations divided by certain threshold (shapeVarEtaThreshold)
+  shapeVarEtaThreshold  = cms.double(1.2),     ## eta threshold which divides up/down variations SFShapeUp/DownEta
+  shapeVarPtThreshold   = cms.double(55.)     ## pt threshold which divides up/down variations SFShapeUp/DownPt
 )
