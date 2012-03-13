@@ -18,7 +18,7 @@
 //
 // Original Author:  Benjamin Lutz,,,DESY
 //         Created:  Thu Feb  2 13:30:58 CET 2012
-// $Id: GenLevelBJetProducer.cc,v 1.6 2012/03/12 17:57:59 blutz Exp $
+// $Id: GenLevelBJetProducer.cc,v 1.7 2012/03/13 13:38:26 blutz Exp $
 //
 //
 
@@ -218,7 +218,7 @@ void GenLevelBJetProducer::produce(edm::Event& evt, const edm::EventSetup& setup
   evt.put(bHadronFromTopBqark, "BHadronFromTopB");
   evt.put(bHadronVsJet,        "BHadronVsJet");
 
-  evt.put(anti_bIdx,           "AntiBHadJetIndex");
+  evt.put(anti_bIdx,                "AntiBHadJetIndex");
   evt.put(anti_bHadrons,            "AntiBHadrons");
   evt.put(anti_bHadronFromTopBqark, "AntiBHadronFromTopB");
   evt.put(anti_bHadronVsJet,        "AntiBHadronVsJet");
@@ -257,7 +257,7 @@ void GenLevelBJetProducer::endLuminosityBlock(edm::LuminosityBlock&, edm::EventS
  *
  * All jets originating from a b-hadron with the right b content (b or anti-b) are identified in the GenJetCollection.
  * This is done by searching through the generator particle decay tree starting from the constituents of the generator jets.
- * The b-hadron which is highest in the decay-chain (nearest to the b-quark) is considered the b-hadron of this jet.
+ * The b-hadron which is lowest in the decay-chain (just before the weak decay of the b) is considered the b-hadron of this jet.
  * Only jets within the given @f$\delta_{r}@f$ to the b-hadron are accepted.
  * In case more than one jet originates from the same b-hadron, the jet which is nearer in @f$\delta_{r}@f$ is chosen.
  *
@@ -274,7 +274,7 @@ void GenLevelBJetProducer::endLuminosityBlock(edm::LuminosityBlock&, edm::EventS
  * @param[in] genJets the GenJetCollection to be searched
  * @param[out] bHadronObjects list of identified b-hadrons
  * @param[out] isFromBquark tells which bHadrons originate from the given b-quark
- * @param[out] bHadronsInJet relation between b-hadron and genJets. 0 => no daughters of bHadron in this jet, 1 => daughters of this b-hadrton in this jet. Access (iJet,iBhadron) -> [iJet * bHadronObject.size() + iBhadron]
+ * @param[out] bHadronsInJet relation between b-hadron and genJets. 0 => no daughters of bHadron in this jet, 1 => daughters of this bHadron in this jet. Access (iJet,iBhadron) -> [iJet * bHadronObject.size() + iBhadron]
  * @returns a list with the indicies of the GenJets that fulfill the requirements
  */
 std::vector<int> GenLevelBJetProducer::getGenJetWith ( const reco::Candidate* bQuark, const reco::GenJetCollection& genJets, std::vector<reco::GenParticle> &bHadronObjects, std::vector<bool> &isFromBquark, std::vector<int> &bHadronsInJet) {
@@ -445,9 +445,11 @@ bool GenLevelBJetProducer::checkForLoop(std::vector<const reco::Candidate*> &par
  */
 bool GenLevelBJetProducer::searchInMothers(const reco::Candidate* bQuark, const reco::Candidate* thisParticle, std::vector<const reco::Candidate*> particleChain, pCRC *bHadron) {
 
-  if ( thisParticle->pdgId() / 1000  == bQuark->pdgId()  // b-baryions
-       || ( thisParticle->pdgId() / 100 % 10 == -bQuark->pdgId() // b-mesons
-            && ! ( noBBbarResonances_ && thisParticle->pdgId() / 10 % 100 == 55 ) ) // not a b-bbar resonance
+  if ( *bHadron == 0 // find only the first b-hadron on the way (the one that decays weekly)
+       && ( thisParticle->pdgId() / 1000  == bQuark->pdgId()  // b-baryions
+            || ( thisParticle->pdgId() / 100 % 10 == -bQuark->pdgId() // b-mesons
+                 && ! ( noBBbarResonances_ && thisParticle->pdgId() / 10 % 100 == 55 ) // but not a b-bbar resonance
+                 ) )
        ) *bHadron = thisParticle;
 
   for (size_t iMother = 0; iMother < thisParticle->numberOfMothers(); ++iMother) {
