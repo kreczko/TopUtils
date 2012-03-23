@@ -9,8 +9,9 @@ cvs status 2>&1 | awk '{
         if ($5=="Patch") status="\033[32moutdated:\033[m";
         if ($5=="Merge") status="\033[41mmerge needed:\033[m";
      }
-     else if ($4=="Locally" && $5=="Modified") {
-        status="\033[31mmodified:\033[m";
+     else if ($4=="Locally") {
+        if ($5=="Modified") status="\033[31mmodified:\033[m";
+        if ($5=="Added") status="\033[31mneeds commit (new):\033[m";
      }
      else if ($4=="Entry" && $5=="Invalid") {
         status="\033[32mremoved upstream:\033[m";
