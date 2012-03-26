@@ -11,13 +11,17 @@ cvs status 2>&1 | awk '{
      }
      else if ($4=="Locally") {
         if ($5=="Modified") status="\033[31mmodified:\033[m";
-        if ($5=="Added") status="\033[31mneeds commit (new):\033[m";
+        if ($5=="Added") status="\033[31mneeds commit\033[m \033[34m(new)\033[m:";
      }
      else if ($4=="Entry" && $5=="Invalid") {
         status="\033[32mremoved upstream:\033[m";
      }
      else if ($6=="Needs" && $7=="Checkout") {
         status="\033[31mlocally lost:\033[m";
+        $2=$4;
+     }
+     else if ( $6=="Locally" && $7=="Removed" ) {
+        status="\033[31mneeds commit\033[m \033[41m(removed)\033[m:";
         $2=$4;
      }
      else status="unsupported status:";
