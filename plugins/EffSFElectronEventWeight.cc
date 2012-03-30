@@ -18,7 +18,7 @@ EffSFElectronEventWeight::EffSFElectronEventWeight(const edm::ParameterSet& cfg)
   additionalFactorErr_  ( cfg.getParameter<double>   ("additionalFactorErr"  ) ),
   meanTriggerEffSF_     ( cfg.getParameter<double>   ("meanTriggerEffSF"  ) ),
   meanTriggerEffSFErr_  ( cfg.getParameter<double>   ("meanTriggerEffSFErr"  ) ),
-  shapeDistortionFactor_( cfg.getParameter<double>   ("shapeDistortionFactor"  ) )
+  shapeDistortionErr_   ( cfg.getParameter<double>   ("shapeDistortionErr"  ) )
   
 {
   produces<double>();
@@ -95,36 +95,38 @@ EffSFElectronEventWeight::produce(edm::Event& evt, const edm::EventSetup& setup)
 //         result = meanTriggerEffSF_;
 //     }
     
-    /// scale trigger efficiency to take difference between non-isolated and
+    /// scale trigger efficiency to take difference between non-isolated for early run ranges and
     /// isolated part for later run ranges (IsoEle25TriJet) into account;
     /// parameterisation obtained by comparing Ele25TriJet (control trigger) and IsoEle25TriJet
-    result = meanTriggerEffSF_ * (factorNonIso_ + factorIso_ * (0.997+0.05*relIso-3.*relIso*relIso));
+    /// if nonIsoEle is MC trigger -> correct isoEle
+    //result = meanTriggerEffSF_ * (factorNonIso_ + factorIso_ * (0.997+0.05*relIso-3.*relIso*relIso));
+    /// if IsoEle is MC trigger -> correct nonIsoEle
+    result = meanTriggerEffSF_ * (factorIso_ + factorNonIso_ / (0.997+0.05*relIso-3.*relIso*relIso));
     
-    /// systematic variations for trigger eff. SF (normalisation and shape uncertainties)
-    if     (sysVar_ == "triggerEffSFNormUp")   result += meanTriggerEffSFErr_;
-    else if(sysVar_ == "triggerEffSFNormDown") result -= meanTriggerEffSFErr_;
-    else if(sysVar_ == "triggerEffSFShapeUpPt")  { 
-      if(pt<shapeVarPtThreshold_) result += shapeDistortionFactor_ * meanTriggerEffSFErr_; 
-      else                        result -= shapeDistortionFactor_ * meanTriggerEffSFErr_;
-    }
-    else if(sysVar_ == "triggerEffSFShapeDownPt"){ 
-      if(pt<shapeVarPtThreshold_) result -= shapeDistortionFactor_ * meanTriggerEffSFErr_; 
-      else                        result += shapeDistortionFactor_ * meanTriggerEffSFErr_;
-    }
-    else if(sysVar_ == "triggerEffSFShapeUpEta")  { 
-      if(std::abs(eta)<shapeVarEtaThreshold_) result += shapeDistortionFactor_ * meanTriggerEffSFErr_; 
-      else                                    result -= shapeDistortionFactor_ * meanTriggerEffSFErr_;
-    }
-    else if(sysVar_ == "triggerEffSFShapeDownEta"){ 
-      if(std::abs(eta)<shapeVarEtaThreshold_) result -= shapeDistortionFactor_ * meanTriggerEffSFErr_; 
-      else                                    result += shapeDistortionFactor_ * meanTriggerEffSFErr_;
-    }
-    
-    /// additional factor as lepton selection eff. SF
+    /// optional additional factor
     result *= additionalFactor_;
-    /// systematic variations for lepton selection eff. SF
-    if     (sysVar_ == "selectionEffSFNormUp")   result *= (1+additionalFactorErr_);
-    else if(sysVar_ == "selectionEffSFNormDown") result *= (1-additionalFactorErr_);
+    
+    /// systematic variations for combined trigger and selection eff. SF (normalisation and shape uncertainties)
+    if     (sysVar_ == "combinedEffSFNormUpSys")    result *= (1+additionalFactorErr_);
+    else if(sysVar_ == "combinedEffSFNormDownSys")  result *= (1-additionalFactorErr_);
+    else if(sysVar_ == "combinedEffSFNormUpStat")   result += meanTriggerEffSFErr_;
+    else if(sysVar_ == "combinedEffSFNormDownStat") result -= meanTriggerEffSFErr_;
+    else if(sysVar_ == "combinedEffSFShapeUpPt")  { 
+      if(pt<shapeVarPtThreshold_) result += shapeDistortionErr_; 
+      else                        result -= shapeDistortionErr_;
+    }
+    else if(sysVar_ == "combinedEffSFShapeDownPt"){ 
+      if(pt<shapeVarPtThreshold_) result -= shapeDistortionErr_; 
+      else                        result += shapeDistortionErr_;
+    }
+    else if(sysVar_ == "combinedEffSFShapeUpEta")  { 
+      if(std::abs(eta)<shapeVarEtaThreshold_) result += shapeDistortionErr_; 
+      else                                    result -= shapeDistortionErr_;
+    }
+    else if(sysVar_ == "combinedEffSFShapeDownEta"){ 
+      if(std::abs(eta)<shapeVarEtaThreshold_) result -= shapeDistortionErr_; 
+      else                                    result += shapeDistortionErr_;
+    }
     
     if(verbose_>=1) std::cout<<numPart<< ": pt=" <<pt<< "; eta=" <<eta<< "; SF= "<<result<<"; error="<< error <<std::endl;
     hists_.find("electronEffSF" )->second->Fill( result );

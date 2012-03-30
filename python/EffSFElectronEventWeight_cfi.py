@@ -2,8 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 effSFElectronEventWeight = cms.EDProducer("EffSFElectronEventWeight",
   particles  = cms.InputTag(""), ## electron collection
-  sysVar   = cms.string(""),                  ## "noSys", "triggerEffSFNormUp/Down", "triggerEffSFShapeUpPt(Eta)/DownPt(Eta)", 
-                                              ## "selectionEffSFNormUp/Down"
+  sysVar   = cms.string(""),                  ## "noSys", "combinedEffSFNormUp/Down Stat/Sys", "combinedEffSFShapeUpPt(Eta)/DownPt(Eta)", 
                                               ## "flatTriggerSF"
   shapeVarPtThreshold  = cms.double(55.),     ## pt threshold which divides up/down variations during SFShapeUp/DownPt
   shapeVarEtaThreshold = cms.double(0.7),     ## eta threshold which divides up/down variations during SFShapeUp/DownEta
@@ -15,5 +14,5 @@ effSFElectronEventWeight = cms.EDProducer("EffSFElectronEventWeight",
   additionalFactorErr = cms.double(0.),       ## error
   meanTriggerEffSF    = cms.double(1.) ,      ## in case of flat SF
   meanTriggerEffSFErr = cms.double(0.) ,      ## in case of flat SF
-  shapeDistortionFactor = cms.double(0.)      ## for shape uncertainty calculation
+  shapeDistortionErr  = cms.double(0.)      ## for shape uncertainty calculation
 )
