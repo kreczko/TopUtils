@@ -23,8 +23,8 @@ EffSFElectronEventWeight::EffSFElectronEventWeight(const edm::ParameterSet& cfg)
 {
   produces<double>();
   
-  factorNonIso_ = 0.31; // fracton of luminosity of Ele25TriJet range = lumiNonIso/lumiTotal
-  factorIso_ = 0.69; // fraction of luminosity of IsoEle25TriJet range = lumiIso/lumiTotal
+  factorNonIso_ = 0.069; // fracton of luminosity of Ele25TriJet range = lumiNonIso/lumiTotal
+  factorIso_    = 0.931; // fraction of luminosity of IsoEle25TriJet range = lumiIso/lumiTotal
   
   // laod TFile Service
   edm::Service<TFileService> fs;
