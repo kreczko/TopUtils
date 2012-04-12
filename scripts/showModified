@@ -24,6 +24,9 @@ cvs status 2>&1 | awk '{
         status="\033[31mneeds commit\033[m \033[41m(removed)\033[m:";
         $2=$4;
      }
+     else if ( $4=="File" && $5=="had" && $6=="conflicts" && $7=="on" && $8=="merge") {
+        status="\033[41mhad merge conflict:\033[m";
+     }
      else status="unsupported status:";
 
      print status" "currentDir"/"$2
