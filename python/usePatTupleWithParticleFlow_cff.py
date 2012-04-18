@@ -43,8 +43,8 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     postfix='' #options['postfix']
 
     # check if needed standard sequences are available, else load them
-    if not hasattr(process, 'XMLIdealGeometryESSource'):
-        process.load("Configuration.StandardSequences.Geometry_cff")
+    if not hasattr(process, 'XMLIdealGeometryESSource') and not hasattr(process, 'XMLFromDBSource'):
+        process.load("Configuration.StandardSequences.GeometryDB_cff")
 
     if not hasattr(process, 'magfield'):
         process.load("Configuration.StandardSequences.MagneticField_cff")
