@@ -11,6 +11,7 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 /**
    \class   GenCandSelector GenCandSelector.h "TopAnalysis/TopUtils/interface/GenCandSelector.h"
@@ -45,6 +46,10 @@
                      meter set is expected to hold the parameter _pdgId_ for the configuration 
 		     of the ancestor particle(s) as described below.
 
+    _ancestorIgnore_  : parameter set for the configuration of particle(s) that should not be ancestor(s). 
+                        This parameter set is expected to hold the parameter _pdgId_ for the configuration 
+		        of the ancestor particle(s) as described below.
+
     _pdgId_        : vector of pdgIds of the ancestor particle(s). E.g. this might be W's or Z's. 
                      The elements of the vector can be bare numbers (as strings) or of type 
 		     'ance:part', where part indicates the pdgId of the ancestor particle and 
@@ -67,6 +72,8 @@ class GenCandSelector : public edm::EDProducer {
   explicit GenCandSelector(const edm::ParameterSet&);
   /// default destructor
   ~GenCandSelector(){};
+  /// print properties from all ancestors
+  void MotherPrinter(edm::LogVerbatim& log, const reco::Candidate* p) const;
   
  private:
   /// produce function to select the 
@@ -84,9 +91,9 @@ class GenCandSelector : public edm::EDProducer {
   bool descendant(const std::vector<std::pair<int, int> >::const_iterator& first, const std::vector<std::pair<int, int> >::const_iterator& last, const reco::Candidate* p) const;
   /// find ancestor which is in list of allowed particles upstream the decay chain
   bool ancestor(const std::vector<std::pair<int, int> >::const_iterator& first, const std::vector<std::pair<int, int> >::const_iterator& last, const reco::Candidate* p) const;
-  /// object loggiong for debugging purposes
+  /// object logging for debugging purposes
   void print(const reco::Candidate* p) const;
-  
+
  private:
   /// input collection
   edm::InputTag src_;
@@ -102,6 +109,12 @@ class GenCandSelector : public edm::EDProducer {
   /// pdgId of a potentail further ancestor particle. If no ancestor 
   /// is given the first element will be set to 0 
   std::vector<std::pair<int, int> > ancestorIds_;
+  /// pgdId of excluded ancestor particle(s); the second element corresponds 
+  /// to the pdgId of the target particle, the first element to the 
+  /// pdgId of a potentail further ancestor particle. If no ancestor 
+  /// is given the first element will be set to 0 
+  //std::vector<std::pair<int, int> > ancestorIgnoreIds_;
+
 };
 
 /// check whether the pdgId of the given candidates is element if the std::vector of std::pair, '0' is used as wildcart

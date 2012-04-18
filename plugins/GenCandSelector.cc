@@ -1,6 +1,5 @@
 //#include <iostream>
 //#include <algorithm>
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "TopAnalysis/TopUtils/plugins/GenCandSelector.h"
 
 GenCandSelector::GenCandSelector(const edm::ParameterSet& cfg):
@@ -8,7 +7,7 @@ GenCandSelector::GenCandSelector(const edm::ParameterSet& cfg):
 {
   // buffer for string->std::pair<int,int> conversion from target/ancestor 
   // configuration 
-  std::vector<std::string> buffer;
+  std::vector<std::string> buffer;//, bufferIgnore;
 
   // configure target particle(s); daughterIds_ is filled with pdgIds of 
   // target particle(s) and potential daughter particle(s) if existing; if
@@ -33,6 +32,16 @@ GenCandSelector::GenCandSelector(const edm::ParameterSet& cfg):
     ancestorIds_.push_back(std::make_pair(secondElement(*pdgId).empty()?0:atoi(firstElement(*pdgId).c_str()), secondElement(*pdgId).empty()?atoi(firstElement(*pdgId).c_str()):atoi(secondElement(*pdgId).c_str())) );
   }
 
+  // configure excluded ancestor particle(s); ancestorIgnoreIds_ is filled with pdgIds 
+  // of ancestor particle(s) and their further ancestor particle(s) if 
+  // existing. If no ':' is found in the configuration string the first 
+  // list element is set to '0'; '0' is a wildcart
+  //edm::ParameterSet ancestorIgnore=cfg.getParameter<edm::ParameterSet>("ancestorIgnore");
+  //bufferIgnore = ancestorIgnore.getParameter<std::vector<std::string> >("pdgId" );
+  //for(std::vector<std::string>::const_iterator pdgId=bufferIgnore.begin(); pdgId!=bufferIgnore.end(); ++pdgId){
+  //  ancestorIgnoreIds_.push_back(std::make_pair(secondElement(*pdgId).empty()?0:atoi(firstElement(*pdgId).c_str()), secondElement(*pdgId).empty()?atoi(firstElement(*pdgId).c_str()):atoi(secondElement(*pdgId).c_str())) );
+  //}
+
   // register output
   produces<std::vector<reco::GenParticle> >();
 }
@@ -54,7 +63,9 @@ GenCandSelector::produce(edm::Event& evt, const edm::EventSetup& setup)
 	if(p->numberOfMothers()>0){
 	  if( ancestor( ancestorIds_.begin(), ancestorIds_.end(), p->mother()) ){
 	    if(p->status()==status_){
-	      print(&(*p)); out->push_back(*p);
+	      //if( !ancestor( ancestorIgnoreIds_.begin(), ancestorIgnoreIds_.end(), p->mother()) ){
+		print(&(*p)); out->push_back(*p);
+		//}
 	    }
 	  }
 	}
@@ -118,7 +129,7 @@ GenCandSelector::ancestor(const std::vector<std::pair<int, int> >::const_iterato
       for(unsigned int i=0; i<p->numberOfMothers(); ++i){
 	// does p have an adaequte mother? Other
 	// wise bubble further up
-	if(abs(p->mother(i)->pdgId()) == (first+index)->first){
+	if(abs(p->mother(i)->pdgId()) == (first+index)->first){//&&p->mother(i)->status()==3){
 	  return true;
 	}
 	else{
@@ -146,12 +157,11 @@ GenCandSelector::print(const reco::Candidate* p) const
       << ">> found object that fits to requirements:         <<" << "\n"
       << "-----------------------------------------------------" << "\n";
   if(p->mother()->numberOfMothers()>0){
-    log << "ancestor : " << p->mother()->mother()->pdgId();
-    if(p->mother()->mother()->numberOfMothers()>0){
-      log << "," << p->mother()->mother()->mother()->pdgId();
-    } log << "\n";
+    log << "ancestors : ";
+    MotherPrinter(log, p->mother());
   }
-  log << "mother   : " << p->mother()->pdgId() << "\n"
+  log << "\n";
+  log << "mother   : " << p->mother()->pdgId() << "(status " << p->mother()->status() << ")\n"
       << "part     : " << p->pdgId() << " [status " << p->status() << "]\n";
   if(p->begin()!=p->end()){
     log	<< "daugther : ";
@@ -162,6 +172,15 @@ GenCandSelector::print(const reco::Candidate* p) const
       }
       log << "], ";
     } log << "\n";
+  }
+}
+
+void 
+GenCandSelector::MotherPrinter(edm::LogVerbatim& log, const reco::Candidate* p) const
+{
+  if(p->numberOfMothers()>0){
+    log << ", " << p->mother()->pdgId() << "(status " << p->mother()->status() << ")";
+    if(p->mother()->numberOfMothers()>0) MotherPrinter(log, p->mother());
   }
 }
 

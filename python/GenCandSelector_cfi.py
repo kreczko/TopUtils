@@ -11,7 +11,11 @@ isolatedGenMuons = cms.EDProducer("GenCandSelector",
   ## configuration of mother particle
   ancestor = cms.PSet(
     pdgId = cms.vstring("24")
-  )
+  )#,
+  ## configuration of excluded mother particle                               
+    #ancestorIgnore = cms.PSet(
+    #pdgId = cms.vstring("5")
+  #)
 )
 
 isolatedGenElectrons = cms.EDProducer("GenCandSelector",
@@ -25,6 +29,10 @@ isolatedGenElectrons = cms.EDProducer("GenCandSelector",
   ## configuration of mother particle
   ancestor = cms.PSet(
     pdgId = cms.vstring("24")
-  )
+  )#,
+  ## configuration of excluded mother particle                               
+    #ancestorIgnore = cms.PSet(
+    #pdgId = cms.vstring("5")
+  #)
 )
 
