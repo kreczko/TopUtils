@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 #
-# $Id: GenJetParticles_cff.py,v 1.1 2010/05/27 15:28:16 henderle Exp $
+# $Id: GenJetParticles_cff.py,v 1.2 2012/04/19 13:43:51 henderle Exp $
 #
 # ShR 27 Mar 07: move modules producing candidates for Jets from RecoGenJets.cff
 # 
@@ -18,7 +18,7 @@ genParticlesForJets = cms.EDProducer("myInputGenJetsParticleSelector",
          39),
     partonicFinalState = cms.bool(False),
     excludeResonances = cms.bool(True),
-    excludeFromResonancePids = cms.vuint32(12, 13, 14, 16),
+    excludeFromResonancePids = cms.vuint32(11, 12, 13, 14, 16),
     tausAsJets = cms.bool(False)
 )
 
