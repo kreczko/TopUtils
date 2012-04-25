@@ -2,6 +2,7 @@
 <use name="rootgpad"/>
 <use name="FWCore/MessageLogger"/>
 <use name="PhysicsTools/CandUtils"/>
+<use name="PhysicsTools/PatAlgos"/>
 <use name="DataFormats/PatCandidates"/>
 <use name="CondFormats/JetMETObjects"/>
 <use name="SimGeneral/HepPDTRecord"/>

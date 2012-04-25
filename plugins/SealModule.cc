@@ -33,3 +33,8 @@ DEFINE_FWK_MODULE( TtSemiLepSignalSelectorMVATrainer );
 #include "TopAnalysis/TopUtils/plugins/TtSemiLepSignalSelectorMVAComputer.h"
 DEFINE_FWK_MODULE( TtSemiLepSignalSelectorMVAComputer );
 
+#include "TopAnalysis/TopUtils/plugins/CandidateCleaner.h"
+//namespace pat {
+  typedef CandidateCleaner<reco::GenJet> PATGenJetCleaner;
+//}
+DEFINE_FWK_MODULE(PATGenJetCleaner);
