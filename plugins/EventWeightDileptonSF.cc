@@ -16,58 +16,67 @@ double EventWeightDileptonSF::getLeptonSF(const reco::Candidate& lep){
   double pt  = lep.pt();
   double eta = lep.eta();
   
-  // for pt below 20 and abs(eta) > 2.5 no scale factors are available
-  if(pt<20. && fabs(eta)>2.5)
+  // for pt below 20 and abs(eta) > 2.4 no scale factors are available
+  if(pt<20. && fabs(eta)>2.4)
     return sf;
-  //SF taken from AN-11-225: numbers = scale factor identification*scale factor isolation
+  //SF taken from AN-12-075: numbers = scale factor identification*scale factor isolation
   if(lep.isElectron()){  
-    if(fabs(eta)<=1.5){
+    if(fabs(eta)<=1.4){
       if(pt<30.)
-        sf = 1.0094;
+        sf = 1.0080;
       else if(pt<40.)
-        sf = 1.0027;	
+        sf = 1.0061;	
       else if(pt<50.)
-        sf = 0.9981; 
+        sf = 1.0060; 
       else
-        sf = 0.9990; 	   
-    } else if(fabs(eta)<=2.5){
+        sf = 1.0016; 	   
+    } else if(fabs(eta)<=1.6){
       if(pt<30.)
-        sf = 1.0537;
+        sf = 1.0057;
       else if(pt<40.)
-        sf = 1.0324;	
+        sf = 1.0175;	
       else if(pt<50.)
-        sf = 1.0110; 
+        sf = 1.0126; 
       else
-        sf = 1.0056;         
+        sf = 1.0046;         
+    } else if(fabs(eta)<=2.4){
+      if(pt<30.)
+        sf = 1.0603;
+      else if(pt<40.)
+        sf = 1.0330;	
+      else if(pt<50.)
+        sf = 1.0160; 
+      else
+        sf = 1.0081;         
     }  
   } else if(lep.isMuon()) {
-    if(fabs(eta)<=1.0){
+    if(fabs(eta)<=1.4){
       if(pt<30.)
-        sf = 1.0030;
+        sf = 0.9963;
       else if(pt<40.)
-        sf = 0.9945;	
+        sf = 0.9936;	
       else if(pt<50.)
-        sf = 0.9988; 
+        sf = 0.9912; 
       else
-        sf = 1.0022; 	   
-    } else if(fabs(eta)<=2.1){
+        sf = 0.9852; 	   
+    } else if(fabs(eta)<=1.6){
       if(pt<30.)
-        sf = 0.9884;
+        sf = 0.9841;
       else if(pt<40.)
-        sf = 0.9921;	
+        sf = 0.9806;	
       else if(pt<50.)
-        sf = 0.9901; 
+        sf = 0.9772; 
       else
-        sf = 0.9896;         
-    } else if(fabs(eta)<=2.5){
+        sf = 0.9709;         
+    } else if(fabs(eta)<=2.4){
       if(pt<30.)
-        sf = 0.9870;
+        sf = 0.9918;
       else if(pt<40.)
-        sf = 0.9811;	
+        sf = 0.9820;	
       else if(pt<50.)
-        sf = 0.9924; 
+        sf = 0.9779; 
       else
-        sf = 0.9947;         
+        sf = 0.9646;         
     }    
   }    
   
