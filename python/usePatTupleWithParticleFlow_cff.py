@@ -42,7 +42,6 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## postfixes are NOT supported right now
     postfix='' #options['postfix']
 
-    # check if needed standard sequences are available, else load them
     if not hasattr(process, 'XMLIdealGeometryESSource') and not hasattr(process, 'XMLFromDBSource'):
         process.load("Configuration.StandardSequences.GeometryDB_cff")
 
@@ -762,6 +761,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     print 'runOnAOD:', options['runOnAOD']
     print 'switchOffEmbedding:', options['switchOffEmbedding']
     print 'addResolutions:', options['addResolutions']
+    print 'resolutionsVersion:', options['resolutionsVersion']
     #print 'postfix:', options.setdefault('postfix', '')
     print 'runOnOLDcfg:', options['runOnOLDcfg']
     print 'cutsMuon:', options['cutsMuon']
