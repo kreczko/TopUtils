@@ -12,7 +12,7 @@
 #include "TMath.h"
 
 using namespace std;
-Double_t rounderror(Double_t value, Double_t error, Int_t k);
+Double_t rounderror(Double_t value, Double_t error, Int_t k, bool highUncert);
 
 int main(int argc, char* argv[])
 {
@@ -28,15 +28,29 @@ int main(int argc, char* argv[])
   else if(ParticleID == 2)identifier = "elec";
   else if(ParticleID == 3)identifier = "muon";
   else if(ParticleID == 4)identifier = "MET";
-  TFile* file = new TFile("resol"+identifier+"histos.root");
+
+  TString puString = "";
+  if(argc>=3){
+    if(atoi(argv[2])==1)puString="_puWeight";
+    if(atoi(argv[2])==2)puString="_puWeightDown";
+    if(atoi(argv[2])==3)puString="_puWeightUp";
+  }
+
+  TFile* file = new TFile("resol"+identifier+"histos"+puString+".root");
+
+  TString useErf = "";
+  if(argc>=5){
+    std::cout<<"using erf function for MET resolution"<<std::endl;
+    useErf=argv[4];
+  }
 
   Int_t etbinNum;
   if(ParticleID==0 || ParticleID==1)etbinNum = 25;
   else if(ParticleID==4)etbinNum = 41;
   else etbinNum = 10;
   Int_t etstartbin = 0;
-  if(argc>=3)etstartbin = atoi(argv[2]);
-  else etstartbin = 3;
+  if(argc>=4)etstartbin = atoi(argv[3]);
+  else etstartbin = 2;
   Int_t etabinNum;
   if(ParticleID == 2 || ParticleID == 3)etabinNum = 24;
   else if(ParticleID == 4)etabinNum = 1;
@@ -111,10 +125,15 @@ int main(int argc, char* argv[])
   TF1* myetfunction = 0;
 
   // define 1D functions in E_T here!
-  if(ParticleID == 3 && i_etetaphi==0)myetfunction = new TF1("linear","[0]+[1]*x",etbinning[etstartbin],1800.);//muon ET resolution
-  else if(((ParticleID==0 || ParticleID==1)&& i_etetaphi!=0) || (ParticleID == 3 && i_etetaphi==1) || (ParticleID == 2 && i_etetaphi==1))
-    myetfunction = new TF1("reduced","sqrt([0]*[0]+[1]*[1]/(x*x))",etbinning[etstartbin],1800.);
-  else myetfunction = new TF1("complete","sqrt([0]*[0]+[1]*[1]/(x)+[2]*[2]/(x*x))",etbinning[etstartbin],1800.);
+  if(ParticleID == 3 && i_etetaphi==0)myetfunction = new TF1("linear","[0]+[1]*x",etbinning[etstartbin],500.);//muon ET resolution
+  else if(((ParticleID==0 || ParticleID==1)&& i_etetaphi!=0))// || (ParticleID == 3 && i_etetaphi==1) || (ParticleID == 2 && i_etetaphi==1))
+    myetfunction = new TF1("reduced","sqrt([0]*[0]+[1]*[1]/(x*x))",etbinning[etstartbin],500.);
+  else if(ParticleID==4 && i_etetaphi==0 && useErf=="erf")
+    myetfunction = new TF1("erf","sqrt([0]*[0]+[1]*[1]/(x*x))*TMath::Erf([2]*x)",etbinning[etstartbin],500.);
+  else myetfunction = new TF1("complete","sqrt([0]*[0]+[1]*[1]/(x)+[2]*[2]/(x*x))",etbinning[etstartbin],500.);
+  // not using b-jets above 230 GeV as they are affected by reco-jet merging
+  // could possibly be recovered by reducing Gaussian-fit range for these bins
+  if(ParticleID == 1)myetfunction->SetRange(etbinning[etstartbin],230.);
 
   file->cd();
   for(Int_t ieta = 0; ieta < etabinNum; ieta++){
@@ -183,12 +202,23 @@ int main(int argc, char* argv[])
     bGraph[ieta]->SetMarkerSize(0.8);
 
     myetfunction->SetLineWidth(1);
-    myetfunction->SetLineColor(kRed);
+    myetfunction->SetLineColor(kBlue);
+
+    double functionLowEdge = 0.;
+    double functionUppEdge = 0.;
+    myetfunction->GetRange(functionLowEdge,functionUppEdge);
+
+    // need initial values to avoid fit problems
+    if(ParticleID != 4 || i_etetaphi!=1)
+      for(int i = 0; i < myetfunction->GetNpar(); i++)
+	myetfunction->SetParameter(i,0.0001);
 
     bGraph[ieta]->Fit(myetfunction->GetName(),"+QR");
     bGraph[ieta]->DrawClone("pe1same");
-    if(ParticleID == 1)myetfunction->SetRange(0,300);
-    else myetfunction->SetRange(0,500);
+    myetfunction->SetRange(0,500);
+    myetfunction->DrawCopy("same");
+    myetfunction->SetLineColor(kRed);
+    myetfunction->SetRange(functionLowEdge,functionUppEdge);
     myetfunction->DrawCopy("same");
 
     cout << "myetfunction: " << myetfunction->GetExpFormula("p") << ", Prob: " << myetfunction->GetProb() << endl;
@@ -214,13 +244,16 @@ int main(int argc, char* argv[])
     etastring += upperetastring;
     etastring += ": ";
 
-    sprintf(parachar,"%1.5f",myetfunction->GetParameter(0));
+    if((TString)myetfunction->GetName()=="linear")
+      sprintf(parachar,"%1.5f",myetfunction->GetParameter(0));
+    else
+      sprintf(parachar,"%1.5f",TMath::Abs(myetfunction->GetParameter(0)));
     parastring = parachar;
 
     if((TString)myetfunction->GetName()=="complete"){
-      sprintf(parachar,"^{2}+%1.4f^{2}/E_{T}+",myetfunction->GetParameter(1));
+      sprintf(parachar,"^{2}+%1.4f^{2}/E_{T}+",TMath::Abs(myetfunction->GetParameter(1)));
       parastring += parachar;
-      sprintf(parachar,"%1.4f",myetfunction->GetParameter(2));
+      sprintf(parachar,"%1.4f",TMath::Abs(myetfunction->GetParameter(2)));
       parastring += parachar;
       if(ParticleID == 0 || ParticleID == 1)l.DrawLatex(50.,0.4,etastring +"#sqrt{"+ parastring +"^{2}/E_{T}^{2}}");
       else if(ParticleID == 2){
@@ -231,10 +264,17 @@ int main(int argc, char* argv[])
       else if(ParticleID == 4 && i_etetaphi!=1)l.DrawLatex(50.,2.2,"#sqrt{"+ parastring +"^{2}/E_{T}^{2}}");
     }
     else if((TString)myetfunction->GetName()=="reduced"){
-      sprintf(parachar,"^{2}+%1.4f^{2}/E_{T}^{2}}",myetfunction->GetParameter(1));
+      sprintf(parachar,"^{2}+%1.4f^{2}/E_{T}^{2}}",TMath::Abs(myetfunction->GetParameter(1)));
       parastring += parachar;
       if(ParticleID == 0 || ParticleID == 1)l.DrawLatex(50.,0.09,etastring +"#sqrt{"+ parastring);
       if(ParticleID == 2 || ParticleID == 3)l.DrawLatex(50.,0.0027,etastring +"#sqrt{"+ parastring);
+    }
+    else if((TString)myetfunction->GetName()=="erf"){
+      sprintf(parachar,"^{2}+%1.4f^{2}/E_{T}^{2}}#upointerf(",TMath::Abs(myetfunction->GetParameter(1)));
+      parastring += parachar;
+      sprintf(parachar,"%1.4f#upointE_{T})",TMath::Abs(myetfunction->GetParameter(2)));
+      parastring += parachar;
+      l.DrawLatex(50.,2.2,etastring +"#sqrt{"+ parastring);
     }
     else if((TString)myetfunction->GetName()=="linear"){
       sprintf(parachar,"+%1.6f#upointE_{T}",myetfunction->GetParameter(1));
@@ -244,13 +284,23 @@ int main(int argc, char* argv[])
     else{
       l.DrawLatex(50.,0.09,"unknown function");
     }
-	
+    
+    double par0 = rounderror(myetfunction->GetParameter(0), myetfunction->GetParameter(0), 3, false);
+    double par1 = rounderror(myetfunction->GetParameter(1), myetfunction->GetParameter(1), 3, false);
+    double par2 = rounderror(myetfunction->GetParameter(2), myetfunction->GetParameter(2), 3, false);
+
+//     if(par0 == 0. && par1 == 0. && par2 == 0.){
+//       par0 = rounderror(myetfunction->GetParameter(0), myetfunction->GetParError(0), 2, true);
+//       par1 = rounderror(myetfunction->GetParameter(1), myetfunction->GetParError(1), 2, true);
+//       par2 = rounderror(myetfunction->GetParameter(2), myetfunction->GetParError(2), 2, true);
+//     }
+
     Char_t tmpformulachar0[10];
-    sprintf(tmpformulachar0,"%g",TMath::Abs(rounderror(myetfunction->GetParameter(0), myetfunction->GetParError(0), 2)));
+    sprintf(tmpformulachar0,"%g",TMath::Abs(par0));
     Char_t tmpformulachar1[10];
-    sprintf(tmpformulachar1,"%g",TMath::Abs(rounderror(myetfunction->GetParameter(1), myetfunction->GetParError(1), 2)));
+    sprintf(tmpformulachar1,"%g",TMath::Abs(par1));
     Char_t tmpformulachar2[10];
-    sprintf(tmpformulachar2,"%g",TMath::Abs(rounderror(myetfunction->GetParameter(2), myetfunction->GetParError(2), 2)));
+    sprintf(tmpformulachar2,"%g",TMath::Abs(par2));
 
     if(i_etetaphi==0){
       etstrg  = "    cms.PSet(\n";
@@ -261,6 +311,8 @@ int main(int argc, char* argv[])
 	etstrg += "    et  = cms.string('et * (sqrt("+TString(tmpformulachar0)+"^2 + ("+TString(tmpformulachar1)+"/et)^2))'),\n";
       else if((TString)myetfunction->GetName()=="linear")
 	etstrg += "    et  = cms.string('et * ("+TString(tmpformulachar0)+" + "+TString(tmpformulachar1)+" * et)'),\n";
+      else if((TString)myetfunction->GetName()=="erf")
+	etstrg += "    et  = cms.string('et * (sqrt("+TString(tmpformulachar0)+"^2 + ("+TString(tmpformulachar1)+"/et)^2)) * erf("+TString(tmpformulachar2)+"*et)'),\n";
       else 
 	etstrg += "    et  = cms.string('unknown function'),\n";
     }
@@ -310,12 +362,12 @@ int main(int argc, char* argv[])
   ofstream res_file;
   res_file.open ("resolution_"+identifier+"_cff.py");
 
-  if(ParticleID==0)res_file<<"udscResolution = stringResolution.clone(parametrization = 'EtEtaPhi',\n";
-  if(ParticleID==1)res_file<<"bjetResolution = stringResolution.clone(parametrization = 'EtEtaPhi',\n";
-  if(ParticleID==2)res_file<<"elecResolution = stringResolution.clone(parametrization = 'EtEtaPhi',\n";
-  if(ParticleID==3)res_file<<"muonResolution = stringResolution.clone(parametrization = 'EtEtaPhi',\n";
-  if(ParticleID==4)res_file<<"metResolution  = stringResolution.clone(parametrization = 'EtEtaPhi',\n";
-  res_file<<"                                        functions = cms.VPSet(\n";
+  if(ParticleID==0)res_file<<"udscResolutionPF = stringResolution.clone(parametrization = 'EtEtaPhi',\n";
+  if(ParticleID==1)res_file<<"bjetResolutionPF = stringResolution.clone(parametrization = 'EtEtaPhi',\n";
+  if(ParticleID==2)res_file<<"elecResolution   = stringResolution.clone(parametrization = 'EtEtaPhi',\n";
+  if(ParticleID==3)res_file<<"muonResolution   = stringResolution.clone(parametrization = 'EtEtaPhi',\n";
+  if(ParticleID==4)res_file<<"metResolutionPF  = stringResolution.clone(parametrization = 'EtEtaPhi',\n";
+  res_file<<"                                          functions = cms.VPSet(\n";
 
   for(Int_t ieta = 0; ieta < etabinNum; ieta++){
     res_file<<etvec[ieta];
@@ -323,28 +375,36 @@ int main(int argc, char* argv[])
     res_file<<phivec[ieta];
   }
   res_file<<"    ),\n";
-  res_file<<"                                        constraints = cms.vdouble(0)\n";
-  res_file<<"                                        )\n";
+  res_file<<"                                          constraints = cms.vdouble(0)\n";
+  res_file<<"                                          )\n";
   res_file.close();
   return 0;
 }
 
-Double_t rounderror(Double_t value, Double_t error, Int_t k = 2)
+Double_t rounderror(Double_t value, Double_t error, Int_t k = 2, bool highUncert = false)
 {
+  Double_t tempo = 0.;
   Double_t start = 1e20;
-  Bool_t ok = kTRUE;
   Double_t ex = 0.0;
-  
-  for(Int_t i = 0; i < 40 && ok; i++)
+  Double_t ex2 = 0.0;
+  Double_t blaexp = pow(10.0,-(k-1));
+  bool warning = false;
+
+  for(Int_t i = 0; i < 40; i++)
     {
       ex = start*pow(10.0,-1*i);
       Int_t tmp = static_cast<Int_t>(error/ex);
-      if(tmp != 0)
- 	{
-	  ok = kFALSE;
-	}
+      if(tmp != 0 || value==0.)break;
     }
-  Double_t blaexp = pow(10.0,-(k-1));
-  Double_t tempo = static_cast<Int_t>(value/(ex*blaexp)+0.5)*ex*blaexp;
+  tempo = static_cast<Int_t>(value/(ex*blaexp)+0.5)*ex*blaexp;
+  if(highUncert && value!=0.)
+    for(Int_t i = 1; i < 40; i++){
+      if(tempo!=0.)break;
+      warning = true;
+      ex2 = pow(10.0,-1*i);
+      tempo = static_cast<Int_t>(value/(ex*blaexp*ex2)+0.5)*ex*blaexp*ex2;
+    }
+
+  if(warning)std::cout<<"Warning: uncertainty is larger than the value!"<<std::endl;
   return tempo;
 }
