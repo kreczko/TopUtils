@@ -8,7 +8,7 @@
 //
 // Original Author:  Holger Enderle,68/111,4719,
 //         Created:  Mon Jan 26 16:29:19 CET 2009
-// $Id: ResolutionTreeWriter.cc,v 1.5 2011/07/05 08:20:36 henderle Exp $
+// $Id: ResolutionTreeWriter.cc,v 1.6 2012/05/11 09:20:24 henderle Exp $
 //
 //
 
@@ -54,12 +54,13 @@ ResolutionTreeWriter::ResolutionTreeWriter(const edm::ParameterSet& iConfig):
   muonLabel_(iConfig.getUntrackedParameter<edm::InputTag>("muonTag")),
   METLabel_(iConfig.getUntrackedParameter<edm::InputTag>("METTag"))
 {
-   //now do what ever initialization is needed
-
-   tree = fs->make<TTree>("ResolutionTree","ResolutionTree");
-   treeMemPtr = new ResolutionVariables;
-
-   tree->Branch("ResolutionVariables","ResolutionVariables", &treeMemPtr); // address of pointer!
+  //now do what ever initialization is needed
+  if(iConfig.exists("weightTags" )) weightTags_= iConfig.getParameter< std::vector<edm::InputTag> >("weightTags" );
+  
+  tree = fs->make<TTree>("ResolutionTree","ResolutionTree");
+  treeMemPtr = new ResolutionVariables;
+  
+  tree->Branch("ResolutionVariables","ResolutionVariables", &treeMemPtr); // address of pointer!
 }
 
 
@@ -98,6 +99,25 @@ ResolutionTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
    iEvent.getByLabel(METLabel_, METHandle);
    edm::View<pat::MET> METs = *METHandle;
 
+   // prepare the event weights
+   std::vector<double> weights;
+   // get weight from the CMSSW event
+   // loop over all eventWeightTags and multiply weights
+   for(unsigned iWeight=0; iWeight < weightTags_.size(); iWeight++){
+     // get weight from the CMSSW event
+     edm::Handle<double> wgt;
+     iEvent.getByLabel(weightTags_[iWeight], wgt);
+     // ignore non existing weights
+     if(wgt.isValid()){
+       //std::cout<<"  eventWeight "<<iWeight<<" "<< weightTags_[iWeight].label() << weightTags_[iWeight].instance() <<": "<<*wgt<<std::endl;
+       weights.push_back(*wgt);
+     }
+     else{
+       std::cout<< "eventWeight " << iWeight << " not found"<<std::endl;
+       edm::LogInfo("weightNotFound") << "eventWeight " << iWeight << " not found";
+     }
+   }
+
    float deltaR = 0.;
    float deltaPhi = 0.;
    float deltaEta = 0.;
@@ -124,11 +144,21 @@ ResolutionTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 	 deltaEta = jet_iter->genParton()->eta() - jet_iter->eta();
 	 deltaR = sqrt(deltaPhi*deltaPhi + deltaEta*deltaEta);
 	 if(jet_iter->isCaloJet())
-	   treeMemPtr->fillVariables(jet_iter->genParton()->energy(), jet_iter->genParton()->et(), jet_iter->genParton()->pt(), jet_iter->genParton()->eta(), jet_iter->genParton()->phi(), jet_iter->energy(), jet_iter->et(), jet_iter->pt(), jet_iter->eta(), jet_iter->phi(), jet_iter->pt()/jet_iter->genParton()->pt(), jet_iter->partonFlavour(), jet_iter->emEnergyFraction(), METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, 0, 0.);
+	   treeMemPtr->fillVariables(jet_iter->genParton()->energy(), jet_iter->genParton()->et(), jet_iter->genParton()->pt(), 
+				     jet_iter->genParton()->eta(), jet_iter->genParton()->phi(), 
+				     jet_iter->energy(), jet_iter->et(), jet_iter->pt(), jet_iter->eta(), jet_iter->phi(), 
+				     jet_iter->pt()/jet_iter->genParton()->pt(), jet_iter->partonFlavour(), jet_iter->emEnergyFraction(),
+				     METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, 0, 0.,
+				     weights[0], weights[1], weights[2]);
 	 else if(jet_iter->isPFJet())
-	   treeMemPtr->fillVariables(jet_iter->genParton()->energy(), jet_iter->genParton()->et(), jet_iter->genParton()->pt(), jet_iter->genParton()->eta(), jet_iter->genParton()->phi(), jet_iter->energy(), jet_iter->et(), jet_iter->pt(), jet_iter->eta(), jet_iter->phi(), jet_iter->pt()/jet_iter->genParton()->pt(), jet_iter->partonFlavour(), jet_iter->chargedEmEnergyFraction(), METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, jet_iter->genParton()->pdgId(), 0.);
+	   treeMemPtr->fillVariables(jet_iter->genParton()->energy(), jet_iter->genParton()->et(), jet_iter->genParton()->pt(), 
+				     jet_iter->genParton()->eta(), jet_iter->genParton()->phi(), 
+				     jet_iter->energy(), jet_iter->et(), jet_iter->pt(), jet_iter->eta(), jet_iter->phi(), 
+				     jet_iter->pt()/jet_iter->genParton()->pt(), jet_iter->partonFlavour(), jet_iter->chargedEmEnergyFraction(), 
+				     METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, jet_iter->genParton()->pdgId(), 0.,
+				     weights[0], weights[1], weights[2]);
 	 else
-	   treeMemPtr->fillVariables(0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.);
+	   treeMemPtr->fillVariables(0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.);
 
 	 tree->Fill();
        }
@@ -153,7 +183,12 @@ ResolutionTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 	 deltaEta = ele_iter->genLepton()->eta() - ele_iter->eta();
 	 deltaR = sqrt(deltaPhi*deltaPhi + deltaEta*deltaEta);
 
-	 treeMemPtr->fillVariables(ele_iter->genLepton()->energy(), ele_iter->genLepton()->et(), ele_iter->genLepton()->pt(), ele_iter->genLepton()->eta(), ele_iter->genLepton()->phi(), ele_iter->energy(), ele_iter->et(), ele_iter->pt(), ele_iter->eta(), ele_iter->phi(), ele_iter->pt()/ele_iter->genLepton()->pt(), ele_iter->charge()*-11, 0., METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, 0, 0.);
+	 treeMemPtr->fillVariables(ele_iter->genLepton()->energy(), ele_iter->genLepton()->et(), ele_iter->genLepton()->pt(), 
+				   ele_iter->genLepton()->eta(), ele_iter->genLepton()->phi(), 
+				   ele_iter->energy(), ele_iter->et(), ele_iter->pt(), ele_iter->eta(), ele_iter->phi(), 
+				   ele_iter->pt()/ele_iter->genLepton()->pt(), ele_iter->charge()*-11, 0., 
+				   METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, 0, 0.,
+				   weights[0], weights[1], weights[2]);
 	 
 	 tree->Fill();
        }
@@ -202,7 +237,12 @@ ResolutionTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 	     pTinnerTracker = muon_iter->innerTrack()->pt();
 	   }
 
-	 treeMemPtr->fillVariables(muon_iter->genLepton()->energy(), muon_iter->genLepton()->et(), muon_iter->genLepton()->pt(), muon_iter->genLepton()->eta(), muon_iter->genLepton()->phi(), muon_iter->energy(), muon_iter->et(), muon_iter->pt(), muon_iter->eta(), muon_iter->phi(), muon_iter->pt()/muon_iter->genLepton()->pt(), muon_iter->charge()*-13, 0., METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, whichMuon, pTinnerTracker);
+	 treeMemPtr->fillVariables(muon_iter->genLepton()->energy(), muon_iter->genLepton()->et(), muon_iter->genLepton()->pt(), 
+				   muon_iter->genLepton()->eta(), muon_iter->genLepton()->phi(), 
+				   muon_iter->energy(), muon_iter->et(), muon_iter->pt(), muon_iter->eta(), muon_iter->phi(), 
+				   muon_iter->pt()/muon_iter->genLepton()->pt(), muon_iter->charge()*-13, 0., 
+				   METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, whichMuon, pTinnerTracker,
+				   weights[0], weights[1], weights[2]);
 	 
 	 tree->Fill();
        }
@@ -217,9 +257,19 @@ ResolutionTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
        deltaEta = METs.begin()->genMET()->eta() - METs.begin()->eta();
        deltaR = sqrt(deltaPhi*deltaPhi + deltaEta*deltaEta);
        if(METs.begin()->isCaloMET())
-	 treeMemPtr->fillVariables(METs.begin()->genMET()->energy(), METs.begin()->genMET()->et(), METs.begin()->genMET()->pt(), METs.begin()->genMET()->eta(), METs.begin()->genMET()->phi(), METs.begin()->energy(), METs.begin()->et(), METs.begin()->pt(), METs.begin()->eta(), METs.begin()->phi(), METs.begin()->pt()/METs.begin()->genMET()->pt(), -21, METs.begin()->emEtFraction(), METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, 0, 0.);
+	 treeMemPtr->fillVariables(METs.begin()->genMET()->energy(), METs.begin()->genMET()->et(), METs.begin()->genMET()->pt(), 
+				   METs.begin()->genMET()->eta(), METs.begin()->genMET()->phi(), 
+				   METs.begin()->energy(), METs.begin()->et(), METs.begin()->pt(), METs.begin()->eta(), METs.begin()->phi(), 
+				   METs.begin()->pt()/METs.begin()->genMET()->pt(), -21, METs.begin()->emEtFraction(), 
+				   METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, 0, 0.,
+				   weights[0], weights[1], weights[2]);
        else
-	 treeMemPtr->fillVariables(METs.begin()->genMET()->energy(), METs.begin()->genMET()->et(), METs.begin()->genMET()->pt(), METs.begin()->genMET()->eta(), METs.begin()->genMET()->phi(), METs.begin()->energy(), METs.begin()->et(), METs.begin()->pt(), METs.begin()->eta(), METs.begin()->phi(), METs.begin()->pt()/METs.begin()->genMET()->pt(), -21, 0., METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, 0, 0.);
+	 treeMemPtr->fillVariables(METs.begin()->genMET()->energy(), METs.begin()->genMET()->et(), METs.begin()->genMET()->pt(), 
+				   METs.begin()->genMET()->eta(), METs.begin()->genMET()->phi(), 
+				   METs.begin()->energy(), METs.begin()->et(), METs.begin()->pt(), METs.begin()->eta(), METs.begin()->phi(), 
+				   METs.begin()->pt()/METs.begin()->genMET()->pt(), -21, 0., 
+				   METs.begin()->genMET()->sumEt(), METs.begin()->sumEt(), deltaPhi, deltaR, nextdeltaR, 0, 0.,
+				   weights[0], weights[1], weights[2]);
        
        tree->Fill();
      }

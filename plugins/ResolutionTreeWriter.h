@@ -34,3 +34,4 @@ edm::InputTag jetLabel_;
 edm::InputTag electronLabel_;
 edm::InputTag muonLabel_;
 edm::InputTag METLabel_;
+std::vector<edm::InputTag> weightTags_;
