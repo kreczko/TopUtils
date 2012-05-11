@@ -8,7 +8,7 @@
 //
 // Original Author:  Holger Enderle,68/111,4719,
 //         Created:  Mon Jan 26 16:29:19 CET 2009
-// $Id: ResolutionTreeWriter.cc,v 1.6 2012/05/11 09:20:24 henderle Exp $
+// $Id: ResolutionTreeWriter.cc,v 1.7 2012/05/11 15:41:47 henderle Exp $
 //
 //
 
@@ -102,19 +102,32 @@ ResolutionTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
    // prepare the event weights
    std::vector<double> weights;
    // get weight from the CMSSW event
-   // loop over all eventWeightTags and multiply weights
-   for(unsigned iWeight=0; iWeight < weightTags_.size(); iWeight++){
-     // get weight from the CMSSW event
-     edm::Handle<double> wgt;
-     iEvent.getByLabel(weightTags_[iWeight], wgt);
-     // ignore non existing weights
-     if(wgt.isValid()){
-       //std::cout<<"  eventWeight "<<iWeight<<" "<< weightTags_[iWeight].label() << weightTags_[iWeight].instance() <<": "<<*wgt<<std::endl;
-       weights.push_back(*wgt);
+   // loop over all eventWeightTags (only 3 can be used at the moment)
+   //for(unsigned iWeight=0; iWeight < weightTags_.size(); iWeight++){
+   for(unsigned iWeight=0; iWeight < 3; iWeight++){
+     if(iWeight < weightTags_.size()){
+       // get weight by label
+       edm::Handle<double> wgt;
+       iEvent.getByLabel(weightTags_[iWeight], wgt);
+       // check weights
+       if(wgt.isValid())weights.push_back(*wgt);
+       else{
+	 weights.push_back(0.);
+	 std::cout<< "eventWeight " << iWeight << " not found"<<std::endl;
+	 edm::LogInfo("weightNotFound") << "eventWeight " << iWeight << " not found";//should probably be an error
+       }
      }
      else{
-       std::cout<< "eventWeight " << iWeight << " not found"<<std::endl;
-       edm::LogInfo("weightNotFound") << "eventWeight " << iWeight << " not found";
+       if(iWeight==0){
+	 // if no weight is given, simply set it to 1.
+	 weights.push_back(1.);
+	 edm::LogInfo("weightNotGiven") << "no eventWeight given, setting to 1.";
+       }
+       else{
+	 // if no systematic weights are given, simply set them to 0.
+	 weights.push_back(0.);
+	 edm::LogInfo("weightNotGiven") << "no systematic eventWeight given, setting to 0.";
+       }
      }
    }
 
