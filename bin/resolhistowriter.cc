@@ -20,7 +20,8 @@ int main(int argc, char* argv[])
   gStyle->SetOptFit(1111);
 
   TString inputfilename = "ResolutionTree.root";
-  if(argc>=4) inputfilename = argv[3];
+  if(argc>=3) inputfilename = argv[2];
+  cout<<"input file: "+inputfilename<<endl;
   TFile* inputfile = new TFile(inputfilename,"READ");
   TTree* tree = (TTree*)inputfile->Get("resolutionTreeWriter/ResolutionTree");
   ResolutionVariables* resobject = new ResolutionVariables();
@@ -46,15 +47,41 @@ int main(int argc, char* argv[])
   tree->SetBranchAddress("pTinnerTracker",&resobject->pTinnerTracker);
   tree->SetBranchAddress("Particle_ID",&resobject->Particle_ID);
   tree->SetBranchAddress("whichMuon",&resobject->whichMuon);
+  tree->SetBranchAddress("PUweight",&resobject->PUweight);
+  tree->SetBranchAddress("PUweightUp",&resobject->PUweightUp);
+  tree->SetBranchAddress("PUweightDown",&resobject->PUweightDown);
 
   Int_t ParticleID = 0; //0 = non b jets, 1 = b jets, 2 = electrons, 3 = muons, 4 = MET
   if(argc>=2)ParticleID = atoi(argv[1]);
-  TFile* file = 0;
-  if(ParticleID == 0)file = new TFile("resolnonbhistos.root","RECREATE");
-  else if(ParticleID == 1)file = new TFile("resolbhistos.root","RECREATE");
-  else if(ParticleID == 2)file = new TFile("resolelechistos.root","RECREATE");
-  else if(ParticleID == 3)file = new TFile("resolmuonhistos.root","RECREATE");
-  else if(ParticleID == 4)file = new TFile("resolMEThistos.root","RECREATE");
+  TString identifier;
+  if(ParticleID == 0){
+    identifier = "nonb";
+    cout<<"resolutions for udsc jets"<<endl;
+  }
+  else if(ParticleID == 1){
+    identifier = "b";
+    cout<<"resolutions for b jets"<<endl;
+  }
+  else if(ParticleID == 2){
+    identifier = "elec";
+    cout<<"resolutions for electrons"<<endl;
+  }
+  else if(ParticleID == 3){
+    identifier = "muon";
+    cout<<"resolutions for muons"<<endl;
+  }
+  else if(ParticleID == 4){
+    identifier = "MET";
+    cout<<"resolutions for MET"<<endl;
+  }
+
+  TString puString = "";
+  if(argc>=4){
+    if(atoi(argv[3])==1)puString="_puWeight";
+    if(atoi(argv[3])==2)puString="_puWeightDown";
+    if(atoi(argv[3])==3)puString="_puWeightUp";
+  }
+  TFile* file = new TFile("resol"+identifier+"histos"+puString+".root","RECREATE");
 
   Int_t etbinNum;
   if(ParticleID==0 || ParticleID==1)etbinNum = 25;
@@ -222,13 +249,22 @@ int main(int argc, char* argv[])
     ethnameeta[isel] = "h_eta"+lower_et_cut+"_"+upper_et_cut;
     ethnamephi[isel] = "h_phi"+lower_et_cut+"_"+upper_et_cut;
   }
+
+  double weight = 1.;
+
   Int_t nevent = (Int_t)tree->GetEntries();
   for(Int_t ientry = 0; ientry < nevent; ++ientry){
     tree->GetEntry(ientry);
+
+    if(argc>=4){
+      if(atoi(argv[3])==1)weight = resobject->PUweight;
+      if(atoi(argv[3])==2)weight = resobject->PUweightDown;
+      if(atoi(argv[3])==3)weight = resobject->PUweightUp;
+    }
+
     for(Int_t ieta = 0; ieta < etabinNum; ieta++){
 
       for(Int_t isel = 0; isel < etbinNum; isel++){
-
 	if(ParticleID == 0){
 	  if(resobject->Particle_ID!=0
 	     && TMath::Abs(resobject->Particle_ID)<5
@@ -236,19 +272,19 @@ int main(int argc, char* argv[])
 	     && TMath::Abs(resobject->Gen_eta)<etabinning[ieta+1]
 	     && resobject->Gen_et>etbinning[isel]
 	     && resobject->Gen_et<=etbinning[isel+1]){
- 	    bincenterhisto[(ieta*etbinNum)+isel]->Fill(resobject->Gen_et);
-	    reshisto[(ieta*etbinNum)+isel]->Fill(resobject->Reco_et/resobject->Gen_et-1);
+ 	    bincenterhisto[(ieta*etbinNum)+isel]->Fill(resobject->Gen_et, weight);
+	    reshisto[(ieta*etbinNum)+isel]->Fill(resobject->Reco_et/resobject->Gen_et-1, weight);
 	    if(isel>10){
-	      reshistoeta3[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta);
-	      reshistophi3[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi);
+	      reshistoeta3[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta, weight);
+	      reshistophi3[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi, weight);
 	    }
 	    else if(isel>3){
-	      reshistoeta2[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta);
-	      reshistophi2[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi);
+	      reshistoeta2[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta, weight);
+	      reshistophi2[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi, weight);
 	    }
 	    else{
-	      reshistoeta[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta);
-	      reshistophi[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi);
+	      reshistoeta[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta, weight);
+	      reshistophi[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi, weight);
 	    }
 	  }
 	}
@@ -258,19 +294,19 @@ int main(int argc, char* argv[])
 	     && TMath::Abs(resobject->Gen_eta)<etabinning[ieta+1]
 	     && resobject->Gen_et>etbinning[isel]
 	     && resobject->Gen_et<=etbinning[isel+1]){
-	    bincenterhisto[(ieta*etbinNum)+isel]->Fill(resobject->Gen_et);
-	    reshisto[(ieta*etbinNum)+isel]->Fill(resobject->Reco_et/resobject->Gen_et-1);
+	    bincenterhisto[(ieta*etbinNum)+isel]->Fill(resobject->Gen_et, weight);
+	    reshisto[(ieta*etbinNum)+isel]->Fill(resobject->Reco_et/resobject->Gen_et-1, weight);
 	    if(isel>10){
-	      reshistoeta3[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta);
-	      reshistophi3[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi);
+	      reshistoeta3[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta, weight);
+	      reshistophi3[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi, weight);
 	    }
 	    else if(isel>3){
-	      reshistoeta2[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta);
-	      reshistophi2[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi);
+	      reshistoeta2[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta, weight);
+	      reshistophi2[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi, weight);
 	    }
 	    else{
-	      reshistoeta[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta);
-	      reshistophi[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi);
+	      reshistoeta[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta, weight);
+	      reshistophi[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi, weight);
 	    }
 	  }
 	}
@@ -281,19 +317,19 @@ int main(int argc, char* argv[])
 	     && TMath::Abs(resobject->Gen_eta)<etabinning[ieta+1]
 	     && resobject->Gen_et>etbinning[isel]
 	     && resobject->Gen_et<=etbinning[isel+1]){
-	    bincenterhisto[(ieta*etbinNum)+isel]->Fill(resobject->Gen_et);
-	    reshisto[(ieta*etbinNum)+isel]->Fill(resobject->Reco_et/resobject->Gen_et-1);
+	    bincenterhisto[(ieta*etbinNum)+isel]->Fill(resobject->Gen_et, weight);
+	    reshisto[(ieta*etbinNum)+isel]->Fill(resobject->Reco_et/resobject->Gen_et-1, weight);
 	    if(isel>5){
-	      reshistoeta3[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta);
-	      reshistophi3[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi);
+	      reshistoeta3[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta, weight);
+	      reshistophi3[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi, weight);
 	    }
 	    else if(isel>2){
-	      reshistoeta2[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta);
-	      reshistophi2[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi);
+	      reshistoeta2[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta, weight);
+	      reshistophi2[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi, weight);
 	    }
 	    else {
-	      reshistoeta[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta);
-	      reshistophi[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi);
+	      reshistoeta[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta, weight);
+	      reshistophi[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi, weight);
 	    }
 	  }
 	}
@@ -305,19 +341,19 @@ int main(int argc, char* argv[])
 	     && TMath::Abs(resobject->Gen_eta)<etabinning[ieta+1]
 	     && resobject->Gen_et>etbinning[isel]
 	     && resobject->Gen_et<=etbinning[isel+1]){
-	    bincenterhisto[(ieta*etbinNum)+isel]->Fill(resobject->Gen_et);
-	    reshisto[(ieta*etbinNum)+isel]->Fill(resobject->Reco_pt/resobject->Gen_pt-1);
+	    bincenterhisto[(ieta*etbinNum)+isel]->Fill(resobject->Gen_et, weight);
+	    reshisto[(ieta*etbinNum)+isel]->Fill(resobject->Reco_pt/resobject->Gen_pt-1, weight);
 	    if(isel>5){
-	      reshistoeta3[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta);
-	      reshistophi3[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi);
+	      reshistoeta3[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta, weight);
+	      reshistophi3[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi, weight);
 	    }
 	    else if(isel>2){
-	      reshistoeta2[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta);
-	      reshistophi2[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi);
+	      reshistoeta2[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta, weight);
+	      reshistophi2[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi, weight);
 	    }
 	    else {
-	      reshistoeta[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta);
-	      reshistophi[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi);
+	      reshistoeta[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta, weight);
+	      reshistophi[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi, weight);
 	    }
 	  }
 	}
@@ -325,10 +361,10 @@ int main(int argc, char* argv[])
 	  if(resobject->Particle_ID==-21
 	     && resobject->Gen_et>etbinning[isel]
 	     && resobject->Gen_et<=etbinning[isel+1]){
-	    bincenterhisto[(ieta*etbinNum)+isel]->Fill(resobject->Gen_et);
-	    reshisto[(ieta*etbinNum)+isel]->Fill(resobject->Reco_et/resobject->Gen_et-1);
-	    reshistoeta[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta);
-	    reshistophi[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi);
+	    bincenterhisto[(ieta*etbinNum)+isel]->Fill(resobject->Gen_et, weight);
+	    reshisto[(ieta*etbinNum)+isel]->Fill(resobject->Reco_et/resobject->Gen_et-1, weight);
+	    reshistoeta[(ieta*etbinNum)+isel]->Fill(resobject->Reco_eta-resobject->Gen_eta, weight);
+	    reshistophi[(ieta*etbinNum)+isel]->Fill(resobject->DeltaPhi, weight);
 	  }
 	}
       }
@@ -442,7 +478,7 @@ int main(int argc, char* argv[])
     Char_t tmpchar2[10];
     sprintf(tmpchar2,"%i",ieta+1);
     etastrg = tmpchar2;
-    if(argc>=3 && argv[2]){
+    if(argc>=5 && atoi(argv[4])){
       if(ParticleID == 0){
 	controlcan[ieta]->Print("gauscontrol/gauscontrolnonb_"+etastrg+".ps");
 	controlcaneta[ieta]->Print("gauscontrol/gauscontrolnonb_eta_"+etastrg+".ps");
