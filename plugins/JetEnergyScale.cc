@@ -162,6 +162,7 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
       }
       scaleJetEnergy( scaledJet, resolutionFactor(scaledJet) );
       delete deltaJEC;
+      delete param;
     }
     pJets->push_back( scaledJet );
     
