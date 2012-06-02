@@ -23,60 +23,60 @@ double EventWeightDileptonSF::getLeptonSF(const reco::Candidate& lep){
   if(lep.isElectron()){  
     if(fabs(eta)<=1.4){
       if(pt<30.)
-        sf = 1.0080;
+        sf = 0.9671;
       else if(pt<40.)
-        sf = 1.0061;	
+        sf = 0.9831;	
       else if(pt<50.)
-        sf = 1.0060; 
+        sf = 0.9924; 
       else
-        sf = 1.0016; 	   
+        sf = 0.9961; 	   
     } else if(fabs(eta)<=1.6){
       if(pt<30.)
-        sf = 1.0057;
+        sf = 0.9546;
       else if(pt<40.)
-        sf = 1.0175;	
+        sf = 0.9896;	
       else if(pt<50.)
-        sf = 1.0126; 
+        sf = 0.9920; 
       else
-        sf = 1.0046;         
+        sf = 0.9957;         
     } else if(fabs(eta)<=2.4){
       if(pt<30.)
-        sf = 1.0603;
+        sf = 1.0129;
       else if(pt<40.)
-        sf = 1.0330;	
+        sf = 0.9964;	
       else if(pt<50.)
-        sf = 1.0160; 
+        sf = 0.9941; 
       else
-        sf = 1.0081;         
+        sf = 0.9964;         
     }  
   } else if(lep.isMuon()) {
     if(fabs(eta)<=1.4){
       if(pt<30.)
-        sf = 0.9963;
+        sf = 0.9898;
       else if(pt<40.)
-        sf = 0.9936;	
+        sf = 0.9915;	
       else if(pt<50.)
         sf = 0.9912; 
       else
-        sf = 0.9852; 	   
+        sf = 0.9847; 	   
     } else if(fabs(eta)<=1.6){
       if(pt<30.)
-        sf = 0.9841;
+        sf = 0.9844;
       else if(pt<40.)
         sf = 0.9806;	
       else if(pt<50.)
-        sf = 0.9772; 
+        sf = 0.9761; 
       else
-        sf = 0.9709;         
+        sf = 0.9704;         
     } else if(fabs(eta)<=2.4){
       if(pt<30.)
-        sf = 0.9918;
+        sf = 0.9822;
       else if(pt<40.)
-        sf = 0.9820;	
+        sf = 0.9786;	
       else if(pt<50.)
-        sf = 0.9779; 
+        sf = 0.9751; 
       else
-        sf = 0.9646;         
+        sf = 0.9597;         
     }    
   }    
   
