@@ -121,25 +121,31 @@ EffSFElectronEventWeight::produce(edm::Event& evt, const edm::EventSetup& setup)
     SFele *= additionalFactor_;
     
     /// systematic variations for combined trigger and selection eff. SF (normalisation and shape uncertainties)
-    if     (sysVar_ == "combinedEffSFNormUpSys")    SFele *= (1+additionalFactorErr_);
+    if     (sysVar_ == "" || sysVar_ == "noSys") ; // central value -> already set above
+    else if(sysVar_ == "combinedEffSFNormUpSys")    SFele *= (1+additionalFactorErr_);
     else if(sysVar_ == "combinedEffSFNormDownSys")  SFele *= (1-additionalFactorErr_);
     else if(sysVar_ == "combinedEffSFNormUpStat")   SFele += meanTriggerEffSFErr_;
     else if(sysVar_ == "combinedEffSFNormDownStat") SFele -= meanTriggerEffSFErr_;
-    else if(sysVar_ == "combinedEffSFShapeUpptEle")  { 
+    else if(sysVar_ == "combinedEffSFShapeUpPt")  { 
       if(ptEle<shapeVarPtEleThreshold_) SFele += shapeDistortionErr_; 
       else                        SFele -= shapeDistortionErr_;
     }
-    else if(sysVar_ == "combinedEffSFShapeDownptEle"){ 
+    else if(sysVar_ == "combinedEffSFShapeDownPt"){ 
       if(ptEle<shapeVarPtEleThreshold_) SFele -= shapeDistortionErr_; 
       else                        SFele += shapeDistortionErr_;
     }
-    else if(sysVar_ == "combinedEffSFShapeUpetaEle")  { 
+    else if(sysVar_ == "combinedEffSFShapeUpEta")  { 
       if(std::abs(etaEle)<shapeVarEtaEleThreshold_) SFele += shapeDistortionErr_; 
       else                                    SFele -= shapeDistortionErr_;
     }
-    else if(sysVar_ == "combinedEffSFShapeDownetaEle"){ 
+    else if(sysVar_ == "combinedEffSFShapeDownEta"){ 
       if(std::abs(etaEle)<shapeVarEtaEleThreshold_) SFele -= shapeDistortionErr_; 
       else                                    SFele += shapeDistortionErr_;
+    }
+    else if (std::string::npos != sysVar_.find("jetEffSF")) ; // to avoid an exception throw for jetEffSF variations (see below)
+    else{
+      throw edm::Exception( edm::errors::Configuration,
+			    sysVar_+" is no valid systematic variation name! ERROR!" );
     }
     
     if(verbose_>=1) std::cout<<numPart<< ": ptEle=" <<ptEle<< "; etaEle=" <<etaEle<< "; SF= "<<SFele<<"; errorSFele="<< errorSFele <<std::endl;
@@ -198,15 +204,21 @@ EffSFElectronEventWeight::produce(edm::Event& evt, const edm::EventSetup& setup)
       errorDownSFjet = yErrLo[iPoint];
       
       /// systematic variations
-      if(sysVar_ == "jetEffSFNormUpSys")    SFjet += jetTriggerEffsSFNormSysErr_;
-      if(sysVar_ == "jetEffSFNormDownSys")  SFjet -= jetTriggerEffsSFNormSysErr_;
-      if(sysVar_ == "jetEffSFShapeUpSys"){
+      if     (sysVar_ == "" || sysVar_ == "noSys") ; // central value -> already set above
+      else if(sysVar_ == "jetEffSFNormUpSys")    SFjet += jetTriggerEffsSFNormSysErr_;
+      else if(sysVar_ == "jetEffSFNormDownSys")  SFjet -= jetTriggerEffsSFNormSysErr_;
+      else if(sysVar_ == "jetEffSFShapeUpSys"){
 	if(absEtaJet4 < 1.4) SFjet += jetTriggerEffsSFShapeSysErr_;
 	else                 SFjet -= jetTriggerEffsSFShapeSysErr_;
       }
-      if(sysVar_ == "jetEffSFDhapeDownSys"){
+      else if(sysVar_ == "jetEffSFShapeDownSys"){
 	if(absEtaJet4 < 1.4) SFjet -= jetTriggerEffsSFShapeSysErr_;
 	else                 SFjet += jetTriggerEffsSFShapeSysErr_;
+      }
+      else if (std::string::npos != sysVar_.find("combinedEffSF")) ; // to avoid an exception throw for combinedEffSF variations (see above)
+      else{
+	throw edm::Exception( edm::errors::Configuration,
+			      sysVar_+" is no valid systematic variation name! ERROR!" );
       }
     }
   }
