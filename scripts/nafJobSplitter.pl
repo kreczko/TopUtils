@@ -545,6 +545,7 @@ fi
 
 
 if [ "$?" = "0" ] ; then
+    sync
     thisPart=$(($continueOldJobNo + 1))
     alternativeOutput=ALTERNATIVEOUTPUT
     grep -qP ':signalHandler:\d+ received signal \d+ initiating program termination!' $tmp/stdout.txt
@@ -553,7 +554,9 @@ if [ "$?" = "0" ] ; then
             set -e
             mv $tmp/jobreport.xml $current/naf_DIRECTORY/jobreport$SGE_TASK_ID.xml.part.$thisPart
             mv $tmp/CONFIGFILE-$SGE_TASK_ID.root $current/naf_DIRECTORY/CONFIGFILE-$SGE_TASK_ID.root.part.$thisPart
-            mv $tmp/stdout.txt $current/naf_DIRECTORY/out$SGE_TASK_ID.txt.part.$thisPart
+            mv $tmp/stdout.txt $current/naf_DIRECTORY/tmp.out$SGE_TASK_ID.txt.part.$thisPart
+            grep TrigReport $current/naf_DIRECTORY/tmp.out$SGE_TASK_ID.txt.part.$thisPart >/dev/null 2>&1
+	    mv $current/naf_DIRECTORY/tmp.out$SGE_TASK_ID.txt.part.$thisPart $current/naf_DIRECTORY/out$SGE_TASK_ID.txt.part.$thisPart
             set +e
         else
             #bad luck, not supported!
@@ -566,7 +569,9 @@ if [ "$?" = "0" ] ; then
                 set -e
                 mv $tmp/jobreport.xml $current/naf_DIRECTORY/jobreport$SGE_TASK_ID.xml.part.$thisPart
                 mv $tmp/CONFIGFILE-$SGE_TASK_ID.root $current/naf_DIRECTORY/CONFIGFILE-$SGE_TASK_ID.root.part.$thisPart
-                mv $tmp/stdout.txt $current/naf_DIRECTORY/out$SGE_TASK_ID.txt.part.$thisPart
+                mv $tmp/stdout.txt $current/naf_DIRECTORY/tmp.out$SGE_TASK_ID.txt.part.$thisPart
+		grep TrigReport $current/naf_DIRECTORY/tmp.out$SGE_TASK_ID.txt.part.$thisPart >/dev/null 2>&1
+		mv $current/naf_DIRECTORY/tmp.out$SGE_TASK_ID.txt.part.$thisPart $current/naf_DIRECTORY/out$SGE_TASK_ID.txt.part.$thisPart
                 hadd $tmp/hadd.root $current/naf_DIRECTORY/CONFIGFILE-$SGE_TASK_ID.root.part.*
                 mv $tmp/hadd.root $current/naf_DIRECTORY/CONFIGFILE-$SGE_TASK_ID.root
                 sumTriggerReports2.pl $current/naf_DIRECTORY/out$SGE_TASK_ID.txt.part.* > $current/naf_DIRECTORY/out$SGE_TASK_ID.txt
@@ -575,7 +580,9 @@ if [ "$?" = "0" ] ; then
                 set -e
                 mv $tmp/jobreport.xml $current/naf_DIRECTORY/jobreport$SGE_TASK_ID.xml
                 mv $tmp/CONFIGFILE-$SGE_TASK_ID.root $current/naf_DIRECTORY/
-                mv $tmp/stdout.txt $current/naf_DIRECTORY/out$SGE_TASK_ID.txt
+                mv $tmp/stdout.txt $current/naf_DIRECTORY/tmp.out$SGE_TASK_ID.txt
+		grep TrigReport $current/naf_DIRECTORY/tmp.out$SGE_TASK_ID.txt >/dev/null 2>&1
+		mv $current/naf_DIRECTORY/tmp.out$SGE_TASK_ID.txt $current/naf_DIRECTORY/out$SGE_TASK_ID.txt
                 set +e
             fi
             if [ -e $current/naf_DIRECTORY/autojoin ] ; then
