@@ -21,6 +21,10 @@ class UnclusteredMETScale : public edm::EDProducer {
  private:
   /// jet input collection 
   edm::InputTag inputJets_;
+  /// jet input collection 
+  edm::InputTag inputElectrons_;
+  /// jet input collection 
+  edm::InputTag inputMuons_;
   /// met input collection
   edm::InputTag inputMETs_;
   /// scale factor for the rescaling
