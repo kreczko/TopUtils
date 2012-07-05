@@ -20,7 +20,7 @@ use constant C_RESUBMIT => 'magenta';
 ########################
 
 my %args;
-getopts('SsbW:kJjp:q:o:m:t:c:O:d:n', \%args);
+getopts('SsbW:kJjp:q:o:m:t:c:O:d:nQ:', \%args);
 
 if ($args{'p'}) {
     peekIntoJob($args{'p'});
@@ -80,6 +80,8 @@ Available Parameters
       the ouput directory, NJS will create a symlink to it. E.g. it might be useful
       to specify -o /scratch/hh/current/cms/user/$USER/njs
       Use NJS_OUTPUT environment variable to set a default
+  -Q: add options directly to the qsub command, for example -Q "-l site=hh" forces
+      jobs to run on Hamburg hosts
   -d: directory or symlink suffix of dir/link where files are stored
       e.g. njs -d xxx file.py will create naf_file_xxx/
   -c: additional command line arguments to cmsRun (put after the .py file),
@@ -129,12 +131,12 @@ where jobid is "jobid.arraynumber", e.g. "4491742.7".
 * Resuming jobs                                                  *
 ******************************************************************
 
-All jobs will be notified 5 Minutes before the end of the specified 
+All jobs will be notified 5 Minutes before the end of the specified
 job length. This is done via the signal XCPU or USR1. To support
 resuming, you need to catch these signals in cmsRun and emit the
 signal INT instead so that cmsRun will end the job. To achieve this,
 put 'process.load("TopAnalysis.TopUtils.SignalCatcher_cfi")' at the
-very end of your config file. Further, your python config file must 
+very end of your config file. Further, your python config file must
 support a "skipEvents" parameter, so that "cmsRun config.py skipEvents=100"
 would skip 100 events.
 
@@ -209,7 +211,7 @@ sub submitJob {
     my ($dir, $dirBase) = fileparse(File::Spec->canonpath("$current/$dirWithRelPath"));
     if (chdir($dirBase)) {
         $script ||= do { open my $FH, '<', "$dir/exe"; <$FH> };
-        my $line = `qsub -t $from-$to:1 $dir/$script`;
+        my $line = `qsub -t $from-$to:1 $args{'Q'} $dir/$script`;
         if ($line =~ /Your job-array (\d+)(?:\.\d+-\d+:1) \(".+"\) has been submitted/) {
             my $success;
             my $ids = ''; $ids .= "$_\t$1\n" for $from..$to;
@@ -226,7 +228,7 @@ sub submitJob {
             return $1;
         } else {
             die "Cannot submit job!\n$line";
-        }        
+        }
     } else {
         print colored("Could not chdir to $dirBase!\n", C_ERROR);
         return;
@@ -257,7 +259,7 @@ sub check {
 }
 
 sub checkJob {
-    my ($dir, $qstat) = @_; 
+    my ($dir, $qstat) = @_;
     #$dir contains njs_whatever, assuming you have chdir'ed into the correct directory
     #$qstat contains an instance of a qstat class
     my $isComplete = 0;
@@ -753,4 +755,3 @@ sub job {
 }
 
 1;
-
