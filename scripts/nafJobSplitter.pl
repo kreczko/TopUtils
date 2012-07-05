@@ -20,10 +20,13 @@ use constant C_RESUBMIT => 'magenta';
 ########################
 
 my %args;
-getopts('SsbW:kJjp:q:o:m:t:c:O:d:nQ:', \%args);
+getopts('SsbW:kJjp:P:q:o:m:t:c:O:d:nQ:', \%args);
+$args{'Q'} ||= ""; # to suppress unitialised warning when not set
 
 if ($args{'p'}) {
     peekIntoJob($args{'p'});
+} elsif ($args{'P'}) {
+    logIntoHost($args{'P'});
 } else {
     my ($numberOfJobs, $config) = @ARGV;
     syntax() unless $config;
@@ -82,6 +85,7 @@ Available Parameters
       Use NJS_OUTPUT environment variable to set a default
   -Q: add options directly to the qsub command, for example -Q "-l site=hh" forces
       jobs to run on Hamburg hosts
+      the options are not saved, you have to give them again when using check
   -d: directory or symlink suffix of dir/link where files are stored
       e.g. njs -d xxx file.py will create naf_file_xxx/
   -c: additional command line arguments to cmsRun (put after the .py file),
@@ -122,10 +126,18 @@ Available Parameters
      Timing-tstoragefile-read-totalMsecs
   -S show extended read speed summary (for each job)
   -b show speed summary in bytes / bytes per second
+  -Q direct setting of qsub options, see also submitting section
 
 To peek into running jobs, i.e. to show the current stdout:
   nafJobSplitter.pl -p jobid
 where jobid is "jobid.arraynumber", e.g. "4491742.7".
+
+To log into the host a job is running on to do some runtime
+debugging (e.g. sending USR1 to the job and look at the current
+root-file with the possibility to resume the job):
+  nafJobSplitter.pl -P jobid
+where jobid is "jobid.arraynumber", e.g. "4491742.7".
+
 
 ******************************************************************
 * Resuming jobs                                                  *
@@ -455,6 +467,18 @@ sub peekIntoJob {
     }
 }
 
+sub logIntoHost {
+    my $jid = shift;
+    my $job = QStat->new()->job($jid);
+    if ($job) {
+        die "The job is not running\n" unless $job->state() =~ /r/;
+        $job->logIntoHost();
+    } else {
+        die "Cannot find job. Please pass jobid.arraynumber (separated by .) of a running job\n";
+    }
+}
+
+
 sub getConfigTemplate {
     my $maxEvents = $args{'m'} || -1;
     my $alternativeOutput = $args{'O'}?'True':'False';
@@ -653,6 +677,18 @@ sub peek {
         my $jid = $self->fullId();
         #system("qrsh -l h_cpu=00:01:00 -l h=$1 -l h_vmem=400M -now n 'ls /tmp/$jid.*/ /tmp/$jid.*/* ; cat /tmp/$jid.*/njs_*/stdout.txt'");
         system("qrsh -l h_cpu=00:01:00 -l h=$1 -l h_vmem=400M -now n 'cat /tmp/$jid.*/njs_*/stdout.txt'");
+    } else {
+        die "Didn't find hostname\n";
+    }
+}
+
+sub logIntoHost {
+    my $self = shift;
+    die "Job is not running, cannot login to same host\n" unless $self->state() eq 'r';
+    if ($self->queue() =~ /\@(.+)/) {
+        print "Please wait, this can take up to a few minutes...\n";
+        my $jid = $self->fullId();
+        system("qrsh -l h_cpu=00:01:00 -l h=$1 -l h_vmem=400M -now n ");
     } else {
         die "Didn't find hostname\n";
     }
