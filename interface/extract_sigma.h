@@ -4,8 +4,11 @@
 #include <vector>
 #include <iostream>
 
-vector<double> extract_sigma(TH1* theHisto)
+vector<double> extract_sigma(TH1* theHisto, unsigned int verbose=0)
 {
+  int initialIgnoreLevel=gErrorIgnoreLevel;
+  if(verbose==0) gErrorIgnoreLevel=kWarning;
+
   double lowLim = theHisto->GetMean()-theHisto->GetRMS(); 
   double upLim = theHisto->GetMean()+theHisto->GetRMS();  
 
@@ -31,5 +34,6 @@ vector<double> extract_sigma(TH1* theHisto)
   output.push_back(f1->GetParameter(2));
   output.push_back(f1->GetParError(2));
   delete f1;
+  gErrorIgnoreLevel=initialIgnoreLevel;
   return output;
 }
