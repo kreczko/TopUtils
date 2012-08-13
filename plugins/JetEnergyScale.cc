@@ -181,8 +181,8 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
   pat::MET met = *(mets->begin());
   double scaledMETPx = met.px() - dPx;
   double scaledMETPy = met.py() - dPy;
-  pat::MET scaledMET(reco::MET(met.sumEt()+dSumEt, reco::MET::LorentzVector(scaledMETPx, scaledMETPy, 0, sqrt(scaledMETPx*scaledMETPx+scaledMETPy*scaledMETPy)), reco::MET::Point(0,0,0)));
-  pMETs->push_back( scaledMET );
+  met.setP4(reco::MET::LorentzVector(scaledMETPx, scaledMETPy, 0, sqrt(scaledMETPx*scaledMETPx+scaledMETPy*scaledMETPy)));
+  pMETs->push_back( met );
   event.put(pJets, outputJets_);
   event.put(pMETs, outputMETs_);
 }
