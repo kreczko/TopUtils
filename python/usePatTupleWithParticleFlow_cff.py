@@ -674,7 +674,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## embedding of resolutions into the patObjects
     if options['addResolutions']:
         getattr(process,'patMETs'+postfix).addResolutions = True
-        getattr(process,'patMETs'+postfix).resolutions = cms.PSet( default = cms.string("metResolutionPF") )
+        getattr(process,'patMETs'+postfix).resolutions = cms.PSet( default = cms.string("neutrinoResolution") )
 
 
     ##
