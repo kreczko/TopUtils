@@ -44,7 +44,7 @@ GenJetSelector::produce(edm::Event& evt, const edm::EventSetup& setup)
     //std::cout << "checking jet no. " << currentIndex << std::endl;
     if(currentIndex==bbarIX||currentIndex==bIX){
       //std::cout << "candidate found!" << std::endl;
-      if(p->eta()<eta_&&p->pt()>pt_){
+      if(std::abs(p->eta())<eta_&&p->pt()>pt_){
 	//std::cout << std::endl << "selected jet! index" << currentIndex << ", ";
 	//std::cout << "pt= " << p->pt() << ", eta= " << p->eta() << std::endl;
 	out->push_back(*p);
