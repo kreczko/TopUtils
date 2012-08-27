@@ -29,11 +29,52 @@ GenJetSelector::produce(edm::Event& evt, const edm::EventSetup& setup)
   evt.getByLabel(bHadJetIdx_    , BHadJetIndex    );
   evt.getByLabel(antibHadJetIdx_, AntiBHadJetIndex);
   // save them in vector
-  for (int i=0; i<(int) BHadJetIndex->size()    ; ++i){VBHadJetIdx    .push_back(    BHadJetIndex->at(i));};
-  for (int i=0; i<(int) AntiBHadJetIndex->size(); ++i){VAntiBHadJetIdx.push_back(AntiBHadJetIndex->at(i));};
+  //std::cout << "BHadJetIndices: "  << std::endl;
+  for (int i=0; i<(int) BHadJetIndex->size()    ; ++i){
+    VBHadJetIdx    .push_back(    BHadJetIndex->at(i));
+    //std::cout << BHadJetIndex->at(i)  << std::endl;
+  };
+  //std::cout << "AntiBHadJetIndices: "  << std::endl;
+  for (int i=0; i<(int) AntiBHadJetIndex->size(); ++i){
+    VAntiBHadJetIdx.push_back(AntiBHadJetIndex->at(i));
+    //std::cout << AntiBHadJetIndex->at(i) << std::endl;
+};
   // use leading vector entries finally 
   if(VBHadJetIdx    .size()>0) bIX   =VBHadJetIdx    [0];
   if(VAntiBHadJetIdx.size()>0) bbarIX=VAntiBHadJetIdx[0];
+  // deal with more than one bjet index
+  // avoid using the same jets
+  if(VBHadJetIdx.size()>1&&VAntiBHadJetIdx.size()==1){
+    bIX=-1;
+    for(int i=0; i<(int) VBHadJetIdx.size(); ++i){
+      if(VBHadJetIdx[i]!=bbarIX){
+	bIX=VBHadJetIdx[i];
+	break;
+      }
+    }
+  }
+  else if(VAntiBHadJetIdx.size()>1&&VBHadJetIdx.size()==1){
+    bbarIX=-1;
+    for(int i=0; i<(int) VAntiBHadJetIdx.size(); ++i){
+      if(VAntiBHadJetIdx[i]!=bIX){
+	bbarIX=VAntiBHadJetIdx[i];
+	break;
+      }
+    }
+  }
+  else if(VAntiBHadJetIdx.size()>1&&VBHadJetIdx.size()>1){
+    // if conflict use leading jet as b-jet and 2nd leading as bbar-jet
+    bIX   =VBHadJetIdx[0];
+    bbarIX=-1;
+    for(int i=0; i<(int) VAntiBHadJetIdx.size(); ++i){
+      if(VAntiBHadJetIdx[i]!=bIX){
+	bbarIX=VAntiBHadJetIdx[i];
+	break;
+      }
+    }
+  }
+
+
   //allIndices.push_back(bIX   );
   //allIndices.push_back(bbarIX);
   //std::cout << std::endl << "(bIX,bbarIX) = (" << bIX << "," << bbarIX << ")"<< std::endl;
@@ -45,8 +86,8 @@ GenJetSelector::produce(edm::Event& evt, const edm::EventSetup& setup)
     if(currentIndex==bbarIX||currentIndex==bIX){
       //std::cout << "candidate found!" << std::endl;
       if(std::abs(p->eta())<eta_&&p->pt()>pt_){
-	//std::cout << std::endl << "selected jet! index" << currentIndex << ", ";
-	//std::cout << "pt= " << p->pt() << ", eta= " << p->eta() << std::endl;
+	//std::cout << std::endl << "selected jet! index " << currentIndex << ", ";
+	//std::cout << "pt=" << p->pt() << ", eta=" << p->eta() << std::endl;
 	out->push_back(*p);
       }
     }
