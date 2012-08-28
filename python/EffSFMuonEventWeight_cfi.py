@@ -15,6 +15,6 @@ effSFMuonEventWeight = cms.EDProducer("EffSFMuonEventWeight",
   meanTriggerEffSF    = cms.double(1.) ,      ## in case of flat SF and for trigger SF shape uncertainty calculation
   shapeDistortionFactor = cms.double(0.),     ## for shape uncertainty calculation: if >0 modifies difference between mean and actual SF
                                               ## if -1: up/down variations divided by certain threshold (shapeVarEtaThreshold)
-  shapeVarEtaThreshold  = cms.double(1.2),     ## eta threshold which divides up/down variations SFShapeUp/DownEta
+  shapeVarEtaThreshold  = cms.double(0.7),     ## eta threshold which divides up/down variations SFShapeUp/DownEta
   shapeVarPtThreshold   = cms.double(55.)     ## pt threshold which divides up/down variations SFShapeUp/DownPt
 )
