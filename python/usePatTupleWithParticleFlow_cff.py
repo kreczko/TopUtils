@@ -400,18 +400,18 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     getattr(process,'elPFIsoDepositPU'        +postfix).src = 'pfSelectedElectrons'+postfix
 
     ## we want out own isolation cones:
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'elPFIsoValueCharged04'   +postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'elPFIsoValueChargedAll04'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'elPFIsoValueGamma04'     +postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'elPFIsoValueNeutral04'   +postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'elPFIsoValuePU04'        +postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'elPFIsoValueCharged04PFId'   +postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'elPFIsoValueChargedAll04PFId'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'elPFIsoValueGamma04PFId'     +postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'elPFIsoValueNeutral04PFId'   +postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'elPFIsoValuePU04PFId'        +postfix))
 
     ## adapt isolation cone for electrons
-    setattr(process,'elPFIsoValueCharged'             +postfix, getattr(process, 'elPFIsoValueCharged03'   +postfix).clone())
-    setattr(process,'elPFIsoValueChargedAll'          +postfix, getattr(process, 'elPFIsoValueChargedAll03'+postfix).clone())
-    setattr(process,'elPFIsoValueGamma'               +postfix, getattr(process, 'elPFIsoValueGamma03'     +postfix).clone())
-    setattr(process,'elPFIsoValueNeutral'             +postfix, getattr(process, 'elPFIsoValueNeutral03'   +postfix).clone())
-    setattr(process,'elPFIsoValuePU'                  +postfix, getattr(process, 'elPFIsoValuePU03'        +postfix).clone())
+    setattr(process,'elPFIsoValueCharged'             +postfix, getattr(process, 'elPFIsoValueCharged03PFId'   +postfix).clone())
+    setattr(process,'elPFIsoValueChargedAll'          +postfix, getattr(process, 'elPFIsoValueChargedAll03PFId'+postfix).clone())
+    setattr(process,'elPFIsoValueGamma'               +postfix, getattr(process, 'elPFIsoValueGamma03PFId'     +postfix).clone())
+    setattr(process,'elPFIsoValueNeutral'             +postfix, getattr(process, 'elPFIsoValueNeutral03PFId'   +postfix).clone())
+    setattr(process,'elPFIsoValuePU'                  +postfix, getattr(process, 'elPFIsoValuePU03PFId'        +postfix).clone())
 
     getattr(process,'elPFIsoValueCharged'             +postfix).deposits[0].deltaR = cms.double(options['pfIsoConeElec'])
     getattr(process,'elPFIsoValueChargedAll'          +postfix).deposits[0].deltaR = cms.double(options['pfIsoConeElec'])
@@ -419,11 +419,11 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     getattr(process,'elPFIsoValueNeutral'             +postfix).deposits[0].deltaR = cms.double(options['pfIsoConeElec'])
     getattr(process,'elPFIsoValuePU'                  +postfix).deposits[0].deltaR = cms.double(options['pfIsoConeElec'])
 
-    getattr(process,'patPF2PATSequence'+postfix).replace(getattr(process,'elPFIsoValueCharged03'   +postfix),getattr(process,'elPFIsoValueCharged'             +postfix))
-    getattr(process,'patPF2PATSequence'+postfix).replace(getattr(process,'elPFIsoValueChargedAll03'+postfix),getattr(process,'elPFIsoValueChargedAll'          +postfix))
-    getattr(process,'patPF2PATSequence'+postfix).replace(getattr(process,'elPFIsoValueGamma03'     +postfix),getattr(process,'elPFIsoValueGamma'               +postfix))
-    getattr(process,'patPF2PATSequence'+postfix).replace(getattr(process,'elPFIsoValueNeutral03'   +postfix),getattr(process,'elPFIsoValueNeutral'             +postfix))
-    getattr(process,'patPF2PATSequence'+postfix).replace(getattr(process,'elPFIsoValuePU03'        +postfix),getattr(process,'elPFIsoValuePU'                  +postfix))
+    getattr(process,'patPF2PATSequence'+postfix).replace(getattr(process,'elPFIsoValueCharged03PFId'   +postfix),getattr(process,'elPFIsoValueCharged'             +postfix))
+    getattr(process,'patPF2PATSequence'+postfix).replace(getattr(process,'elPFIsoValueChargedAll03PFId'+postfix),getattr(process,'elPFIsoValueChargedAll'          +postfix))
+    getattr(process,'patPF2PATSequence'+postfix).replace(getattr(process,'elPFIsoValueGamma03PFId'     +postfix),getattr(process,'elPFIsoValueGamma'               +postfix))
+    getattr(process,'patPF2PATSequence'+postfix).replace(getattr(process,'elPFIsoValueNeutral03PFId'   +postfix),getattr(process,'elPFIsoValueNeutral'             +postfix))
+    getattr(process,'patPF2PATSequence'+postfix).replace(getattr(process,'elPFIsoValuePU03PFId'        +postfix),getattr(process,'elPFIsoValuePU'                  +postfix))
 
     ## adapt isolation cut
     getattr(process,'pfElectrons'+postfix).isolationValueMapsCharged  = ['elPFIsoValueCharged'+postfix]
@@ -734,16 +734,16 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'phPFIsoDepositGamma'+postfix))
     getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'phPFIsoDepositNeutral'+postfix))
     getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'phPFIsoDepositPU'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'phPFIsoValueCharged03'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'phPFIsoValueChargedAll03'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'phPFIsoValueGamma03'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'phPFIsoValueNeutral03'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'phPFIsoValuePU03'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'phPFIsoValueCharged04'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'phPFIsoValueChargedAll04'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'phPFIsoValueGamma04'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'phPFIsoValueNeutral04'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'phPFIsoValuePU04'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'phPFIsoValueCharged03PFId'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'phPFIsoValueChargedAll03PFId'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'phPFIsoValueGamma03PFId'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'phPFIsoValueNeutral03PFId'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'phPFIsoValuePU03PFId'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'phPFIsoValueCharged04PFId'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'phPFIsoValueChargedAll04PFId'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'phPFIsoValueGamma04PFId'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'phPFIsoValueNeutral04PFId'+postfix))
+    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'phPFIsoValuePU04PFId'+postfix))
     getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'pfIsolatedPhotons'+postfix))
 
     ##
@@ -792,7 +792,6 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     massSearchReplaceAnyInputTag(getattr(process,'patPF2PATSequence'+postfix),'pfNoTau'+postfix,'pfJets'+postfix)
 
     ## remove soft lepton taggers, which would have needed more RECO collections as input
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'softMuonTagInfosAOD'+postfix))
     getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'softMuonBJetTagsAOD'+postfix))
     getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'softMuonByPtBJetTagsAOD'+postfix))
     getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'softMuonByIP3dBJetTagsAOD'+postfix))
