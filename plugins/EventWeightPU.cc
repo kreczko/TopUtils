@@ -24,7 +24,7 @@ EventWeightPU::EventWeightPU(const edm::ParameterSet& cfg):
 
   error_code = 0;
 
-  if(inTag_MCSampleTag == "Fall11"){
+  if(inTag_MCSampleTag == "Fall11" || inTag_MCSampleTag == "Summer12"){
 
     LumiWeights3D_ = edm::Lumi3DReWeighting();
     LumiWeights_   = edm::LumiReWeighting(inTag_MCSampleFile.fullPath(),inTag_DataFile.fullPath(),
@@ -89,7 +89,7 @@ void EventWeightPU::produce(edm::Event& evt, const edm::EventSetup& setup)
     { 
       int BX = iterPU->getBunchCrossing(); // -1: previous BX, 0: current BX,  1: next BX
       
-      if (inTag_MCSampleTag == "Fall11"){
+      if (inTag_MCSampleTag == "Fall11" || inTag_MCSampleTag == "Summer12" ){
 	if      (BX == -1) nvtx_m = iterPU->getTrueNumInteractions();
 	else if (BX ==  0) nvtx   = iterPU->getTrueNumInteractions();
 	else if (BX ==  1) nvtx_p = iterPU->getTrueNumInteractions();
@@ -101,7 +101,7 @@ void EventWeightPU::produce(edm::Event& evt, const edm::EventSetup& setup)
       }
     }
 
-    if      (inTag_MCSampleTag == "Fall11")   wght_ = LumiWeights_.weight(nvtx);
+    if      (inTag_MCSampleTag == "Fall11" || inTag_MCSampleTag == "Summer12") wght_ = LumiWeights_.weight(nvtx);
     else if (inTag_MCSampleTag == "Summer11") wght_ = LumiWeights3D_.weight3D(nvtx_m, nvtx, nvtx_p);
   } 
 
