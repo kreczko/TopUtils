@@ -83,8 +83,8 @@ Available Parameters
       the ouput directory, NJS will create a symlink to it. E.g. it might be useful
       to specify -o /scratch/hh/current/cms/user/$USER/njs
       Use NJS_OUTPUT environment variable to set a default
-  -Q: add options directly to the qsub command, for example -Q "-l site=hh" forces
-      jobs to run on Hamburg hosts
+  -Q: add options directly to the qsub command, for example -Q "-l site=zn" forces
+      jobs to run on Zeuthen hosts (default is -l site=hh)
       the options are not saved, you have to give them again when using check
   -d: directory or symlink suffix of dir/link where files are stored
       e.g. njs -d xxx file.py will create naf_file_xxx/
@@ -529,6 +529,7 @@ sub getBatchsystemTemplate {
 #$ -l h_cpu=__HCPU__
 #$ -l s_cpu=__SCPU__
 #$ -l s_rt=__SCPU__
+#$ -l site=hh
 #
 #(the maximum memory usage of this job)
 #$ -l h_vmem=3700M
