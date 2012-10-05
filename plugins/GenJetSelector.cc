@@ -83,11 +83,11 @@ GenJetSelector::produce(edm::Event& evt, const edm::EventSetup& setup)
   // choose B-jet index from list
   if(VBHadJetIdx.size()>0){
     for(int i=0; i<(int) VBHadJetIdx.size(); ++i){
-      // use indices of jets satisfying the PS cuts if possible
-      for(edm::View<reco::GenJet>::const_iterator p=genJet->begin(); p!=genJet->end(); ++p){
-	int currentIndex=p-genJet->begin();
-	// scan for jet index and check kinematic range
-	if(currentIndex==VBHadJetIdx[i]&&std::abs(p->eta())<2.1&&p->pt()>30) bIX=VBHadJetIdx[i];    
+      // use indices of jets satisfying the PS cuts if possible, loop reverse to prefer high pt jets in PS
+      for(edm::View<reco::GenJet>::const_reverse_iterator p=genJet->rbegin(); p!=genJet->rend(); ++p){
+	int currentIndex=genJet->size()-(p-genJet->rbegin())-1; // reverse iterator has last element in collection as element #0; -1 because index starts with 0
+	// scan for jet index and prefer jets in kinematic range of reco selection
+	if(currentIndex==VBHadJetIdx[i]&&std::abs(p->eta())<2.4&&p->pt()>30) bIX=VBHadJetIdx[i];    
       }
     }
     // if not: take leading index
@@ -96,11 +96,11 @@ GenJetSelector::produce(edm::Event& evt, const edm::EventSetup& setup)
   // choose Anti-B-jet index from list
   if(VAntiBHadJetIdx.size()>0){
     for(int i=0; i<(int) VAntiBHadJetIdx.size(); ++i){
-      // use indices of jets satisfying the PS cuts if possible
-      for(edm::View<reco::GenJet>::const_iterator p=genJet->begin(); p!=genJet->end(); ++p){
-	int currentIndex=p-genJet->begin();
-	// scan for jet index and check kinematic range
-	if(currentIndex==VAntiBHadJetIdx[i]&&std::abs(p->eta())<2.1&&p->pt()>30) bbarIX=VAntiBHadJetIdx[i]; 
+      // use indices of jets satisfying the PS cuts if possible, loop reverse to prefer high pt jets in PS
+      for(edm::View<reco::GenJet>::const_reverse_iterator p=genJet->rbegin(); p!=genJet->rend(); ++p){
+	int currentIndex=genJet->size()-(p-genJet->rbegin())-1; // reverse iterator has last element in collection as element #0; -1 because index starts with 0
+	// scan for jet index and prefer jets in kinematic range of reco selection
+	if(currentIndex==VAntiBHadJetIdx[i]&&std::abs(p->eta())<2.4&&p->pt()>30) bbarIX=VAntiBHadJetIdx[i]; 
       }
     }
     // if not: take leading index
