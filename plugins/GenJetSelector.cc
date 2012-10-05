@@ -107,19 +107,33 @@ GenJetSelector::produce(edm::Event& evt, const edm::EventSetup& setup)
     if(bbarIX==-1)  bbarIX   =VAntiBHadJetIdx    [0];
   }
 
-  // loop input collection
+  // loop input collection to find b-jet
   for(edm::View<reco::GenJet>::const_iterator p=genJet->begin(); p!=genJet->end(); ++p){
     int currentIndex=p-genJet->begin();
     //std::cout << "checking jet no. " << currentIndex << std::endl;
-    if(currentIndex==bbarIX||currentIndex==bIX){
+    if(currentIndex==bIX){
       //std::cout << "candidate found!" << std::endl;
       if(std::abs(p->eta())<eta_&&p->pt()>pt_){
-	//std::cout << std::endl << "selected jet! index " << currentIndex << ", ";
+	//std::cout << std::endl << "selected b-jet! index " << currentIndex << ", ";
 	//std::cout << "pt=" << p->pt() << ", eta=" << p->eta() << std::endl;
 	out->push_back(*p);
       }
     }
   }
+  // loop input collection to find bbar-jet
+  for(edm::View<reco::GenJet>::const_iterator p=genJet->begin(); p!=genJet->end(); ++p){
+    int currentIndex=p-genJet->begin();
+    //std::cout << "checking jet no. " << currentIndex << std::endl;
+    if(currentIndex==bbarIX){
+      //std::cout << "candidate found!" << std::endl;
+      if(std::abs(p->eta())<eta_&&p->pt()>pt_){
+	//std::cout << std::endl << "selected anti b-jet! index " << currentIndex << ", ";
+	//std::cout << "pt=" << p->pt() << ", eta=" << p->eta() << std::endl;
+	out->push_back(*p);
+      }
+    }
+  }
+
   // push out vector into the event
   evt.put(out);
 }
