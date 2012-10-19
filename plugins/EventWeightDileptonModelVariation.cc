@@ -107,6 +107,9 @@ double EventWeightDileptonModelVariation::getTopPtDataWeight()
   double c=1.22081e+00;
   double weightTop =a*ptTop*ptTop  +b*ptTop +c;
   double weightATop=a*ptATop*ptATop+b*ptATop+c;
+  double minX=-b/(2*a);
+  if(ptTop >=minX) weightTop =a*minX*minX+b*minX+c;
+  if(ptATop>=minX) weightATop=a*minX*minX+b*minX+c;
   pt_->Fill(genEvt->top()->pt());
   ptWeighted_->Fill(genEvt->top()->pt(), weightTop * weightATop);
   weightVsPt_->Fill(genEvt->top()->pt()   , weightTop );
