@@ -19,6 +19,7 @@ private:
     virtual void produce ( edm::Event&, const edm::EventSetup& );
     virtual void beginJob();
     double getTopPtWeight();
+    double getTopPtDataWeight();
     double getTopEtaWeight();
     double getTopMassWeight();
     double getTopMassWeightLandau();
@@ -79,7 +80,7 @@ void EventWeightDileptonModelVariation::beginJob()
     rap_ = fs->make<TH1F>("rapidity", "rapidity", 50, -2.5, 2.5);
     rapWeighted_ = fs->make<TH1F>("rapidityWeighted", "rapidityWeighted", 50, -2.5, 2.5);
     weightVsMass_ = fs->make<TH2F>("weightVsMass", "weightVsMass", 100, 345, 1000, 100, 0, 10);
-    weightVsPt_ = fs->make<TH2F>("weightVsPt", "weightVsPt", 100, 0, 400, 100, 0, 10);
+    weightVsPt_ = fs->make<TH2F>("weightVsPt", "weightVsPt", 100, 0, 400, 1000, 0, 10);
     weightVsY_ = fs->make<TH2F>("weightVsRapidity", "weightVsRapidity", 25, 0, 2.5, 100, 0, 10);
 }
 
@@ -93,6 +94,24 @@ double EventWeightDileptonModelVariation::getTopPtWeight()
     weightVsPt_->Fill(genEvt->top()->pt(), weight1);
     weightVsPt_->Fill(genEvt->topBar()->pt(), weight2);
     return weight1 * weight2;
+}
+
+double EventWeightDileptonModelVariation::getTopPtDataWeight()
+{
+  // get values
+  double ptTop =genEvt->top()->pt();
+  double ptATop=genEvt->topBar()->pt();
+  // weight function a*x*x+b*x+c
+  double a=1.40520e-06;
+  double b=-2.00947e-03;
+  double c=1.22081e+00;
+  double weightTop =a*ptTop*ptTop  +b*ptTop +c;
+  double weightATop=a*ptATop*ptATop+b*ptATop+c;
+  pt_->Fill(genEvt->top()->pt());
+  ptWeighted_->Fill(genEvt->top()->pt(), weightTop * weightATop);
+  weightVsPt_->Fill(genEvt->top()->pt()   , weightTop );
+  weightVsPt_->Fill(genEvt->topBar()->pt(), weightATop);
+  return weightTop * weightATop;
 }
 
 double EventWeightDileptonModelVariation::getTopEtaWeight()
@@ -147,6 +166,7 @@ void EventWeightDileptonModelVariation::produce(edm::Event& evt, const edm::Even
     else if (!weightVariable_.compare("toprapidity")) *eventWeight = getTopRapidityWeight();
     else if (!weightVariable_.compare("ttbarmass")) *eventWeight = getTopMassWeight();
     else if (!weightVariable_.compare("ttbarmasslandau")) *eventWeight = getTopMassWeightLandau();
+    else if (!weightVariable_.compare("data")) *eventWeight = getTopPtDataWeight();
     else edm::LogError("EventWeightDilepton") << "don't know which variation to take, " 
         << weightVariable_ << "is invalid!" << std::endl;
     
