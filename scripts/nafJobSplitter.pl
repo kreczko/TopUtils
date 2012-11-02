@@ -562,8 +562,14 @@ if [ -e $current/naf_DIRECTORY/out$SGE_TASK_ID.txt.part.1 ] ; then
     echo "Continuing old job"
     NSkip=$(sumTriggerReports2.pl $current/naf_DIRECTORY/out$SGE_TASK_ID.txt.part.* | perl -ne 'print($1), exit if /TrigReport\s*Events\stotal\s*=\s*(\d+)/')
     echo "Skipping $NSkip old events"
-    PYTHONDONTWRITEBYTECODE=1 cmsRun -j $tmp/jobreport.xml $tmp/run.py CMSRUNPARAMETER,skipEvents=$NSkip
-    #DCACHE_CLIENT_ACTIVE=1 PYTHONDONTWRITEBYTECODE=1 cmsRun -j $tmp/jobreport.xml $tmp/run.py CMSRUNPARAMETER,skipEvents=$NSkip
+    if [ -z "CMSRUNPARAMETER" ] ; then
+        PARAMS="skipEvents=$NSkip"
+    else
+        PARAMS="CMSRUNPARAMETER,skipEvents=$NSkip"
+    fi
+    
+    PYTHONDONTWRITEBYTECODE=1 cmsRun -j $tmp/jobreport.xml $tmp/run.py $PARAMS
+    #DCACHE_CLIENT_ACTIVE=1 PYTHONDONTWRITEBYTECODE=1 cmsRun -j $tmp/jobreport.xml $tmp/run.py $PARAMS
 else
     continueOldJobNo=0
     PYTHONDONTWRITEBYTECODE=1 cmsRun -j $tmp/jobreport.xml $tmp/run.py CMSRUNPARAMETER
