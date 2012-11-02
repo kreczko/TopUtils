@@ -154,7 +154,8 @@ EffSFMuonEventWeight::produce(edm::Event& evt, const edm::EventSetup& setup)
   // break in order to have only one event weight (the one of the leading part.) in case of more part. in the event
   break;
   } 
-
+  // FIXME: 8TeV SF to be derived, use 1.0 for the meanwhile
+  result=1.0;
   std::auto_ptr<double> SFEventWeight(new double);
   *SFEventWeight = result;    
   evt.put(SFEventWeight);
