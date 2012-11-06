@@ -32,6 +32,9 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     options.setdefault('analyzersBeforeElecIso', cms.Sequence())
     options.setdefault('excludeElectronsFromWsFromGenJets', False)
     options.setdefault('METCorrectionLevel', 0)
+    options.setdefault('JECEra' , '')
+    options.setdefault('JECFile', '')
+    options.setdefault('additionalJECLevels', [])
 
     if 'applyMETCorrections' in options:
         raise KeyError, "The option 'applyMETCorrections' is not supported anymore by prependPF2PATSequence, please use 'METCorrectionLevel'! 'METCorrectionLevel' may be set to 0,1,2 (no correction, TypeI, TypeI+TypeII corrections)"
@@ -69,11 +72,36 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
                                                            , src          = cms.InputTag('offlinePrimaryVerticesWithBS')
                                                            )
 
+    ## read JEC from local SQLite file if given
+    if not options['JECEra'] == '' or not options['JECFile'] == '':
+        if not options['JECEra'] == '' and not options['JECFile'] == '':
+            #process.load("CondCore.DBCommon.CondDBCommon_cfi")
+            #from CondCore.DBCommon.CondDBSetup_cfi import CondDBSetup
+            process.jec = cms.ESSource( "PoolDBESSource"
+                                      , DBParameters = cms.PSet(messageLevel = cms.untracked.int32(0))
+                                      , timetype = cms.string('runnumber')
+                                      , toGet = cms.VPSet(cms.PSet( record = cms.string('JetCorrectionsRecord')
+                                                                  , tag    = cms.string('JetCorrectorParametersCollection_'+options['JECEra']+'_AK5PFchs')
+                                                                  , label  = cms.untracked.string('AK5PFchs')
+                                                                  )
+                                                          ## here you add as many jet types as you need
+                                                          ## note that the tag name is specific for the particular sqlite file 
+                                                         )
+                                      , connect = cms.string('sqlite:'+options['JECFile'])
+                                      )
+            ## add an es_prefer statement to resolve a possible conflict from simultaneous connection to a global tag
+            process.es_prefer_jec = cms.ESPrefer('PoolDBESSource','jec')
+        else:
+            raise ValueError, "The options 'JECEra' and 'JECFile' may only be set both (using the give SQLite file and JEC era) or none (taking the JEC from the global tag) and not only one of them!"
+            
     ## choose correct set of jec levels for MC and data
     if options['runOnMC']:
         jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
     else:
         jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute','L2L3Residual']
+
+    ## add additional JEC levels after recommended minimum of JECs
+    jecLevels += options['additionalJECLevels']
 
     ## run the full PF2PAT sequence
     from PhysicsTools.PatAlgos.tools.pfTools import usePF2PAT
@@ -808,6 +836,9 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
                                                                  , bjets = cms.string("bjetResolutionPF")
                                                                  )
 
+    ## when flavor corrections are needed use the ones derived from top events
+    getattr(process,'patJetCorrFactors'+postfix).flavorType = 'T'
+
     ## remove obsolte genJet clustering sequences
     getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'genParticlesForJetsNoNu'+postfix))
     getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'iterativeCone5GenJetsNoNu'+postfix))
@@ -1021,6 +1052,9 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     print 'analyzersBeforeElecIso:', options['analyzersBeforeElecIso']
     print 'excludeElectronsFromWsFromGenJets:', options['excludeElectronsFromWsFromGenJets']
     print 'METCorrectionLevel:', options['METCorrectionLevel']
+    print 'JECEra:', options['JECEra']
+    print 'JECFile:', options['JECFile']
+    print 'additionalJECLevels:', options['additionalJECLevels']
     print '==================================================='
     print '|||||||||||||||||||||||||||||||||||||||||||||||||||'
     print '==================================================='
