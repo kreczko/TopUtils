@@ -34,7 +34,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     options.setdefault('METCorrectionLevel', 0)
     options.setdefault('JECEra' , '')
     options.setdefault('JECFile', '')
-    options.setdefault('additionalJECLevels', [''])
+    options.setdefault('additionalJECLevels', [])
 
     if 'applyMETCorrections' in options:
         raise KeyError, "The option 'applyMETCorrections' is not supported anymore by prependPF2PATSequence, please use 'METCorrectionLevel'! 'METCorrectionLevel' may be set to 0,1,2 (no correction, TypeI, TypeI+TypeII corrections)"
