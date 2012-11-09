@@ -17,7 +17,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     options.setdefault('cutsMuon', 'pt > 10. & abs(eta) < 2.5')
     options.setdefault('cutsElec', 'et > 20. & abs(eta) < 2.5')
     options.setdefault('cutsJets', 'pt > 10. & abs(eta) < 5.0')
-    options.setdefault('electronIDs', 'CiC') ## can be set to CiC, classical
+    options.setdefault('electronIDs', 'CiC') ## can be set to CiC, classical, MVA
     options.setdefault('pfIsoConeMuon', 0.4)
     options.setdefault('pfIsoConeElec', 0.4)
     options.setdefault('pfIsoValMuon', 0.2)
@@ -533,8 +533,23 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
         for name in eleIDsClassical.parameterNames_():
             setattr(eleIDs,name,getattr(eleIDsClassical,name))
 
+    ## add MVA electron ID
+    if options['electronIDs'].count('MVA') > 0 :
+        process.load("EGamma.EGammaAnalysisTools.electronIdMVAProducer_cfi")
+        process.eidMVASequence = cms.Sequence( process.mvaTrigV0
+                                             * process.mvaNonTrigV0
+                                             )
+
+        ## embed MVA electron ID into patElectrons
+        eleIDsMVA = cms.PSet( mvaTrigV0    = cms.InputTag("mvaTrigV0")
+                            , mvaNonTrigV0 = cms.InputTag("mvaNonTrigV0")
+                            )
+
+        for name in eleIDsMVA.parameterNames_():
+            setattr(eleIDs,name,getattr(eleIDsMVA,name))
+
     ## if no electronID is needed, don't try to add it to pat Electron
-    if options['electronIDs'].count('classical') == 0 and options['electronIDs'].count('CiC') == 0 :
+    if options['electronIDs'].count('classical') == 0 and options['electronIDs'].count('CiC') == 0 and options['electronIDs'].count('MVA') == 0 :
         getattr(process,'patElectrons'+postfix).addElectronID = False
 
     ## add all eleIDs to the pat electron
@@ -1008,6 +1023,8 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
         process.pf2pat += process.eidCiCSequence
     if options['electronIDs'].count('classical') > 0 :
         process.pf2pat += process.simpleEleIdSequence
+    if options['electronIDs'].count('MVA') > 0 :
+        process.pf2pat += process.eidMVASequence
 
     ## run PF2PAT sequence
     process.pf2pat += getattr(process,'patPF2PATSequence'+postfix)
