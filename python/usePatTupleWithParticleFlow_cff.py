@@ -22,6 +22,8 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     options.setdefault('pfIsoConeElec', 0.4)
     options.setdefault('pfIsoValMuon', 0.2)
     options.setdefault('pfIsoValElec', 0.2)
+    options.setdefault('doDeltaBetaCorrMuon', False)
+    options.setdefault('doDeltaBetaCorrElec', False)
     options.setdefault('skipIfNoPFMuon', False)
     options.setdefault('skipIfNoPFElec', False)
     options.setdefault('addNoCutPFMuon', False)
@@ -253,6 +255,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     getattr(process,'pfIsolatedMuons'+postfix).deltaBetaIsolationValueMap =  'muPFIsoValuePU'+postfix
     getattr(process,'pfIsolatedMuons'+postfix).isolationValueMapsNeutral  = ['muPFIsoValueNeutral'+postfix,'muPFIsoValueGamma'+postfix]
     getattr(process,'pfIsolatedMuons'+postfix).isolationCut = options['pfIsoValMuon']
+    getattr(process,'pfIsolatedMuons'+postfix).doDeltaBetaCorrection = options['doDeltaBetaCorrMuon']
 
     ## adapt isolation src for pat muons
     getattr(process,'patMuons'+postfix).isolationValues.pfNeutralHadrons   = 'muPFIsoValueNeutral'   +postfix
@@ -461,6 +464,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     getattr(process,'pfIsolatedElectrons'+postfix).deltaBetaIsolationValueMap =  'elPFIsoValuePU'+postfix
     getattr(process,'pfIsolatedElectrons'+postfix).isolationValueMapsNeutral  = ['elPFIsoValueNeutral'+postfix,'elPFIsoValueGamma'+postfix]
     getattr(process,'pfIsolatedElectrons'+postfix).isolationCut = options['pfIsoValElec']
+    getattr(process,'pfIsolatedElectrons'+postfix).doDeltaBetaCorrection = options['doDeltaBetaCorrElec']
 
     ## adapt isolation src for pat electrons
     getattr(process,'patElectrons'+postfix).isolationValues.pfNeutralHadrons   = 'elPFIsoValueNeutral'   +postfix
@@ -1059,6 +1063,8 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     print 'pfIsoConeElec:', options['pfIsoConeElec']
     print 'pfIsoValMuon:', options['pfIsoValMuon']
     print 'pfIsoValElec:', options['pfIsoValElec']
+    print 'doDeltaBetaCorrMuon:', options['doDeltaBetaCorrMuon']
+    print 'doDeltaBetaCorrElec:', options['doDeltaBetaCorrElec']
     print 'skipIfNoPFMuon:', options['skipIfNoPFMuon']
     print 'skipIfNoPFElec:', options['skipIfNoPFElec']
     print 'addNoCutPFMuon:', options['addNoCutPFMuon']
