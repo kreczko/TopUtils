@@ -224,6 +224,8 @@ double BTagSFEventWeight::effBTagSFerr11004(double x)
     iBin=13;
     factor=2;
   }
+  // FIXME for 8TeV: errors enlarged by factor 1.5
+  factor*=1.5;
   if(bTagAlgo_=="SSVHEM") return factor * SFb_errorSSVHEM[iBin];
   if(bTagAlgo_=="CSVM")   return factor * SFb_errorCSVM[iBin];
   if(bTagAlgo_=="JPM")    return factor * SFb_errorJPM[iBin];
@@ -261,27 +263,32 @@ double BTagSFEventWeight::effMisTagSF11004(double x, double jetEta, TString mean
     }
   }
   else if(bTagAlgo_=="CSVM"){
+    double val=0;
     if(jetEta>=0. && jetEta <=0.8 && x< 670.){
-      if( meanminmax == "mean" ) return  ((1.06182+(0.000617034*x))+(-1.5732e-06*(x*x)))+(3.02909e-10*(x*(x*x)));
-      if( meanminmax == "min" )  return  ((0.972455+(7.51396e-06*x))+(4.91857e-07*(x*x)))+(-1.47661e-09*(x*(x*x)));
-      if( meanminmax == "max" )  return  ((1.15116+(0.00122657*x))+(-3.63826e-06*(x*x)))+(2.08242e-09*(x*(x*x)));
+      if( meanminmax == "mean")  val=  ((1.06182 +(0.000617034*x))+(-1.5732e-06* (x*x)))+( 3.02909e-10*(x*(x*x)));
+      if( meanminmax == "min" )  val=  ((0.972455+(7.51396e-06*x))+( 4.91857e-07*(x*x)))+(-1.47661e-09*(x*(x*x)));
+      if( meanminmax == "max" )  val=  ((1.15116 +(0.00122657 *x))+(-3.63826e-06*(x*x)))+( 2.08242e-09*(x*(x*x)));
     }
     else if(jetEta>0.8 && jetEta <=1.6 && x< 670.){
-      if( meanminmax == "mean" ) return  ((1.111+(-9.64191e-06*x))+(1.80811e-07*(x*x)))+(-5.44868e-10*(x*(x*x)));
-      if( meanminmax == "min" )  return  ((1.02055+(-0.000378856*x))+(1.49029e-06*(x*x)))+(-1.74966e-09*(x*(x*x)));
-      if( meanminmax == "max" )  return  ((1.20146+(0.000359543*x))+(-1.12866e-06*(x*x)))+(6.59918e-10*(x*(x*x)));
+      if( meanminmax == "mean")  val=  ((1.111  +(-9.64191e-06*x))+( 1.80811e-07*(x*x)))+(-5.44868e-10*(x*(x*x)));
+      if( meanminmax == "min" )  val=  ((1.02055+(-0.000378856*x))+( 1.49029e-06*(x*x)))+(-1.74966e-09*(x*(x*x)));
+      if( meanminmax == "max" )  val=  ((1.20146+(0.000359543 *x))+(-1.12866e-06*(x*x)))+( 6.59918e-10*(x*(x*x)));
     }
     else if(jetEta>1.6 && jetEta <=2.4 && x< 670.){
-      if( meanminmax == "mean" ) return  ((1.08498+(-0.000701422*x))+(3.43612e-06*(x*x)))+(-4.11794e-09*(x*(x*x)));
-      if( meanminmax == "min" )  return  ((0.983476+(-0.000607242*x))+(3.17997e-06*(x*x)))+(-4.01242e-09*(x*(x*x)));
-      if( meanminmax == "max" )  return  ((1.18654+(-0.000795808*x))+(3.69226e-06*(x*x)))+(-4.22347e-09*(x*(x*x)));
+      if( meanminmax == "mean")  val=  ((1.08498 +(-0.000701422*x))+(3.43612e-06*(x*x)))+(-4.11794e-09*(x*(x*x)));
+      if( meanminmax == "min" )  val=  ((0.983476+(-0.000607242*x))+(3.17997e-06*(x*x)))+(-4.01242e-09*(x*(x*x)));
+      if( meanminmax == "max" )  val=  ((1.18654 +(-0.000795808*x))+(3.69226e-06*(x*x)))+(-4.22347e-09*(x*(x*x)));
     }
     else if(jetEta>=0. && jetEta <=2.4 && x> 670.){
       x=670.;
-      if( meanminmax == "mean" ) return  ((1.04318+(0.000848162*x))+(-2.5795e-06*(x*x)))+(1.64156e-09*(x*(x*x)));
-      if( meanminmax == "min" )  return  ((0.962627+(0.000448344*x))+(-1.25579e-06*(x*x)))+(4.82283e-10*(x*(x*x)));
-      if( meanminmax == "max" )  return  ((1.12368+(0.00124806*x))+(-3.9032e-06*(x*x)))+(2.80083e-09*(x*(x*x)));
+      if( meanminmax == "mean")  val=  ((1.04318 +(0.000848162*x))+(-2.5795e-06* (x*x)))+(1.64156e-09*(x*(x*x)));
+      if( meanminmax == "min" )  val=  ((0.962627+(0.000448344*x))+(-1.25579e-06*(x*x)))+(4.82283e-10*(x*(x*x)));
+      if( meanminmax == "max" )  val=  ((1.12368 +(0.00124806 *x))+(-3.9032e-06* (x*x)))+(2.80083e-09*(x*(x*x)));
     }
+    // FIXME: 8TeV correction factor: central value scaled, rel. uncertainty stays the same
+    val*=(1.10422 + -0.000523856*x + 1.14251e-06*x*x);
+    if(val!=0) return val;
+
   }
   else if(bTagAlgo_=="JPM"){
     if(jetEta>=0. && jetEta <=0.8 && x< 670.){
@@ -454,9 +461,9 @@ double BTagSFEventWeight::effMisTagSF(double jetPt, double jetEta)
   else if(version_=="11-004"){
     /// ...or by hand from 11-004 (Moriond recommendation)
     if(jetEta >= maxEta_) jetEta = maxEta_-0.1;
-    TString                     meanminmax = "mean";
-    if(sysVar_ == "misTagSFUp") meanminmax = "max";
-    if(sysVar_ == "misTagSFUp") meanminmax = "min";
+    TString                       meanminmax = "mean";
+    if(sysVar_ == "misTagSFUp"  ) meanminmax = "max";
+    if(sysVar_ == "misTagSFDown") meanminmax = "min";
     result = effMisTagSF11004(jetPt, jetEta, meanminmax);
     if(verbose_>=2) std::cout<< "effMisTagSF= "<<effMisTagSF11004(jetPt, jetEta, "mean")<<" + "<<effMisTagSF11004(jetPt, jetEta, "max")
 	  <<" - "<<effMisTagSF11004(jetPt, jetEta, "min")<<std::endl;

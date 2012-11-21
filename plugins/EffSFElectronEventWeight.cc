@@ -235,6 +235,8 @@ EffSFElectronEventWeight::produce(edm::Event& evt, const edm::EventSetup& setup)
   ///-----------------------------------
    
    double SFtotal = SFele * SFjet;
+   // FIXME: 8TeV SF to be derived, use 1.0 for the meanwhile
+   SFtotal=1.0;
    if(verbose_>=1) std::cout<< "SFtotal: " << SFtotal <<std::endl;
    hists_.find("electronEffSFTotal" )->second->Fill( SFtotal );
   
