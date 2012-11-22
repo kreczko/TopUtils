@@ -20,7 +20,7 @@ use constant C_RESUBMIT => 'magenta';
 ########################
 
 my %args;
-getopts('SsbW:kJjp:P:q:o:m:t:c:O:d:nQ:', \%args);
+getopts('SsbW:kJjp:P:q:o:m:t:c:O:d:nQ:M:', \%args);
 $args{'Q'} ||= ""; # to suppress unitialised warning when not set
 
 if ($args{'p'}) {
@@ -77,6 +77,8 @@ Available Parameters
   -q: choose queue, h_cpu in hours
         default: -q 48
         to modify the default, use the environt variable NJS_QUEUE, e.g. "export NJS_QUEUE=12"
+  -M: maximum memory, default is 3700 (unit is MB), this is the hard limit. Soft limit is 300M less.
+        to modify the default, use the environt variable NJS_MEM, e.g. "export NJS_MEM=7000"
   -o: output directory
         default: `pwd`
       Note: the output will always be stored in the current directory. If you specify
@@ -532,8 +534,8 @@ sub getBatchsystemTemplate {
 #$ -l site=hh
 #
 #(the maximum memory usage of this job)
-#$ -l h_vmem=3700M
-#$ -l s_vmem=3400M
+#$ -l h_vmem=__HVMEM__M
+#$ -l s_vmem=__SVMEM__M
 #
 #(stderr and stdout are merged together to stdout)
 #$ -j y
@@ -645,8 +647,11 @@ rm -r $tmp
 
 END_OF_BATCH_TEMPLATE
     my ($hcpu, $scpu) = getCPULimits();
+    my ($hvmem, $svmem) = getMemoryLimits();
     $templ =~ s/__HCPU__/$hcpu/g;
     $templ =~ s/__SCPU__/$scpu/g;
+    $templ =~ s/__HVMEM__/$hvmem/g;
+    $templ =~ s/__SVMEM__/$svmem/g;
     $args{'c'} ||= '';
     $templ =~ s/CMSRUNPARAMETER/$args{'c'}/g;
     $args{'O'} ||= '';
@@ -663,6 +668,12 @@ sub getCPULimits {
     $m -= 5; #substract 5 minutes for soft limit
     if ($m < 0) { --$h; $m +=60; }
     return ($hlimit, "$h:$m:$s");
+}
+
+sub getMemoryLimits {
+    my $hlimit = $args{'M'} || $ENV{NJS_MEM} || 3700;
+    die "invalid memory requirement: $hlimit\n" unless $hlimit =~ /^\d+$/ && $hlimit > 700 && $hlimit < 20000;
+    return ($hlimit, $hlimit - 300);
 }
 
 ################################################################################################
