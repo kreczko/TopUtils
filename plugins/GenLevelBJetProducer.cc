@@ -18,7 +18,7 @@
 //
 // Original Author:  Benjamin Lutz,,,DESY
 //         Created:  Thu Feb  2 13:30:58 CET 2012
-// $Id: GenLevelBJetProducer.cc,v 1.7 2012/03/13 13:38:26 blutz Exp $
+// $Id: GenLevelBJetProducer.cc,v 1.8 2012/12/19 12:15:23 wbehrenh Exp $
 //
 //
 
@@ -280,6 +280,7 @@ void GenLevelBJetProducer::endLuminosityBlock(edm::LuminosityBlock&, edm::EventS
 std::vector<int> GenLevelBJetProducer::getGenJetWith ( const reco::Candidate* bQuark, const reco::GenJetCollection& genJets, std::vector<reco::GenParticle> &bHadronObjects, std::vector<bool> &isFromBquark, std::vector<int> &bHadronsInJet) {
 
   std::vector<int> result;
+  if (! bQuark) return result; //no b-quark given, so so b-jets
 
   std::vector<const reco::GenJet*> bQuarkCandidates;
   std::vector<const reco::GenJet*> bHadronCandidates;
