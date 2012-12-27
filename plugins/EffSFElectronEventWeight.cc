@@ -90,14 +90,14 @@ EffSFElectronEventWeight::produce(edm::Event& evt, const edm::EventSetup& setup)
   evt.getByLabel(jets_, jets);
 
   double ptEle, etaEle, relIsoEle;
-  double SFele       =  1.0;
-  double errorSFele  = -1.0;
+  double SFele       =  0.97562;
+  double errorSFele  =  0.001;
   int numPart        =  0;
   
   double jetMult, ptJet4, absEtaJet4;
   double SFjet           =  1.0;
-  double errorUpSFjet    = 0.;
-  double errorDownSFjet  = 0.;
+  double errorUpSFjet    =  0.0;
+  double errorDownSFjet  =  0.0;
   
   ///-----------------------------------
   /// Electron SF
@@ -115,8 +115,9 @@ EffSFElectronEventWeight::produce(edm::Event& evt, const edm::EventSetup& setup)
     /// if nonIsoEle is MC trigger -> correct isoEle
     //SFele = meanTriggerEffSF_ * (factorNonIso_ + factorIso_ * (0.997+0.05*relIsoEle-3.*relIsoEle*relIsoEle));
     /// if IsoEle is MC trigger -> correct nonIsoEle
-    SFele = meanTriggerEffSF_ * (factorIso_ + factorNonIso_ / (0.997+0.05*relIsoEle-3.*relIsoEle*relIsoEle));
-    
+    //SFele = meanTriggerEffSF_ * (factorIso_ + factorNonIso_ / (0.997+0.05*relIsoEle-3.*relIsoEle*relIsoEle));
+    SFele=meanTriggerEffSF_;
+
     /// optEleional additional factor
     SFele *= additionalFactor_;
     
@@ -222,8 +223,15 @@ EffSFElectronEventWeight::produce(edm::Event& evt, const edm::EventSetup& setup)
       }
     }
   }
+
+  // FIXME: 8 TeV trigger has no jet part -> set SFjet to 1
+  SFjet=1.0;  
+  errorUpSFjet=0.0;
+  errorDownSFjet=0.0;
+    
   if(verbose_>=1){
     std::cout<< "SFjet: "          << SFjet          <<std::endl;
+    std::cout<< "SFele: "          << SFele          <<std::endl; 
     std::cout<< "errorUpSFjet: "   << errorUpSFjet   <<std::endl;
     std::cout<< "errorDownSFjet: " << errorDownSFjet <<std::endl;
   }   
@@ -233,12 +241,10 @@ EffSFElectronEventWeight::produce(edm::Event& evt, const edm::EventSetup& setup)
   ///-----------------------------------
   /// Final Weight
   ///-----------------------------------
-   
-   double SFtotal = SFele * SFjet;
-   // FIXME: 8TeV SF to be derived, use 1.0 for the meanwhile
-   SFtotal=1.0;
-   if(verbose_>=1) std::cout<< "SFtotal: " << SFtotal <<std::endl;
-   hists_.find("electronEffSFTotal" )->second->Fill( SFtotal );
+
+  double SFtotal = SFele * SFjet;
+  if(verbose_>=1) std::cout<< "SFtotal: " << SFtotal <<std::endl;
+  hists_.find("electronEffSFTotal" )->second->Fill( SFtotal );
   
   std::auto_ptr<double> SFEventWeight(new double);
   *SFEventWeight = SFtotal;
