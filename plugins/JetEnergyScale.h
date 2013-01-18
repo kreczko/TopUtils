@@ -4,6 +4,7 @@
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/ParameterSet/interface/FileInPath.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
 
 /**
    \class   JetEnergyScale JetEnergyScale.h "TopAnalysis/TopUtils/plugins/JetEnergyScale.h"
@@ -64,10 +65,15 @@ class JetEnergyScale : public edm::EDProducer {
   void scaleJetEnergy(pat::Jet&, double);
 
  private:
+  /// electron input collection 
+  edm::InputTag inputElectrons_;
   /// jet input collection 
   edm::InputTag inputJets_;
   /// met input collection
   edm::InputTag inputMETs_;
+
+  /// electron output collection 
+  std::string outputElectrons_;
   /// jet output collection 
   std::string outputJets_;
   /// MET output collection 

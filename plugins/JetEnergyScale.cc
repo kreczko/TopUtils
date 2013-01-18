@@ -13,6 +13,7 @@
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
 
 JetEnergyScale::JetEnergyScale(const edm::ParameterSet& cfg):
+  inputElectrons_      (cfg.getParameter<edm::InputTag>("inputElectrons"      )),
   inputJets_           (cfg.getParameter<edm::InputTag>("inputJets"           )),
   inputMETs_           (cfg.getParameter<edm::InputTag>("inputMETs"           )),
   payload_             (cfg.getParameter<std::string>  ("payload"             )),  
@@ -36,10 +37,12 @@ JetEnergyScale::JetEnergyScale(const edm::ParameterSet& cfg):
   allowedTypes_.push_back(std::string("flavor:down"));
 
   // use label of input to create label for output
+  outputElectrons_ = inputElectrons_.label();
   outputJets_ = inputJets_.label();
   outputMETs_ = inputMETs_.label(); 
 
   // register products
+  produces<std::vector<pat::Electron> >(outputElectrons_);
   produces<std::vector<pat::Jet> >(outputJets_);
   produces<std::vector<pat::MET> >(outputMETs_); 
 }
@@ -68,13 +71,39 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
   // access MET
   edm::Handle<std::vector<pat::MET> > mets;
   event.getByLabel(inputMETs_, mets);
-  
-  // create two new collections for jets and MET
+
+  // keep differences for met rescaling
+  double dPx = 0., dPy = 0., dSumEt = 0.;
+
+  // create three new collections for jets and MET and electrons
+  std::auto_ptr<std::vector<pat::Electron> > pElectrons(new std::vector<pat::Electron>);
   std::auto_ptr<std::vector<pat::Jet> > pJets(new std::vector<pat::Jet>);
   std::auto_ptr<std::vector<pat::MET> > pMETs(new std::vector<pat::MET>);
 
-  // loop ans rescale jets
-  double dPx = 0., dPy = 0., dSumEt = 0.;
+  // access electrons
+  if (! inputElectrons_.label().empty()) {
+  
+    edm::Handle<std::vector<pat::Electron> > electrons;
+    event.getByLabel(inputElectrons_, electrons);
+
+    for(std::vector<pat::Electron>::const_iterator electron=electrons->begin(); electron!=electrons->end(); ++electron){
+      pat::Electron scaledElectron = *electron;
+      scaledElectron.setP4(scaledElectron.ecalDrivenMomentum());
+      pElectrons->push_back( scaledElectron );
+        
+      dPx    += scaledElectron.px() - electron->px();
+      dPy    += scaledElectron.py() - electron->py();
+      dSumEt += scaledElectron.et() - electron->et();
+    }
+    
+    //p4 changes might have changed the pt order, so need to sort the new collection
+    std::sort(pElectrons->begin(), pElectrons->end(), 
+        [](const pat::Electron &e1, const pat::Electron &e2) {
+            return e2.pt() < e1.pt();                   
+        });
+  }
+  
+  
   for(std::vector<pat::Jet>::const_iterator jet=jets->begin(); jet!=jets->end(); ++jet){
     pat::Jet scaledJet = *jet;
     
@@ -185,6 +214,7 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
   pMETs->push_back( met );
   event.put(pJets, outputJets_);
   event.put(pMETs, outputMETs_);
+  event.put(pElectrons, outputElectrons_);
 }
 
 double

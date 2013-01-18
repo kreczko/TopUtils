@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 scaledJetEnergy = cms.EDProducer("JetEnergyScale",
+    inputElectrons       = cms.InputTag(""), #empty string: dont scale electrons
     inputJets            = cms.InputTag("patJets"),
     inputMETs            = cms.InputTag("patMETs"),
     scaleFactor          = cms.double(1.0),
