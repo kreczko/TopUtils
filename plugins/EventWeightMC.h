@@ -5,6 +5,8 @@
 #include <string>
 #include <iostream>
 
+#include "TH1.h"
+
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Utilities/interface/InputTag.h"
@@ -23,7 +25,9 @@ class EventWeightMC : public edm::EDProducer {
   
  private:
   double weight_ ;
-
+  /// histogram container
+  /// for output
+  std::map<std::string, TH1F*> hists_;
 };
 
 #endif
