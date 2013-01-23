@@ -2,7 +2,7 @@
 
 echo modified files in current CVS tree
 cvs status 2>&1 | awk '{
-  if ($1 == "?") print "\033[34mnew:\033[m "$2
+  if ($1 == "?") if ($2 ~ /__init__.py/){} else print "\033[34mnew:\033[m "$2
   else if ($3=="Examining") {currentDir=$4}
   else if ($1=="File:" && $4!="Up-to-date") {
      if ($4=="Needs") {
