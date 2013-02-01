@@ -200,9 +200,24 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
     if(jet->correctedJet("Uncorrected").pt() > jetPTThresholdForMET_
        && ((!jet->isPFJet() && jet->emEnergyFraction() < jetEMLimitForMET_) ||
            ( jet->isPFJet() && jet->neutralEmEnergyFraction() + jet->chargedEmEnergyFraction() < jetEMLimitForMET_))) {
-      dPx    += scaledJet.px() - jet->px();
-      dPy    += scaledJet.py() - jet->py();
-      dSumEt += scaledJet.et() - jet->et();
+      // get the uncertainty parameters from file, see
+      // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JECUncertaintySources
+      JetCorrectorParameters* paramTot = new JetCorrectorParameters(JECUncSrcFile_.fullPath(), "Total");
+      // instantiate the jec uncertainty object
+      JetCorrectionUncertainty* deltaJECTot = new JetCorrectionUncertainty(*paramTot);
+      deltaJECTot->setJetEta(jet->eta()); deltaJECTot->setJetPt(jet->pt()); 
+      double metScale=1.;
+      if(scaleType_.substr(scaleType_.find(':')+1)=="up") {
+	float corTot = deltaJECTot->getUncertainty(true);
+	metScale=corTot;
+      }
+      else if(scaleType_.substr(scaleType_.find(':')+1)=="down"){
+	float corTot = deltaJECTot->getUncertainty(false);
+	metScale=corTot;
+      }
+      dPx    += jet->px()*metScale;
+      dPy    += jet->py()*metScale;
+      dSumEt += jet->et()*metScale;
     }
   }
   
