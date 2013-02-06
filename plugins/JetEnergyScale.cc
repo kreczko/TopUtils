@@ -125,14 +125,12 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
     }    
     if(scaleType_.substr(0, scaleType_.find(':'))=="jes" || 
        scaleType_.substr(0, scaleType_.find(':'))=="top" ){
-      // handle to the jet corrector parameters collection
-      edm::ESHandle<JetCorrectorParametersCollection> jetCorrParameters;
-      // get the jet corrector parameters collection from the global tag
-      setup.get<JetCorrectionsRecord>().get(payload_, jetCorrParameters);
-      // get the uncertainty parameters from the collection
-      JetCorrectorParameters const & param = (*jetCorrParameters)["Uncertainty"];
+
+      // get the uncertainty parameters from file, see
+      // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JECUncertaintySources
+      JetCorrectorParameters* param = new JetCorrectorParameters(JECUncSrcFile_.fullPath(), "Total");
       // instantiate the jec uncertainty object
-      JetCorrectionUncertainty* deltaJEC = new JetCorrectionUncertainty(param);
+      JetCorrectionUncertainty* deltaJEC = new JetCorrectionUncertainty(*param);
       deltaJEC->setJetEta(jet->eta()); deltaJEC->setJetPt(jet->pt()); 
 
       // additional JES uncertainty from Top group
@@ -168,6 +166,7 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
       //scaledJet.scaleEnergy( resolutionFactor(scaledJet) );
       scaleJetEnergy( scaledJet, resolutionFactor(scaledJet) );
       delete deltaJEC;
+      delete param;
     }
     // Use AK5PF flavor uncertainty as estimator on the difference between uds- and b-jets
     // Maybe we could make this more generic later (if needed)
@@ -200,24 +199,9 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
     if(jet->correctedJet("Uncorrected").pt() > jetPTThresholdForMET_
        && ((!jet->isPFJet() && jet->emEnergyFraction() < jetEMLimitForMET_) ||
            ( jet->isPFJet() && jet->neutralEmEnergyFraction() + jet->chargedEmEnergyFraction() < jetEMLimitForMET_))) {
-      // get the uncertainty parameters from file, see
-      // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JECUncertaintySources
-      JetCorrectorParameters* paramTot = new JetCorrectorParameters(JECUncSrcFile_.fullPath(), "Total");
-      // instantiate the jec uncertainty object
-      JetCorrectionUncertainty* deltaJECTot = new JetCorrectionUncertainty(*paramTot);
-      deltaJECTot->setJetEta(jet->eta()); deltaJECTot->setJetPt(jet->pt()); 
-      double metScale=1.;
-      if(scaleType_.substr(scaleType_.find(':')+1)=="up") {
-	float corTot = deltaJECTot->getUncertainty(true);
-	metScale=corTot;
-      }
-      else if(scaleType_.substr(scaleType_.find(':')+1)=="down"){
-	float corTot = deltaJECTot->getUncertainty(false);
-	metScale=corTot;
-      }
-      dPx    += jet->px()*metScale;
-      dPy    += jet->py()*metScale;
-      dSumEt += jet->et()*metScale;
+      dPx    += scaledJet.px() - jet->px();
+      dPy    += scaledJet.py() - jet->py();
+      dSumEt += scaledJet.et() - jet->et();
     }
   }
   
