@@ -81,18 +81,21 @@ void EventWeightPU::produce(edm::Event& evt, const edm::EventSetup& setup)
     wght_   = -1;
     wght3D_ = -1;
     
-    int nvtx_m     = -1; 
-    int nvtx       = -1; 
-    int nvtx_p     = -1;
+    int nvtx_m = -1; 
+    int nvtx   = -1; 
+    int nvtx_p = -1;
+    
+    // for the true number of interactions float are used
+    // as this is the mean of a Poisson distribution
+    // (only the current BX needed)
+    float fnvtx = -1.;
     
     for(iterPU = pPUInfo->begin(); iterPU != pPUInfo->end(); ++iterPU)  // vector size is 3
     { 
       int BX = iterPU->getBunchCrossing(); // -1: previous BX, 0: current BX,  1: next BX
       
       if (inTag_MCSampleTag == "Fall11" || inTag_MCSampleTag == "Summer12" ){
-	if      (BX == -1) nvtx_m = iterPU->getTrueNumInteractions();
-	else if (BX ==  0) nvtx   = iterPU->getTrueNumInteractions();
-	else if (BX ==  1) nvtx_p = iterPU->getTrueNumInteractions();
+	if (BX ==  0) fnvtx = iterPU->getTrueNumInteractions();
       }
       else if (inTag_MCSampleTag == "Summer11"){
 	if      (BX == -1) nvtx_m = iterPU->getPU_NumInteractions();
@@ -101,7 +104,7 @@ void EventWeightPU::produce(edm::Event& evt, const edm::EventSetup& setup)
       }
     }
 
-    if      (inTag_MCSampleTag == "Fall11" || inTag_MCSampleTag == "Summer12") wght_ = LumiWeights_.weight(nvtx);
+    if      (inTag_MCSampleTag == "Fall11" || inTag_MCSampleTag == "Summer12") wght_ = LumiWeights_.weight(fnvtx);
     else if (inTag_MCSampleTag == "Summer11") wght_ = LumiWeights3D_.weight3D(nvtx_m, nvtx, nvtx_p);
   } 
 
