@@ -126,6 +126,9 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
     if(scaleType_.substr(0, scaleType_.find(':'))=="jes" || 
        scaleType_.substr(0, scaleType_.find(':'))=="top" ){
 
+      //scaledJet.scaleEnergy( resolutionFactor(scaledJet) );
+      scaleJetEnergy( scaledJet, resolutionFactor(scaledJet) );
+
       // get the uncertainty parameters from file, see
       // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JECUncertaintySources
       JetCorrectorParameters* param = new JetCorrectorParameters(JECUncSrcFile_.fullPath(), "Total");
@@ -163,8 +166,6 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
 	scaleJetEnergy( scaledJet, 1-std::sqrt(jetMet*jetMet + topShift2) );
       }
 
-      //scaledJet.scaleEnergy( resolutionFactor(scaledJet) );
-      scaleJetEnergy( scaledJet, resolutionFactor(scaledJet) );
       delete deltaJEC;
       delete param;
     }
