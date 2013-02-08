@@ -4,7 +4,6 @@
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/ParameterSet/interface/FileInPath.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
-#include "DataFormats/PatCandidates/interface/Electron.h"
 
 /**
    \class   JetEnergyScale JetEnergyScale.h "TopAnalysis/TopUtils/plugins/JetEnergyScale.h"
