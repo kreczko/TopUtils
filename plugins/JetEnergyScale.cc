@@ -45,6 +45,7 @@ JetEnergyScale::JetEnergyScale(const edm::ParameterSet& cfg):
   produces<std::vector<pat::Electron> >(outputElectrons_);
   produces<std::vector<pat::Jet> >(outputJets_);
   produces<std::vector<pat::MET> >(outputMETs_); 
+  //  produces<std::map<double, double> >("jetResSF"); 
 }
 
 void
@@ -101,12 +102,13 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
         [](const pat::Electron &e1, const pat::Electron &e2) {
             return e2.pt() < e1.pt();                   
         });
-  }
-  
+  }  
   
   for(std::vector<pat::Jet>::const_iterator jet=jets->begin(); jet!=jets->end(); ++jet){
     pat::Jet scaledJet = *jet;
-    
+
+
+    double scaleFactor = resolutionFactor(scaledJet);
     if(scaleType_=="abs"){
       //scaledJet.scaleEnergy( scaleFactor_ );
       scaleJetEnergy( scaledJet, scaleFactor_ );
@@ -178,6 +180,7 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
       // instantiate the jec uncertainty object
       JetCorrectionUncertainty* deltaJEC = new JetCorrectionUncertainty(*param);
       deltaJEC->setJetEta(jet->eta()); deltaJEC->setJetPt(jet->pt()); 
+      scaleJetEnergy( scaledJet, resolutionFactor(scaledJet) );
       
       if (abs(scaledJet.partonFlavour()) == 5) {
         if(scaleType_.substr(scaleType_.find(':')+1)=="up") {
@@ -189,17 +192,22 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
           scaleJetEnergy( scaledJet, 1-jetMet );
         }
       }
-      scaleJetEnergy( scaledJet, resolutionFactor(scaledJet) );
       delete deltaJEC;
       delete param;
     }
+    scaledJet.addUserFloat("jerSF", scaleFactor);
     pJets->push_back( scaledJet );
     
-    // consider jet scale shift only if the raw jet pt and emf 
+        // consider jet scale shift only if the raw jet pt and emf 
     // is above the thresholds given in the module definition
     if(jet->correctedJet("Uncorrected").pt() > jetPTThresholdForMET_
        && ((!jet->isPFJet() && jet->emEnergyFraction() < jetEMLimitForMET_) ||
            ( jet->isPFJet() && jet->neutralEmEnergyFraction() + jet->chargedEmEnergyFraction() < jetEMLimitForMET_))) {
+
+      //      std::cout<<"jetPTThre: "<<jetPTThresholdForMET_<<std::endl;
+      //std::cout<<"uncorrJet: "<<jet->correctedJet("Uncorrected")<<std::endl;
+      //std::cout<<"scaledJet: "<<scaledJet<<std::endl;
+      //std::cout<<"jet      : "<<*jet<<std::endl;
       dPx    += scaledJet.px() - jet->px();
       dPy    += scaledJet.py() - jet->py();
       dSumEt += scaledJet.et() - jet->et();
@@ -208,9 +216,13 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
   
   // scale MET accordingly
   pat::MET met = *(mets->begin());
+  //  std::cout<<"met before: "<<met.pt()<<std::endl;
+
   double scaledMETPx = met.px() - dPx;
   double scaledMETPy = met.py() - dPy;
   met.setP4(reco::MET::LorentzVector(scaledMETPx, scaledMETPy, 0, sqrt(scaledMETPx*scaledMETPx+scaledMETPy*scaledMETPy)));
+  //  std::cout<<"met after: "<<met.pt()<<std::endl;
+  //std::cout<<"!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!#!@#!#@!#"<<std::endl;
   pMETs->push_back( met );
   event.put(pJets, outputJets_);
   event.put(pMETs, outputMETs_);
