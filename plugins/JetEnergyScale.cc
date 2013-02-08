@@ -63,6 +63,15 @@ JetEnergyScale::beginJob()
   }		
 }
 
+///function to sort any auto_ptr to a vector of anything which has a pt function
+template<typename T>
+void sortByPt(std::auto_ptr<std::vector<T> > &collection) {
+    std::sort(collection->begin(), collection->end(), 
+        [](const T &e1, const T &e2) {
+            return e2.pt() < e1.pt();                   
+        });
+}
+
 void
 JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
 {
@@ -96,14 +105,8 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
       dPy    += scaledElectron.py() - electron->py();
       dSumEt += scaledElectron.et() - electron->et();
     }
-    
-    //p4 changes might have changed the pt order, so need to sort the new collection
-    std::sort(pElectrons->begin(), pElectrons->end(), 
-        [](const pat::Electron &e1, const pat::Electron &e2) {
-            return e2.pt() < e1.pt();                   
-        });
-  }  
-  
+  }
+
   for(std::vector<pat::Jet>::const_iterator jet=jets->begin(); jet!=jets->end(); ++jet){
     pat::Jet scaledJet = *jet;
 
@@ -224,6 +227,11 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
   //  std::cout<<"met after: "<<met.pt()<<std::endl;
   //std::cout<<"!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!#!@#!#@!#"<<std::endl;
   pMETs->push_back( met );
+
+  //p4 changes might have changed the pt order, so need to sort the new collections
+  sortByPt(pElectrons);
+  sortByPt(pJets);
+
   event.put(pJets, outputJets_);
   event.put(pMETs, outputMETs_);
   event.put(pElectrons, outputElectrons_);
