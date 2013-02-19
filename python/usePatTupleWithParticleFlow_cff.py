@@ -37,6 +37,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     options.setdefault('JECEra' , '')
     options.setdefault('JECFile', '')
     options.setdefault('additionalJECLevels', [])
+    options.setdefault('addGluonTags', False)
 
     if 'applyMETCorrections' in options:
         raise KeyError, "The option 'applyMETCorrections' is not supported anymore by prependPF2PATSequence, please use 'METCorrectionLevel'! 'METCorrectionLevel' may be set to 0,1,2 (no correction, TypeI, TypeI+TypeII corrections)"
@@ -573,10 +574,12 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
         getattr(process,'patElectrons'+postfix).embedHighLevelSelection = True
         getattr(process,'patElectrons'+postfix).embedGsfElectronCore    = False
         getattr(process,'patElectrons'+postfix).embedSuperCluster       = False
+        getattr(process,'patElectrons'+postfix).embedSeedCluster        = False
         getattr(process,'patElectrons'+postfix).embedPFCandidate        = False
         getattr(process,'patElectrons'+postfix).embedGsfTrack           = False
         getattr(process,'patElectrons'+postfix).embedTrack              = False
         getattr(process,'patElectrons'+postfix).embedGenMatch           = False
+        getattr(process,'patElectrons'+postfix).embedRecHits            = False
 
     ## no cut elecs
     if options['addNoCutPFElec']:
@@ -882,34 +885,45 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## this needs to be re-run to compute rho for the L1Fastjet corrections
     ## use rho from ALL PFcandidates to be consistent with the JEC
     from RecoJets.JetProducers.kt4PFJets_cfi import kt4PFJets
-    process.kt6PFJets = kt4PFJets.clone(src='particleFlow', doAreaFastjet=True, doRhoFastjet=True, rParam=0.6)
+    setattr(process, 'kt6PFJetsUsePATWithPFlow'+postfix, kt4PFJets.clone(src='particleFlow', doAreaFastjet=True, doRhoFastjet=True, rParam=0.6))
 
     ## add kt6PFJets for rho calculation needed for L1FastJet correction
     getattr(process,'patPF2PATSequence'+postfix).replace( getattr(process,'pfMET'+postfix)
-                                                        , process.kt6PFJets * getattr(process,'pfMET'+postfix)
+                                                        , getattr(process,'kt6PFJetsUsePATWithPFlow'+postfix) * getattr(process,'pfMET'+postfix)
                                                         )
 
+    ## do gluon tagging for jets
+    ## further information can be found here: https://twiki.cern.ch/twiki/bin/view/CMS/GluonTag
+    if options['addGluonTags']:
+        from QuarkGluonTagger.EightTeV.QGTagger_RecoJets_cff import goodOfflinePrimaryVerticesQG, kt6PFJetsQG, kt6PFJetsIsoQG, QGTagger
+        setattr(process,'goodOfflinePrimaryVerticesQG'+postfix, goodOfflinePrimaryVerticesQG.clone())
+        setattr(process,'kt6PFJetsQG'                 +postfix, kt6PFJetsQG.clone())
+        setattr(process,'kt6PFJetsIsoQG'              +postfix, kt6PFJetsIsoQG.clone())
+        setattr(process,'QGTagger'                    +postfix, QGTagger.clone( srcJets   = cms.InputTag('pfJets'+postfix)
+                                                                              , useCHS    = cms.untracked.bool(True)
+                                                                              , jec       = cms.untracked.string('combinedCorrector')
+                                                                              , srcRho    = cms.InputTag('kt6PFJetsQG'+postfix,'rho')
+                                                                              , srcRhoIso = cms.InputTag('kt6PFJetsIsoQG'+postfix,'rho')
+                                                                              ))
+        setattr(process,'QuarkGluonTagger'+postfix, cms.Sequence( getattr(process,'goodOfflinePrimaryVerticesQG'+postfix)
+                                                                * getattr(process,'kt6PFJetsQG'                 +postfix)
+                                                                * getattr(process,'kt6PFJetsIsoQG'              +postfix)
+                                                                * getattr(process,'QGTagger'                    +postfix)
+                                                                ))
 
-    ##
-    ## customize MET
-    ##
+        getattr(process,'patJets'+postfix).userData.userFloats.src = getattr(process,'patJets'+postfix).userData.userFloats.src + [cms.InputTag("QGTagger"+postfix,"qgLikelihood"), cms.InputTag("QGTagger"+postfix,"qgMLP")]
+        getattr(process,'patPF2PATSequence'+postfix).replace( getattr(process,'kt6PFJetsUsePATWithPFlow'+postfix)
+                                                              ## put after kt6JetUsePATWithPFlows as they are needed by the JEC
+                                                            , getattr(process,'kt6PFJetsUsePATWithPFlow'+postfix) * getattr(process,'QuarkGluonTagger'+postfix))
+        
 
-    ## default met modules:
-    # pfMET
-    # patMETs
-
-    ## re-configure and create MET
-    ## use MET from all PF candidates here !!!
-    getattr(process,'pfMET'+postfix).src = 'particleFlow'
-
-    if options['METCorrectionLevel'] == 0 and not str(options['METCorrectionLevel']) == 'False':
-        print "Raw MET will be used, no corrections will be applied!"
-    elif options['METCorrectionLevel'] == 1 and not str(options['METCorrectionLevel']) == 'True' or options['METCorrectionLevel'] == 2 :
+    ## jet corrector is needed for TypeI MET and QuarkGluonTagger
+    if options['addGluonTags'] or options['METCorrectionLevel'] == 1 or options['METCorrectionLevel'] == 2:
         ## create jet correctors for MET corrections
         from JetMETCorrections.Configuration.JetCorrectionServicesAllAlgos_cff import ak5PFL1Fastjet, ak5PFL2Relative, ak5PFL3Absolute, ak5PFResidual
         ## L1FastJet
         process.ak5PFL1FastjetChs = ak5PFL1Fastjet.clone( algorithm = 'AK5PFchs'
-                                                        , srcRho    = cms.InputTag('kt6PFJets','rho',process.name_())
+                                                        , srcRho    = cms.InputTag('kt6PFJetsUsePATWithPFlow','rho',process.name_())
                                                         )
 
         ## L2Relative
@@ -930,6 +944,22 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
         if options['runOnMC']:
             process.combinedCorrector.correctors.remove('ak5PFResidualChs')
 
+
+    ##
+    ## customize MET
+    ##
+
+    ## default met modules:
+    # pfMET
+    # patMETs
+
+    ## re-configure and create MET
+    ## use MET from all PF candidates here !!!
+    getattr(process,'pfMET'+postfix).src = 'particleFlow'
+
+    if options['METCorrectionLevel'] == 0 and not str(options['METCorrectionLevel']) == 'False':
+        print "Raw MET will be used, no corrections will be applied!"
+    elif options['METCorrectionLevel'] == 1 and not str(options['METCorrectionLevel']) == 'True' or options['METCorrectionLevel'] == 2 :
         ## configuration of MET corrections
         from JetMETCorrections.Type1MET.pfMETCorrections_cff import pfchsMETcorr, pfJetMETcorr, pfCandMETcorr, pfType1p2CorrectedMet
         setattr(process,'metCorrType0'+postfix,pfchsMETcorr.clone())
@@ -943,6 +973,7 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
         setattr(process,'metCorrTypeII'+postfix,pfCandMETcorr.clone())
         getattr(process,'metCorrTypeII'+postfix).src = 'pfNoJet'+postfix
         setattr(process,'corMet'+postfix,pfType1p2CorrectedMet.clone())
+        getattr(process,'corMet'+postfix).src                 = 'pfMET'+postfix
         getattr(process,'corMet'+postfix).srcCHSSums          = [cms.InputTag('metCorrType0'+postfix,'type0')]
         getattr(process,'corMet'+postfix).srcType1Corrections = [cms.InputTag('metCorrTypeI'+postfix,'type1')]
         if options['METCorrectionLevel'] == 1 :
