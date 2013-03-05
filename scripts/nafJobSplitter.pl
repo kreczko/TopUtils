@@ -10,6 +10,9 @@ use Data::Dumper;
 use Term::ANSIColor qw(colored);
 use Getopt::Std;
 
+#my $datasetPythonPath = "$ENV{CMSSW_BASE}/src/NafJobsplitter/Configuration/python";
+my $datasetPythonPath = "/scratch/hh/dust/naf/cms/user/$ENV{USER}/.nafJobSplitter/python";
+use constant DAS_DOWNLOAD_URL => 'https://cmsweb.cern.ch/das/makepy?dataset=%s&instance=cms_dbs_prod_global';
 use constant C_OK => 'green bold';
 use constant C_FILE => 'bold';
 use constant C_ERROR => 'red bold';
@@ -20,7 +23,7 @@ use constant C_RESUBMIT => 'magenta';
 ########################
 
 my %args;
-getopts('SsbW:kJjp:P:q:o:m:t:c:O:d:nQ:M:', \%args);
+getopts('SsbW:kJjp:P:q:o:m:t:c:O:d:nQ:M:D:', \%args);
 $args{'Q'} ||= ""; # to suppress unitialised warning when not set
 
 if ($args{'p'}) {
@@ -43,7 +46,7 @@ if ($args{'p'}) {
 ################################################################################################
 
 sub syntax {
-    print <<'END_USAGE_INFO';
+    print <<END_USAGE_INFO;
 nafJobSplitter.pl
  - A very simple script to split jobs and submit them to the NAF
 
@@ -83,11 +86,14 @@ Available Parameters
         default: `pwd`
       Note: the output will always be stored in the current directory. If you specify
       the ouput directory, NJS will create a symlink to it. E.g. it might be useful
-      to specify -o /scratch/hh/current/cms/user/$USER/njs
+      to specify -o /scratch/hh/current/cms/user/\$USER/njs
       Use NJS_OUTPUT environment variable to set a default
   -Q: add options directly to the qsub command, for example -Q "-l site=zn" forces
       jobs to run on Zeuthen hosts (default is -l site=hh)
       the options are not saved, you have to give them again when using check
+  -D: run over a specific dataset, e.g. /DoubleElectron/Run2012A-13Jul2012-v1/AOD
+      The NJS will automatically download the corresponding python configuration file
+      from DAS and store it in the $datasetPythonPath directory.
   -d: directory or symlink suffix of dir/link where files are stored
       e.g. njs -d xxx file.py will create naf_file_xxx/
   -c: additional command line arguments to cmsRun (put after the .py file),
@@ -155,12 +161,42 @@ support a "skipEvents" parameter, so that "cmsRun config.py skipEvents=100"
 would skip 100 events.
 
 Local jobs: to run jobs locally, for example job 6, do:
-$ SGE_TASK_ID=6 naf_directory/j_whatever.sh & ; disown
+\$ SGE_TASK_ID=6 naf_directory/j_whatever.sh & ; disown
 Note that the "check" function currently does not know about local jobs!
 Use this if a certain job is always removed from the batch system.
 
 END_USAGE_INFO
     exit 1;
+}
+
+# pass dataset name as parameter
+# returns import command for python file (full line, but excluding \n)
+sub getDatasetPythonFile {
+    my $dataset = shift;
+    (my $localFileName = $dataset) =~ s!\W!_!g;
+    $localFileName =~ s/^_//;
+    mkpath $datasetPythonPath;
+    my $localFileNameFull = "$datasetPythonPath/$localFileName.py";
+    if (-e $localFileNameFull) {
+        print "Dataset configuration file already downloaded.\n";
+    } else {
+        my $url = sprintf(DAS_DOWNLOAD_URL, $dataset);
+        print "Downloading configuration file from DAS:\ngetting $url...\n";
+        #no Net::SSLeay available on the NAF
+        #my $result = getstore($url, $localFileNameFull);
+        #if (is_success($result)) {
+        my $result = system("wget", "--no-check-certificate", '-O', $localFileNameFull, $url);
+        if ($result == 0) {
+            print "Success, file stored as $localFileNameFull\n"
+        } else {
+            unlink $localFileNameFull;
+            die "Could not download dataset file: $?\n";
+        }
+    }
+    #make sure the file can be found even without running scram (dirty hack)
+    $ENV{PYTHONPATH} = "$datasetPythonPath:$ENV{PYTHONPATH}";
+    return qq{process.load("$localFileName")};
+#     return qq{process.load("TopAnalysis.Configuration.$localFileName")};
 }
 
 sub submitNewJob {
@@ -180,9 +216,12 @@ sub submitNewJob {
             $dir .= '_' . $varparsing;
         }
     }
+    
+    my $ownDataset = $args{'D'} ? getDatasetPythonFile($args{'D'}) : '';
+    
     createNJSDirectory("naf_$dir");
 
-    my $cfgPy = getConfigTemplate();
+    my $cfgPy = getConfigTemplate($ownDataset);
     my $cfgSh = getBatchsystemTemplate();
 
     for ($cfgPy, $cfgSh) {
@@ -480,8 +519,9 @@ sub logIntoHost {
     }
 }
 
-
+# parameter: possible dataset file download by the NAF
 sub getConfigTemplate {
+    my $ownDataset = shift;
     my $maxEvents = $args{'m'} || -1;
     my $alternativeOutput = $args{'O'}?'True':'False';
     return <<END_OF_TEMPLATE;
@@ -489,6 +529,7 @@ sub getConfigTemplate {
 import os
 from CONFIGFILE import *
 
+$ownDataset
 numberOfFiles = len(process.source.fileNames)
 numberOfJobs = NUMBER_OF_JOBS
 jobNumber = int(os.environ["SGE_TASK_ID"]) - 1
