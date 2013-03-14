@@ -5,20 +5,21 @@
 *  the config file that come from
 *  W,Z and H decays, and except for a special list, which can be used for
 *  unvisible BSM-particles.
-*  It is also possible to only selected the partonic final state, 
+*  It is also possible to only selected the partonic final state,
 *  which means all particles before the hadronization step.
 *
 *  The algorithm is based on code of Christophe Saout.
 *
-*  Usage: [example for no resonance from nu an mu, and deselect invisible BSM 
+*  Usage: [example for no resonance from nu an mu, and deselect invisible BSM
 *         particles ]
 *
 *  module genJetParticles = InputGenJetsParticleSelector {
 *                InputTag src = "genParticles"
-*                bool partonicFinalState = false  
-*                bool excludeResonances = true   
+*                bool partonicFinalState = false
+*                bool excludeResonances = true
 *                vuint32 excludeFromResonancePids = {13,12,14,16}
 *                bool tausAsJets = false
+*                int32 flavour = 5
 *                vuint32 ignoreParticleIDs = {   1000022, 2000012, 2000014,
 *                                                2000016, 1000039, 5000039,
 *                                                4000012, 9900012, 9900014,
@@ -44,6 +45,7 @@ myInputGenJetsParticleSelector::myInputGenJetsParticleSelector(const edm::Parame
   partonicFinalState(params.getParameter<bool>("partonicFinalState")),
   excludeResonances(params.getParameter<bool>("excludeResonances")),
   tausAsJets(params.getParameter<bool>("tausAsJets")),
+  flavour(params.getParameter<int>("flavour")),
   ptMin(0.0){
   if (params.exists("ignoreParticleIDs"))
     setIgnoredParticles(params.getParameter<std::vector<unsigned int> >
@@ -51,8 +53,9 @@ myInputGenJetsParticleSelector::myInputGenJetsParticleSelector(const edm::Parame
   setExcludeFromResonancePids(params.getParameter<std::vector<unsigned int> >
 			("excludeFromResonancePids"));
 
-  produces <reco::GenParticleRefVector> ();
-      
+//  produces <reco::GenParticleRefVector> ();	// Replaced in order to add new hadron particles with scaled energy
+  produces <reco::GenParticleCollection> ();
+
 }
 
 myInputGenJetsParticleSelector::~myInputGenJetsParticleSelector(){}
@@ -109,11 +112,10 @@ bool myInputGenJetsParticleSelector::isExcludedFromResonance(int pdgId) const
 		     excludeFromResonancePids.end(),
 		     (unsigned int)pdgId);
   return pos != excludeFromResonancePids.end() && *pos == (unsigned int)pdgId;
- 
+
 }
 
 static unsigned int partIdx(const myInputGenJetsParticleSelector::ParticleVector &p,
-			    //const reco::GenParticle *particle)
 			    const reco::GenParticle *particle)
 {
   myInputGenJetsParticleSelector::ParticleVector::const_iterator pos =
@@ -125,7 +127,7 @@ static unsigned int partIdx(const myInputGenJetsParticleSelector::ParticleVector
 
   return pos - p.begin();
 }
-    
+
 static void invalidateTree(myInputGenJetsParticleSelector::ParticleBitmap &invalid,
 			   const myInputGenJetsParticleSelector::ParticleVector &p,
 			   const reco::GenParticle *particle)
@@ -142,8 +144,8 @@ static void invalidateTree(myInputGenJetsParticleSelector::ParticleBitmap &inval
     invalidateTree(invalid, p, dynamic_cast<const reco::GenParticle*>(particle->daughter(i)));
   }
 }
-  
-  
+
+
 int myInputGenJetsParticleSelector::testPartonChildren
 (myInputGenJetsParticleSelector::ParticleBitmap &invalid,
  const myInputGenJetsParticleSelector::ParticleVector &p,
@@ -177,21 +179,21 @@ myInputGenJetsParticleSelector::fromResonance(ParticleBitmap &invalid,
   int id = particle->pdgId();
 
   if (invalid[idx]) return kIndirect;
-      
+
   if (isResonance(id) && particle->status() == 3){
     return kDirect;
   }
 
-  
+
   if (!isIgnored(id) && (isParton(id)))
     return kNo;
-  
-  
-  
+
+
+
   unsigned int nMo=particle->numberOfMothers();
   if (!nMo)
     return kNo;
-  
+
 
   for(unsigned int i=0;i<nMo;++i){
     ResonanceState result = fromResonance(invalid,p,dynamic_cast<const reco::GenParticle*>(particle->mother(i)));
@@ -216,38 +218,52 @@ bool myInputGenJetsParticleSelector::hasPartonChildren(ParticleBitmap &invalid,
 						     const reco::GenParticle *particle) const {
   return testPartonChildren(invalid, p, particle) > 0;
 }
-    
+
 //######################################################
 //function NEEDED and called per EVENT by FRAMEWORK:
 void myInputGenJetsParticleSelector::produce (edm::Event &evt, const edm::EventSetup &evtSetup){
 
- 
-  std::auto_ptr<reco::GenParticleRefVector> selected_ (new reco::GenParticleRefVector);
-    
+
+//  std::auto_ptr<reco::GenParticleRefVector> selected_ (new reco::GenParticleRefVector);   // Replaced in order to add new hadron particles with scaled energy
+  std::auto_ptr<reco::GenParticleCollection> selected_ (new reco::GenParticleCollection);
+
   edm::Handle<reco::GenParticleCollection> genParticles;
   //  evt.getByLabel("genParticles", genParticles );
   evt.getByLabel(inTag, genParticles );
-    
-    
+
   ParticleVector particles;
   for (reco::GenParticleCollection::const_iterator iter=genParticles->begin();iter!=genParticles->end();++iter){
-    particles.push_back(&*iter); 
+    particles.push_back(&*iter);
   }
-  
+
   std::sort(particles.begin(), particles.end());
   unsigned int size = particles.size();
-  
+
   ParticleBitmap selected(size, false);
   ParticleBitmap invalid(size, false);
 
   for(unsigned int i = 0; i < size; i++) {
     const reco::GenParticle *particle = particles[i];
+
     if (invalid[i])
       continue;
     if (particle->status() == 1)
       selected[i] = true;
+
+    // Putting hadron of specified flavour into the list of particles for jet clustering
+    if(abs(particle->pdgId()/1000) == flavour || abs(particle->pdgId()/100 % 10) == flavour){
+      selected[i] = true;
+      // Skipping hadron that has hadron daughter (doesn't decay weakly)
+      for(unsigned int k=0; k<particle->numberOfDaughters();k++){
+        if(abs(particle->daughter(k)->pdgId()/1000) == flavour || abs(particle->daughter(k)->pdgId()/100 % 10) == flavour){
+          selected[i] = false;
+        }
+      }
+    }
+
+
     if (partonicFinalState && isParton(particle->pdgId())) {
-	  
+
       if (particle->numberOfDaughters()==0 &&
 	  particle->status() != 1) {
 	// some brokenness in event...
@@ -259,38 +275,45 @@ void myInputGenJetsParticleSelector::produce (edm::Event &evt, const edm::EventS
 	invalidateTree(invalid, particles,particle); //this?!?
       }
     }
-	
+
   }
  unsigned int count=0;
-  for(size_t idx=0;idx<genParticles->size();++idx){ 
+  for(size_t idx=0;idx<genParticles->size();++idx){
     const reco::GenParticle *particle = particles[idx];
     if (!selected[idx] || invalid[idx]){
       continue;
     }
-	
+
     if (excludeResonances &&
 	fromResonance(invalid, particles, particle)) {
       invalid[idx] = true;
       //cout<<"[INPUTSELECTOR] Invalidates FROM RESONANCE!: ["<<setw(4)<<idx<<"] "<<particle->pdgId()<<" "<<particle->pt()<<endl;
       continue;
     }
-	
+
     if (isIgnored(particle->pdgId())){
       continue;
     }
 
-   
+
     if (particle->pt() >= ptMin){
-      edm::Ref<reco::GenParticleCollection> particleRef(genParticles,idx);
-      selected_->push_back(particleRef);
+//      edm::Ref<reco::GenParticleCollection> particleRef(genParticles,idx);  // Replaced because we use particles instead of references for hadrons
+      reco::GenParticle part = (*particle);
+      if(abs(part.pdgId()/1000) == flavour || abs(part.pdgId()/100 % 10) == flavour){
+
+// 				std::printf("hadInEve: Pdg: %d\tPt: %.1f\tEta: %.3f\tPhi: %.3f\n",particle->pdgId(), particle->pt(), particle->eta(), particle->phi());
+        part.setP4(part.p4()*.0000000000000000001); // Scaling down the energy of the hadron so that jet energy isn't affected
+      }
+//      selected_->push_back(particleRef);    // Commented because references are replaced by particles
+      selected_->push_back(part);
       //cout<<"Finally we have: ["<<setw(4)<<idx<<"] "<<setw(4)<<particle->pdgId()<<" "<<particle->pt()<<endl;
       count++;
     }
   }
   evt.put(selected_);
 }
-      
-      
-  
+
+
+
 //define this as a plug-in
 DEFINE_FWK_MODULE(myInputGenJetsParticleSelector);

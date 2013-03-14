@@ -67,6 +67,7 @@ class myInputGenJetsParticleSelector : public edm::EDProducer {
   ResonanceState fromResonance(ParticleBitmap &invalid,
 			       const ParticleVector &p,
 			       const reco::GenParticle *particle) const;
+  void printf(const char* arg1);
   
   
   // iterators over selected objects: collection begin
@@ -89,7 +90,8 @@ class myInputGenJetsParticleSelector : public edm::EDProducer {
   bool			partonicFinalState;
   bool			excludeResonances;
   bool			tausAsJets;
-  double			ptMin;
+  int			flavour;
+  double		ptMin;
   
   
   
