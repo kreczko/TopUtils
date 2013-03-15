@@ -19,7 +19,7 @@
 // Original Author:  Benjamin Lutz,DESY
 //   Second Author:  Nazar Bartosik,DESY
 //         Created:  Thu Feb  2 13:30:58 CET 2012
-// $Id: GenLevelBJetProducer.cc,v 1.9 2013/03/14 16:23:57 nbartosi Exp $
+// $Id: GenLevelBJetProducer.cc,v 1.10 2013/03/15 14:45:09 nbartosi Exp $
 //
 //
 
@@ -104,7 +104,6 @@ private:
   double deltaR_;
   int flavour_;
   bool noBBbarResonances_;
-	bool saveAllMothers_;
   bool requireTopBquark_;
   bool resolveName_;
 	bool doImprovedHadronMatching_;
@@ -179,7 +178,6 @@ GenLevelBJetProducer::GenLevelBJetProducer(const edm::ParameterSet& cfg) {
   flavour_           = cfg.getParameter<int>("flavour");
   noBBbarResonances_ = cfg.getParameter<bool>("noBBbarResonances");
   requireTopBquark_  = cfg.getParameter<bool>("requireTopBquark");
-  saveAllMothers_ 	 = cfg.getParameter<bool>("saveAllMothers");
   resolveName_       = cfg.getParameter<bool>("resolveParticleName");
 	doImprovedHadronMatching_ = cfg.getParameter<bool>("doImprovedHadronMatching");
 	doValidationPlotsForImprovedHadronMatching_ = cfg.getParameter<bool>("doValidationPlotsForImprovedHadronMatching");
@@ -301,7 +299,6 @@ void GenLevelBJetProducer::fillDescriptions(edm::ConfigurationDescriptions& desc
   desc.add<bool>("requireTopBquark",false)->setComment("Only accept hadrons coming from the top-quark");
   desc.add<bool>("resolveParticleName",false)->setComment("Print particle name during warning and debug output instead of PDG ID");
   desc.add<int>("flavour",5)->setComment("Flavour of weakly decaying hadron that should be added to the jet for futher tagging. (4-c, 5-b)");
-	desc.add<bool>("saveAllMothers",false)->setComment("Whether should mothers of hadrons be stored or only hadrons.");
 	desc.add<bool>("doImprovedHadronMatching",false)->setComment("Whether to store improved information about bHadron-bQuark-Jet matching.");
 	desc.add<bool>("doValidationPlotsForImprovedHadronMatching",false)->setComment("Whether to store validation plots for improved matching.");
   descriptions.add("produceGenLevelBJets",desc);
