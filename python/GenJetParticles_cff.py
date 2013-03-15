@@ -2,13 +2,13 @@ import FWCore.ParameterSet.Config as cms
 from TopAnalysis.TopUtils.GenJetParticles_cfi import *
 
 
-genJetParticlesPlusBHadron = cms.Sequence(genParticlesForJetsPlusBHadron)
+genJetParticlesPlusHadron = cms.Sequence(genParticlesForJetsPlusHadron)
 
-hiGenParticlesForJetsPlusBHadron = genParticlesForJetsPlusBHadron.clone()
-hiGenParticlesForJetsPlusBHadron.src = cms.InputTag("hiGenParticles")
+hiGenParticlesForJetsPlusHadron = genParticlesForJetsPlusHadron.clone()
+hiGenParticlesForJetsPlusHadron.src = cms.InputTag("hiGenParticles")
 
-genParticlesForJetsPlusBHadronNoNu = genParticlesForJetsPlusBHadron.clone()
-genParticlesForJetsPlusBHadronNoNu.ignoreParticleIDs += cms.vuint32( 12,14,16)
+genParticlesForJetsNoNuPlusHadron = genParticlesForJetsPlusHadron.clone()
+genParticlesForJetsNoNuPlusHadron.ignoreParticleIDs += cms.vuint32( 12,14,16)
 
-genParticlesForJetsPlusBHadronNoMuNoNu = genParticlesForJetsPlusBHadron.clone()
-genParticlesForJetsPlusBHadronNoMuNoNu.ignoreParticleIDs += cms.vuint32( 12,13,14,16)
+genParticlesForJetsNoMuNoNuPlusHadron = genParticlesForJetsPlusHadron.clone()
+genParticlesForJetsNoMuNoNuPlusHadron.ignoreParticleIDs += cms.vuint32( 12,13,14,16)

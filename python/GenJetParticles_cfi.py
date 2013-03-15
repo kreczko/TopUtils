@@ -1,12 +1,12 @@
 import FWCore.ParameterSet.Config as cms
 
 #
-# $Id: GenJetParticles_cfi.py,v 1.1 2013/03/14 16:29:00 nbartosi Exp $
+# $Id: GenJetParticles_cfi.py,v 1.2 2013/03/15 14:41:39 nbartosi Exp $
 #
 # ShR 27 Mar 07: move modules producing candidates for Jets from RecoGenJets.cff
 # 
 #
-genParticlesForJetsPlusBHadron = cms.EDProducer("myInputGenJetsParticleSelector",
+genParticlesForJetsPlusHadron = cms.EDProducer("myInputGenJetsParticleSelector",
     src = cms.InputTag("genParticles"),
     ignoreParticleIDs = cms.vuint32(
          1000022,
