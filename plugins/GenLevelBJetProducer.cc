@@ -19,7 +19,7 @@
 // Original Author:  Benjamin Lutz,DESY
 //   Second Author:  Nazar Bartosik,DESY
 //         Created:  Thu Feb  2 13:30:58 CET 2012
-// $Id: GenLevelBJetProducer.cc,v 1.10 2013/03/15 14:45:09 nbartosi Exp $
+// $Id: GenLevelBJetProducer.cc,v 1.11 2013/03/21 12:18:43 nbartosi Exp $
 //
 //
 
@@ -79,20 +79,21 @@ private:
   virtual void beginLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&);
   virtual void endLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&);
 
-  std::vector<int> findHadronJets( const reco::GenJetCollection& genJets,  std::vector<int> &hadIndex, std::vector<reco::GenParticle> &hadMothers, std::vector<std::vector<int> > &hadMothersIndices, std::vector<int> &hadFlavour);
+  std::vector<int> findHadronJets( const reco::GenJetCollection& genJets,  std::vector<int> &hadIndex, std::vector<reco::GenParticle> &hadMothersGenPart, std::vector<std::vector<int> > &hadMothersIndices, std::vector<int> &hadFlavour);
   std::vector<int> getGenJetWith( const reco::Candidate* bQuark, const reco::GenJetCollection& genJets, std::vector<reco::GenParticle> &bHadronObjects, std::vector<bool> &isFromBquark, std::vector<int> &bHadronsInJet);
   int getGenJetNear( const reco::Candidate* particle, std::vector<const reco::GenJet*> &genJets );
   typedef const reco::Candidate* pCRC;
-  int analyzeMothers( const reco::Candidate* thisParticle, pCRC *hadron, std::vector<reco::GenParticle> &hadMothers, std::vector<std::vector<int> > &hadMothersIndices, std::vector<bool> &isDirectDaughter);
+  int analyzeMothers( const reco::Candidate* thisParticle, pCRC *hadron, std::vector<const reco::Candidate*> &hadMothers, std::vector<std::vector<int> > &hadMothersIndices, std::vector<bool> &isDirectDaughter);
   bool searchInMothers( const reco::Candidate* bQuark, const reco::Candidate* thisParticle, std::vector<const reco::Candidate*> particleChain, pCRC *bHadron);
   bool putMotherIndex( std::vector<std::vector<int> > &hadMothersIndices, int partIndex, int mothIndex, std::vector<bool> &isDirectDaughter, bool isDirDaugh);
   bool isHadron(const int flavour, const reco::Candidate* thisParticle);
   bool hasHadronDaughter(const int flavour, const reco::Candidate* thisParticle);
-  int isInList(std::vector<reco::GenParticle> &particleList, const reco::GenParticle* particle);
+  int isInList(std::vector<const reco::Candidate*> particleList, const reco::Candidate* particle);
   void findInMothers(int idx, std::vector<int> &mothChains, std::vector<std::vector<int> > &hadMothersIndices, std::vector<reco::GenParticle> &hadMothers, std::vector<bool> &isDirectDaughter, int status, int pdgId, bool pdgAbs, bool dirDaughOnly, int firstLast, bool verbose);
   bool isNeutralPdg(int pdgId);
 
   bool checkForLoop(std::vector<const reco::Candidate*> &particleChain, const reco::Candidate* particle);
+	bool hasMotherInLoop(int partIndex, std::vector<std::vector<int> > &hadMothersIndices, std::set<int> &indices);
   std::string getParticleName(int id) const;
 
   inline std::string printJetInfo(const size_t iJet, const reco::GenJet* ) const;
@@ -131,6 +132,8 @@ private:
 	TH2D *h2_lastQ_lastQ_dR, *h2_lastQ_lastQ_Pdg;
 	TH1D *h_lastQ_lastQ_dRmin, *h_lastQ_lastQ_ddR, *h_lastQM_Pdg1, *h_lastQM_Pdg2, *h_lastQM_Pdg3;
 	TH1D *h_hadQ_dRmin, *h_hadJet_dRmin, *h_jetQ_dRmin;
+	TH1D *h_dEHadJet_T, *h_dEHadJet_H, *h_dEHadJet_Z, *h_dEHadJet_G, *h_dEHadJet_P, *h_dEHadJet_Q, *h_dEHadJet_Other, *h_dEHadJet[7];
+	TH1I *h_nHadInJet;
 
 
 };
@@ -257,9 +260,9 @@ GenLevelBJetProducer::GenLevelBJetProducer(const edm::ParameterSet& cfg) {
 	h2_lastQ_lastQ_dR = fs->make<TH2D>("lastQ_lastQ_dR", "dR between hadron and pairs of last quarks;dR_{hadron}^{Quark_1};dR_{hadron}^{Quark_2}", 50, 0, 4,50,0,4);
 	h_lastQ_lastQ_ddR = fs->make<TH1D>("lastQ_lastQ_ddR", "#deltadR between hadron and pair of closest last quark;$deltadR_{hadron}^{Quark}", 50, 0, 1);
 	h_lastQ_lastQ_dRmin = fs->make<TH1D>("lastQ_lastQ_dRmin", "dR_{min} between hadron and closest last quark;dR_{hadron}^{Quark}", 50, 0, 4);
-	h_lastQM_Pdg1 = fs->make<TH1D>("lastQM_Pdg1", "abs(Pdg)*chargeMatch of last quark's mother;Pdg_{QMother}", 35, -8, 27);
-	h_lastQM_Pdg2 = fs->make<TH1D>("lastQM_Pdg2", "abs(Pdg)*chargeMatch of last quark's mother;Pdg_{QMother}", 35, -8, 27);
-	h_lastQM_Pdg3 = fs->make<TH1D>("lastQM_Pdg3", "abs(Pdg)*chargeMatch of last quark's mother;Pdg_{QMother}", 35, -8, 27);
+	h_lastQM_Pdg1 = fs->make<TH1D>("lastQM_Pdg1", "PdgId of last quark's mother;Pdg_{QMother}", 35, -8, 27);
+	h_lastQM_Pdg2 = fs->make<TH1D>("lastQM_Pdg2", "PdgId of last quark's mother;Pdg_{QMother}", 35, -8, 27);
+	h_lastQM_Pdg3 = fs->make<TH1D>("lastQM_Pdg3", "PdgId of last quark's mother;Pdg_{QMother}", 35, -8, 27);
 	h_lastQSt2M_Pdg = fs->make<TH1I>("lastQSt2M_Pdg", "PdgId of the last st. 2 quark's mother;PdgId", 35, -8, 27);
 
 	h_nHadTop = fs->make<TH1I>("nHadTop", "Nr. of hadrons from Top;N", 10, 0, 10);
@@ -267,6 +270,23 @@ GenLevelBJetProducer::GenLevelBJetProducer(const edm::ParameterSet& cfg) {
 	h_nHadGluon = fs->make<TH1I>("nHadGluon", "Nr. of hadrons from Gluon;N", 10, 0, 10);
 	h_nHadZ = fs->make<TH1I>("nHadZ", "Nr. of hadrons from Z;N", 10, 0, 10);
 	h_nHadNo = fs->make<TH1I>("nHadNo", "Nr. of hadrons without flavour;N", 10, 0, 10);
+
+	h_dEHadJet_T = fs->make<TH1D>("dEHadJet_T", "E_{had}^{top}/E_{jet};#deltaE", 50, 0, 1);
+	h_dEHadJet_H = fs->make<TH1D>("dEHadJet_H", "E_{had}^{higgs}/E_{jet};#deltaE", 50, 0, 1);
+	h_dEHadJet_G = fs->make<TH1D>("dEHadJet_G", "E_{had}^{gluon}/E_{jet};#deltaE", 50, 0, 1);
+	h_dEHadJet_Z = fs->make<TH1D>("dEHadJet_Z", "E_{had}^{Z}/E_{jet};#deltaE", 50, 0, 1);
+	h_dEHadJet_Q = fs->make<TH1D>("dEHadJet_Q", "E_{had}^{uds}/E_{jet};#deltaE", 50, 0, 1);
+	h_dEHadJet_P = fs->make<TH1D>("dEHadJet_P", "E_{had}^{photon}/E_{jet};#deltaE", 50, 0, 1);
+	h_dEHadJet_Other = fs->make<TH1D>("dEHadJet_Other", "E_{had}^{other}/E_{jet};#deltaE", 50, 0, 1);
+	h_dEHadJet[0] = fs->make<TH1D>("dEHadJet_1", "E_{had}/E_{jet_1};#deltaE", 50, 0, 1);
+	h_dEHadJet[1] = fs->make<TH1D>("dEHadJet_2", "E_{had}/E_{jet_2};#deltaE", 50, 0, 1);
+	h_dEHadJet[2] = fs->make<TH1D>("dEHadJet_3", "E_{had}/E_{jet_3};#deltaE", 50, 0, 1);
+	h_dEHadJet[3] = fs->make<TH1D>("dEHadJet_4", "E_{had}/E_{jet_4};#deltaE", 50, 0, 1);
+	h_dEHadJet[4] = fs->make<TH1D>("dEHadJet_5", "E_{had}/E_{jet_5};#deltaE", 50, 0, 1);
+	h_dEHadJet[5] = fs->make<TH1D>("dEHadJet_6", "E_{had}/E_{jet_6};#deltaE", 50, 0, 1);
+	h_dEHadJet[6] = fs->make<TH1D>("dEHadJet_7", "E_{had}/E_{jet_7};#deltaE", 50, 0, 1);
+
+	h_nHadInJet = fs->make<TH1I>("nHadInJet", "N hadrons associated to a jet;N hadrons;Jets", 10, 0, 10);
 }
 
 GenLevelBJetProducer::~GenLevelBJetProducer() {
@@ -589,7 +609,8 @@ bool GenLevelBJetProducer::searchInMothers(const reco::Candidate* bQuark, const 
       edm::LogWarning("decayChain") << "Identified a loop in the current decay chain."
       << " Paricle " << mother
       << " PDG: " << mother->pdgId()
-      << " " << mother->p4()
+//       << " " << mother->p4()
+      << " pt: " << mother->pt() << ", eta: " << mother->eta()
       << " is already in the chain."
       << " Will stop this branch here. B-hadron identification might be incomplete."
       << " " << printParticleChain(particleChain,*bHadron);
@@ -633,6 +654,7 @@ bool GenLevelBJetProducer::searchInMothers(const reco::Candidate* bQuark, const 
 std::vector<int> GenLevelBJetProducer::findHadronJets( const reco::GenJetCollection& genJets, std::vector<int> &hadIndex, std::vector<reco::GenParticle> &hadMothers, std::vector<std::vector<int> > &hadMothersIndices, std::vector<int> &hadFlavour) {
 
   std::vector<int> result;
+	std::vector<const reco::Candidate*> hadMothersCand;
 
   // If mother of particle-quark of given flavour has more than one daughter quark, it is checked
   // whether a particle-quark has the highest Pt among other daughters
@@ -652,9 +674,8 @@ std::vector<int> GenLevelBJetProducer::findHadronJets( const reco::GenJetCollect
     for (unsigned int iParticle = 0; iParticle < particles.size(); ++iParticle) {
       const reco::GenParticle* thisParticle = particles[iParticle];
       const reco::Candidate* hadron = 0;
-//			printf("  Part %d: pt: %.4f\teta: %.4f\tphi: %.4f\tpdg: %d status: %d  \tmotherId: %d\tnMothers: %d\tnDaughters: %d\n",(int)iParticle,thisParticle->pt(), thisParticle->eta(), thisParticle->phi(),thisParticle->pdgId(),thisParticle->status(),thisParticle->mother()->pdgId(),(int)thisParticle->numberOfMothers(),(int)thisParticle->numberOfDaughters());
       if(thisParticle->status()>1) continue; // Excluding non-final state particles (e.g. bHadrons)
-      int hadronIndex = analyzeMothers(thisParticle, &hadron, hadMothers, hadMothersIndices, isDirectDaughter);
+      int hadronIndex = analyzeMothers(thisParticle, &hadron, hadMothersCand, hadMothersIndices, isDirectDaughter);
       if(hadron) {    // Putting hadron index to the list if it is not yet
         int hadListIndex=-1;
         for(unsigned int hadNum=0; hadNum<hadIndex.size(); hadNum++) {
@@ -668,15 +689,16 @@ std::vector<int> GenLevelBJetProducer::findHadronJets( const reco::GenJetCollect
     }   // End of loop over jet consituents
   }   // End of loop over jets
 
-// printf("\nPrinting all mothers in the event: \n\n");
-// for(int i=0; i<(int)hadMothers.size(); i++){
-//   printf("%d.\tPt: %.4f  \tEta: %.4f\tPhi: %.4f\tPdg: %d   \tSt: %d\tnMoth: %d",i,hadMothers[i].pt(),hadMothers[i].eta(),hadMothers[i].phi(),hadMothers[i].pdgId(),hadMothers[i].status(),(int)hadMothers[i].numberOfMothers());
-//   printf("\t|-->");
+// printf("\nPrinting all mothers in the event: %d - %d\n\n",(int)hadMothersCand.size(),(int)hadMothers.size());
+for(int i=0; i<(int)hadMothersCand.size(); i++){
+//   printf("%d.\tPt: %.4f  \tEta: %.4f\tPhi: %.4f\tPdg: %d   \tSt: %d\tnMoth: %d",i,hadMothersCand[i]->pt(),hadMothersCand[i]->eta(),hadMothersCand[i]->phi(),hadMothersCand[i]->pdgId(),hadMothersCand[i]->status(),(int)hadMothersCand[i]->numberOfMothers());
 //   std::vector<int> mothIndex = hadMothersIndices.at(i);
-//   for(int j=0; j<(int)mothIndex.size();j++) printf(" %d", mothIndex[j]);
-//   printf(" | %d",(int)mothIndex.size());
+//   printf("\t%d |-->",(int)mothIndex.size());
+//   for(int j=0; j<(int)mothIndex.size();j++) printf(" %d", mothIndex.at(j));
 //   printf("\n");
-// }
+//
+	hadMothers.push_back((*dynamic_cast<const reco::GenParticle*>(hadMothersCand[i])));
+}
 
   // Checking mothers of hadrons in order to assign flags (where the hadron comes from)
   unsigned int nHad = hadIndex.size();
@@ -694,16 +716,14 @@ std::vector<int> GenLevelBJetProducer::findHadronJets( const reco::GenJetCollect
     // Looping over all jets to match them to current hadron
     for (unsigned int jetNum = 0; jetNum < nJets; jetNum++) {
       // Checking whether jet contains this hadron in it (that was put in jet by clustering algorithm)
-      const reco::GenJet* jet = &(genJets[jetNum]);
-      std::vector<const reco::GenParticle*> particles = jet->getGenConstituents();
+      std::vector<const reco::GenParticle*> particles = genJets[jetNum].getGenConstituents();
       for(unsigned int partNum=0; partNum<particles.size(); partNum++) {
         const reco::GenParticle* particle = particles[partNum];
         if(particle->status()<2) continue;    // Skipping final state particles
         if(!isHadron(flavour_,particle)) {
-//           printf("WARNING: Non final non hadron particle (pdg: %d status: %d) clustered in jet\n",particle->pdgId(),particle->status());
+          printf("WARNING: Non final non hadron particle (pdg: %d status: %d) clustered in jet\n",particle->pdgId(),particle->status());
           continue;
         }
-//         printf("hadInJet: Pdg: %d\tPt: %.1f\tEta: %.3f\tPhi: %.3f\n",particle->pdgId(), particle->pt(), particle->eta(), particle->phi());
         // Checking whether hadron and particle in jet are identical
         if(hadron->pdgId()!=particle->pdgId() || fabs(hadron->eta()-particle->eta())>0.00001 || fabs(hadron->phi()-particle->phi())>0.00001) continue;
         jetIndex=jetNum;
@@ -711,14 +731,13 @@ std::vector<int> GenLevelBJetProducer::findHadronJets( const reco::GenJetCollect
       }   // End of loop over jet constituents
       if(jetIndex>=0) break;
     }   // End of loop over jets
-//     if(jetIndex<0) printf("  ATTENTION!!! NO MATCHED JET\n");
 
     result.push_back(jetIndex);     // Putting jet index to the result list
 
 		std::vector <int> FirstQuarkId;
 		std::vector <int> LastQuarkId;
 
-		int hadFlav = hadMothers[hadIdx].pdgId()<0?-1:1;  // Flavour of hadron (1,-1)
+		int hadFlav = hadMothers[hadIdx].pdgId()<0?-1:1;  // Charge of the hadron (-1,1)
 		if(abs( hadMothers[hadIdx].pdgId() )/1000 < 1) hadFlav*=-1;	  // Inverting flavour of hadron if it is a meson
 // 		printf(" Had: %d\tPdg: %d\tPt: %.3f\tFlav: %d\n",hadNum,hadMothers[hadIdx].pdgId(),hadMothers[hadIdx].pt(),hadFlav);
 
@@ -726,15 +745,13 @@ std::vector<int> GenLevelBJetProducer::findHadronJets( const reco::GenJetCollect
 		findInMothers(hadIdx, FirstQuarkId, hadMothersIndices, hadMothers, isDirectDaughter, 0, hadFlav*flavour_, false, true, 1, false);
 		// Filling histograms for each 1-st quark
 		for(unsigned int qId=0; qId<FirstQuarkId.size(); qId++) {
-//			printf("  Q1: %d. Pt: %.2f\tEta: %.2f\tPdg: %d\tstatus: %d", qId, hadMothers[FirstQuarkId[qId]].pt(), hadMothers[FirstQuarkId[qId]].eta(), hadMothers[FirstQuarkId[qId]].pdgId(), hadMothers[FirstQuarkId[qId]].status());
-//			if(!isDirectDaughter[FirstQuarkId[qId]]) printf("\tNOT DIRECT!!!");
-//			printf("\n");
 			int qFlav = (hadMothers[FirstQuarkId[qId]].pdgId()<0)?-1:1;
 			if(toPlot) {
 			  h_firstQstatus->Fill(hadMothers[FirstQuarkId[qId]].status());
 			  h_firstQPdg->Fill(hadMothers[FirstQuarkId[qId]].pdgId());
 			  h2_firstQFlav_HadFlav->Fill(hadFlav,qFlav);
 			}
+
 			// Getting mothers of the first quark
 			std::vector<int> FirstQMotherId = hadMothersIndices.at(FirstQuarkId[qId]);
 			for(unsigned int qmId=0; qmId<FirstQMotherId.size(); qmId++) {
@@ -767,7 +784,6 @@ std::vector<int> GenLevelBJetProducer::findHadronJets( const reco::GenJetCollect
 				  h2_lastQPdg_QMotherPdg->Fill(hadMothers[LastQuarkId[qId]].pdgId(),hadMothers[LastQMotherId[qmId]].pdgId());
 				}
 			}		// End of loop over all mothers of the last quark of the hadron
-
 		}		// End of loop over all last quarks of the hadron
 
 		// Finding the flavour of the hadron
@@ -778,12 +794,12 @@ std::vector<int> GenLevelBJetProducer::findHadronJets( const reco::GenJetCollect
 			hadronFlavour=0;		// Assigning hadron flavour to the unknown value
 		} else if(LastQuarkId.size()==1) {
 			std::vector<int> qMothers = hadMothersIndices.at(LastQuarkId[0]);
-			if(toPlot) {
+			if(toPlot && qMothers[0]>=0) {
 			  h_lastQM_Pdg1->Fill(hadMothers[qMothers[0]].pdgId());
 			  if(hadMothers[LastQuarkId[0]].status()==2) h_lastQSt2M_Pdg->Fill(hadMothers[LastQuarkId[0]].pdgId());
 			}
 
-			hadronFlavour = abs(hadMothers[qMothers[0]].pdgId())*hadFlav; 		// Assigning hadron flavour to the pdg of last non-b quark mother
+			if(qMothers[0]>=0) hadronFlavour = abs(hadMothers[qMothers[0]].pdgId())*hadFlav; 		// Assigning hadron flavour to the pdg of last non-b quark mother
 		} else if(LastQuarkId.size()>1) {
 			float dRmin = 999.9;
 			float dRmin_ = 999.9;
@@ -796,6 +812,7 @@ std::vector<int> GenLevelBJetProducer::findHadronJets( const reco::GenJetCollect
 				std::vector<int> qMothers = hadMothersIndices.at(qIdx1);
 				for(unsigned int qNum2=qNum1+1; qNum2<LastQuarkId.size(); qNum2++) {
 					int qIdx2 = LastQuarkId[qNum2];
+					if(qIdx2<0) continue;
 					float dR2 = deltaR(hadMothers[hadIdx].eta(),hadMothers[hadIdx].phi(),hadMothers[qIdx2].eta(),hadMothers[qIdx2].phi());
 					if(dR2<dRmin) dRmin=dR2;
 					float dRmax = dR1<dR2?dR2:dR1;
@@ -878,22 +895,86 @@ std::vector<int> GenLevelBJetProducer::findHadronJets( const reco::GenJetCollect
 		h_nHadGluon->Fill(nFlavHadrons[2]);
 		h_nHadZ->Fill(nFlavHadrons[3]);
 		h_nHadNo->Fill(nFlavHadrons[4]);
-	}
 
-  // TO COMMENT -->
-// 	if(nFlavHadrons[0]<2) printf("\tATTENTION: TopHadrons lt 2\n");
-// 	if(nFlavHadrons[0]>2) printf("\tATTENTION: TopHadrons gt 2\n");
-//
-// 	if(nFlavHadrons[1]<2) printf("\tATTENTION: HiggsHadrons lt 2\n");
-// 	if(nFlavHadrons[1]>2) printf("\tATTENTION: HiggsHadrons gt 2\n");
-//
-// 	if(nFlavHadrons[4]>0) printf("\tATTENTION: NoFlavourHadrons\n");
-//
-// 	if(nHad<2) printf("\tATTENTION: Hadrons lt 2\n");
-// 	if(nHad==3) printf("\tATTENTION: 3Hadrons\n");
-  // <-- TO COMMENT
+		// Checking energy fractions of hadrons in associated genJets
+		int jetIdx[7] = {-1};		// Highest Pt jet index
+		int jetHadIdx[7] = {-1};		// Associated hadron index
+		for(unsigned int pos=0; pos<7; pos++) {		// Sorting jets by decreasing Pt
+			float Pt_max=-1.0;
+			for(unsigned int iJet=0; iJet<nJets; iJet++) {
+				if(genJets[iJet].pt()<=Pt_max) continue;
+				bool free = true;
+				for(unsigned int i=0; i<pos; i++) if(jetIdx[i]==(int)iJet) { free = false; break; }
+				if(!free) continue;			// Skipping highest Pt jets from previous positions
+				int hadIdx = -1;
+				float hadPt_max = -1.0;
+				for(unsigned int i=0; i<result.size(); i++) if(result[i]==(int)iJet) {
+					if(hadMothers[hadIndex[i]].pt() < hadPt_max) continue;
+					hadIdx = i;
+					hadPt_max = hadMothers[hadIndex[i]].pt();
+				}
+				if(hadIdx<0) continue;		// Skipping jets not matched to any hadron
+				jetIdx[pos] = iJet;
+				jetHadIdx[pos] = hadIdx;
+				Pt_max = genJets[iJet].pt();
+			}		// End of loop over jets
+		}		// End of loop over positions
+
+		for(unsigned int pos=0; pos<7; pos++) {
+			if(jetIdx[pos]<0 || jetHadIdx[pos]<0) continue;
+			h_dEHadJet[pos]->Fill(hadMothers[hadIndex[jetHadIdx[pos]]].energy()/genJets[jetIdx[pos]].energy());
+		}
+
+		for(unsigned int iHad=0; iHad<nHad; iHad++) {
+			if(result[iHad]<0) continue;
+			int flav = abs(hadFlavour[iHad]);
+			if(flav==25) h_dEHadJet_H->Fill(hadMothers[hadIndex[iHad]].energy()/genJets[result[iHad]].energy()); else
+			if(flav==6) h_dEHadJet_T->Fill(hadMothers[hadIndex[iHad]].energy()/genJets[result[iHad]].energy()); else
+			h_dEHadJet_Other->Fill(hadMothers[hadIndex[iHad]].energy()/genJets[result[iHad]].energy());
+
+			if(flav==1 || flav==2 || flav==3) h_dEHadJet_Q->Fill(hadMothers[hadIndex[iHad]].energy()/genJets[result[iHad]].energy()); else
+			if(flav==21) h_dEHadJet_G->Fill(hadMothers[hadIndex[iHad]].energy()/genJets[result[iHad]].energy()); else
+			if(flav==22) h_dEHadJet_P->Fill(hadMothers[hadIndex[iHad]].energy()/genJets[result[iHad]].energy()); else
+			if(flav==23) h_dEHadJet_Z->Fill(hadMothers[hadIndex[iHad]].energy()/genJets[result[iHad]].energy());
+		}
+
+		for(unsigned int iJet=0; iJet<nJets; iJet++) {
+			int N = 0;
+			for(unsigned int i=0; i<result.size(); i++) if(result[i]==(int)iJet) N++;
+			h_nHadInJet->Fill(N);
+		}
+
+	}		// If validation histograms should be filled
 
   return result;
+}
+
+/**
+ * @brief helper function to keep track of the decay chain and identify loops in the decay tree
+ *
+ * @param[in] partIndex index of the particle that is being checked for being a part of the loop
+ * @param[in] hadMothersIndices list of all daughter-mother relations in the event known at the moment
+ * @param[out] indices list of all particles that have been analyzed in a single chain. If any particle appear >1 time, it is a loop.
+ *
+ * returns true if a loop has been found in the chain starting from the partIndex, finishing by proton.
+ */
+bool GenLevelBJetProducer::hasMotherInLoop(int partIndex, std::vector<std::vector<int> > &hadMothersIndices, std::set<int> &indices) {
+
+	if(partIndex<0) return false;
+	bool isInLoop=false;
+
+	indices.insert(partIndex);		// Putting current particle to the list of particles that have been seen in current decay chain
+	if((int)hadMothersIndices.size()<=partIndex) return false;			// Skipping if no mothers are stored for this particle
+
+	std::vector<int> motherIds = hadMothersIndices.at(partIndex);
+  for (unsigned int i = 0; i < motherIds.size(); ++i) {
+		if(indices.count(motherIds.at(i)) > 0) return true;			// If this mother has been seen alread, it is a loop
+		isInLoop=hasMotherInLoop(motherIds.at(i),hadMothersIndices,indices);		// Going deeper in the decay chain
+		if(isInLoop) break;			// If loop found after current mother particle, stopping and returning the answer
+  }
+  indices.erase(partIndex);		// Removing current particle from the list of processed particles if no loop observed
+
+  return isInLoop;
 }
 
 /**
@@ -923,12 +1004,9 @@ bool GenLevelBJetProducer::checkForLoop(std::vector<const reco::Candidate*> &par
  *
  * returns true if a particle is already in the list
  */
-int GenLevelBJetProducer::isInList(std::vector<reco::GenParticle> &particleList, const reco::GenParticle* particle) {
+int GenLevelBJetProducer::isInList(std::vector<const reco::Candidate*> particleList, const reco::Candidate* particle) {
   for(unsigned int i = 0; i<particleList.size(); i++)
-    if( particleList[i].pdgId() == particle->pdgId()
-      && particleList[i].status() == particle->status()
-      && particleList[i].p4() == particle->p4()
-      ) return i;
+		if(particleList[i]==particle) return i;
 
   return -1;
 }
@@ -974,27 +1052,29 @@ bool GenLevelBJetProducer::hasHadronDaughter(const int flavour, const reco::Cand
  *
  * the treatment of b-bar resonances depends on the global parameter noBBbarResonances_
  *
- * @param[in] thisParticle current particle to be analysed
- * @param[in] particleChain current version of the search path
- * @param[out] hadron the oldest b-hadron found in the search
+ * @param[in] thisParticle current particle from which starts the search of the hadron and all its mothers up to proton
+ * @param[out] hadron the last hadron in the decay chain (that decays weekly)
+ * @param[out] hadMothers list of all particles starting with hadron and ending with proton
+ * @param[out] hadMothersIndices list of i-vectors containing j-indices representing particles that are mothers of each i-particle from hadMothers
+ * @param[out] isDirectDaughter list of flags saying whether each particle from hadMothers is a direct daughter or not (like [b]->[b,bbar,b])
  *
- * @returns whether the b-quark was found or not
+ * @returns index of the hadron in the hadMothers list. -1 if no hadron found
  */
-int GenLevelBJetProducer::analyzeMothers(const reco::Candidate* thisParticle, pCRC *hadron, std::vector<reco::GenParticle> &hadMothers, std::vector<std::vector<int> > &hadMothersIndices, std::vector<bool> &isDirectDaughter) {
+int GenLevelBJetProducer::analyzeMothers(const reco::Candidate* thisParticle, pCRC *hadron, std::vector<const reco::Candidate*> &hadMothers, std::vector<std::vector<int> > &hadMothersIndices, std::vector<bool> &isDirectDaughter) {
 
   int hadronIndex=-1;	// Index of the hadron that is returned by this function
   // Storing the first hadron has been found in the chain when going up from the final particle of the jet
-// 	printf("    Checking particle: pdg: %d\tstatus: %d\tPt: %.3f\n",thisParticle->pdgId(), thisParticle->status(), thisParticle->pt());
+// 	printf("Checking particle: pdg: %d\tstatus: %d\tPt: %.3f\tnMothers: %d\n",thisParticle->pdgId(), thisParticle->status(), thisParticle->pt(), (int)thisParticle->numberOfMothers());
   if (*hadron == 0 // find only the first b-hadron on the way (the one that decays weekly)
       && isHadron(flavour_, thisParticle)  // is a hadron
       && !hasHadronDaughter(flavour_, thisParticle)  // has no hadron daughter (decays weekly)
        ) {
     *hadron = thisParticle;
-    const reco::GenParticle *genHadron = dynamic_cast<const reco::GenParticle*>(thisParticle);
 
-    int index = isInList(hadMothers, genHadron);
+    int index = isInList(hadMothers, thisParticle);
+
     if(index<0) {   // If hadron is not in the list of mothers yet
-      hadMothers.push_back(*genHadron);
+      hadMothers.push_back(thisParticle);
       hadronIndex=hadMothers.size()-1;
     } else {	    // If hadron is in the list of mothers already
       hadronIndex=index;
@@ -1002,13 +1082,24 @@ int GenLevelBJetProducer::analyzeMothers(const reco::Candidate* thisParticle, pC
   }
 
   int partIndex = -1;	  // Index of particle being checked in the list of mothers
-  partIndex = isInList(hadMothers, dynamic_cast<const reco::GenParticle*>(thisParticle));
+  partIndex = isInList(hadMothers, thisParticle);
+
   bool isDirDaugh=true;
+	std::set<int> indicesForLoop;
+	if(hasMotherInLoop(partIndex, hadMothersIndices, indicesForLoop)) {
+		return hadronIndex;		// Skipping the mother that is a part of large infinite loop
+	}
+
   // Putting the mothers to the list of mothers
   for (size_t iMother = 0; iMother < thisParticle->numberOfMothers(); ++iMother) {
     const reco::Candidate* mother = thisParticle->mother(iMother);
-    // Checking whether this mother has other daughters that have the same pdgId
-    if(abs( thisParticle->pdgId() )==flavour_ && abs( thisParticle->pdgId() ) == abs( mother->pdgId() )) {
+    int mothIndex = isInList(hadMothers, mother);
+		if(mothIndex == partIndex && partIndex>=0) {
+			continue;		// Skipping the mother that is its own daughter
+		}
+
+		// Checking whether this mother has other daughters that have the same pdgId
+    if(toPlot && abs( thisParticle->pdgId() )==flavour_ && abs( thisParticle->pdgId() ) == abs( mother->pdgId() )) {
       double highPt = -1.0;
 			int highPtId = -1;
 			int thisParticleId = -1;
@@ -1025,26 +1116,27 @@ int GenLevelBJetProducer::analyzeMothers(const reco::Candidate* thisParticle, pC
 				if(abs( daughter->pdgId() )!=abs( thisParticle->pdgId() )) continue;
 				if(thisParticle==daughter) thisParticleId=iDaughter;
 				if(daughter->pdgId()*mother->pdgId() < 0) {
-//					printf("ATTENTION!!! Found charge mismatch:\n");
-//					printf("\tPdg: (%d|%d)\tPt: (%.3f|%.3f)\tEta: (%.3f|%3f)\tPhi: (%.3f|%.3f)\tE: (%.3f|%.3f)\n",daughter->pdgId(),mother->pdgId(),daughter->pt(), mother->pt(), daughter->eta(), mother->eta(), daughter->phi(), mother->phi(), daughter->energy(), mother->energy());
+// 					printf("ATTENTION!!! Found charge mismatch:\n");
+// 					printf("\tPdg: (%d|%d)\tPt: (%.3f|%.3f)\tEta: (%.3f|%3f)\tPhi: (%.3f|%.3f)\tE: (%.3f|%.3f)\n",daughter->pdgId(),mother->pdgId(),daughter->pt(), mother->pt(), daughter->eta(), mother->eta(), daughter->phi(), mother->phi(), daughter->energy(), mother->energy());
 					continue;
 				}
 				if(daughter->pt()>highPt) {highPt=daughter->pt(); highPtId=iDaughter;}
 				float dR=deltaR(daughter->eta(),daughter->phi(),mother->eta(),mother->phi());
-				if(toPlot) {
-				  h_QQMothEFrac->Fill(daughter->energy()/mother->energy());
-				  h_QQMothdR->Fill(dR);
-				  if(nSameDaugh>1) {
-					  h_QQMothEFrac_ambig->Fill(daughter->energy()/mother->energy());
-					  h_QQMothdR_ambig->Fill(dR);
-				  }
+
+				h_QQMothEFrac->Fill(daughter->energy()/mother->energy());
+				h_QQMothdR->Fill(dR);
+				if(nSameDaugh>1) {
+					h_QQMothEFrac_ambig->Fill(daughter->energy()/mother->energy());
+					h_QQMothdR_ambig->Fill(dR);
 				}
+
 				if(dR<dR_min) dR_min=dR;
       }
 
-// TO COMMENT -->
       if(highPt<0.0) continue;
-			if(highPtId!=thisParticleId) isDirDaugh=false;
+			if(highPtId!=thisParticleId) {
+				isDirDaugh=false;
+			}
 			for(unsigned int iDaughter = 0; iDaughter<mother->numberOfDaughters(); iDaughter++) {
 				const reco::Candidate* daughter = mother->daughter(iDaughter);
 				if(daughter->pdgId()*mother->pdgId() < 0) continue;		// Skipping particles with wrong charge
@@ -1055,49 +1147,34 @@ int GenLevelBJetProducer::analyzeMothers(const reco::Candidate* thisParticle, pC
 					}
 					continue;		// Skipping the highest Pt particle
 				}
-				if(toPlot) {
-				  h_QHQPtFrac->Fill((highPt-daughter->pt())/highPt);
-				  if(nSameDaugh>1) h_QHQPtFrac_ambig->Fill((highPt-daughter->pt())/highPt);
-				}
+				h_QHQPtFrac->Fill((highPt-daughter->pt())/highPt);
+				if(nSameDaugh>1) h_QHQPtFrac_ambig->Fill((highPt-daughter->pt())/highPt);
       }
-      if(toPlot) {
-	h_QQMothdR_min->Fill(dR_min);
-	if(nSameDaugh>1) h_QQMothdR_min_ambig->Fill(dR_min);
-	h2_QQMothSamePdg->Fill(thisParticle->pdgId(),mother->pdgId());
-      }
-// <-- TO COMMENT
+			h_QQMothdR_min->Fill(dR_min);
+			if(nSameDaugh>1) h_QQMothdR_min_ambig->Fill(dR_min);
+			h2_QQMothSamePdg->Fill(thisParticle->pdgId(),mother->pdgId());
     }	// If both particle and mother are quarks and have same abs(pdgId)
 
-//    if ( checkForLoop(particleChain, mother) ) {
-//      printf("    Loop found!!!\n");
-//      edm::LogWarning("decayChain") << "Identified a loop in the current decay chain."
-//                                    << " Paricle " << mother
-//                                    << " PDG: " << mother->pdgId()
-//                                    << " " << mother->p4()
-//                                    << " is already in the chain."
-//                                    << " Will stop this branch here. B-hadron identification might be incomplete."
-//                                    << " " << printParticleChain(particleChain,*hadron);
-////      continue;
-//    }
-    const reco::GenParticle *genMother = dynamic_cast<const reco::GenParticle*>(mother);
-    int mothIndex = isInList(hadMothers, genMother);
     // If this mother isn't yet in the list and hadron is in the list
     if(mothIndex<0 && (*hadron)!=0) {
-      hadMothers.push_back(*genMother);
+      hadMothers.push_back(mother);
       mothIndex=hadMothers.size()-1;
     }
     // If hadron has already been found in current chain and the mother isn't a duplicate of the particle being checked
-    if((*hadron)!=0 && mothIndex!=partIndex) {
+    if((*hadron)!=0 && mothIndex!=partIndex && partIndex>=0) {
       putMotherIndex(hadMothersIndices, partIndex, mothIndex, isDirectDaughter, isDirDaugh);			// Putting the index of mother for current particle
     }
-//     printf("     %d\tMother %d: pt: %.4f\teta: %.4f\tphi: %.4f\tpdg: %d  \tstatus: %d\tnMoth: %d\tnDau: %d\n",mothIndex,(int)iMother,mother->pt(), mother->eta(), mother->phi(),mother->pdgId(),mother->status(),(int)mother->numberOfMothers(),(int)mother->numberOfDaughters());
-    int index = analyzeMothers(mother, hadron, hadMothers,hadMothersIndices, isDirectDaughter);
+    int index = analyzeMothers(mother, hadron, hadMothers, hadMothersIndices, isDirectDaughter);
     hadronIndex = index<0?hadronIndex:index;
-  }
+  }			// End of loop over mothers
+
+  if(partIndex<0) return hadronIndex;			// Safety check
+
   // Adding -1 to the list of mother indices for current particle if it has no mothers (for consistency between numbering of indices and mothers)
   if((int)thisParticle->numberOfMothers()<=0 && (*hadron)!=0) {
     putMotherIndex(hadMothersIndices, partIndex, -1, isDirectDaughter, isDirDaugh);
   }
+
 
   return hadronIndex;
 
@@ -1105,34 +1182,43 @@ int GenLevelBJetProducer::analyzeMothers(const reco::Candidate* thisParticle, pC
 
 /**
  * @brief puts mother index to the list of mothers of particle, if it isn't there already
+ *
+ * @param[in] hadMothersIndices vector of indices of mothers for each particle
+ * @param[in] partIndex index of the particle for which the mother index should be stored
+ * @param[in] mothIndex index of mother that should be stored for current particle
+ * @param[in] isDirectDaughter vector of flags saying whether each particle is direct daughter of its mother
+ * @param[in] isDirDaugh actual value that should be put into isDirectDaughter for this particle
+ *
  */
 bool GenLevelBJetProducer::putMotherIndex(std::vector<std::vector<int> > &hadMothersIndices, int partIndex, int mothIndex, std::vector<bool> &isDirectDaughter, bool isDirDaugh)
 { // Putting vector of mothers indices for the given particle
-  bool inList=0;
-  if((int)hadMothersIndices.size()<=partIndex) {    // If there is no list of mothers for current particle yet
+// 	printf("Putting mother: %d for particle: %d\n",mothIndex, partIndex);
+  bool inList=false;
+ 	if(partIndex<0) return false;
+
+  while((int)hadMothersIndices.size()<=partIndex) {    // If there is no list of mothers for current particle yet
     std::vector<int> mothersIndices;
-    mothersIndices.push_back(mothIndex);  // Adding this mother's index to the list of mothers of current particle
     hadMothersIndices.push_back(mothersIndices);
-  } else {
-    std::vector<int> *hadMotherIndices=&hadMothersIndices.at(partIndex);
-    // Checking if current mother is already in the list of theParticle's mothers
-    for(int k=0;k<(int)(*hadMotherIndices).size();k++){
-      if((*hadMotherIndices)[k]!=mothIndex) continue;
-      inList=1;
-      break;
-    }
-    // Adding current mother to the list of mothers of this particle
-    if(!inList) {
-      hadMotherIndices->push_back(mothIndex);
-    }
   }
+
+	std::vector<int> *hadMotherIndices=&hadMothersIndices.at(partIndex);
+	// Checking if current mother is already in the list of theParticle's mothers
+	for(int k=0;k<(int)(*hadMotherIndices).size();k++){
+		if((*hadMotherIndices)[k]!=mothIndex) continue;
+		inList=true;
+		break;
+	}
+	// Adding current mother to the list of mothers of this particle
+	if(!inList) {
+		hadMotherIndices->push_back(mothIndex);
+	}
   // Putting flag whether particle is direct daughter
   if((int)isDirectDaughter.size()<=partIndex) {
 		isDirectDaughter.push_back(isDirDaugh);
   } else {
 		isDirectDaughter.at(partIndex)=isDirDaugh;
   }
-
+// 	printf("End of putting mother: %d for particle: %d\n",mothIndex, partIndex);
   return inList;
 }
 
@@ -1245,13 +1331,21 @@ void GenLevelBJetProducer::findInMothers(int idx, std::vector<int> &mothChains, 
 	// Inverting charge if mother is a b(c) meson
 	if(abs(hadMothers[idx].pdgId())/1000 < 1 && (abs(hadMothers[idx].pdgId())/100%10 == 4 || abs(hadMothers[idx].pdgId())/100%10 == 5) ) partCharge*=-1;
 
-	if(!isDirectDaughter.at(idx) && dirDaughOnly) {if(verbose) printf("NOT DIRECT PARTICLE: pdg: %d\tPt: %.3f\tEta: %.3f\n",hadMothers[idx].pdgId(), hadMothers[idx].pt(),hadMothers[idx].eta());return;}
+	if(!isDirectDaughter.at(idx) && dirDaughOnly) {
+	  if(verbose) printf(" NOT DIRECT PARTICLE %d: pdg: %d\tPt: %.3f\tEta: %.3f\n",idx,hadMothers[idx].pdgId(), hadMothers[idx].pt(),hadMothers[idx].eta());
+	  return;
+	}
+	if((int)hadMothersIndices.size()<=idx) {
+		if(verbose) printf(" Stopping checking particle %d. No mothers are stored.\n",idx);
+		return;	  // Skipping if no mothers are stored for this particle
+	}
+
   std::vector<int> mothers = hadMothersIndices.at(idx);
   int nMothers = mothers.size();
 	bool isCorrect=false;		// Whether current particle is what is being searched
   if(verbose){
     if(abs(hadMothers[idx].pdgId())==2212) printf("Chk:  %d\tpdg: %d\tstatus: %d",idx, hadMothers[idx].pdgId(), hadMothers[idx].status()); else {
-      printf("Chk:  %d(%d mothers)\tpdg: %d\tstatus: %d\tPt: %.3f\tEta: %.3f",idx, nMothers, hadMothers[idx].pdgId(), hadMothers[idx].status(), hadMothers[idx].pt(),hadMothers[idx].eta());
+      printf(" Chk:  %d(%d mothers)\tpdg: %d\tstatus: %d\tPt: %.3f\tEta: %.3f",idx, nMothers, hadMothers[idx].pdgId(), hadMothers[idx].status(), hadMothers[idx].pt(),hadMothers[idx].eta());
     }
   }
     // Checking whether current mother satisfies selection criteria
@@ -1261,7 +1355,7 @@ void GenLevelBJetProducer::findInMothers(int idx, std::vector<int> &mothChains, 
 		isCorrect=true;
     bool inList=false;
     for(unsigned int k=0; k<mothChains.size();k++) if(mothChains[k]==idx) {inList=true; break;}    // Checking whether isn't already in the list
-    if(!inList) {
+    if(!inList && mothers.at(0)>=0 && (hadMothers[idx].pdgId()*pdgId>0 || !pdgAbs)) {		// If not in list and mother of this quark has correct charge
       if(firstLast==0 || firstLast==1) mothChains.push_back(idx);
       if(verbose) printf("   *");
     }
@@ -1274,18 +1368,19 @@ void GenLevelBJetProducer::findInMothers(int idx, std::vector<int> &mothChains, 
   // Checking next level mothers
   for(int i=0;i<nMothers;i++){
     int idx2 = mothers[i];
-    if(idx2<0) continue;    // Stopping if mother id is -1 (no mother), that means current particle is a proton
+    if(idx2<0) continue;    // Skipping if mothers id is -1 (no mother), that means current particle is a proton
     if(idx2==idx) continue; // Skipping if particle is stored as its own mother
+		std::set<int> indicesForLoop;
+		if(hasMotherInLoop(idx2,hadMothersIndices,indicesForLoop)) return;    // Skipping if this particle is part of a loop
 		if(firstLast==2 && isCorrect && (
 			(abs(hadMothers[idx2].pdgId()) != abs(pdgId) && pdgAbs==true) ||
 			(hadMothers[idx2].pdgId() != pdgId && pdgAbs==false) ) ) {		// If only last occurance must be stored and mother has different flavour
-			bool inList=false;
-			for(unsigned int k=0; k<mothChains.size();k++) if(mothChains[k]==idx) {inList=true; break;}    // Checking whether isn't already in the list
-			if(!inList) mothChains.push_back(idx);
+			if(verbose) printf("Checking mother %d out of %d mothers once more to store it as the last quark\n",i,nMothers);
+			findInMothers(idx, mothChains, hadMothersIndices, hadMothers, isDirectDaughter, 0, pdgId, pdgAbs, false, 1, verbose);
 		}
 
     // Checking next level mother
-    if(verbose) printf("  Checking mother %d of %d\n",i,nMothers);
+    if(verbose) printf("Checking mother %d out of %d mothers\n",i,nMothers);
     findInMothers(idx2, mothChains, hadMothersIndices, hadMothers, isDirectDaughter, status, pdgId, pdgAbs, dirDaughOnly, firstLast, verbose);
   }
 }
@@ -1302,8 +1397,8 @@ void GenLevelBJetProducer::findInMothers(int idx, std::vector<int> &mothChains, 
 bool GenLevelBJetProducer::isNeutralPdg(int pdgId) {
     const int max = 5;
     int neutralPdgs[max]={9,21,22,23,25};
-    for(int i=0; i<max; i++) if(abs(pdgId)==neutralPdgs[i]) return 1;
-    return 0;
+    for(int i=0; i<max; i++) if(abs(pdgId)==neutralPdgs[i]) return true;
+    return false;
 }
 
 
