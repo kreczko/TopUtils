@@ -19,7 +19,7 @@
 // Original Author:  Benjamin Lutz,DESY
 //   Second Author:  Nazar Bartosik,DESY
 //         Created:  Thu Feb  2 13:30:58 CET 2012
-// $Id: GenLevelBJetProducer.cc,v 1.12 2013/04/02 15:46:17 nbartosi Exp $
+// $Id: GenLevelBJetProducer.cc,v 1.13 2013/04/04 14:21:59 nbartosi Exp $
 //
 //
 
@@ -187,7 +187,7 @@ GenLevelBJetProducer::GenLevelBJetProducer(const edm::ParameterSet& cfg) {
 
 
   flavour_ = abs(flavour_); // Make flavour independent of sign given in configuration
-  if(flavour_==5) flavourStr_="b"; else if(flavour_==4) flavourStr_="c";
+  if(flavour_==5) flavourStr_="B"; else if(flavour_==4) flavourStr_="C";
   else edm::LogError("GenLevelBJetProducer") << "Flavour option must be 4 (c-jet) or 5 (b-jet), but is: " << flavour_ << ". Correct this!";
 
   produces< std::vector<int> >("BHadJetIndex");
@@ -203,11 +203,11 @@ GenLevelBJetProducer::GenLevelBJetProducer(const edm::ParameterSet& cfg) {
 	if(!doImprovedHadronMatching_) return;
 
   // Hadron matching variables
-  produces< std::vector<reco::GenParticle> >(flavourStr_+"HadMothers"); // All mothers in all decay chains above any hadron of specified flavour
-  produces< std::vector< std::vector<int> > >(flavourStr_+"HadMothersIndices"); // Indices of mothers of each hadMother
-  produces< std::vector<int> >(flavourStr_+"HadIndex"); // Index of hadron in the vector of hadMothers
-	produces< std::vector<int> >(flavourStr_+"HadFlavour");  // PdgId of the first non-b(c) quark mother with sign corresponding to hadron charge
-  produces< std::vector<int> >(flavourStr_+"HadJetIndex");  // Index of genJet matched to each hadron by jet clustering algorithm
+  produces< std::vector<reco::GenParticle> >("gen"+flavourStr_+"HadPlusMothers"); // All mothers in all decay chains above any hadron of specified flavour
+  produces< std::vector< std::vector<int> > >("gen"+flavourStr_+"HadPlusMothersIndices"); // Indices of mothers of each hadMother
+  produces< std::vector<int> >("gen"+flavourStr_+"HadIndex"); // Index of hadron in the vector of hadMothers
+	produces< std::vector<int> >("gen"+flavourStr_+"HadFlavour");  // PdgId of the first non-b(c) quark mother with sign corresponding to hadron charge
+  produces< std::vector<int> >("gen"+flavourStr_+"HadJetIndex");  // Index of genJet matched to each hadron by jet clustering algorithm
 
 	if(!doValidationPlotsForImprovedHadronMatching_) return;
 
@@ -325,8 +325,6 @@ void GenLevelBJetProducer::produce(edm::Event& evt, const edm::EventSetup& setup
   edm::Handle<reco::GenJetCollection> genJets;
   evt.getByLabel(genJets_, genJets);
 
-//   printf(" Lumi: %d Event: %d bQuarks: %d Flavour: %d\n",evt.id().luminosityBlock(),evt.id().event(), (int)genEvt->numberOfBQuarks(true), flavour_);
-
   LogDebug("bJet") << "searching for b-jets in " << genJets_;
   *bIdx = getGenJetWith(genEvt->b(), *genJets, *bHadrons, *bHadronFromTopBqark, *bHadronVsJet);
   LogDebug("bJet") << "searching for anti-b-jets in " << genJets_;
@@ -357,11 +355,11 @@ void GenLevelBJetProducer::produce(edm::Event& evt, const edm::EventSetup& setup
   *hadJetIndex = findHadronJets(*genJets, *hadIndex, *hadMothers, *hadMothersIndices, *hadFlavour);
 
   // Hadron matching variables
-  evt.put(hadMothers,         flavourStr_+"HadMothers");
-  evt.put(hadMothersIndices,  flavourStr_+"HadMothersIndices");
-  evt.put(hadIndex,           flavourStr_+"HadIndex");
-	evt.put(hadFlavour,         flavourStr_+"HadFlavour");
-  evt.put(hadJetIndex,        flavourStr_+"HadJetIndex");
+  evt.put(hadMothers,         "gen"+flavourStr_+"HadPlusMothers");
+  evt.put(hadMothersIndices,  "gen"+flavourStr_+"HadPlusMothersIndices");
+  evt.put(hadIndex,           "gen"+flavourStr_+"HadIndex");
+	evt.put(hadFlavour,         "gen"+flavourStr_+"HadFlavour");
+  evt.put(hadJetIndex,        "gen"+flavourStr_+"HadJetIndex");
 }
 
 // ------------ method called once each job just before starting event loop  ------------
@@ -656,14 +654,7 @@ std::vector<int> GenLevelBJetProducer::findHadronJets( const reco::GenJetCollect
     }   // End of loop over jet consituents
   }   // End of loop over jets
 
-  // printf("\nPrinting all mothers in the event: %d - %d\n\n",(int)hadMothersCand.size(),(int)hadMothers.size());
   for(int i=0; i<(int)hadMothersCand.size(); i++){
-    //   printf("%d.\tPt: %.4f  \tEta: %.4f\tPhi: %.4f\tPdg: %d   \tSt: %d\tnMoth: %d",i,hadMothersCand[i]->pt(),hadMothersCand[i]->eta(),hadMothersCand[i]->phi(),hadMothersCand[i]->pdgId(),hadMothersCand[i]->status(),(int)hadMothersCand[i]->numberOfMothers());
-    //   std::vector<int> mothIndex = hadMothersIndices.at(i);
-    //   printf("\t%d |-->",(int)mothIndex.size());
-    //   for(int j=0; j<(int)mothIndex.size();j++) printf(" %d", mothIndex.at(j));
-    //   printf("\n");
-
     hadMothers.push_back((*dynamic_cast<const reco::GenParticle*>(hadMothersCand[i])));
   }
 
@@ -690,7 +681,6 @@ std::vector<int> GenLevelBJetProducer::findHadronJets( const reco::GenJetCollect
         const reco::GenParticle* particle = particles[partNum];
         if(particle->status()<2) continue;    // Skipping final state particles
         if(!isHadron(flavour_,particle)) {
-          printf("WARNING: Non final non hadron particle (pdg: %d status: %d) clustered in jet\n",particle->pdgId(),particle->status());
           continue;
         }
         // Checking whether hadron and particle in jet are identical
