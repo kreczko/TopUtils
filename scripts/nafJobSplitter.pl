@@ -12,9 +12,6 @@ use Getopt::Std;
 
 #my $datasetPythonPath = "$ENV{CMSSW_BASE}/src/NafJobsplitter/Configuration/python";
 my $datasetPythonPath = "/scratch/hh/dust/naf/cms/user/$ENV{USER}/.nafJobSplitter/python";
-#make sure the file can be found even without running scram (dirty hack)
-$ENV{PYTHONPATH} = "$datasetPythonPath:$ENV{PYTHONPATH}";
-
 use constant DAS_DOWNLOAD_URL => 'https://cmsweb.cern.ch/das/makepy?dataset=%s&instance=cms_dbs_prod_global';
 use constant C_OK => 'green bold';
 use constant C_FILE => 'bold';
@@ -196,6 +193,8 @@ sub getDatasetPythonFile {
             die "Could not download dataset file: $?\n";
         }
     }
+    #make sure the file can be found even without running scram (dirty hack)
+    $ENV{PYTHONPATH} = "$datasetPythonPath:$ENV{PYTHONPATH}";
     return qq{process.load("$localFileName")};
 #     return qq{process.load("TopAnalysis.Configuration.$localFileName")};
 }
@@ -608,8 +607,6 @@ if [ -e $current/naf_DIRECTORY/out$SGE_TASK_ID.txt.part.1 ] ; then
     echo "Skipping $NSkip old events"
     if [ -z "CMSRUNPARAMETER" ] ; then
         PARAMS="skipEvents=$NSkip"
-    elif [ "CMSRUNPARAMETER" == *" "* ]
-        PARAMS="CMSRUNPARAMETER skipEvents=$NSkip"
     else
         PARAMS="CMSRUNPARAMETER,skipEvents=$NSkip"
     fi
