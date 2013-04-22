@@ -101,20 +101,13 @@ double EventWeightDileptonModelVariation::getTopPtDataWeight()
   // get values
   double ptTop =genEvt->top()->pt();
   double ptATop=genEvt->topBar()->pt();
-  // weight function a*x*x+b*x+c
-  double a=1.40520e-06;
-  double b=-2.00947e-03;
-  double c=1.22081e+00;
-  double weightTop =a*ptTop*ptTop  +b*ptTop +c;
-  double weightATop=a*ptATop*ptATop+b*ptATop+c;
-  double minX=-b/(2*a);
-  if(ptTop >=minX) weightTop =a*minX*minX+b*minX+c;
-  if(ptATop>=minX) weightATop=a*minX*minX+b*minX+c;
+  double weightTop =TMath::Exp(slope_*(weight1x_-ptTop ));
+  double weightATop=TMath::Exp(slope_*(weight1x_-ptATop));
   pt_->Fill(genEvt->top()->pt());
-  ptWeighted_->Fill(genEvt->top()->pt(), weightTop * weightATop);
-  weightVsPt_->Fill(genEvt->top()->pt()   , weightTop );
-  weightVsPt_->Fill(genEvt->topBar()->pt(), weightATop);
-  return weightTop * weightATop;
+  ptWeighted_->Fill(genEvt->top()->pt(), TMath::Sqrt(weightTop * weightATop));
+  weightVsPt_->Fill(genEvt->top()->pt()   , TMath::Sqrt(weightTop * weightATop));
+  weightVsPt_->Fill(genEvt->topBar()->pt(), TMath::Sqrt(weightTop * weightATop));
+  return TMath::Sqrt(weightTop * weightATop);
 }
 
 double EventWeightDileptonModelVariation::getTopEtaWeight()
