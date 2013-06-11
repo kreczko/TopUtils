@@ -9,6 +9,8 @@ UhhGenJetSelector::UhhGenJetSelector(const edm::ParameterSet& cfg):
 {
   // register output
   produces<std::vector<reco::GenJet> >();
+  produces<std::vector<reco::GenJet> >("lightJetsFromTop");
+  produces<std::vector<reco::GenJet> >("additionalJets"  );
 }
 
 void
@@ -20,7 +22,9 @@ UhhGenJetSelector::produce(edm::Event& evt, const edm::EventSetup& setup)
   evt.getByLabel(genJet_, genJet);
   
   // prepare output vector
-  std::auto_ptr<std::vector<reco::GenJet> > out(new std::vector<reco::GenJet>);
+  std::auto_ptr<std::vector<reco::GenJet> > bJetsOut(new std::vector<reco::GenJet>);
+  std::auto_ptr<std::vector<reco::GenJet> > lJetsOut(new std::vector<reco::GenJet>);
+  std::auto_ptr<std::vector<reco::GenJet> > addJetsOut(new std::vector<reco::GenJet>);
   
   // get indices (e.g. produced by TopAnalysis/TopUtils/GenLevelBJetProducer.cc)
   bIX   =-1;
@@ -107,36 +111,95 @@ UhhGenJetSelector::produce(edm::Event& evt, const edm::EventSetup& setup)
     // if not: take leading index
     if(bbarIX==-1)  bbarIX   =VAntiBHadJetIdx    [0];
   }
+  
+  // configuration for light jet candidates
+  std::map<float, std::pair<int,int> > jjWcand_;
+  double mW=80.4;
+  double mWwindow=0.2;
 
-  // loop input collection to find b-jet
+  // loop input genJet collection
   for(edm::View<reco::GenJet>::const_iterator p=genJet->begin(); p!=genJet->end(); ++p){
     int currentIndex=p-genJet->begin();
     if(debug) std::cout << "checking jet no. " << currentIndex << std::endl;
-    if(currentIndex==bIX){
-      if(debug) std::cout << "candidate found!" << std::endl;
-      if(std::abs(p->eta())<eta_&&p->pt()>pt_){
-	if(debug) std::cout << std::endl << "selected b-jet! index " << currentIndex << ", ";
-	if(debug) std::cout << "pt=" << p->pt() << ", eta=" << p->eta() << std::endl;
-	out->push_back(*p);
+    // check acceptance
+    if(std::abs(p->eta())<eta_&&p->pt()>pt_){
+      // A find b-jet
+      if(currentIndex==bIX){
+	if(debug) std::cout << "candidate found!" << std::endl;
+	if(std::abs(p->eta())<eta_&&p->pt()>pt_){
+	  if(debug) std::cout << std::endl << "selected b-jet! index " << currentIndex << ", ";
+	  if(debug) std::cout << "pt=" << p->pt() << ", eta=" << p->eta() << std::endl;
+	  bJetsOut->push_back(*p);
+	}
       }
-    }
-  }
-  // loop input collection to find bbar-jet
-  for(edm::View<reco::GenJet>::const_iterator p=genJet->begin(); p!=genJet->end(); ++p){
-    int currentIndex=p-genJet->begin();
-    if(debug) std::cout << "checking jet no. " << currentIndex << std::endl;
-    if(currentIndex==bbarIX){
-      if(debug) std::cout << "candidate found!" << std::endl;
-      if(std::abs(p->eta())<eta_&&p->pt()>pt_){
-	if(debug) std::cout << std::endl << "selected anti b-jet! index " << currentIndex << ", ";
-	if(debug) std::cout << "pt=" << p->pt() << ", eta=" << p->eta() << std::endl;
-	out->push_back(*p);
+      // B find bbar-jet
+      else if(currentIndex==bbarIX){
+	if(debug) std::cout << "candidate found!" << std::endl;
+	if(std::abs(p->eta())<eta_&&p->pt()>pt_){
+	  if(debug) std::cout << std::endl << "selected anti b-jet! index " << currentIndex << ", ";
+	  if(debug) std::cout << "pt=" << p->pt() << ", eta=" << p->eta() << std::endl;
+	  bJetsOut->push_back(*p);
+	}
+      }
+      // C find candidates for light jets from W decay
+      else{
+	// 2nd genjet collection loop (loop only remaining gen jets)
+	for(edm::View<reco::GenJet>::const_iterator p2=p+1; p2!=genJet->end(); ++p2){
+	  int currentIndex2=p2-genJet->begin();
+	  // 2nd check acceptance
+	  if(std::abs(p2->eta())<eta_&&p2->pt()>pt_){
+	    // no b candidate
+	    if(currentIndex2!=bIX&&currentIndex2!=bbarIX){
+	      // calculate w mass from candidates
+	      double wcand=std::abs(((p->p4()+p2->p4()).mass()-mW))/mW;
+	      if(debug) std::cout << "W(jj) candidate: mW(" << currentIndex << "," << currentIndex2 << ")=" << (p->p4()+p2->p4()).mass() << std::endl;
+	      if(wcand<mWwindow){
+		jjWcand_[wcand]=std::make_pair(currentIndex,currentIndex2);
+	      }
+	    }
+	  }
+	}
       }
     }
   }
 
-  // push out vector into the event
-  evt.put(out);
+  // choose light jet pair closest to W mass as light jets from hadronic top candidate
+  int lJet1Index=-1;
+  int lJet2Index=-1;
+  if(jjWcand_.size()){
+    lJet1Index=((jjWcand_.begin())->second).first;
+    lJet2Index=((jjWcand_.begin())->second).second; 
+    if(debug){
+      double mWCandRel=(jjWcand_.begin())->first;
+      double mWCand=(genJet->at(lJet1Index).p4()+genJet->at(lJet2Index).p4()).mass();
+      std::cout << "light jets candidates (closest to W mass found):" << std::endl;
+      std::cout << "  mW(jj)=" << mWCand << " GeV (=" << mWCandRel *100 << "% wrt. " << mW << ")" << std::endl;
+      std::cout << "  jet1: IX " << lJet1Index << "(pt=" << genJet->at(lJet1Index).pt() << "eta=" << genJet->at(lJet1Index).eta() << ")" << std::endl;
+      std::cout << "  jet2: IX " << lJet2Index << "(pt=" << genJet->at(lJet2Index).pt() << "eta=" << genJet->at(lJet2Index).eta() << ")" << std::endl;  
+  }
+  }
+  // add light jets to output
+  if(lJet1Index!=-1) lJetsOut->push_back(genJet->at(lJet1Index));
+  if(lJet2Index!=-1) lJetsOut->push_back(genJet->at(lJet2Index));
+
+  // D sample additionally radiated jets
+  // loop input genJet collection
+  for(edm::View<reco::GenJet>::const_iterator p=genJet->begin(); p!=genJet->end(); ++p){
+    int currentIndex=p-genJet->begin();
+    // check acceptance
+    if(std::abs(p->eta())<eta_&&p->pt()>pt_){
+      // no light jet or b/bbar jet
+      if(currentIndex!=bIX&&currentIndex!=bbarIX&&currentIndex!=lJet1Index&&currentIndex!=lJet2Index){
+	addJetsOut->push_back(*p);
+      }
+    }
+  } 
+  
+  // push out new gen jet collection vectors into the event
+  evt.put(bJetsOut                    );
+  evt.put(lJetsOut, "lightJetsFromTop");
+  evt.put(addJetsOut,"additionalJets" );
+
 }
 
 bool checkKinematicRange(int index, edm::Handle<edm::View<reco::GenJet> > genJet){

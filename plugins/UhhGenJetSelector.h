@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <iostream>
+#include <utility>
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EDProducer.h"
