@@ -9,7 +9,6 @@ produceGenLevelBJets = cms.EDProducer("GenLevelBJetProducer",
     requireTopBquark = cms.bool(False),
     noBBbarResonances = cms.bool(True),
     doImprovedHadronMatching = cms.bool(False),
-    doValidationPlotsForImprovedHadronMatching = cms.bool(False)
 )
 
 

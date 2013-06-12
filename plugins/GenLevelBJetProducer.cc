@@ -19,7 +19,7 @@
 // Original Author:  Benjamin Lutz,DESY
 //   Second Author:  Nazar Bartosik,DESY
 //         Created:  Thu Feb  2 13:30:58 CET 2012
-// $Id: GenLevelBJetProducer.cc,v 1.14 2013/04/09 08:35:42 nbartosi Exp $
+// $Id: GenLevelBJetProducer.cc,v 1.15 2013/06/12 16:27:24 nbartosi Exp $
 //
 //
 
@@ -108,30 +108,10 @@ private:
     bool requireTopBquark_;
     bool resolveName_;
     bool doImprovedHadronMatching_;
-    bool doValidationPlotsForImprovedHadronMatching_;
-    bool toPlot;
 
     std::string flavourStr_;  // Name of the flavour specified in config file
 
     edm::ESHandle<ParticleDataTable> pdt_;
-
-
-// -- testing histograms
-    TH1I *h_nHad, *h_hadJetIndex;
-    TH2D *h2_Q2MothPdg, *h2_Q2Moth_2Pdg;
-    TH1D *h_jetdPt, *h_jetDeltaPt;
-    TH2D *h2_QQMothSamePdg;
-    TH1D *h_QQMothEFrac, *h_QHQPtFrac, *h_QQMothdR, *h_QQMothdR_min, *h_QHQdR;
-    TH1D *h_QQMothEFrac_ambig, *h_QHQPtFrac_ambig, *h_QQMothdR_ambig, *h_QQMothdR_min_ambig, *h_QHQdR_ambig;
-    TH1D *h_jetHad_dR, *h_jetHadOld_dR, *h_jetHadOldNoMatch_dR, *h_jetHad_dR_noFlav, *h_jetHadOldNoMatch_dR_noFlav;
-
-    TH1I *h_nFirstQ,*h_firstQstatus, *h_firstQPdg;
-    TH2D *h2_firstQFlav_HadFlav, *h2_firstQFlav_QMotherFlav;
-    TH1I *h_nLastQ,*h_lastQstatus, *h_lastQPdg, *h_nHadTop, *h_nHadHiggs, *h_nHadGluon, *h_nHadZ, *h_nHadNo;
-    TH2D *h2_lastQFlav_HadFlav, *h2_lastQFlav_QMotherFlav, *h2_lastQPdg_QMotherPdg;
-    TH1D *h_lastQ_lastQ_dRmin, *h_hadJet_dRmin;
-    TH1D *h_dEHadJet_T, *h_dEHadJet_H, *h_dEHadJet_Z, *h_dEHadJet_G, *h_dEHadJet_P, *h_dEHadJet_Q, *h_dEHadJet_Other, *h_dEHadJet[7];
-    TH1I *h_nHadInJet;
 
 
 };
@@ -182,12 +162,6 @@ GenLevelBJetProducer::GenLevelBJetProducer ( const edm::ParameterSet& cfg )
     requireTopBquark_  = cfg.getParameter<bool> ( "requireTopBquark" );
     resolveName_       = cfg.getParameter<bool> ( "resolveParticleName" );
     doImprovedHadronMatching_ = cfg.getParameter<bool> ( "doImprovedHadronMatching" );
-    doValidationPlotsForImprovedHadronMatching_ = cfg.getParameter<bool> ( "doValidationPlotsForImprovedHadronMatching" );
-
-    if ( !doImprovedHadronMatching_ ) {
-        doValidationPlotsForImprovedHadronMatching_=false;
-    }
-    toPlot = doValidationPlotsForImprovedHadronMatching_;
 
 
     flavour_ = abs ( flavour_ ); // Make flavour independent of sign given in configuration
@@ -220,59 +194,6 @@ GenLevelBJetProducer::GenLevelBJetProducer ( const edm::ParameterSet& cfg )
     produces< std::vector<int> > ( "gen"+flavourStr_+"HadFlavour" ); // PdgId of the first non-b(c) quark mother with sign corresponding to hadron charge
     produces< std::vector<int> > ( "gen"+flavourStr_+"HadJetIndex" ); // Index of genJet matched to each hadron by jet clustering algorithm
 
-    if ( !doValidationPlotsForImprovedHadronMatching_ ) {
-        return;
-    }
-
-// Initializing ROOT file for storing histograms
-    edm::Service<TFileService> fs;
-
-    h_nHad = fs->make<TH1I> ( "nHad", "Nr. of hadrons;N", 10, 0, 10 );
-    h_hadJetIndex = fs->make<TH1I> ( "hadJetIndex", "Index of hadron jet;index;hadrons", 102, -2, 100 );
-    h_jetdPt = fs->make<TH1D> ( "jetdPt", "#DeltaPt(Clust/dR);#DeltaPt(Clust/dR)", 50, 0, 3 );
-    h_jetDeltaPt = fs->make<TH1D> ( "jetDeltaPt", "#DeltaPt(Clust-dR);#DeltaPt [GeV]", 50, -100, 100 );
-
-    h2_QQMothSamePdg = fs->make<TH2D> ( "QQMothSamePdg", "PdgId of quark and mother quark with same abs(pdgId);Daughter PdgId;Mother PdgId", 14, -7, 7,14,-7,7 );
-    h_QQMothEFrac = fs->make<TH1D> ( "QQMothEFrac", "E fraction of daughter;#frac{E}{E^{mother}}", 50, 0., 10.0 );
-    h_QHQPtFrac = fs->make<TH1D> ( "QHQPtFrac", "Pt fraction of highest Pt daughter;#frac{Pt^{highest}-Pt}{Pt^{highest}}", 50, 0., 1.01 );
-    h_QQMothdR = fs->make<TH1D> ( "QQMothdR", "dR between mother and same pdgId daughters;dR", 100, 0.0, 5.0 );
-    h_QQMothdR_min = fs->make<TH1D> ( "QQMothdR_min", "Min. dR between mother and same pdgId daughters;dR", 100, 0.0, 5.0 );
-    h_QHQdR = fs->make<TH1D> ( "QHQdR", "dR between mother and highest Pt daughter;dR", 100, 0.0, 5.0 );
-
-    h_QQMothEFrac_ambig = fs->make<TH1D> ( "QQMothEFrac_ambig", "E fraction of daughter;#frac{E}{E^{mother}}", 50, 0., 10.0 );
-    h_QHQPtFrac_ambig = fs->make<TH1D> ( "QHQPtFrac_ambig", "Pt fraction of highest Pt daughter;#frac{Pt^{highest}-Pt}{Pt^{highest}}", 50, 0., 1.01 );
-    h_QQMothdR_ambig = fs->make<TH1D> ( "QQMothdR_ambig", "dR between mother and same pdgId daughters;dR", 100, 0.0, 5.0 );
-    h_QQMothdR_min_ambig = fs->make<TH1D> ( "QQMothdR_min_ambig", "Min. dR between mother and same pdgId daughters;dR", 100, 0.0, 5.0 );
-    h_QHQdR_ambig = fs->make<TH1D> ( "QHQdR_ambig", "dR between mother and highest Pt daughter;dR", 100, 0.0, 5.0 );
-
-    h_jetHad_dR = fs->make<TH1D> ( "jetHad_dR", "dR between hadron and jet matched by jet clustering algo;dR_{hadron}^{jet}", 50, 0, 4 );
-    h_jetHadOld_dR = fs->make<TH1D> ( "jetHadOld_dR", "dR between hadron and jet matched by decay products;dR_{hadron}^{jet}", 50, 0, 4 );
-    h_jetHadOldNoMatch_dR = fs->make<TH1D> ( "jetHadOldNoMatch_dR", "dR between hadron and jet matched by decay products;dR_{hadron}^{jet}", 50, 0, 4 );
-    h_jetHad_dR_noFlav = fs->make<TH1D> ( "jetHad_dR_noFlav", "dR between hadron and jet matched by jet clustering algo;dR_{hadron}^{jet}", 50, 0, 4 );
-    h_jetHadOldNoMatch_dR_noFlav = fs->make<TH1D> ( "jetHadOldNoMatch_dR_noFlav", "dR between hadron and jet matched by decay products;dR_{hadron}^{jet}", 50, 0, 4 );
-
-    h_hadJet_dRmin = fs->make<TH1D> ( "hadJet_dRmin", "Min dR between hadron and any jet;dR_{hadron}^{jet}", 50, 0, 4 );
-
-    h_nFirstQ = fs->make<TH1I> ( "nFirstQ", "Number of the 1-st quarks;N", 10, 0, 10 );
-    h_firstQstatus = fs->make<TH1I> ( "firstQstatus", "Status of the 1-st quark;status", 5, 0, 5 );
-    h_firstQPdg = fs->make<TH1I> ( "firstQPdg", "PdgId of the 1-st quark;PdgId", 60, -30, 30 );
-    h2_firstQFlav_HadFlav = fs->make<TH2D> ( "firstQFlav_HadFlav", "Charge of the 1-st quark and hadron;Hadron charge;Quark charge", 5, -2, 3, 5,-2,3 );
-    h2_firstQFlav_QMotherFlav = fs->make<TH2D> ( "firstQMotherFlav_QMotherFlav", "Charge of the 1-st quark and its mother;Quark charge;Quark's mother charge", 5, -2, 3, 5, -2, 3 );
-    h_nLastQ = fs->make<TH1I> ( "nLastQ", "Number of the last quarks;N", 10, 0, 10 );
-    h_lastQstatus = fs->make<TH1I> ( "lastQstatus", "Status of the last quark;status", 5, 0, 5 );
-    h_lastQPdg = fs->make<TH1I> ( "lastQPdg", "PdgId of the last quark;PdgId", 60, -30, 30 );
-    h2_lastQFlav_HadFlav = fs->make<TH2D> ( "lastQFlav_HadFlav", "Charge of the last quark and hadron;Hadron charge;Quark charge", 5, -2, 2,5,-2,2 );
-    h2_lastQFlav_QMotherFlav = fs->make<TH2D> ( "lastQFlav_QMotherFlav", "Charge of the last quark and its mother;Quark charge;Quark's mother charge", 5, -2, 3,5,-2,3 );
-    h2_lastQPdg_QMotherPdg = fs->make<TH2D> ( "lastQPdg_QMotherPdg", "PdgId of the last quark and its mother;Quark pdgId;Quark's mother pdgId", 13, -6, 7,35,-8,27 );
-    h_lastQ_lastQ_dRmin = fs->make<TH1D> ( "lastQ_lastQ_dRmin", "dR_{min} between hadron and closest last quark;dR_{hadron}^{Quark}", 50, 0, 4 );
-
-    h_nHadTop = fs->make<TH1I> ( "nHadTop", "Nr. of hadrons from Top;N", 10, 0, 10 );
-    h_nHadHiggs = fs->make<TH1I> ( "nHadHiggs", "Nr. of hadrons from Higgs;N", 10, 0, 10 );
-    h_nHadGluon = fs->make<TH1I> ( "nHadGluon", "Nr. of hadrons from Gluon;N", 10, 0, 10 );
-    h_nHadZ = fs->make<TH1I> ( "nHadZ", "Nr. of hadrons from Z;N", 10, 0, 10 );
-    h_nHadNo = fs->make<TH1I> ( "nHadNo", "Nr. of hadrons without flavour;N", 10, 0, 10 );
-
-    h_nHadInJet = fs->make<TH1I> ( "nHadInJet", "N hadrons associated to a jet;N hadrons;Jets", 10, 0, 10 );
 }
 
 GenLevelBJetProducer::~GenLevelBJetProducer()
@@ -308,7 +229,6 @@ void GenLevelBJetProducer::fillDescriptions ( edm::ConfigurationDescriptions& de
     desc.add<bool> ( "resolveParticleName",false )->setComment ( "Print particle name during warning and debug output instead of PDG ID" );
     desc.add<int> ( "flavour",5 )->setComment ( "Flavour of weakly decaying hadron that should be added to the jet for futher tagging. (4-c, 5-b)" );
     desc.add<bool> ( "doImprovedHadronMatching",false )->setComment ( "Whether to store improved information about bHadron-bQuark-Jet matching." );
-    desc.add<bool> ( "doValidationPlotsForImprovedHadronMatching",false )->setComment ( "Whether to store validation plots for improved matching." );
     descriptions.add ( "produceGenLevelBJets",desc );
 }
 
@@ -662,8 +582,6 @@ std::vector<int> GenLevelBJetProducer::findHadronJets ( const reco::GenJetCollec
     std::vector<const reco::Candidate*> hadMothersCand;
 
     const unsigned int nJets = genJets.size();
-    bool hadVsJet[100][400]= {{false}};				// Whether jet contains decay products of the hadron (max 100 hadrons, 250 jets foreseen)
-
 
     for ( size_t iJet = 0; iJet < nJets; ++iJet )  {
         const reco::GenJet* thisJet = & ( genJets[iJet] );
@@ -690,7 +608,6 @@ std::vector<int> GenLevelBJetProducer::findHadronJets ( const reco::GenJetCollec
                     hadIndex.push_back ( hadronIndex );
                     hadListIndex=hadIndex.size();
                 }
-                hadVsJet[hadListIndex][iJet]=true;		// Setting current jet as containing decay products of the found hadron
             }
         }   // End of loop over jet consituents
     }   // End of loop over jets
@@ -701,9 +618,6 @@ std::vector<int> GenLevelBJetProducer::findHadronJets ( const reco::GenJetCollec
 
 // Checking mothers of hadrons in order to assign flags (where the hadron comes from)
     unsigned int nHad = hadIndex.size();
-
-// Checking number of different flavours of hadrons in the event
-    int nFlavHadrons[5] = {0};		// Numbers of hadrons (0-Top, 1-Higgs, 2-Gluon, 3-Z)
 
     std::vector<std::vector<int> > LastQuarkMotherIds;
 
@@ -754,21 +668,9 @@ std::vector<int> GenLevelBJetProducer::findHadronJets ( const reco::GenJetCollec
 
 // Filling histograms for each 1-st quark
         for ( unsigned int qId=0; qId<FirstQuarkId.size(); qId++ ) {
-            int qFlav = ( hadMothers[FirstQuarkId[qId]].pdgId() <0 ) ?-1:1;
-            if ( toPlot ) {
-                h_firstQstatus->Fill ( hadMothers[FirstQuarkId[qId]].status() );
-                h_firstQPdg->Fill ( hadMothers[FirstQuarkId[qId]].pdgId() );
-                h2_firstQFlav_HadFlav->Fill ( hadFlav,qFlav );
-            }
 
 // Getting mothers of the first quark
             std::vector<int> FirstQMotherId = hadMothersIndices.at ( FirstQuarkId[qId] );
-            for ( unsigned int qmId=0; qmId<FirstQMotherId.size(); qmId++ ) {
-                int qmFlav = ( hadMothers[FirstQMotherId[qmId]].pdgId() <0 ) ?-1:1;
-                if ( toPlot ) {
-                    h2_firstQFlav_QMotherFlav->Fill ( qFlav,qmFlav );
-                }
-            }		// End of loop over all mothers of the first quark of the hadron
 
 // Finding last quark of the hadron starting from the first quark
             findInMothers ( FirstQuarkId[qId], LastQuarkId, hadMothersIndices, hadMothers, 0, hadFlav*flavour_, false, 2, false );
@@ -785,16 +687,10 @@ std::vector<int> GenLevelBJetProducer::findHadronJets ( const reco::GenJetCollec
 // Finding the closest quark in dR
         for ( unsigned int qId=0; qId<LastQuarkId.size(); qId++ ) {
             int qIdx = LastQuarkId[qId];
-            int qFlav = ( hadMothers.at ( qIdx ).pdgId() <0 ) ?-1:1;
 // Checking the dR between hadron and quark
             float dR = deltaR ( hadMothers[hadIdx].eta(),hadMothers[hadIdx].phi(),hadMothers[qIdx].eta(),hadMothers[qIdx].phi() );
             if ( dR>=dRmin ) {
                 continue;
-            }
-            if ( toPlot ) {
-                h_lastQstatus->Fill ( hadMothers.at ( qIdx ).status() );
-                h_lastQPdg->Fill ( hadMothers.at ( qIdx ).pdgId() );
-                h2_lastQFlav_HadFlav->Fill ( hadFlav,qFlav );
             }
 // Getting mothers of the last quark
             std::vector<int> LastQMotherId = hadMothersIndices.at ( qIdx );
@@ -810,11 +706,6 @@ std::vector<int> GenLevelBJetProducer::findHadronJets ( const reco::GenJetCollec
                 inList = LastQuarkMotherId.size()-1;
             }
 
-            int qmFlav = ( hadMothers.at ( LastQMotherId.at ( 0 ) ).pdgId() <0 ) ?-1:1;
-            if ( toPlot ) {
-                h2_lastQFlav_QMotherFlav->Fill ( qFlav,qmFlav );
-                h2_lastQPdg_QMotherPdg->Fill ( hadMothers.at ( qIdx ).pdgId(),hadMothers.at ( LastQMotherId.at ( 0 ) ).pdgId() );
-            }
 // Updating indices of closest quark mother
             dRmin=dR;
             dRminQMId=inList;
@@ -822,9 +713,6 @@ std::vector<int> GenLevelBJetProducer::findHadronJets ( const reco::GenJetCollec
 
         LastQuarkMotherIds.push_back ( LastQuarkMotherId );
 
-        if ( toPlot ) {
-            h_lastQ_lastQ_dRmin->Fill ( dRmin );
-        }
 
         if ( dRminQMId>=0 ) {
             int qmIdx = LastQuarkMotherId.at ( dRminQMId );
@@ -862,98 +750,8 @@ std::vector<int> GenLevelBJetProducer::findHadronJets ( const reco::GenJetCollec
 
 // 		printf("  hadronFlavour: %d (%d)\n",hadronFlavour,hadFlav);
         hadFlavour.push_back ( hadronFlavour );
+    }	// End of loop over all hadrons
 
-        int jetIdx1 = result[hadNum];   // Index of jet from matching by jet clustering algorithm
-
-        int jetIdx2 = -1;
-        float maxPt = 0.0;
-        float dR_min=999.9;
-// Looping over jets containing decay products of hadron to find the highest Pt one
-        for ( unsigned int jetNum=0; jetNum<nJets; jetNum++ ) {
-            if ( toPlot ) {
-                float dR = deltaR ( genJets[jetNum].eta(),genJets[jetNum].phi(),hadron->eta(),hadron->phi() );
-                if ( dR<dR_min ) {
-                    dR_min=dR;
-                }
-            }
-            if ( !hadVsJet[hadNum][jetNum] ) {
-                continue;
-            }
-            if ( genJets[jetNum].pt() <=maxPt ) {
-                continue;
-            }
-            maxPt=genJets[jetNum].pt();
-            jetIdx2=jetNum;
-        }
-
-        if ( toPlot ) {
-            h_hadJetIndex->Fill ( jetIdx1 );
-            h_hadJet_dRmin->Fill ( dR_min );
-            if ( jetIdx1>=0 ) {
-                h_jetHad_dR->Fill ( deltaR ( genJets[jetIdx1].eta(),genJets[jetIdx1].phi(),hadron->eta(),hadron->phi() ) );
-            }
-            if ( jetIdx2>=0 && jetIdx1>=0 ) {
-                h_jetdPt->Fill ( genJets[jetIdx1].pt() /genJets[jetIdx2].pt() );
-                h_jetDeltaPt->Fill ( genJets[jetIdx1].pt()-genJets[jetIdx2].pt() );
-            }
-            if ( jetIdx2>=0 ) {
-                h_jetHadOld_dR->Fill ( deltaR ( genJets[jetIdx2].eta(),genJets[jetIdx2].phi(),hadron->eta(),hadron->phi() ) );
-            }
-// Setting index to highest Pt jet containing decay products of the hadron if no jet was associated by jet clustering algorithm
-            if ( jetIdx2>=0 && jetIdx1<0 ) {
-                h_jetHadOldNoMatch_dR->Fill ( deltaR ( genJets[jetIdx2].eta(),genJets[jetIdx2].phi(),hadron->eta(),hadron->phi() ) );
-            }
-            if ( jetIdx2>=0 && jetIdx1<0 && abs ( hadronFlavour ) ==0 ) {
-                h_jetHadOldNoMatch_dR_noFlav->Fill ( deltaR ( genJets[jetIdx2].eta(),genJets[jetIdx2].phi(),hadron->eta(),hadron->phi() ) );
-            }
-            if ( abs ( hadronFlavour ) ==0 && jetIdx1>=0 ) {
-                h_jetHad_dR_noFlav->Fill ( deltaR ( genJets[jetIdx1].eta(),genJets[jetIdx1].phi(),hadron->eta(),hadron->phi() ) );
-            }
-
-            h_nFirstQ->Fill ( FirstQuarkId.size() );
-            h_nLastQ->Fill ( LastQuarkId.size() );
-        }
-    }		// End of loop over all hadrons
-
-// Checking number of different flavours of hadrons in the event
-    for ( unsigned int i=0; i<hadFlavour.size(); i++ ) {
-        switch ( abs ( hadFlavour.at ( i ) ) ) {
-        case 6:
-            nFlavHadrons[0]++;	// Top
-            break;
-        case 25:
-            nFlavHadrons[1]++;	// Higgs
-            break;
-        case 21:
-            nFlavHadrons[2]++;	// Gluon
-            break;
-        case 23:
-            nFlavHadrons[3]++;	// Z
-            break;
-        default:
-            nFlavHadrons[4]++;	// No
-            break;
-        }
-    }
-
-    if ( toPlot ) {
-        h_nHad->Fill ( nHad );
-        h_nHadTop->Fill ( nFlavHadrons[0] );
-        h_nHadHiggs->Fill ( nFlavHadrons[1] );
-        h_nHadGluon->Fill ( nFlavHadrons[2] );
-        h_nHadZ->Fill ( nFlavHadrons[3] );
-        h_nHadNo->Fill ( nFlavHadrons[4] );
-
-// Filling number of hadrons associated to a single jet
-        for ( unsigned int iJet=0; iJet<nJets; iJet++ ) {
-            int N = 0;
-            for ( unsigned int i=0; i<result.size(); i++ ) if ( result[i]== ( int ) iJet ) {
-                    N++;
-                }
-            h_nHadInJet->Fill ( N );
-        }
-
-    }		// If validation histograms should be filled
 
     return result;
 }
@@ -1110,75 +908,6 @@ int GenLevelBJetProducer::analyzeMothers ( const reco::Candidate* thisParticle, 
         if ( mothIndex == partIndex && partIndex>=0 ) {
             continue;		// Skipping the mother that is its own daughter
         }
-
-// Checking whether this mother has other daughters that have the same pdgId [Only if plotting option is enabled]
-        if ( toPlot && abs ( thisParticle->pdgId() ) ==flavour_ && abs ( thisParticle->pdgId() ) == abs ( mother->pdgId() ) ) {
-            double highPt = -1.0;
-            int highPtId = -1;
-// Loop over daughters of the mother to look how many daughters with the same pdgId it has
-            float dR_min=999.9;
-            int nSameDaugh=0;
-            for ( unsigned int iDaughter = 0; iDaughter<mother->numberOfDaughters(); iDaughter++ ) {
-                const reco::Candidate* daughter = mother->daughter ( iDaughter );
-                if ( abs ( daughter->pdgId() ) !=abs ( thisParticle->pdgId() ) ) {
-                    continue;
-                }
-                nSameDaugh++;
-            }
-            for ( unsigned int iDaughter = 0; iDaughter<mother->numberOfDaughters(); iDaughter++ ) {
-                const reco::Candidate* daughter = mother->daughter ( iDaughter );
-                if ( abs ( daughter->pdgId() ) !=abs ( thisParticle->pdgId() ) ) {
-                    continue;
-                }
-                if ( daughter->pdgId() *mother->pdgId() < 0 ) {
-                    continue;
-                }
-                if ( daughter->pt() >highPt ) {
-                    highPt=daughter->pt();
-                    highPtId=iDaughter;
-                }
-                float dR=deltaR ( daughter->eta(),daughter->phi(),mother->eta(),mother->phi() );
-
-                h_QQMothEFrac->Fill ( daughter->energy() /mother->energy() );
-                h_QQMothdR->Fill ( dR );
-                if ( nSameDaugh>1 ) {
-                    h_QQMothEFrac_ambig->Fill ( daughter->energy() /mother->energy() );
-                    h_QQMothdR_ambig->Fill ( dR );
-                }
-
-                if ( dR<dR_min ) {
-                    dR_min=dR;
-                }
-            }
-
-            if ( highPt<0.0 ) {
-                continue;
-            }
-            for ( unsigned int iDaughter = 0; iDaughter<mother->numberOfDaughters(); iDaughter++ ) {
-                const reco::Candidate* daughter = mother->daughter ( iDaughter );
-                if ( daughter->pdgId() *mother->pdgId() < 0 ) {
-                    continue;    // Skipping particles with wrong charge
-                }
-                if ( ( int ) iDaughter==highPtId ) {
-                    if ( toPlot ) {
-                        h_QHQdR->Fill ( deltaR ( daughter->eta(),daughter->phi(),mother->eta(),mother->phi() ) );
-                        if ( nSameDaugh>1 ) {
-                            h_QHQdR_ambig->Fill ( deltaR ( daughter->eta(),daughter->phi(),mother->eta(),mother->phi() ) );
-                        }
-                    }
-                    continue;		// Skipping the highest Pt particle
-                }
-                h_QHQPtFrac->Fill ( ( highPt-daughter->pt() ) /highPt );
-                if ( nSameDaugh>1 ) {
-                    h_QHQPtFrac_ambig->Fill ( ( highPt-daughter->pt() ) /highPt );
-                }
-            }
-            h_QQMothdR_min->Fill ( dR_min );
-            if ( nSameDaugh>1 ) {
-                h_QQMothdR_min_ambig->Fill ( dR_min );
-            }
-            h2_QQMothSamePdg->Fill ( thisParticle->pdgId(),mother->pdgId() );
-        }	// If both particle and mother are quarks and have same abs(pdgId)
 
 // If this mother isn't yet in the list and hadron is in the list
         if ( mothIndex<0 && ( *hadron ) !=0 ) {
