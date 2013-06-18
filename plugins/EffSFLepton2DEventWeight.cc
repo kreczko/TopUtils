@@ -58,10 +58,10 @@ EffSFLepton2DEventWeight::EffSFLepton2DEventWeight(const edm::ParameterSet& cfg)
       etamin=hists2D_["effSFPtEta"]->GetYaxis()->GetXmin();
       etamax=hists2D_["effSFPtEta"]->GetYaxis()->GetXmax();
       // set range per hand
-      ptmin =  30.1;
+      ptmin =  33.1;
       ptmax =1199.9;
-      etamin= -2.01;
-      etamax=  1.99;
+      etamin= -2.09;
+      etamax=  2.09;
       if(verbose_>=1){
 	std::cout << "x range: " << ptmin  << ".." << ptmax  << std::endl;
 	std::cout << "y range: " << etamin << ".." << etamax << std::endl;
