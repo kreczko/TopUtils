@@ -7,6 +7,7 @@ scaledJetEnergy = cms.EDProducer("JetEnergyScale",
     scaleFactor          = cms.double(1.0),
     scaleFactorB         = cms.double(1.0),
     scaleType            = cms.string("abs"), #abs or rel(*eta) or jes:up / jes:down (pt-dependend)
+    sourceName           = cms.string(""),
     payload              = cms.string("AK5PF"), #jet and constituent type in JetMET convention
     jetPTThresholdForMET = cms.double(10.),
     jetEMLimitForMET     = cms.double(0.9),                                 

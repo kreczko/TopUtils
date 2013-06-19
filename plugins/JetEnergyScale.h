@@ -81,6 +81,8 @@ class JetEnergyScale : public edm::EDProducer {
   std::string payload_;
   /// absolute scaling or relative in eta
   std::string scaleType_;
+  /// if scaleType is set to use a single source, here's the name of the source to be used
+  std::string sourceName_;
   /// scale factor for the rescaling of JES
   double scaleFactor_;
   /// scale factor bJES/JES
