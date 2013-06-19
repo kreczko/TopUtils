@@ -53,7 +53,7 @@ class BTagSFEventWeight : public edm::EDProducer {
   edm::FileInPath filename_;
   double maxPtDB_;
   double maxPt11004_;
-  double maxPt12470_;
+  double maxPt2012_;
   double maxPtMisTag_;
   double maxEta_;
   
@@ -75,9 +75,9 @@ class BTagSFEventWeight : public edm::EDProducer {
   double effBTagSF11004(double);
   double effBTagSFerr11004(double);
   double effMisTagSF11004(double, double, TString);
-  double effBTagSF12470(double);
-  double effBTagSFerr12470(double);
-  double effMisTagSF12470(double, double, TString);
+  double effBTagSF2012(double);
+  double effBTagSFerr2012(double);
+  double effMisTagSF2012(double, double, TString);
   double effBTag    (double, double);
   double effBTagSF  (double, double, bool);
   double effBTagCjet(double, double);

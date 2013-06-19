@@ -22,10 +22,9 @@ BTagSFEventWeight::BTagSFEventWeight(const edm::ParameterSet& cfg):
   
   // set the edges of the last histo bin
   maxPtDB_     = 240.;
-  maxPt11004_  = 670.;
   maxPtMisTag_ = 520.;
   maxEta_      = 2.4;
-  maxPt12470_  = 800.; // AN-12-470: http://cms.cern.ch/iCMS/jsp/openfile.jsp?tp=draft&files=AN2012_470_v3.pdf
+  maxPt2012_  = 800.; // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2012_Data_and_MC_EPS13_prescript
 
   // load TFile Service
   edm::Service<TFileService> fs;
@@ -144,7 +143,7 @@ BTagSFEventWeight::produce(edm::Event& evt, const edm::EventSetup& setup)
 
 /// Default SF values taken from database wrt. PAS BTV-11-001 (pTrel method),
 /// or from PAS BTV-11-004
-/// or from AN BTV-12-470 (Moriond 2013)
+/// or from https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2012_Data_and_MC_EPS13_prescript for 2012 ABCD
 /// Values for eff. from user-defined histo as a function of pt and eta.
 
 double BTagSFEventWeight::effBTagSF11004(double x)
@@ -159,12 +158,12 @@ double BTagSFEventWeight::effBTagSF11004(double x)
   }
 }
 
-double BTagSFEventWeight::effBTagSF12470(double x)
+double BTagSFEventWeight::effBTagSF2012(double x)
 {
-  // function from AN 12-470 (dataset=ABCD); x = jetPt
-  if(bTagAlgo_=="CSVM")   return 0.726981*((1.+(0.253238*x))/(1.+(0.188389*x)));
+  // function from https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2012_Data_and_MC_EPS13_prescript; x = jetPt
+  if(bTagAlgo_=="CSVM")   return (0.939158+(0.000158694*x))+(-2.53962e-07*(x*x));
   else { 
-    std::cout<< "WARNING!!! b tag SF for "<< bTagAlgo_ << " for effBTagSF12470 not in code!!! CHECK!!!" << std::endl;
+    std::cout<< "WARNING!!! b tag SF for "<< bTagAlgo_ << " for effBTagSF2012 not in code!!! CHECK!!!" << std::endl;
     return 1.; 
   }
 }
@@ -247,29 +246,29 @@ double BTagSFEventWeight::effBTagSFerr11004(double x)
   }
 }
 
-double BTagSFEventWeight::effBTagSFerr12470(double x)
+double BTagSFEventWeight::effBTagSFerr2012(double x)
 {
-  // function from AN 12-470 (dataset=ABCD); x = jetPt
+  // function from https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2012_Data_and_MC_EPS13_prescript (dataset=ABCD); x = jetPt
   // pt binning
   double pt[] = {20, 30, 40, 50, 60, 70, 80, 100, 120, 160, 210, 260, 320, 400, 500, 600, 800};
   // corresponding SFb uncertainties
   double SFb_errorCSVM[] = {
-    0.0554504,
-    0.0209663,
-    0.0207019,
-    0.0230073,
-    0.0208719,
-    0.0200453,
-    0.0264232,
-    0.0240102,
-    0.0229375,
-    0.0184615,
-    0.0216242,
-    0.0248119,
-    0.0465748,
-    0.0474666,
-    0.0718173,
-    0.0717567 };
+    0.0415694,
+    0.023429,
+    0.0261074,
+    0.0239251,
+    0.0232416,
+    0.0197251,
+    0.0217319,
+    0.0198108,
+    0.0193,
+    0.0276144,
+    0.0205839,
+    0.026915,
+    0.0312739,
+    0.0415054,
+    0.0740561,
+    0.0598311 };
 
   /// look for index corresponding to pt
   int iBin = -1;
@@ -290,7 +289,7 @@ double BTagSFEventWeight::effBTagSFerr12470(double x)
   } 
   if(bTagAlgo_=="CSVM")   return factor * SFb_errorCSVM[iBin];
   else { 
-    std::cout<< "WARNING!!! b tag SF for "<< bTagAlgo_ << " in effBTagSFerr12470 not in code!!! CHECK!!!"<<std::endl;
+    std::cout<< "WARNING!!! b tag SF for "<< bTagAlgo_ << " in effBTagSFerr2012 not in code!!! CHECK!!!"<<std::endl;
     return 1.; 
   }
 }
@@ -380,46 +379,39 @@ double BTagSFEventWeight::effMisTagSF11004(double x, double jetEta, TString mean
   return -1111.;
 }
 
-double BTagSFEventWeight::effMisTagSF12470(double x, double jetEta, TString meanminmax)
+double BTagSFEventWeight::effMisTagSF2012(double x, double jetEta, TString meanminmax)
 {
-  // function from AN 12-470; dataset=ABCD 
-  //          (https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2012_Data_and_MC_Moriond13_presc, 
-  //           http://cms.cern.ch/iCMS/jsp/openfile.jsp?tp=draft&files=AN2012_470_v3.pdf)
+  // function from https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2012_Data_and_MC_EPS13_prescript; dataset=ABCD 
   // x = jetPt; meanminmax = "mean" -> central value; = "min" -> down variation; = "max" -> up variation
   if(bTagAlgo_=="CSVM"){
-    double val=0;
-    if(jetEta>=0. && jetEta <=0.8 && x< 800 && x>=20){
-      if( meanminmax == "mean") val= ((1.06238+(0.00198635 *x))+(-4.89082e-06*(x*x)))+(3.29312e-09*(x*(x*x)));
-      if( meanminmax == "min" ) val= ((0.972746+(0.00104424*x))+(-2.36081e-06*(x*x)))+(1.53438e-09*(x*(x*x)));
-      if( meanminmax == "max" ) val= ((1.15201+(0.00292575 *x))+(-7.41497e-06*(x*x)))+(5.0512e-09* (x*(x*x)));
+    double val =0, valMean=0, valMin=0, valMax=0;
+    bool outOfRange = false;
+    if(x<20) {x=20; outOfRange = true;}
+    if(jetEta>=0. && jetEta <=0.8){
+      if(x>1000.) {x=1000.; outOfRange = true;}
+      valMean= ((1.07541+(0.00231827*x))+(-4.74249e-06*(x*x)))+(2.70862e-09*(x*(x*x)));
+      valMin= ((0.964527+(0.00149055*x))+(-2.78338e-06*(x*x)))+(1.51771e-09*(x*(x*x)));
+      valMax= ((1.18638+(0.00314148*x))+(-6.68993e-06*(x*x)))+(3.89288e-09*(x*(x*x)));
     }
-    else if(jetEta>0.8 && jetEta <=1.6 && x< 800. && x>=20){
-      if( meanminmax == "mean") val= ((1.08048+(0.00110831 *x))+(-2.96189e-06*(x*x)))+(2.16266e-09*(x*(x*x)));
-      if( meanminmax == "min" ) val= ((0.9836 +(0.000649761*x))+(-1.59773e-06*(x*x)))+(1.14324e-09*(x*(x*x)));
-      if( meanminmax == "max" ) val= ((1.17735+(0.00156533 *x))+(-4.32257e-06*(x*x)))+(3.18197e-09*(x*(x*x)));
+    else if(jetEta>0.8 && jetEta <=1.6){
+      if(x>1000.) {x=1000.; outOfRange = true;}
+      valMean= ((1.05613+(0.00114031*x))+(-2.56066e-06*(x*x)))+(1.67792e-09*(x*(x*x)));
+      valMin= ((0.946051+(0.000759584*x))+(-1.52491e-06*(x*x)))+(9.65822e-10*(x*(x*x)));
+      valMax= ((1.16624+(0.00151884*x))+(-3.59041e-06*(x*x)))+(2.38681e-09*(x*(x*x)));
     }
-    else if(jetEta>1.6 && jetEta <=2.4 && x< 700. && x>=20){
-      if( meanminmax == "mean") val= ((1.09145+(0.000687171*x))+(-2.45054e-06*(x*x)))+(1.7844e-09 *(x*(x*x)));
-      if( meanminmax == "min" ) val= ((1.00616+(0.000358884*x))+(-1.23768e-06*(x*x)))+(6.86678e-10*(x*(x*x)));
-      if( meanminmax == "max" ) val= ((1.17671+(0.0010147  *x))+(-3.66269e-06*(x*x)))+(2.88425e-09*(x*(x*x)));
+    else if(jetEta>1.6 && jetEta <=2.4){
+      if(x>850.) {x=850.; outOfRange = true;}
+      valMean= ((1.05625+(0.000487231*x))+(-2.22792e-06*(x*x)))+(1.70262e-09*(x*(x*x)));
+      valMin= ((0.956736+(0.000280197*x))+(-1.42739e-06*(x*x)))+(1.0085e-09*(x*(x*x)));
+      valMax= ((1.15575+(0.000693344*x))+(-3.02661e-06*(x*x)))+(2.39752e-09*(x*(x*x)));
     }
-    else if((jetEta>=0. && jetEta <=1.6 && x> 800.)||(jetEta>=1.6 && jetEta <=2.4 && x> 700.)||(jetEta>=0. && jetEta <=2.4 && x<20)){
-      if(x<20) x=20;
-      else{
-	x=700.;
-	if(jetEta>=0. && jetEta <=1.6) x=800.;
-      }
-      double meanval= ((1.07585 +(0.00119553 *x))+(-3.00163e-06*(x*x)))+(2.10724e-09*(x*(x*x)));
-      double minval = ((0.987005+(0.000726254*x))+(-1.73476e-06*(x*x)))+(1.20406e-09*(x*(x*x)));
-      double maxval = ((1.1647  +(0.00166318 *x))+(-4.26493e-06*(x*x)))+(3.01017e-09*(x*(x*x)));
-      if( meanminmax == "mean") val= meanval;
-      if( meanminmax == "min" ) val= minval-(meanval-minval); // 2x the uncertainty
-      if( meanminmax == "max" ) val= maxval+(maxval-meanval); // 2x the uncertainty
-    }
+      if( meanminmax == "mean") val= valMean;
+      if( meanminmax == "min" ) val= outOfRange? valMin-(valMean-valMin) : valMin; // if outOfRange -> 2x the uncertainty
+      if( meanminmax == "max" ) val= outOfRange? valMax+(valMax-valMean) : valMax; // if outOfRange -> 2x the uncertainty
     if(val!=0) return val;
   }
   else { 
-    std::cout<< "WARNING!!! b tag SF for "<< bTagAlgo_ << " in effMisTagSF12470 not in code!!! CHECK!!!"<<std::endl;
+    std::cout<< "WARNING!!! b tag SF for "<< bTagAlgo_ << " in effMisTagSF2012 not in code!!! CHECK!!!"<<std::endl;
     return 1.; 
   }
   return -1111.;
@@ -433,7 +425,7 @@ double BTagSFEventWeight::effBTag(double jetPt, double jetEta)
   if(filename_.location()) {
     TH2F* his = effHists_.find("EffBJetsTaggedPtEta")->second;
     // ensure that pt is in accepted range of BTV DB
-    if(jetPt  >= maxPt12470_) jetPt  = maxPt12470_-1.;
+    if(jetPt  >= maxPt2012_) jetPt  = maxPt2012_-1.;
     if(jetEta >= maxEta_    ) jetEta = maxEta_-0.1;
     result = his->GetBinContent( his->FindBin(jetPt, jetEta) );
   }
@@ -466,9 +458,9 @@ double BTagSFEventWeight::effBTagSF(double jetPt, double jetEta, bool isCjet)
     /// ...or by hand from 11-004 (Moriond recommendation)
     result = effBTagSF11004(jetPt);
   }
-  else if(version_=="12-470"){
-    /// ...or by hand from 12-470 (Moriond 2013 recommendation)
-    result = effBTagSF12470(jetPt);
+  else if(version_=="2012"){
+    /// ...or by hand from 2012 (EPS 2013 recommendation)
+    result = effBTagSF2012(jetPt);
   }
   if(uncertaintySFb_<0.){
     if(version_=="DB11-001"){
@@ -484,9 +476,9 @@ double BTagSFEventWeight::effBTagSF(double jetPt, double jetEta, bool isCjet)
       /// ...or by hand from 11-004 (Moriond recommendation)
       error = effBTagSFerr11004(jetPt);
     }
-    else if(version_=="12-470"){
-      /// ...or by hand from 12-470 (Moriond 2013 recommendation)
-      error = effBTagSFerr12470(jetPt);
+    else if(version_=="2012"){
+      /// ...or by hand from 2012 (EPS 2013 recommendation)
+      error = effBTagSFerr2012(jetPt);
     }
 
   }
@@ -526,7 +518,7 @@ double BTagSFEventWeight::effBTagCjet(double jetPt, double jetEta)
   if(filename_.location()) {
     TH2F* his = effHists_.find("EffCJetsTaggedPtEta")->second;
     // ensure that pt is in accepted range
-    if(jetPt >= maxPt12470_) jetPt = maxPt12470_-1.;
+    if(jetPt >= maxPt2012_) jetPt = maxPt2012_-1.;
     if(jetEta >= maxEta_) jetEta = maxEta_-0.1;
     result = his->GetBinContent( his->FindBin(jetPt, jetEta) );
   }
@@ -584,15 +576,15 @@ double BTagSFEventWeight::effMisTagSF(double jetPt, double jetEta)
     if(verbose_>=2) std::cout<< "effMisTagSF= "<<effMisTagSF11004(jetPt, jetEta, "mean")<<" + "<<effMisTagSF11004(jetPt, jetEta, "max")
 	  <<" - "<<effMisTagSF11004(jetPt, jetEta, "min")<<std::endl;
   }
-  else if(version_=="12-470"){
+  else if(version_=="2012"){
     /// ...or by hand from 11-004 (Moriond recommendation)
     if(jetEta >= maxEta_) jetEta = maxEta_-0.1;
     TString                       meanminmax = "mean";
     if(sysVar_ == "misTagSFUp"  ) meanminmax = "max";
     if(sysVar_ == "misTagSFDown") meanminmax = "min";
-    result = effMisTagSF12470(jetPt, jetEta, meanminmax);
-    if(verbose_>=2) std::cout<< "effMisTagSF= "<<effMisTagSF12470(jetPt, jetEta, "mean")<<" + "<<effMisTagSF12470(jetPt, jetEta, "max")
-	  <<" - "<<effMisTagSF12470(jetPt, jetEta, "min")<<std::endl;
+    result = effMisTagSF2012(jetPt, jetEta, meanminmax);
+    if(verbose_>=2) std::cout<< "effMisTagSF= "<<effMisTagSF2012(jetPt, jetEta, "mean")<<" + "<<effMisTagSF2012(jetPt, jetEta, "max")
+	  <<" - "<<effMisTagSF2012(jetPt, jetEta, "min")<<std::endl;
   }
 
   return result;

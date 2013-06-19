@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 bTagSFEventWeight = cms.EDProducer("BTagSFEventWeight",
   jets  = cms.InputTag("tightLeadingPFJets"), ## jet collection (after jet selection, before b-tagging)
   bTagAlgo = cms.string("CSVM"),              ## name of b tag algorithm (short, i.e. "CSVM")
-  version  = cms.string("12-470"),            ## "12-470" for value from AN for moriond 2013,
+  version  = cms.string("2012"),            ## "12-470" for value from AN for moriond 2013,
   sysVar   = cms.string(""),                  ## bTagSFUp, bTagSFDown, misTagSFUp, misTagSFDown possible;
                                               ## bTagSFShapeUpPt, bTagSFShapeDownPt, bTagSFShapeUpEta, bTagSFShapeDownEta,
                                               ## everything else: no systematic variation is made
